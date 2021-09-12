@@ -9,7 +9,8 @@
 - ``` make run ``` to run.  output is located at build/linux/a.out
 
 ## Dependencies
-- There is none
+- GLAD | GLFW
+   Static library files for these libraries must be located in a library search directory
 
 
 ### Notes

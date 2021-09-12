@@ -11,14 +11,16 @@ ADDITIONAL_OBJS :=
 #thirdparty/glad/glad.o
 
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d) include/
+INC_DIRS := $(shell find $(SRC_DIRS) -type d) include/ thirdparty/
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDFLAGS := -lGL -lglfw3 -lX11 -lpthread -ldl
+LIB_DIRS := lib/
+LIB_FLAGS := $(addprefix -L,$(LIB_DIRS))
+LDFLAGS := -lGL -lglfw3 -lX11 -lpthread -ldl -lglad
 
-CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -std=c++17
+CPPFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -MMD -MP -std=c++17 -DGLFW_INCLUDE_NONE
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CXX) $(OBJS) ${ADDITIONAL_OBJS} -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS) ${LIB_FLAGS} ${ADDITIONAL_OBJS} -o $@ $(LDFLAGS)
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s
