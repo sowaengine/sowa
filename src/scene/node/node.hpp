@@ -28,6 +28,7 @@ namespace Ease
          Node();
 
          unsigned int getUUID() { return m_UUID; }
+         void setUUID(unsigned int uuid) { m_UUID = uuid; }
          std::string& getName() { return m_Name; }
          void setName(const char* name) { m_Name = name; }
 
@@ -49,6 +50,11 @@ namespace Ease
                   return true;
             }
             return false;
+         }
+         template<typename T>
+         T& getComponent()
+         {
+            return m_sceneRegistry->get<T>(m_EntityID);
          }
 
          /**

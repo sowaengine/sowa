@@ -25,6 +25,7 @@ int main(int argc, char const **argv)
 
    Ease::sceneSerializer serial;
    serial.serialize("output.escn");
+   serial.deserialize("output.escn");
 
    // Main Loop
    unsigned int exitError = 0;

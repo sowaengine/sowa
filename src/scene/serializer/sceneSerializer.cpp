@@ -9,22 +9,54 @@
 
 #include "global.hpp"
 
+#include "debug/debug.hpp"
 
 #include "yaml-cpp/yaml.h"
 namespace YAML
 {
    // YAML conversion overload
+   template<>
+   struct convert<glm::vec2>
+   {
+      static Node encode(const glm::vec2& item)
+      {
+         Node node;
+         node.push_back(item.x);
+         node.push_back(item.y);
+         return node;
+      }
+      static bool decode(const Node& node, glm::vec2& item)
+      {
+         if(!node.IsSequence() || node.size() != 2)
+            return false;
+         
+         item.x = node[0].as<float>();
+         item.y = node[1].as<float>();
 
+         return true;
+      }
+   };
 
    // YAML Overloads
+
+   YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& item)
+   {
+      out << YAML::Flow;
+      out << YAML::BeginSeq << item.x << item.y << YAML::EndSeq;
+      return out;
+   }
 }
 
-void serializeNode( YAML::Emitter& out, Ease::Node* node )
-{
-   out << YAML::Newline;
 
+
+void serializeNode( YAML::Emitter& out, Ease::Node* node)
+{
+   //out << YAML::Newline;
+
+
+   out << YAML::Key << "Node";
    out << YAML::BeginMap; // 1
-      out << YAML::Key << "Node";
+      out << YAML::Key << "ID";
       out << YAML::Value << node->getUUID();
 
       {  /* Node name */
@@ -37,16 +69,21 @@ void serializeNode( YAML::Emitter& out, Ease::Node* node )
          {  /* Components */
             if(node->hasComponent<Ease::Comp::Transform2D>() )
             {
+               auto& transform2d = node->getComponent<Ease::Comp::Transform2D>();
+
                out << YAML::Key << "Transform2D";
                out << YAML::BeginMap; // A
                   out << YAML::Key << "Position";
-                  out << YAML::Value << 2;
+                  out << YAML::Value << transform2d.position;
 
                   out << YAML::Key << "Rotation";
-                  out << YAML::Value << 2;
+                  out << YAML::Value << transform2d.rotation;
+
+                  out << YAML::Key << "Z-Index";
+                  out << YAML::Value << transform2d.zIndex;
                out << YAML::EndMap; // A
             }
-            if(true /* node->hasComponent<Sprite2D>() */)
+            if(false /* node->hasComponent<Sprite2D>() */)
             {
                out << YAML::Key << "Sprite2D";
                out << YAML::BeginMap; // A
@@ -58,15 +95,61 @@ void serializeNode( YAML::Emitter& out, Ease::Node* node )
       out << YAML::EndMap; // 2
 
       out << YAML::Key << "Children";
-      out << YAML::BeginSeq; // A
+      out << YAML::BeginMap; // A
          // loop over children
          for(Ease::Node* _node : node->getChildren())
          {
             serializeNode(out, _node);
          }
-      out << YAML::EndSeq; // A
+      out << YAML::EndMap; // A
    out << YAML::EndMap; // 1
 }
+
+void deserializeNode( YAML::Node yaml_node )
+{
+   Ease::Node* node = new Ease::Node();
+
+   if( yaml_node["ID"] ) {
+      unsigned int uuid = yaml_node["ID"].as<unsigned int>(0);
+      if(uuid != 0)
+         node->setUUID(uuid);
+   }
+   if( yaml_node["Name"] ) {
+      node->setName( yaml_node["Name"].as<std::string>().c_str() );
+   }
+
+   if( yaml_node["Components"] )
+   {
+      YAML::Node components = yaml_node["Components"];
+      if( components["Transform2D"] ) {
+         node->addComponent<Ease::Comp::Transform2D>();
+         auto& transform2d = node->getComponent<Ease::Comp::Transform2D>();
+         transform2d.position = components["Transform2D"]["Position"].as<glm::vec2>();
+         
+         transform2d.rotation = components["Transform2D"]["Rotation"].as<float>();
+
+         
+         std::cout << "\nFound a Transform2D;"
+         << "\n\t" << "Name: " << node->getName()
+         << "\n\t" << "Position: [" << transform2d.position.x << "," << transform2d.position.y << "]"
+         << "\n\t" << "Rotation: " << transform2d.rotation
+         << "\n\t" << "Z-Index: " << transform2d.zIndex << std::endl;
+      }
+   }
+
+
+   if( yaml_node["Children"] )
+   {
+      if( yaml_node["Children"].size() > 0 )
+      {
+         for (YAML::const_iterator it = yaml_node["Children"].begin(); it != yaml_node["Children"].end(); ++it){
+            // std::cout << "Serializing Child Node: " << it->first.as<std::string>() << "\n";
+            deserializeNode(it->second);
+         }
+      }
+   }
+}
+
 
 namespace Ease
 {
@@ -74,14 +157,22 @@ namespace Ease
    {
       Node* x = new Node();
       Node* y = new Node();
+      Node* z = new Node();
+      Node* t = new Node();
       RootNode = x;
       x->setName("My Root Node");
       y->setName("My Child Node");
+      z->setName("Second Child Node");
+      t->setName("Child of second");
 
       x->addChildren(y);
+      x->addChildren(z);
+      y->addChildren(t);
 
       x->addComponent<Comp::Transform2D>();
-      //y->addComponent<Comp::Transform2D>();
+      y->addComponent<Comp::Transform2D>();
+      z->addComponent<Comp::Transform2D>();
+      t->addComponent<Comp::Transform2D>();
 
       YAML::Emitter out;
 
@@ -110,9 +201,9 @@ namespace Ease
          out << YAML::Newline;
 
          out << YAML::Key << "Scene";
-         out << YAML::BeginSeq; // 1
+         out << YAML::BeginMap; // 1
             serializeNode(out, RootNode);
-         out << YAML::EndSeq; // 1
+         out << YAML::EndMap; // 1
 
       out << YAML::EndMap; // 1
 
@@ -127,7 +218,30 @@ namespace Ease
 
    Node* sceneSerializer::deserialize(const char* inputPath)
    {
-      assert(false && "Don't use yet");
+      /**
+       * TODO reset the scene
+       **/
+
+      std::ifstream stream(inputPath);
+      std::stringstream strStream;
+      strStream << stream.rdbuf();
+
+      YAML::Node data = YAML::Load(strStream.str());
+      
+      // if scene has 'Scene' section which has nodes in it
+      if(data["Scene"])
+      {
+         if(data["Scene"]["Node"])
+         {
+            deserializeNode( data["Scene"]["Node"] );
+
+         } else {
+            debug::logError("Scene doesnt have a root!", 0);
+         }
+
+      }
+
+
       return nullptr;
    }
 }
