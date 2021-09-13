@@ -5,9 +5,12 @@
 #include "global.hpp"
 #include "scene/serializer/sceneSerializer.hpp"
 #include "scene/node/node.hpp"
+#include "resource/resourceManager.hpp"
 
+
+// Globals
 Ease::Engine* EngineRef;
-
+Ease::ResourceManager* resourceManager;
 
 int main(int argc, char const **argv)
 {
@@ -19,6 +22,8 @@ int main(int argc, char const **argv)
    Ease::Engine engine;
    EngineRef = &engine;
 
+   Ease::ResourceManager resManager;
+   resourceManager = &resManager;
 
    Ease::Node::resetScene();
 
@@ -26,6 +31,8 @@ int main(int argc, char const **argv)
    Ease::sceneSerializer serial;
    serial.serialize("output.escn");
    serial.deserialize("output.escn");
+
+   // Game loads main scene file
 
    // Main Loop
    unsigned int exitError = 0;

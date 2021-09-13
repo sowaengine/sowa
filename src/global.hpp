@@ -7,6 +7,8 @@
 
 #include "entt/entt.hpp"
 
+#include "resource/resourceManager.hpp"
+
 /**
  * Global unit containing extern variables
  * that can be accessed from any other place
@@ -21,6 +23,8 @@
 
       extern Ease::Node* RootNode;
       extern entt::registry sceneRegistry;
+
+      extern Ease::ResourceManager* resourceManager;
    /*}
 }*/
 

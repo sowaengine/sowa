@@ -221,9 +221,6 @@ namespace Ease
 
    Node* sceneSerializer::deserialize(const char* inputPath)
    {
-      /**
-       * TODO reset the scene
-       **/
       Ease::Node::resetScene();
 
       std::ifstream stream(inputPath);
