@@ -5,6 +5,8 @@
 #include "core/engine.hpp"
 #include "scene/node/node.hpp"
 
+#include "entt/entt.hpp"
+
 /**
  * Global unit containing extern variables
  * that can be accessed from any other place
@@ -13,10 +15,12 @@
 {
    namespace Global
    {*/
+
       extern Ease::Window* windowRef;
       extern Ease::Engine* EngineRef;
 
       extern Ease::Node* RootNode;
+      extern entt::registry sceneRegistry;
    /*}
 }*/
 

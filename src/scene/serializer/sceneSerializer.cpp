@@ -5,6 +5,11 @@
 #include <sstream>
 #include <fstream>
 
+#include "scene/components/components.hpp"
+
+#include "global.hpp"
+
+
 #include "yaml-cpp/yaml.h"
 namespace YAML
 {
@@ -30,7 +35,7 @@ void serializeNode( YAML::Emitter& out, Ease::Node* node )
       out << YAML::Key << "Components";
       out << YAML::BeginMap; // 2
          {  /* Components */
-            if(true /* node->hasComponent<Transform2D>() */)
+            if(node->hasComponent<Ease::Comp::Transform2D>() )
             {
                out << YAML::Key << "Transform2D";
                out << YAML::BeginMap; // A
@@ -69,10 +74,14 @@ namespace Ease
    {
       Node* x = new Node();
       Node* y = new Node();
+      RootNode = x;
       x->setName("My Root Node");
       y->setName("My Child Node");
 
       x->addChildren(y);
+
+      x->addComponent<Comp::Transform2D>();
+      //y->addComponent<Comp::Transform2D>();
 
       YAML::Emitter out;
 
@@ -102,7 +111,7 @@ namespace Ease
 
          out << YAML::Key << "Scene";
          out << YAML::BeginSeq; // 1
-            serializeNode(out, x);
+            serializeNode(out, RootNode);
          out << YAML::EndSeq; // 1
 
       out << YAML::EndMap; // 1

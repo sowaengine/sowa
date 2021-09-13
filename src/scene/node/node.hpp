@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include "entt/entt.hpp"
 
 namespace Ease
 {
@@ -18,6 +19,11 @@ namespace Ease
 
          std::string m_Name;
          unsigned int m_UUID;
+
+         entt::entity m_EntityID;
+
+
+         entt::registry* m_sceneRegistry;
       public:
          Node();
 
@@ -28,6 +34,27 @@ namespace Ease
          std::vector<Node*>& getChildren() { return m_Children; }
 
          void addChildren(Node* node);
+
+         template<typename T>
+         void addComponent()
+         {
+            m_sceneRegistry->emplace<T>(m_EntityID);
+         }
+         template<typename T>
+         bool hasComponent()
+         {
+            auto view = m_sceneRegistry->view<T>();
+            for(auto entity: view) {
+               if(entity == m_EntityID)
+                  return true;
+            }
+            return false;
+         }
+
+         /**
+          * Destroys all nodes, initializes a new scene registry
+          **/
+         static void resetScene();
    };
 }
 

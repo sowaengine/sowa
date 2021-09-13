@@ -4,6 +4,7 @@
 #include "core/engine.hpp"
 #include "global.hpp"
 #include "scene/serializer/sceneSerializer.hpp"
+#include "scene/node/node.hpp"
 
 Ease::Engine* EngineRef;
 
@@ -17,6 +18,10 @@ int main(int argc, char const **argv)
 
    Ease::Engine engine;
    EngineRef = &engine;
+
+
+   Ease::Node::resetScene();
+
 
    Ease::sceneSerializer serial;
    serial.serialize("output.escn");

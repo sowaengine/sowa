@@ -3,8 +3,10 @@
 #include "global.hpp"
 #include <iostream>
 #include <chrono>
+#include "scene/components/components.hpp"
 
 Ease::Node* RootNode;
+entt::registry sceneRegistry;
 
 namespace Ease
 {
@@ -19,6 +21,10 @@ namespace Ease
          rand();
       }
       m_UUID = rand();
+
+      m_EntityID = sceneRegistry.create();
+      m_sceneRegistry = &sceneRegistry;
+      addComponent<Comp::Entity>();
    }
 
 
@@ -27,5 +33,11 @@ namespace Ease
       // first check if its already its child
       node->m_Parent = this;
       m_Children.push_back(node);
+   }
+
+
+   void Node::resetScene()
+   {
+      // TODO: delete all nodes
    }
 }

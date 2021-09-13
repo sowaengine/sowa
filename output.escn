@@ -9,7 +9,7 @@ Assets:
 
 Scene:
 
-  - Node: 1189641421
+  - Node: 521595368
     Name: My Root Node
     Components:
       Transform2D:
@@ -19,12 +19,9 @@ Scene:
         Texture: 65
     Children:
 
-      - Node: 1303455736
+      - Node: 1914544919
         Name: My Child Node
         Components:
-          Transform2D:
-            Position: 2
-            Rotation: 2
           Sprite2D:
             Texture: 65
         Children:
