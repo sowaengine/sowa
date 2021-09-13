@@ -10,7 +10,7 @@
 
 // Globals
 Ease::Engine* EngineRef;
-Ease::ResourceManager* resourceManager;
+
 
 int main(int argc, char const **argv)
 {

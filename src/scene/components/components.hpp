@@ -7,6 +7,6 @@
  * 
  **/
 #include "Transform2D/transform2d.hpp"
-
+#include "Sprite2D/sprite2d.hpp"
 
 #endif // __COMPONENTS_HPP__

@@ -5,11 +5,17 @@
 
 namespace Ease
 {
-   unsigned int ResourceManager::addTexture()
+   unsigned int ResourceManager::addTexture(const char* filepath)
    {
-      Texture& texture = m_Textures.emplace_back();
+      Texture& texture = m_Textures.emplace_back(filepath);
 
-      return 0;
+      return texture.getUUID();
+   }
+   unsigned int ResourceManager::addTexture(uint32_t uuid, const char* filepath)
+   {
+      Texture& texture = m_Textures.emplace_back(uuid, filepath);
+
+      return texture.getUUID();
    }
 
    Texture* ResourceManager::getTexture(unsigned int uuid)

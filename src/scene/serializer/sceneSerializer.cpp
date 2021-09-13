@@ -8,6 +8,7 @@
 #include "scene/components/components.hpp"
 
 #include "global.hpp"
+Ease::ResourceManager* resourceManager;
 
 #include "debug/debug.hpp"
 
@@ -83,12 +84,14 @@ void serializeNode( YAML::Emitter& out, Ease::Node* node)
                   out << YAML::Value << transform2d.zIndex;
                out << YAML::EndMap; // A
             }
-            if(false /* node->hasComponent<Sprite2D>() */)
+            if(node->hasComponent<Ease::Comp::Sprite2D>() )
             {
+               auto& sprite2d = node->getComponent<Ease::Comp::Sprite2D>();
+
                out << YAML::Key << "Sprite2D";
                out << YAML::BeginMap; // A
                   out << YAML::Key << "Texture";
-                  out << YAML::Value << 65;
+                  out << YAML::Value << sprite2d.texture->getUUID();
                out << YAML::EndMap; // A
             }
          }
@@ -129,11 +132,21 @@ Ease::Node* deserializeNode( YAML::Node yaml_node )
          transform2d.rotation = components["Transform2D"]["Rotation"].as<float>();
 
          
-         std::cout << "\nFound a Transform2D;"
+         /*std::cout << "\nFound a Transform2D;"
          << "\n\t" << "Name: " << node->getName()
          << "\n\t" << "Position: [" << transform2d.position.x << "," << transform2d.position.y << "]"
          << "\n\t" << "Rotation: " << transform2d.rotation
-         << "\n\t" << "Z-Index: " << transform2d.zIndex << std::endl;
+         << "\n\t" << "Z-Index: " << transform2d.zIndex << std::endl;*/
+      }
+
+      if( components["Sprite2D"] ) {
+         node->addComponent<Ease::Comp::Sprite2D>();
+         auto& sprite2d = node->getComponent<Ease::Comp::Sprite2D>();
+         
+         //resourceManager->getTexture(components["Sprite2D"][]);
+         /***
+          * ! COME BACK HERE LATER
+          **/
       }
    }
 
@@ -176,6 +189,11 @@ namespace Ease
       z->addComponent<Comp::Transform2D>();
       t->addComponent<Comp::Transform2D>();
 
+      y->addComponent<Comp::Sprite2D>();
+      auto& spr = y->getComponent<Comp::Sprite2D>();
+      spr.texture = 
+      resourceManager->getTexture( resourceManager->addTexture("filepath.png")
+      );
 
       YAML::Emitter out;
 
@@ -229,6 +247,13 @@ namespace Ease
 
       YAML::Node data = YAML::Load(strStream.str());
       
+      // Load all assets from the scene
+      // Textures
+      /***
+       * !TODO: Load texture asset files with their given ids and load it to ResourceManager class
+       **/
+
+
       // if scene has 'Scene' section which has nodes in it
       if(data["Scene"])
       {

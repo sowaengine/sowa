@@ -16,6 +16,10 @@ namespace Ease
          unsigned int getUUID() { return m_UUID; }
          GLuint getTextureID() { return m_TextureID; }
 
+         Texture(const char* filepath);
+         Texture(uint32_t uuid, const char* filepath);
+         ~Texture();
+
    };
 }
 
