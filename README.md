@@ -4,7 +4,7 @@
 
 
 ## Installation
-- See [Dependencies](#-Dependencies)
+- See [Dependencies](#Dependencies)
 - ``` make ``` to build the engine
 - ``` make run ``` to run.  output is located at build/linux/a.out
 
