@@ -1,0 +1,31 @@
+# Ease scene version: 1
+
+Assets:
+  Textures:
+    65:
+      Path: path/to/texture.png
+      min-filter: REPEAT
+
+
+Scene:
+
+  - Node: 1189641421
+    Name: My Root Node
+    Components:
+      Transform2D:
+        Position: 2
+        Rotation: 2
+      Sprite2D:
+        Texture: 65
+    Children:
+
+      - Node: 1303455736
+        Name: My Child Node
+        Components:
+          Transform2D:
+            Position: 2
+            Rotation: 2
+          Sprite2D:
+            Texture: 65
+        Children:
+          []

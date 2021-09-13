@@ -3,7 +3,7 @@
 
 #include "renderer/window/window.hpp"
 #include "core/engine.hpp"
-
+#include "scene/node/node.hpp"
 
 /**
  * Global unit containing extern variables
@@ -15,6 +15,8 @@
    {*/
       extern Ease::Window* windowRef;
       extern Ease::Engine* EngineRef;
+
+      extern Ease::Node* RootNode;
    /*}
 }*/
 

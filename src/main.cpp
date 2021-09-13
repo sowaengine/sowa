@@ -3,6 +3,7 @@
 #include "renderer/window/window.hpp"
 #include "core/engine.hpp"
 #include "global.hpp"
+#include "scene/serializer/sceneSerializer.hpp"
 
 Ease::Engine* EngineRef;
 
@@ -16,6 +17,9 @@ int main(int argc, char const **argv)
 
    Ease::Engine engine;
    EngineRef = &engine;
+
+   Ease::sceneSerializer serial;
+   serial.serialize("output.escn");
 
    // Main Loop
    unsigned int exitError = 0;
