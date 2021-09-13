@@ -105,7 +105,7 @@ void serializeNode( YAML::Emitter& out, Ease::Node* node)
    out << YAML::EndMap; // 1
 }
 
-void deserializeNode( YAML::Node yaml_node )
+Ease::Node* deserializeNode( YAML::Node yaml_node )
 {
    Ease::Node* node = new Ease::Node();
 
@@ -148,6 +148,8 @@ void deserializeNode( YAML::Node yaml_node )
          }
       }
    }
+
+   return node;
 }
 
 
@@ -173,6 +175,7 @@ namespace Ease
       y->addComponent<Comp::Transform2D>();
       z->addComponent<Comp::Transform2D>();
       t->addComponent<Comp::Transform2D>();
+
 
       YAML::Emitter out;
 
@@ -221,6 +224,7 @@ namespace Ease
       /**
        * TODO reset the scene
        **/
+      Ease::Node::resetScene();
 
       std::ifstream stream(inputPath);
       std::stringstream strStream;
@@ -233,7 +237,7 @@ namespace Ease
       {
          if(data["Scene"]["Node"])
          {
-            deserializeNode( data["Scene"]["Node"] );
+            RootNode = deserializeNode( data["Scene"]["Node"] );
 
          } else {
             debug::logError("Scene doesnt have a root!", 0);

@@ -1,11 +1,6 @@
 #ifndef __COMPONENTS_HPP__
 #define __COMPONENTS_HPP__
 
-/**
- * Main component that every entity has
- * used for looping entities
- **/
-#include "Entity/entity.hpp"
 
 /**
  * 

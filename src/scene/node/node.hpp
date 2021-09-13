@@ -26,15 +26,22 @@ namespace Ease
          entt::registry* m_sceneRegistry;
       public:
          Node();
+         ~Node();
 
          unsigned int getUUID() { return m_UUID; }
          void setUUID(unsigned int uuid) { m_UUID = uuid; }
          std::string& getName() { return m_Name; }
          void setName(const char* name) { m_Name = name; }
 
+         entt::entity getEntityID() { return m_EntityID; }
+
+
          std::vector<Node*>& getChildren() { return m_Children; }
 
          void addChildren(Node* node);
+
+         void free();
+
 
          template<typename T>
          void addComponent()

@@ -8,6 +8,8 @@
 Ease::Node* RootNode;
 entt::registry sceneRegistry;
 
+void destroyNode(Ease::Node* node);
+
 namespace Ease
 {
    Node::Node()
@@ -24,9 +26,12 @@ namespace Ease
 
       m_EntityID = sceneRegistry.create();
       m_sceneRegistry = &sceneRegistry;
-      addComponent<Comp::Entity>();
    }
 
+   Node::~Node()
+   {
+      std::cout << "Deleting: " << this->m_Name << std::endl;
+   }
 
    void Node::addChildren(Node* node)
    {
@@ -35,9 +40,37 @@ namespace Ease
       m_Children.push_back(node);
    }
 
+   void Node::free()
+   {
+      delete this;
+   }
+
 
    void Node::resetScene()
    {
-      // TODO: delete all nodes
+      if(RootNode)
+         for(auto* child : RootNode->getChildren())
+         {
+            std::cout << "Name: " << child->m_Name << std::endl;
+            destroyNode(child);
+         }
+      
+   }
+}
+void destroyNode(Ease::Node* node)
+{
+   if(node)
+   {
+      for(Ease::Node* _node : node->getChildren())
+      {
+         if(_node)
+         {
+            destroyNode(_node);
+            if( sceneRegistry.valid(_node->getEntityID()) )
+               sceneRegistry.destroy(_node->getEntityID());
+
+         }
+      }
+      node->free();
    }
 }
