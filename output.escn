@@ -9,7 +9,7 @@ Assets:
 
 Scene:
   Node:
-    ID: 12531235
+    ID: 1365180540
     Name: My Root Node
     Components:
       Transform2D:
@@ -18,7 +18,7 @@ Scene:
         Z-Index: 0
     Children:
       Node:
-        ID: 15123523
+        ID: 635723058
         Name: My Child Node
         Components:
           Transform2D:
@@ -26,10 +26,10 @@ Scene:
             Rotation: 0
             Z-Index: 0
           Sprite2D:
-            Texture: 364343
+            Texture: 1780695788
         Children:
           Node:
-            ID: 45742275
+            ID: 1632621729
             Name: Child of second
             Components:
               Transform2D:
@@ -39,7 +39,7 @@ Scene:
             Children:
               {}
       Node:
-        ID: 4584522
+        ID: 1129566413
         Name: Second Child Node
         Components:
           Transform2D:
