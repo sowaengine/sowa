@@ -7,6 +7,8 @@
 #include "scene/node/node.hpp"
 #include "resource/resourceManager.hpp"
 
+#include "file/file.hpp"
+
 
 // Globals
 Ease::Engine* EngineRef;

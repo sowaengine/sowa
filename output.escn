@@ -3,7 +3,7 @@
 Assets:
   Textures:
     65:
-      Path: ../../resources/Mechanic/idle_1.png
+      Path: res://resources/Mechanic/idle_2.png
       min-filter: LINEAR
       mag-filter: LINEAR
       

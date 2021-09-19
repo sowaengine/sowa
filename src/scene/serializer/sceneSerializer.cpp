@@ -13,6 +13,7 @@
 Ease::ResourceManager* resourceManager;
 
 #include "debug/debug.hpp"
+#include "file/file.hpp"
 
 #include "yaml-cpp/yaml.h"
 namespace YAML
@@ -280,7 +281,7 @@ namespace Ease
                   unsigned int uuid = it->first.as<unsigned int>();
                   std::string filepath = "";
                   if(tex["Path"])
-                     filepath = tex["Path"].as<std::string>();
+                     filepath = File::getPath( tex["Path"].as<std::string>() );
 
 
                   resourceManager->addTexture(uuid, filepath.c_str());
