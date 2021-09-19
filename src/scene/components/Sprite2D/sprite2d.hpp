@@ -12,6 +12,8 @@ namespace Ease
 
          Sprite2D();
          ~Sprite2D();
+
+         void Draw();
       } Sprite2D;
    }
 }

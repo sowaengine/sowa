@@ -1,4 +1,6 @@
 #include "sprite2d.hpp"
+#include <iostream>
+#include <assert.h>
 
 namespace Ease
 {
@@ -15,5 +17,11 @@ namespace Ease
 
       }
 
+
+      void Sprite2D::Draw()
+      {
+         std::cout << "Drawed Sprite2D" << std::endl;
+         assert(false && "This method is not used. Don't use it");
+      }
    }
 }

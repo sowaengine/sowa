@@ -84,11 +84,62 @@ namespace Ease
          return 0;
       }
 
-      std::cout << "Vertex Shader:\n"
-                << vertexShaderSrc << "\n"
-                << "Fragment Shader: \n"
-                << fragmentShaderSrc << std::endl;
+      
+      m_ProgramID = glCreateProgram();
 
-      return 0;
+      /* Compile Vertex Shader */
+      GLuint vertexID = glCreateShader(GL_VERTEX_SHADER);
+      const char* src_vert = vertexShaderSrc.c_str();
+      glShaderSource(vertexID, 1, &src_vert, nullptr);
+      glCompileShader(vertexID);
+      GLint result;
+      glGetShaderiv(vertexID, GL_COMPILE_STATUS, &result);
+      if(result == GL_FALSE)
+      {
+         int length;
+         glGetShaderiv(vertexID, GL_INFO_LOG_LENGTH, &length);
+
+         GLchar* strInfoLog = new GLchar[length+1];
+         glGetShaderInfoLog(vertexID, length, &length, strInfoLog);
+
+         std::cout << "Shader Error Vertex Shader -> " << strInfoLog << std::endl;
+         delete[] strInfoLog;
+      }
+
+      /* Compile Fragment Shader */
+      GLuint fragID = glCreateShader(GL_FRAGMENT_SHADER);
+      const char* src_frag = fragmentShaderSrc.c_str();
+      glShaderSource(fragID, 1, &src_frag, nullptr);
+      glCompileShader(fragID);
+      // GLint result;
+      glGetShaderiv(fragID, GL_COMPILE_STATUS, &result);
+      if(result == GL_FALSE)
+      {
+         int length;
+         glGetShaderiv(fragID, GL_INFO_LOG_LENGTH, &length);
+
+         GLchar* strInfoLog = new GLchar[length+1];
+         glGetShaderInfoLog(fragID, length, &length, strInfoLog);
+
+         std::cout << "Shader Error Fragment Shader -> " << strInfoLog << std::endl;
+         delete[] strInfoLog;
+      }
+
+
+      /* Link Shaders into program */
+      glAttachShader(m_ProgramID, vertexID);
+      glAttachShader(m_ProgramID, fragID);
+      // attach other shader types if there is
+
+      glLinkProgram(m_ProgramID);
+      glValidateProgram(m_ProgramID);
+      glUseProgram(m_ProgramID);
+
+      glDeleteShader(vertexID);
+      glDeleteShader(fragID);
+
+
+      std::cout << "Created new Shader Program with id: " << m_ProgramID << std::endl;
+      return m_ProgramID;
    }
 }

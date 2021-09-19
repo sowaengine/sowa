@@ -8,14 +8,18 @@ namespace Ease
    class Engine
    {
       private:
+         bool m_Running;
 
       public:
-         Engine() {}
+         Engine();
          ~Engine() {}
 
          // return 1 -> Success
          // anything other than 1 -> Error
          unsigned int Update();
+
+         void SetRunning(bool will_run);
+         bool isRunning() { return m_Running; }
    };
 }
 

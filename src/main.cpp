@@ -9,6 +9,8 @@
 
 #include "file/file.hpp"
 
+
+#include "renderer/batch2d/batch2d.hpp"
 #include "renderer/shader/shader.hpp"
 
 
@@ -25,6 +27,10 @@ int main(int argc, char const **argv)
 
    Ease::Engine engine;
    EngineRef = &engine;
+   engine.SetRunning(true);
+
+   Ease::Renderer::Initialize();
+
 
    Ease::ResourceManager resManager;
    resourceManager = &resManager;
@@ -36,9 +42,8 @@ int main(int argc, char const **argv)
    // serial.serialize("output.escn");
    serial.deserialize("output.escn");
 
-   // Game loads main scene file
-   Ease::Shader shader;
-   shader.loadShader( Ease::File::getPath("res://resources/shaders/sprite2d_batch.shader") );
+   // Game loads main scene file and configurations
+
 
    // Main Loop
    unsigned int exitError = 0;

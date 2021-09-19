@@ -12,10 +12,12 @@ namespace Ease
    class Shader
    {
       private:
-         GLuint m_ShaderID;
+         GLuint m_ProgramID;
 
       public:
          GLuint loadShader(const std::string& filepath);
+
+         GLuint getID() { return m_ProgramID; }
    };
 }
 
