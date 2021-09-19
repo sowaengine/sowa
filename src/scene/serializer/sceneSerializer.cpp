@@ -5,6 +5,8 @@
 #include <sstream>
 #include <fstream>
 
+#include <unordered_map>
+
 #include "scene/components/components.hpp"
 
 #include "global.hpp"
@@ -237,6 +239,24 @@ namespace Ease
    }
 
 
+   // String representations of TextureProperties items
+   const std::unordered_map<std::string, TextureProperties> TexPropToString = {
+      { "REPEAT"       , TextureProperties::REPEAT        },
+      { "CLAMP_TO_EDGE", TextureProperties::CLAMP_TO_EDGE },
+      { "LINEAR"       , TextureProperties::LINEAR },
+      { "CLAMP"        , TextureProperties::CLAMP },
+   };
+   TextureProperties getTextureProp(const std::string& str)
+   {
+      auto it = TexPropToString.find(str);
+      if(it != TexPropToString.end()) {
+         return it->second;
+      }
+      
+      return TextureProperties::NONE;
+   }
+
+
    Node* sceneSerializer::deserialize(const char* inputPath)
    {
       Ease::Node::resetScene();
@@ -248,10 +268,38 @@ namespace Ease
       YAML::Node data = YAML::Load(strStream.str());
       
       // Load all assets from the scene
-      // Textures
-      /***
-       * !TODO: Load texture asset files with their given ids and load it to ResourceManager class
-       **/
+      if(data["Assets"])
+      {
+         // Textures
+         if(data["Assets"]["Textures"])
+         {
+            if( data["Assets"]["Textures"].size() > 0 )
+            {
+               for (YAML::const_iterator it = data["Assets"]["Textures"].begin(); it != data["Assets"]["Textures"].end(); ++it){
+                  YAML::Node tex = it->second;
+                  unsigned int uuid = it->first.as<unsigned int>();
+                  std::string filepath = "";
+                  if(tex["Path"])
+                     filepath = tex["Path"].as<std::string>();
+
+
+                  resourceManager->addTexture(uuid, filepath.c_str());
+
+                  Texture* texture = resourceManager->getTexture(uuid);
+
+                  if(tex["min-filter"]){
+                     TextureProperties prop = getTextureProp( tex["min-filter"].as<std::string>() );;
+                     if(prop != TextureProperties::NONE)
+                        texture->min_filter = prop;
+                  }
+
+
+                  // load texture after setting up parameters
+                  resourceManager->loadTexture(uuid);
+               }
+            }
+         }
+      }
 
 
       // if scene has 'Scene' section which has nodes in it

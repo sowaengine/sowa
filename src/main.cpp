@@ -29,7 +29,7 @@ int main(int argc, char const **argv)
 
 
    Ease::sceneSerializer serial;
-   serial.serialize("output.escn");
+   // serial.serialize("output.escn");
    serial.deserialize("output.escn");
 
    // Game loads main scene file

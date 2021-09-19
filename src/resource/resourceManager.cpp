@@ -36,4 +36,10 @@ namespace Ease
       // gldeletetextures(texture->getEntityID());
    }
 
+   void ResourceManager::loadTexture(unsigned int uuid)
+   {
+      Texture* tex = getTexture(uuid);
+      tex->loadTexture();
+   }
+
 }

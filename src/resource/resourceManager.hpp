@@ -16,6 +16,8 @@ namespace Ease
          Texture* getTexture(unsigned int uuid);
          void freeTexture(unsigned int uuid);
          void freeTexture(Texture* texture);
+
+         void loadTexture(unsigned int uuid);
    };
 }
 
