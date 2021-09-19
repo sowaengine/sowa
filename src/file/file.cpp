@@ -4,7 +4,7 @@
 
 namespace Ease
 {
-   std::string resPath = "../../";
+   std::string resPath = "";
 
    std::string File::getPath(const std::string& path)
    {

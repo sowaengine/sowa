@@ -9,6 +9,8 @@
 
 #include "file/file.hpp"
 
+#include "renderer/shader/shader.hpp"
+
 
 // Globals
 Ease::Engine* EngineRef;
@@ -35,6 +37,8 @@ int main(int argc, char const **argv)
    serial.deserialize("output.escn");
 
    // Game loads main scene file
+   Ease::Shader shader;
+   shader.loadShader( Ease::File::getPath("res://resources/shaders/sprite2d_batch.shader") );
 
    // Main Loop
    unsigned int exitError = 0;
@@ -43,6 +47,6 @@ int main(int argc, char const **argv)
       
    }
    
-   
+   if(exitError == 1) return 0;
    return exitError;
 }
