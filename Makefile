@@ -1,4 +1,4 @@
-TARGET_EXEC ?= a.out
+TARGET_EXEC ?= Ease
 
 BUILD_DIR ?= build/linux
 SRC_DIRS ?= src
@@ -8,16 +8,16 @@ OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 ADDITIONAL_OBJS := 
-#thirdparty/glad/glad.o
+
 
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d) include/ thirdparty/
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 LIB_DIRS := lib/
 LIB_FLAGS := $(addprefix -L,$(LIB_DIRS))
-LDFLAGS := -lGL -lglfw3 -lX11 -lpthread -ldl -lglad -lyaml-cpp
+LDFLAGS := -lglfw3 -ldl -lvulkan -lpthread -lX11 -lXxf86vm -lXrandr -lXi
 
-CPPFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -MMD -MP -std=c++17 -DGLFW_INCLUDE_NONE
+CPPFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -MMD -MP -std=c++17
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CXX) $(OBJS) ${LIB_FLAGS} ${ADDITIONAL_OBJS} -o $@ $(LDFLAGS)
@@ -43,7 +43,7 @@ clean:
 	$(RM) -r $(BUILD_DIR)
 
 run:
-	build/linux/a.out
+	build/linux/Ease
 
 
 -include $(DEPS)
