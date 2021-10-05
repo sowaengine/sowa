@@ -2,15 +2,20 @@
 
 **Ease Engine** is a 2D Game/Rendering Engine
 
+**Note**
+- Ease Engine is being written using Vulkan backend now
+
 
 ## Installation
 - See [Dependencies](#Dependencies)
 - ``` make ``` to build the engine
-- ``` make run ``` to run.  output is located at build/linux/a.out
+- ``` make run ``` to run.  output is located at build/linux/Ease
 
 ## Dependencies
-- GLAD | GLFW | YAML
+- GLFW | YAML
    Static library files for these libraries must be located in a library search directory
+
+- Vulkan SDK installed
 
 
 ### Notes
