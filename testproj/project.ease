@@ -1,0 +1,22 @@
+ext:
+  200: "res://sprites/ship.png"
+
+Application:
+  Config:
+    title: Ease Engine Game
+    description: Description
+    icon: ext://200
+  
+  Run:
+    mainScene: res://scenes/scene.escn
+  
+  Window:
+    renderWidth: 1280
+    renderHeight: 720
+
+    windowWidth: 1600
+    windowHeight: 900
+
+    resizeable: true
+    fullScreen: false
+    useVSync: true
