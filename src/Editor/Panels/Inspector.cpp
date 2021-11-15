@@ -67,10 +67,10 @@ static void drawNode(Node* node)
    
 
 // Draw Components
-   // Transform3D Component
-   if(node->hasComponent<Comp::Transform3D>())
+   // Transform3DComponent Component
+   if(node->hasComponent<Transform3DComponent>())
    {
-      drawComponent<Comp::Transform3D>("Transform3D", node, [](Comp::Transform3D& component)
+      drawComponent<Transform3DComponent>("Transform3D", node, [](Transform3DComponent& component)
       {
          ImGui::Text("Position"); ImGui::SameLine();
          ImGui::DragFloat3("##Position", glm::value_ptr(component.translation));
@@ -85,17 +85,17 @@ static void drawNode(Node* node)
          ImGui::DragFloat3("##Scale", glm::value_ptr(component.scale));
       });
    }
-   // Camera Component
-   if(node->hasComponent<Comp::Camera>())
+   // CameraComponent Component
+   if(node->hasComponent<CameraComponent>())
    {
-      drawComponent<Comp::Camera>("Camera", node, [](Comp::Camera& component)
+      drawComponent<CameraComponent>("CameraComponent", node, [](CameraComponent& component)
       {
          ImGui::Text("Projection"); ImGui::SameLine();
          const char* projTypes[] = {"Orthographic", "Perspective"};
 
          static int currItem = 0;
          ImGui::Combo("##", &currItem, projTypes, 2);
-         component.projectionType = (Comp::CameraProjection)currItem;
+         component.projectionType = (CameraProjection)currItem;
 
          ImGui::Text("Current"); ImGui::SameLine();
          ImGui::Checkbox("##Current", &component.current);
@@ -105,7 +105,7 @@ static void drawNode(Node* node)
          component.near = component.near < 0.f ? 0.f : component.near;
 
 
-         if(component.projectionType == Comp::CameraProjection::PERSPECTIVE)
+         if(component.projectionType == CameraProjection::PERSPECTIVE)
          {
             ImGui::Text("Fov"); ImGui::SameLine();
             ImGui::SliderAngle("##Fov", &component.fov, 0.f, 180.f);
@@ -129,13 +129,13 @@ static void drawNode(Node* node)
    
    if(ImGui::BeginPopup("_add_comp"))
    {
-      if(!node->hasComponent<Comp::Transform3D>())
-         if(ImGui::MenuItem("Transform3D"))
-            node->addComponent<Comp::Transform3D>();
+      if(!node->hasComponent<Transform3DComponent>())
+         if(ImGui::MenuItem("Transform3DComponent"))
+            node->addComponent<Transform3DComponent>();
 
-      if(!node->hasComponent<Comp::Camera>())
-         if(ImGui::MenuItem("Camera"))
-            node->addComponent<Comp::Camera>();
+      if(!node->hasComponent<CameraComponent>())
+         if(ImGui::MenuItem("CameraComponent"))
+            node->addComponent<CameraComponent>();
 
       ImGui::EndPopup();
    }

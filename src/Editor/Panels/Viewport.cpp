@@ -122,7 +122,7 @@ void Editor::drawViewport()
 
       // Draw Grid
       {
-         Comp::Transform3D* cameraTc;
+         Transform3DComponent* cameraTc;
          if(editorData.editorCameraType == EditorCameraType::TWO_D)
             cameraTc = editorData.camera2DTransform;
          else
@@ -153,15 +153,15 @@ void Editor::drawViewport()
       // Only translation for now
       if(editorData.selectedNode != nullptr)
       {
-         if(editorData.selectedNode->hasComponent<Comp::Transform3D>())
+         if(editorData.selectedNode->hasComponent<Transform3DComponent>())
          {
-            Comp::Transform3D* cameraTc;
+            Transform3DComponent* cameraTc;
             if(editorData.editorCameraType == EditorCameraType::TWO_D)
                cameraTc = editorData.camera2DTransform;
             else
                cameraTc = editorData.camera3DTransform;
 
-            auto& tc = editorData.selectedNode->getComponent<Comp::Transform3D>();
+            auto& tc = editorData.selectedNode->getComponent<Transform3DComponent>();
 
             int width=1280, height=720;
             editorData.window->getVideoSize(&width, &height);

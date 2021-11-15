@@ -35,13 +35,13 @@ class GLRenderer
 {
 public:
    static void drawModel(const Model& model);
-   static void drawModels(bool useEditorCamera, const Comp::Transform3D& cameraTransform, const Comp::Camera& camera);
+   static void drawModels(bool useEditorCamera, const Transform3DComponent& cameraTransform, const CameraComponent& camera);
    /**
     * @param useScreenSize -> should node be drawen to target resolution or window resolution
     * true -> use target resolution (NOT SCREEN)
     * @note CHECK IMPLEMENTATION BEFORE USING IT. ITS PROBABLY NOT THE THING YOU WANT
    */
-   static void drawMesh(Shader* shader, const Comp::Transform3D& transform, const Comp::Mesh& mesh);
+   static void drawMesh(Shader* shader, const Transform3DComponent& transform, const MeshComponent& mesh);
 
    static void setWindow(Window* _window);
 

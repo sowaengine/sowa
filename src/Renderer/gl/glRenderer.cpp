@@ -62,7 +62,7 @@ void GLRenderer::drawModel(const Model& model)
 }
 float cameraX = 0;
 int x=0;
-void GLRenderer::drawModels(bool useEditorCamera, const Comp::Transform3D& cameraTransform, const Comp::Camera& camera)
+void GLRenderer::drawModels(bool useEditorCamera, const Transform3DComponent& cameraTransform, const CameraComponent& camera)
 {
    using namespace Global;
    using namespace Comp;
@@ -72,7 +72,7 @@ void GLRenderer::drawModels(bool useEditorCamera, const Comp::Transform3D& camer
    glViewport(0, 0, width, height);
 
 
-   // Camera
+   // CameraComponent
    glm::mat4 view{1.0f};
    glm::mat4 proj;
 
@@ -80,9 +80,9 @@ void GLRenderer::drawModels(bool useEditorCamera, const Comp::Transform3D& camer
    if(!useEditorCamera)
    {
       // find current camera and apply
-      for(auto entity: Global::registry.view<Transform3D, Camera>()) {
-         auto& transformComp = Global::registry.get<Transform3D>(entity);
-         auto& cameraComp = Global::registry.get<Camera>(entity);
+      for(auto entity: Global::registry.view<Transform3DComponent, CameraComponent>()) {
+         auto& transformComp = Global::registry.get<Transform3DComponent>(entity);
+         auto& cameraComp = Global::registry.get<CameraComponent>(entity);
 
          if(cameraComp.current)
          {
@@ -97,7 +97,7 @@ void GLRenderer::drawModels(bool useEditorCamera, const Comp::Transform3D& camer
    if(useEditorCamera || !found)
    {
       static int i =0;
-      std::cout << "Fallback " << i++ << std::endl; 
+      //std::cout << "Fallback " << i++ << std::endl; 
       //view = glm::translate(view, {-width*0.5f, -height*0.5f, 0.f});
       //view = glm::scale(view, cameraTransform.scale);
       //view = glm::translate(view, cameraTransform.translation);
@@ -113,9 +113,9 @@ void GLRenderer::drawModels(bool useEditorCamera, const Comp::Transform3D& camer
 
    
 
-   for(auto entity: Global::registry.view<Transform3D, Mesh>()) {
-      auto& transform = Global::registry.get<Transform3D>(entity);
-      auto& mesh = Global::registry.get<Mesh>(entity);
+   for(auto entity: Global::registry.view<Transform3DComponent, MeshComponent>()) {
+      auto& transform = Global::registry.get<Transform3DComponent>(entity);
+      auto& mesh = Global::registry.get<MeshComponent>(entity);
 
       if(!mesh.Visible) continue;
 
@@ -155,12 +155,12 @@ void GLRenderer::drawModels(bool useEditorCamera, const Comp::Transform3D& camer
 }
 
 
-void GLRenderer::drawMesh(Shader* shader, const Comp::Transform3D& transform, const Comp::Mesh& mesh)
+void GLRenderer::drawMesh(Shader* shader, const Transform3DComponent& transform, const MeshComponent& mesh)
 {
    using namespace Global;
    using namespace Comp;
 
-   // Camera view matrix
+   // CameraComponent view matrix
    glm::mat4 view{1.0f};
    int width=1280, height=720;
    window->getWindowSize(&width, &height);

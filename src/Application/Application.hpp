@@ -1,5 +1,8 @@
 #pragma once
 
+#include "lua/lua.hpp"
+
+
 #include "Window/Window.hpp"
 #include "Renderer/Shader/Shader.hpp"
 #include "Renderer/Model/Model.hpp"
@@ -37,11 +40,19 @@ private:
 
    void startGame();
    void stopGame();
+   void updateGame();
 
-   Comp::Transform3D m_EditorCamera2DTransform;
-   Comp::Transform3D m_EditorCamera3DTransform;
-   Comp::Camera m_EditorCamera2D;
-   Comp::Camera m_EditorCamera3D;
+   Transform3DComponent m_EditorCamera2DTransform;
+   Transform3DComponent m_EditorCamera3DTransform;
+   CameraComponent m_EditorCamera2D;
+   CameraComponent m_EditorCamera3D;
+
+
+   /*
+      Runtime
+   */
+  lua_State* g_LuaState = nullptr;
+
 };
    
 } // namespace Ease

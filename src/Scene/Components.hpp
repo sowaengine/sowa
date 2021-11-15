@@ -3,6 +3,11 @@
 #include "Transform2D/Transform2D.hpp"
 #include "Mesh/Mesh.hpp"
 
+#include "Lang/Lua/luaScript.hpp"
+
+
+#include "EaseEngine.hpp"
+#include "Lang/Native/NativeScriptResource.hpp"
 
 #include "glm/glm.hpp"
 #include <glm/gtc/matrix_transform.hpp>
@@ -10,19 +15,19 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-namespace Ease::Comp {
+namespace Ease {
 
-struct Mesh
+struct MeshComponent
 {
    std::shared_ptr<Model> model;
    std::shared_ptr<Material> material;
 
    bool Visible = true;
 };
-struct Transform2D
+struct Transform2DComponent
 {
-   Transform2D() = default;
-   Transform2D(glm::vec2 position) { this->position = position; }
+   Transform2DComponent() = default;
+   Transform2DComponent(glm::vec2 position) { this->position = position; }
    
    glm::vec2 position{0.f, 0.f};
    float zIndex = 0.f;
@@ -42,10 +47,10 @@ struct Transform2D
       return transform;
    }
 };
-struct Transform3D
+struct Transform3DComponent
 {
-   Transform3D() = default;
-   Transform3D(glm::vec3 translation) { this->translation = translation; }
+   Transform3DComponent() = default;
+   Transform3DComponent(glm::vec3 translation) { this->translation = translation; }
    
    glm::vec3 translation{0.f, 0.f, 0.f};
    glm::vec3 rotation{0.f, 0.f, 0.f};
@@ -113,9 +118,9 @@ enum class CameraProjection
    ORTHOGRAPHIC = 0,
    PERSPECTIVE,
 };
-struct Camera
+struct CameraComponent
 {
-   Camera() {}
+   CameraComponent() {}
 
    CameraProjection projectionType = CameraProjection::ORTHOGRAPHIC;
 
@@ -139,7 +144,7 @@ struct Camera
       else
          return glm::ortho(0.f, (float)size.x, 0.f, (float)size.y, -1.f, 1.f);
    }
-   // return Camera Projection matrix with right handed system
+   // return CameraComponent Projection matrix with right handed system
    glm::mat4 getProjectionRH() const
    {
       assert(false);
@@ -151,12 +156,27 @@ struct Camera
    }
 };
 
-
-struct LuaScript
+// LuaBehaviour component is the component that will be attached to nodes;
+// LuaScript is a resource object that will hold a lua script (.lua)
+struct LuaBehaviour
 {
-   std::string filepath = "";
+   LuaScript script;
    std::string className = "";
+
+   int scriptRef = -1;
+
+   int startRef = -1;
+   int updateRef = -1;
 };
 
 
-} // namespace Ease::Comp
+struct NativeBehaviour
+{
+   std::string sharedObjectPath = "";
+
+   std::shared_ptr<NativeScriptResource> resource;
+   NativeScript* obj;
+};
+
+
+} // namespace Ease

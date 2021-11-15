@@ -47,10 +47,10 @@ struct EditorData
 
    bool gameRunning = false;
 
-   Comp::Transform3D* camera2DTransform = nullptr;
-   Comp::Transform3D* camera3DTransform = nullptr;
-   Comp::Camera* editorCamera2D = nullptr;
-   Comp::Camera* editorCamera3D = nullptr;
+   Transform3DComponent* camera2DTransform = nullptr;
+   Transform3DComponent* camera3DTransform = nullptr;
+   CameraComponent* editorCamera2D = nullptr;
+   CameraComponent* editorCamera3D = nullptr;
 
 
    EditorCameraType editorCameraType = EditorCameraType::TWO_D;
