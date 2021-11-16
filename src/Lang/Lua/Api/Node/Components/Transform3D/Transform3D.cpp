@@ -6,11 +6,6 @@
 namespace Ease::Lua
 {
 
-Transform3D::Transform3D()
-{
-   data_type = LUA_TYPE_COMPONENT_TRANSFORM;
-}
-
 //static
 int Lua::Transform3D::lua_get(lua_State* L)
 {

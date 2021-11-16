@@ -13,17 +13,13 @@
 #include "../../Node.hpp"
 #include "Scene/SceneTree/Node.hpp"
 
-#include "Lang/Lua/Api/BaseUserdata/BaseUserdata.hpp"
+#include "Lang/Lua/Api/Node/Components/BaseComponent/BaseComponent.hpp"
 
 namespace Ease::Lua
 {
 
-struct Transform3D : public BaseUserdata
+struct Transform3D : public BaseComponent
 {
-   /** @brief initializes BaseUserData::data_type */
-   Transform3D();
-
-
 
    glm::vec3 translation;
    glm::vec3 rotation;
