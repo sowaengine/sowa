@@ -35,7 +35,11 @@ public:
       m_Channels = channels;
    }
 
-   GLuint getTexID() { return m_TextureID; }
+   GLuint getTexID() const { return m_TextureID; }
+   int getWidth() const { return m_Width; }
+   int getHeight() const { return m_Height; }
+   int getChannels() const { return m_Channels; }
+   bool isValid() const { return m_Valid; }
 private:
    friend class GLRenderer;
 
@@ -45,6 +49,8 @@ private:
    int m_Width;
    int m_Height;
    int m_Channels;
+
+   bool m_Valid = false;
 };
    
 } // namespace Ease

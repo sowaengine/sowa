@@ -20,7 +20,7 @@ static Node* rightClickedNode = nullptr;
 static void drawNodeRecursive(Node& node, EditorData& editorData, ImGuiTreeNodeFlags flags = 0)
 {
    bool singleClicked = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
-   bool doubleClicked = ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left);
+   // bool doubleClicked = ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left);
    bool rightClicked = ImGui::IsMouseClicked(ImGuiMouseButton_Right);
 
    // double click -> open children

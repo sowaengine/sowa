@@ -2,8 +2,9 @@
 
 **Ease Engine** is a 2D Game/Rendering Engine
 
-**Note**
-- Ease Engine is being written using Vulkan backend now
+
+### Notes
+   This software is not in usable state yet.
 
 
 ## Installation
@@ -15,8 +16,7 @@
 - GLFW | YAML
    Static library files for these libraries must be located in a library search directory
 
-- Vulkan SDK installed
+- Check Makefile:LDFLAGS for other dependencies
 
-
-### Notes
-   Development of Ease Engine started in earlier than September 2021, But because of bad code and messy codebase, it's being completely rewritten in this repository.
+- yaml-cpp : https://github.com/jbeder/yaml-cpp
+- lua      : https://github.com/lua/lua

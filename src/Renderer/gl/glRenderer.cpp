@@ -96,7 +96,7 @@ void GLRenderer::drawModels(bool useEditorCamera, const Transform3DComponent& ca
    }
    if(useEditorCamera || !found)
    {
-      static int i =0;
+      //static int i =0;
       //std::cout << "Fallback " << i++ << std::endl; 
       //view = glm::translate(view, {-width*0.5f, -height*0.5f, 0.f});
       //view = glm::scale(view, cameraTransform.scale);

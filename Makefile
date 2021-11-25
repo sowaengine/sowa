@@ -17,6 +17,7 @@ LIB_DIRS := lib/
 LIB_FLAGS := $(addprefix -L,$(LIB_DIRS))
 LDFLAGS := -lglfw3 -ldl -lvulkan -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lyaml-cpp -llua
 
+CFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -Wall -g -DEASE_EDITOR
 CPPFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -MMD -MP -std=c++17 -Wall -g -DEASE_EDITOR
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
@@ -30,7 +31,7 @@ $(BUILD_DIR)/%.s.o: %.s
 # c source
 $(BUILD_DIR)/%.c.o: %.c
 	$(MKDIR_P) $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # c++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp

@@ -84,7 +84,7 @@ void Node::setPath(const std::string& path)
    }
    
    Node* nodeToAddSelf = Global::sceneTree.getRoot();
-   int iter = 1; // 0 is scene root
+   size_t iter = 1; // 0 is scene root
    while(true)
    {
       Node* nextNode = nullptr;
@@ -103,7 +103,7 @@ void Node::setPath(const std::string& path)
 
 void Node::removeChild(Node* node)
 {
-   for(int i=0; i<m_Children.size(); i++)
+   for(size_t i=0; i<m_Children.size(); i++)
    {
       if(m_Children[i]->m_EntityID == node->m_EntityID)
       {
@@ -133,7 +133,7 @@ Node* Node::getNode(const std::string& path)
    }
 
    Node* nodeToAddSelf = this;
-   int iter = 1; // 0 is scene root
+   size_t iter = 1; // 0 is scene root
    while(true)
    {
       Node* nextNode = nullptr;

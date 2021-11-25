@@ -35,7 +35,7 @@ struct BaseUserdata
 {  
    uint32_t data_type = LUA_TYPE_NONE;
 
-   const std::string& getTypeName();
+   std::string getTypeName();
 };
    
 } // namespace Ease::Lua

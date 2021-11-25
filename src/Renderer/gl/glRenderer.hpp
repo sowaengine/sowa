@@ -14,11 +14,15 @@
    x;\
    ASSERT(glLogCall(#x, __FILE__, __LINE__))
 
-static void glClearError()
+
+static void glClearError();
+static bool glLogCall(const char* function, const char* file, int line);
+
+void glClearError()
 {
    while(glGetError() != GL_NO_ERROR);
 }
-static bool glLogCall(const char* function, const char* file, int line)
+bool glLogCall(const char* function, const char* file, int line)
 {
    while(GLenum error = glGetError())
    {

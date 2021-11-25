@@ -16,7 +16,7 @@ static const std::map<uint32_t, std::string> types =
    { LUA_TYPE_COMPONENT_TRANSFORM, LUA_TYPENAME_COMPONENT_TRANSFORM },
 };
 
-const std::string& BaseUserdata::getTypeName()
+std::string BaseUserdata::getTypeName()
 {
    for (const auto& type : types)
    {

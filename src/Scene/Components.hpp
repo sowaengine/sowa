@@ -17,6 +17,15 @@
 
 namespace Ease {
 
+/**
+ * @brief works with transform3D
+ * 
+ */
+struct Sprite2DComponent
+{
+   std::shared_ptr<Texture> texture;
+   glm::vec4 color;
+};
 struct MeshComponent
 {
    std::shared_ptr<Model> model;
@@ -24,6 +33,8 @@ struct MeshComponent
 
    bool Visible = true;
 };
+
+// will be deleted
 struct Transform2DComponent
 {
    Transform2DComponent() = default;

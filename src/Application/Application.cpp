@@ -10,6 +10,7 @@
 
 #include "Renderer/Texture/Texture.hpp"
 #include "Renderer/Material/Material.hpp"
+#include "Renderer/gl/BatchRenderer/BatchRenderer.hpp"
 
 #include "Renderer/Framebuffer/GLFramebuffer.hpp"
 
@@ -23,7 +24,7 @@
 #include "Utils/File.hpp"
 
 #include "Scene/Components.hpp"
-#define EASE_EDITOR
+// #define EASE_EDITOR
 #ifdef EASE_EDITOR
    #include "Editor/Editor.hpp"
 #endif
@@ -59,7 +60,7 @@ void Application::Run()
    glClearColor(0.25, 0.25, 0.25, 1.0);
    std::cout << "GL version: " << glGetString(GL_VERSION) << std::endl;
 
-#pragma region initialize project
+/* ------- initialize project -------- */
    Project project;
    Serializer::DeserializeProject("testproj/project.ease", project);
    Global::project = &project;
@@ -68,11 +69,10 @@ void Application::Run()
    m_Window.setVideoSize(project.projectSettings.renderWidth, project.projectSettings.renderHeight);
    m_Window.setWindowSize(project.projectSettings.windowWidth, project.projectSettings.windowHeight);
    m_Window.resizeWindow();
-#pragma endregion
+/* ---------------------------------- */
 
 
-#pragma region Editor Camera Setup
-   //Global::sceneTree = SceneTree();
+/* ---------- Editor Camera Setup -------------- */
    m_EditorCamera2DTransform = Transform3DComponent();
    m_EditorCamera2DTransform.translation = glm::vec3(0, 0, 0);
    m_EditorCamera2DTransform.scale = glm::vec3(1, 1, 1);
@@ -91,9 +91,13 @@ void Application::Run()
    m_EditorCamera3D.aspect = 16.f / 9.f;
    m_EditorCamera3D.near = 0.1f;
    m_EditorCamera3D.far = 1000.f;
-#pragma endregion
+/* -------------------------------------------------- */
 
-#pragma region Global Models & Shaders Setup
+/* ------- Global Models & Shaders Setup ---------*/
+
+   // initialize batch renderer
+   BatchRenderer::initialize();
+
    // setup post process shader
    m_PostProcessShader.createShader("res://shaders/postprocess.vert","res://shaders/postprocess.frag");
 
@@ -117,7 +121,7 @@ void Application::Run()
 
    GLFramebuffer framebuffer;
    framebuffer.recreateFrameBuffer();
-#pragma endregion
+/* -------------------------------------------- */
 
 
 // initialize editor
@@ -156,7 +160,7 @@ void Application::Run()
    material2->color = {0.1, 0.2, 0.1, 1.0};
 
    m_FinalFramebufferNode = Global::sceneTree.createNode("finalFrameBuffer Entity");
-   auto& framebufferTransform = m_FinalFramebufferNode->addComponent<Transform3DComponent>();
+   /*auto& framebufferTransform =*/ m_FinalFramebufferNode->addComponent<Transform3DComponent>();
    auto& framebufferMesh = m_FinalFramebufferNode->addComponent<MeshComponent>();
    
    std::shared_ptr<Material> f_material = std::make_shared<Material>();
@@ -221,8 +225,11 @@ void Application::Run()
             GLRenderer::drawModels(false, m_EditorCamera2DTransform, m_EditorCamera2D);
          else
             GLRenderer::drawModels(false, m_EditorCamera3DTransform, m_EditorCamera3D);
+
       }
       framebuffer.unbind();
+      
+         
 
 
 #ifdef EASE_EDITOR
@@ -287,8 +294,15 @@ void Application::Run()
 
       editor.endDraw();
 #else
+      /*BatchRenderer::begin2D();
+      BatchRenderer::submitQuad({0.f, 0.f, 0.f}, 0.f, {320.f, 320.f},     *(tex.get()),     {0.2, 0.5, 0.7, 1.0});
+      BatchRenderer::submitQuad({200.f, 800.f, 0.f}, 0.f, {320.f, 320.f}, *(tex.get()), {0.2, 0.5, 0.7, 1.0});
+      BatchRenderer::flush2D();*/
+
+
       drawFinalFramebuffer();
 #endif
+
       
 
       glfwSwapBuffers(m_Window.get());
@@ -336,7 +350,7 @@ void Application::startGame()
    
    using namespace Comp;
 
-#pragma region LuaBehaviour
+/* ---------------- LuaBehaviour -------------*/
    g_LuaState = luaL_newstate();
    // bind global lua functions here
    luaL_openlibs(g_LuaState);
@@ -431,10 +445,10 @@ void Application::startGame()
          }
       }
    }
-#pragma endregion
+/* ------------------------------------------ */
 
 
-#pragma region NativeBehaviour
+/* --------------- NativeBehaviour -------------- */
    for(auto entity : Global::registry.view<NativeBehaviour>()) { break;
       auto& nativeBehaviour = Global::registry.get<NativeBehaviour>(entity);
 
@@ -459,7 +473,7 @@ void Application::startGame()
       // unload the triangle library
       //dlclose(obj);
    }
-#pragma endregion
+/* ------------------------------------- */
 
 
    Debug::log("Started Game");
@@ -472,7 +486,7 @@ void Application::updateGame()
    if(!isRunning) return;
 
 
-#pragma region LuaBehaviour
+/* ----------------- LuaBehaviour -----------------*/
    // call start functions on all LuaBehaviour components
    for(auto entity: Global::registry.view<LuaBehaviour>()) {
       auto& luaBehaviour = Global::registry.get<LuaBehaviour>(entity);
@@ -495,15 +509,15 @@ void Application::updateGame()
          }
       }
    }
-#pragma endregion
+/* ---------------------------------------------------*/
 
-#pragma region NativeBehaviour
+/* ----------------- NativeBehaviour ----------------- */
    for(auto entity : Global::registry.view<NativeBehaviour>()) { break;
       auto& nativeBehaviour = Global::registry.get<NativeBehaviour>(entity);
 
       nativeBehaviour.obj->Update();
    }
-#pragma endregion
+/* --------------------------------------------------- */
 
 
 }

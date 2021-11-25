@@ -95,6 +95,7 @@ void Texture::recreateTexture()
     * !Clear old texture here
     */
    //m_FilePath = "res/textures/ship.png";
+   m_Valid = false;
    auto* pixels = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &m_Channels, 4);
 
    if(!pixels)
@@ -116,6 +117,7 @@ void Texture::recreateTexture()
    glBindTexture(GL_TEXTURE_2D, 0);
 
    stbi_image_free(pixels);
+   m_Valid = true;
 }
 
 void Texture::bind(unsigned int slot/* = 0*/) const

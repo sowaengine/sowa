@@ -81,7 +81,7 @@ static void drawFolder(const std::string& folderPath, EditorData& editorData)
                std::cout << editorData.selectedItemFilename << std::endl;
             }
          }
-         ImGui::TextWrapped(dirEntry.path().filename().string().c_str());
+         ImGui::TextWrapped("%s", dirEntry.path().filename().string().c_str());
          
          ImGui::TableNextColumn();
       }

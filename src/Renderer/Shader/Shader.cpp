@@ -16,7 +16,7 @@
 #include "Utils/File.hpp"
 
 std::string get_file_contents(const char* filename)
-{
+{std::cout << filename << std::endl;
    std::ifstream in(filename, std::ios::binary);
    if(in)
    {

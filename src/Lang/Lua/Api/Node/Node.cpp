@@ -18,10 +18,6 @@ int Lua::Node::getNode(lua_State* L)
 {
    const char* name = luaL_checkstring(L, -1);
    Ease::Node* node = Global::sceneTree.getRoot()->getChild(name);
-   for(auto x : Global::sceneTree.getRoot()->getChildren())
-   {
-      //std::cout << x->getName() << std::endl;
-   }
    assert(node != nullptr && "Cant find node | Write better debugger");
 
 
