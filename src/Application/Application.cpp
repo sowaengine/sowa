@@ -5,6 +5,10 @@
 #include "Resource/Texture/Texture.hpp"
 #include "Global.hpp"
 
+#include "Scene/SceneTree.hpp"
+#include "Scene/Node.hpp"
+
+
 namespace Ease
 {
 
@@ -26,6 +30,14 @@ void cl_Application::InitApp()
 void cl_Application::Run()
 {
    std::shared_ptr<Texture> tex = Global::ResourceManager->LoadTexture("ship.png");
+   Node* node1 = Global::SceneTree->NewNode("My Node1");
+   Node* node2 = Global::SceneTree->NewNode("My Node2");
+   
+   node1->AddChild(node2);
+
+   Node* node = Global::SceneTree->GetRoot()->GetNode("/My Node1/My Node2");
+
+   LOG("Node2 Path: %s", node2->GetPath().c_str())
    do
    {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

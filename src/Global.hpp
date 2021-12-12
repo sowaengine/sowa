@@ -14,6 +14,7 @@ namespace Ease
    class cl_Project;
    class cl_ResourceManager;
    class cl_Application;
+   class cl_SceneTree;
 }
 
 namespace Ease::Global
@@ -21,4 +22,5 @@ namespace Ease::Global
    extern cl_Project* Project;
    extern cl_ResourceManager* ResourceManager;
    extern cl_Application* Application;
+   extern cl_SceneTree* SceneTree;
 } // namespace Ease::Global
