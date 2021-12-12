@@ -20,7 +20,8 @@ LDFLAGS := -lglfw3 -ldl -lvulkan -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lyaml-
 CFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -Wall -g -DEASE_EDITOR
 CPPFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -MMD -MP -std=c++17 -Wall -g -DEASE_EDITOR
 
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+# $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+Ease : $(OBJS)
 	$(CXX) $(OBJS) ${LIB_FLAGS} ${ADDITIONAL_OBJS} -o $@ $(LDFLAGS)
 
 # assembly
@@ -42,9 +43,12 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 
 clean:
 	$(RM) -r $(BUILD_DIR)
+clean-exec:
+	$(RM) Ease
 
 run:
-	build/linux/Ease
+#  build/linux/Ease
+	./Ease
 
 # Compile shader files
 shader:

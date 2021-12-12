@@ -10,7 +10,7 @@
 ## Installation
 - See [Dependencies](#Dependencies)
 - ``` make ``` to build the engine
-- ``` make run ``` to run.  output is located at build/linux/Ease
+- ``` make run ``` to run.  output is located at Project Root Directory
 
 ## Dependencies
 - GLFW | YAML

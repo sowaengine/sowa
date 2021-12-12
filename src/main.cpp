@@ -1,21 +1,24 @@
 #include <iostream>
 
-#include "Ease.hpp"
-#include "Debug.hpp"
+#include "Resource/Project/Project.hpp"
 #include "Application/Application.hpp"
 
 
 int main(int argc, char const **argv)
 {
-   std::cout << "Ease Engine" << std::endl;
+   std::cout << "\nEase Engine" << std::endl;
    
 
-   Ease::Application app;
+   Ease::Project.InitProject(argv[0]);
    
-   try { app.Run(); }
+   
+   try {
+      Ease::Application.InitApp();
+      Ease::Application.Run();
+   }
    catch(const std::exception& e) {
-      //std::cerr << e.what() << '\n';
-      //return EXIT_FAILURE;
+      std::cerr << e.what() << '\n';
+      return EXIT_FAILURE;
    }
    
    

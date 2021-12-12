@@ -1,40 +1,50 @@
-#include "Window.hpp"
+#include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
-#include "Ease.hpp"
+#include "Window.hpp"
+#include <string>
 
+#include "Debug.hpp"
+#include <iostream>
+
+void error_callback( int error, const char *msg ) {
+    std::string s;
+    s = " [" + std::to_string(error) + "] " + msg + '\n';
+    std::cerr << s << std::endl;
+}
 
 namespace Ease
 {
 
-static void glfwWindowResizeCallback(GLFWwindow* windowPointer, int w, int h)
+void Window::Create(int width, int height, const std::string& title)
 {
-   Window* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(windowPointer));
-   window->setWindowSize(w, h);
-}
+   glfwSetErrorCallback( error_callback );
 
+   if( !glfwInit() )
+   {
+      throw std::runtime_error("Failed to initialize GLFW");
+   }
 
-Window::Window()
-{
+   glfwWindowHint(GLFW_SAMPLES, 4);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-}
-
-void Window::create(int width, int height, const char* title)
-{
-   m_Width = width;
-   m_Height = height;
-   m_Title = title;
-
-   m_WindowPointer = glfwCreateWindow(width, height, title, NULL, NULL);
-   Debug::test_and_throw(m_WindowPointer, "GLFWWindow* is null");
+   
+   
+   m_WindowPointer = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+   if(m_WindowPointer == nullptr)
+   {
+      throw std::runtime_error("Failed to create GLFW window");
+   }
 
    glfwMakeContextCurrent(m_WindowPointer);
    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
    glfwSwapInterval(1);
 
-   glfwSetWindowUserPointer(m_WindowPointer, this);
-   glfwSetFramebufferSizeCallback(m_WindowPointer, glfwWindowResizeCallback);
-   
+
+   glfwSetInputMode(m_WindowPointer, GLFW_STICKY_KEYS, GL_TRUE);
 }
    
 } // namespace Ease

@@ -1,58 +1,46 @@
+/**
+ * @file Application.hpp
+ * @author Lexographics
+ * @brief 
+ * @version 0.1
+ * @date 2021-12-12
+ */
+
 #pragma once
 
-#include "lua/lua.hpp"
-
-
+#include <string>
+#include "glad/glad.h"
 #include "Window/Window.hpp"
-#include "Renderer/Shader/Shader.hpp"
-#include "Renderer/Model/Model.hpp"
 
-#include "Scene/SceneTree/SceneTree.hpp"
-#include "Scene/SceneTree/Node.hpp"
-#include "Scene/Components.hpp"
-
-#include <memory>
 
 namespace Ease
 {
 
-class Application
+
+// Singleton class, dont instantiate
+class cl_Application
 {
 public:
+   static cl_Application& get()
+   {
+      static cl_Application project{};
+      return project;
+   }
+
+   void InitApp();
+
    void Run();
 
-   void setIsRunning();
+   void Quit(int code = 0);
+
 private:
-   Window m_Window;
-
-   std::shared_ptr<Model> m_Sprite2DModel;
-   Shader m_Sprite2DShader{};
+   cl_Application() = default;
 
 
-// sets final framebuffers position relative to window mode (keep width, keep height, stretch etc.) and draws it to screen
-   void drawFinalFramebuffer();
-   Node* m_FinalFramebufferNode;
-
-   Shader m_PostProcessShader{};
-
-// is game running -> true by default on exports
-   bool isRunning = false;
-
-   void startGame();
-   void stopGame();
-   void updateGame();
-
-   Transform3DComponent m_EditorCamera2DTransform;
-   Transform3DComponent m_EditorCamera3DTransform;
-   CameraComponent m_EditorCamera2D;
-   CameraComponent m_EditorCamera3D;
-
-
-   /*
-      Runtime
-   */
-  lua_State* g_LuaState = nullptr;
+   Window m_Window{};
 
 };
-   
+static cl_Application Application = cl_Application::get();
+
+
 } // namespace Ease
