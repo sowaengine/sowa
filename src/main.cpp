@@ -2,19 +2,29 @@
 
 #include "Resource/Project/Project.hpp"
 #include "Application/Application.hpp"
+#include "Resource/ResourceManager/ResourceManager.hpp"
 
+#include "Debug.hpp"
+#include "Global.hpp"
+
+namespace Ease
+{
+   cl_Project* Global::Project;
+   cl_ResourceManager* Global::ResourceManager;
+   cl_Application* Global::Application;
+}
 
 int main(int argc, char const **argv)
 {
    std::cout << "\nEase Engine" << std::endl;
    
-
-   Ease::Project.InitProject(argv[0]);
-   
+   Ease::Global::Application->Init();
+   Ease::Global::ResourceManager->Init();
+   Ease::Global::Project->InitProject(argv[0]);
    
    try {
-      Ease::Application.InitApp();
-      Ease::Application.Run();
+      Ease::Global::Application->InitApp();
+      Ease::Global::Application->Run();
    }
    catch(const std::exception& e) {
       std::cerr << e.what() << '\n';

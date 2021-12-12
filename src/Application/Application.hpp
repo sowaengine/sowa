@@ -21,11 +21,8 @@ namespace Ease
 class cl_Application
 {
 public:
-   static cl_Application& get()
-   {
-      static cl_Application project{};
-      return project;
-   }
+   static void Init();
+
 
    void InitApp();
 
@@ -40,7 +37,6 @@ private:
    Window m_Window{};
 
 };
-static cl_Application Application = cl_Application::get();
 
 
 } // namespace Ease

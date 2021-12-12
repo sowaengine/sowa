@@ -49,33 +49,28 @@ struct ProjectSettings
 class cl_Project
 {
 public:
-   static cl_Project& Get()
-   {
-      static cl_Project project{};
-      return project;
-   }
-
    // initializes project on current program directory
-   void InitProject(const std::string& executableName);
+   static void InitProject(const std::string& executableName);
 
    // Returns absolute path of a file that is located in project directory
-   std::filesystem::path GetAbsolutePath(const std::string& relativePath);
+   std::string GetAbsolutePath(const std::string& relativePath);
 
 
    const ProjectSettings& GetProjectSettings() { return m_ProjectSettings; }
+
+   std::string dataDir = "";
 private:
    cl_Project() = default;
+   void Init(const std::string& executableName);
 
-   std::filesystem::path m_ProjectDir;
+   std::string m_ProjectDir = "";
    std::string m_ExecutableName = "";
 
-   std::filesystem::path m_DataDir;
-
+   std::string m_DataDir = "";
 
 
    ProjectSettings m_ProjectSettings;
 };
-static cl_Project Project = cl_Project::Get();
 
 
 } // namespace Ease
