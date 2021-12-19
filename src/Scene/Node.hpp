@@ -10,6 +10,9 @@
 #include <vector>
 #include "Debug.hpp"
 
+#include "entt/entt.hpp"
+
+
 typedef uint32_t NodeID;
 
 namespace Ease
@@ -34,6 +37,31 @@ class Node
       Node* GetParent() { return m_Parent; }
       const std::vector<Node*>& GetChildren() { return m_Children; }
 
+
+      template<typename T, typename... Args>
+      T& addComponent(Args&&... args)
+      {
+         return m_pRegistry->emplace<T>((entt::entity)m_NodeID, std::forward<Args>(args)...);
+      }
+
+      template<typename T>
+      T& getComponent()
+      {
+         return m_pRegistry->get<T>((entt::entity)m_NodeID);
+      }
+
+      template<typename T>
+      void removeComponent()
+      {
+         m_pRegistry->remove<T>((entt::entity)m_NodeID);
+      }
+
+      template<typename T>
+      bool hasComponent()
+      {
+         auto comp = m_pRegistry->try_get<T>((entt::entity)m_NodeID);
+         return comp != NULL;
+      }
       
 
       bool operator==(const Node& other) const { return m_NodeID == other.m_NodeID; }
@@ -48,6 +76,9 @@ class Node
 
       Node* m_Parent;
       std::vector<Node*> m_Children;
+
+
+      entt::registry* m_pRegistry;
 };
 
 } // namespace Ease

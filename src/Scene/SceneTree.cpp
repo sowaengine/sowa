@@ -2,6 +2,9 @@
 #include "Global.hpp"
 #include "Node.hpp"
 
+#include "entt/entt.hpp"
+
+
 
 namespace Ease
 {
@@ -23,10 +26,11 @@ void cl_SceneTree::Init()
 
 Node* cl_SceneTree::NewNode(const std::string& name /*= "New Node"*/)
 {
-   static int i = 12;
    Node* node = new Node();
-   node->m_NodeID = i++; // todo entt::registry.create()
+   entt::entity entity = m_Registry.create();
+   node->m_NodeID = (uint32_t)entity;
    node->m_Name = name;
+   node->m_pRegistry = &m_Registry;
 
    Global::SceneTree->GetRoot()->AddChild(node);
    

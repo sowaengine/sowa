@@ -12,6 +12,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "entt/entt.hpp"
+
 
 namespace Ease
 {
@@ -24,6 +26,8 @@ class cl_SceneTree
       Node* GetRoot() { return m_RootNode; }
 
       Node* NewNode(const std::string& name = "New Node");
+
+      entt::registry* GetRegistry() { return &m_Registry; }
    private:
       Node* m_RootNode = nullptr;
 
@@ -33,6 +37,8 @@ class cl_SceneTree
       
 
       std::unordered_map<NodeID, Node*> m_Nodes;
+
+      entt::registry m_Registry;
 };
    
 } // namespace Ease
