@@ -14,13 +14,15 @@
 #include "Renderer/Shader.hpp"
 #include "Resource/ResourceManager/ResourceManager.hpp"
 
+#include "Application/Window/Window.hpp"
+
 namespace Ease
 {
    
 class SystemDriver
 {
    public:
-      SystemDriver(entt::registry* registry);
+      SystemDriver(entt::registry* registry, Window* window);
 
       // Updates all component Groups
       void UpdateAll();
@@ -38,6 +40,8 @@ class SystemDriver
       std::shared_ptr<IndexBuffer> m_IndexBuffer;
 
       std::shared_ptr<Texture> tex;
+
+      Window* m_Window;
 };
 
 } // namespace Ease

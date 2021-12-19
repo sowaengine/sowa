@@ -22,14 +22,17 @@ public:
 
    GLFWwindow* GetPtr() { return m_WindowPointer; }
 
-   uint16_t WindowWidth() { return m_WindowWidth; }
-   uint16_t WindowHeight() { return m_WindowHeight; }
+   inline uint16_t WindowWidth() { return m_WindowWidth; }
+   inline uint16_t WindowHeight() { return m_WindowHeight; }
 
+   
 private:
    GLFWwindow* m_WindowPointer = nullptr;
 
    uint16_t m_WindowWidth;
    uint16_t m_WindowHeight;
+   
+   friend class WindowResizeUpdater;
 };
    
 } // namespace Ease

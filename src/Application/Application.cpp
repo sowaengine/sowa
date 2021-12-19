@@ -11,7 +11,7 @@
 #include "Scene/SystemDriver.hpp"
 
 #include "Event/Input/Input.hpp"
-
+#include "Event/Timer/Timer.hpp"
 
 namespace Ease
 {
@@ -33,7 +33,9 @@ void cl_Application::InitApp()
 
 void cl_Application::Run()
 {
-   SystemDriver systemDriver(Global::SceneTree->GetRegistry());
+   SystemDriver systemDriver(Global::SceneTree->GetRegistry(), &m_Window);
+   Timer m_Timer;
+
 
    std::shared_ptr<Texture> tex = Global::ResourceManager->LoadTexture("ship.png");
    std::shared_ptr<Texture> tex2 = Global::ResourceManager->LoadTexture("ship.png");
@@ -52,7 +54,7 @@ void cl_Application::Run()
    node2->addComponent<Component::Camera2D>();
    node2->getComponent<Component::Camera2D>().current = true;
    node2->addComponent<Component::Sprite2D>();
-   node2->getComponent<Component::Sprite2D>().texture = tex2;
+   node2->getComponent<Component::Sprite2D>().texture = tex;
 
    node1->AddChild(node2);
 
@@ -74,12 +76,13 @@ void cl_Application::Run()
    glEnable(GL_DEPTH_TEST);
    do
    {
+      m_Timer.Update();
+      
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      tc.rotation += glm::radians(0.5f);
       systemDriver.UpdateAll();
-
       
+      tc.rotation += glm::radians(0.5f);
       if(Input::IsKeyPressed(KeyCode::KEY_D))
          node2->getComponent<Component::Transform2D>().position.x += 2.f;
       if(Input::IsKeyPressed(KeyCode::KEY_A))
@@ -89,11 +92,14 @@ void cl_Application::Run()
       if(Input::IsKeyPressed(KeyCode::KEY_S))
          node2->getComponent<Component::Transform2D>().position.y -= 2.f;
 
+      if(Input::IsKeyPressed(KeyCode::KEY_SPACE))
+         tex2 = nullptr;
+
       glfwSwapBuffers(m_Window.GetPtr());
       glfwPollEvents();
 
    } while (
-      glfwGetKey(m_Window.GetPtr(), GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
+      !Input::IsKeyPressed(KeyCode::KEY_ESCAPE) &&
       glfwWindowShouldClose(m_Window.GetPtr()) == 0 );
 
    Quit(0);

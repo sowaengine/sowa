@@ -85,9 +85,10 @@ glm::mat4 view_mat_2d = glm::mat4(1.0f);
 glm::mat4 proj_mat = glm::mat4(1.0f);
 
 
-SystemDriver::SystemDriver(entt::registry* registry)
+SystemDriver::SystemDriver(entt::registry* registry, Window* window)
 {
    m_pRegistry = registry;
+   m_Window = window;
 
 
    view_mat_2d = glm::mat4(1.0f);
@@ -135,7 +136,7 @@ void SystemDriver::UpdateAll()
          if(cam.current)
          {
             view_mat_2d = glm::inverse(tc.Transform(1.f, 1.f, 10.f));
-
+            
             break;
          }
       }
@@ -144,7 +145,10 @@ void SystemDriver::UpdateAll()
    
    { // Render Sprite2D with Transform2D
       auto view = m_pRegistry->view<Component::Transform2D, Component::Sprite2D>();
-      //glUseProgram(m_ShaderProgram);
+      float width  = float(m_Window->WindowWidth());
+      float height = float(m_Window->WindowHeight());
+      glViewport(0, 0, width, height);
+      proj_mat = glm::ortho(-width / 2.f, width / 2.f, -height / 2.f, height / 2.f, 0.1f, 100.f);
       m_Shader.Bind();
       for(auto entity: view) {
          auto& tc = view.get<Component::Transform2D>(entity);
@@ -165,7 +169,7 @@ void SystemDriver::UpdateAll()
          m_Shader.BindUniform("view", view_mat_2d);
          m_Shader.BindUniform("proj", proj_mat);
          m_Shader.BindUniform("model", tc.Transform(spritec.texture->Width(), spritec.texture->Height()));
-
+         
 
          spritec.texture->Bind(0);
          //glUniform1i(glGetUniformLocation(m_ShaderProgram, "u_Texture"), 0);
