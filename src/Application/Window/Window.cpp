@@ -6,6 +6,7 @@
 
 #include "Debug.hpp"
 #include <iostream>
+#include "Event/Input/Keyboard.hpp"
 
 void error_callback( int error, const char *msg ) {
     std::string s;
@@ -44,6 +45,7 @@ void Window::Create(int width, int height, const std::string& title)
    glfwSwapInterval(1);
 
 
+   glfwSetKeyCallback(m_WindowPointer, Input::KeyCallback);
    glfwSetInputMode(m_WindowPointer, GLFW_STICKY_KEYS, GL_TRUE);
 }
    

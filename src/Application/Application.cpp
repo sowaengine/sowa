@@ -10,6 +10,8 @@
 #include "Scene/Components.hpp"
 #include "Scene/SystemDriver.hpp"
 
+#include "Event/Input/Input.hpp"
+
 
 namespace Ease
 {
@@ -54,8 +56,19 @@ void cl_Application::Run()
 
    node1->AddChild(node2);
 
-   Node* node = Global::SceneTree->GetRoot()->GetNode("/My Node1/My Node2");
-
+   for(int y = 0; y < 32; y++)
+   {
+      for(int x = 0; x < 32; x++)
+      {
+         Node* node = Global::SceneTree->NewNode( std::string( std::to_string(x) + "-" + std::to_string(y))  );
+         node->addComponent<Component::Transform2D>();
+         node->getComponent<Component::Transform2D>().position = {x*64, y*64};
+         node->getComponent<Component::Transform2D>().scale = {0.2, 0.2};
+         node->getComponent<Component::Transform2D>().rotation = x*y;
+         node->addComponent<Component::Sprite2D>();
+         node->getComponent<Component::Sprite2D>().texture = tex;
+      }
+   }
 
    glClearColor(0.15, 0.15, 0.15, 1);
    glEnable(GL_DEPTH_TEST);
@@ -66,10 +79,15 @@ void cl_Application::Run()
       tc.rotation += glm::radians(0.5f);
       systemDriver.UpdateAll();
 
-      static int ticks = 0;
-      ticks++;
-      node2->getComponent<Component::Transform2D>().position.x += glm::sin(glm::radians(float(ticks))) * 3;
-
+      
+      if(Input::IsKeyPressed(KeyCode::KEY_D))
+         node2->getComponent<Component::Transform2D>().position.x += 2.f;
+      if(Input::IsKeyPressed(KeyCode::KEY_A))
+         node2->getComponent<Component::Transform2D>().position.x -= 2.f;
+      if(Input::IsKeyPressed(KeyCode::KEY_W))
+         node2->getComponent<Component::Transform2D>().position.y += 2.f;
+      if(Input::IsKeyPressed(KeyCode::KEY_S))
+         node2->getComponent<Component::Transform2D>().position.y -= 2.f;
 
       glfwSwapBuffers(m_Window.GetPtr());
       glfwPollEvents();
