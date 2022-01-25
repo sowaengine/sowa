@@ -1,7 +1,7 @@
 TARGET_EXEC ?= Ease
 
 BUILD_DIR ?= build/linux
-SRC_DIRS ?= src thirdparty
+SRC_DIRS ?= src thirdparty/compile
 
 SRCS := $(shell find $(SRC_DIRS) -name "*.cpp" -or -name "*.c" -or -name "*.s")
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
@@ -11,11 +11,11 @@ ADDITIONAL_OBJS :=
 
 
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d) include/ thirdparty/ include/imgui/
+INC_DIRS := $(shell find $(SRC_DIRS) -type d) include/ thirdparty/ thirdparty/imgui-docking/
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 LIB_DIRS := lib/
 LIB_FLAGS := $(addprefix -L,$(LIB_DIRS))
-LDFLAGS := -lglfw3 -ldl -lvulkan -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lyaml-cpp -llua
+LDFLAGS := -lglfw3 -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lyaml-cpp -llua -limgui
 
 CFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -Wall -g -DEASE_EDITOR
 CPPFLAGS ?= $(INC_FLAGS) $(LIB_FLAGS) -MMD -MP -std=c++17 -Wall -g -DEASE_EDITOR

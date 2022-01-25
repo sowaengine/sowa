@@ -1,37 +1,44 @@
 #shader vertex
+
 #version 330 core
+
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
-layout (location = 2) in vec2 aTexCoords;
+layout (location = 1) in vec2 aTexCoords;
+layout (location = 2) in vec3 aColor;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
-//uniform mat4 u_MVP;
-
-out vec3 color;
 out vec2 texCoords;
+out vec3 color;
+
+uniform mat4 u_Model;
+uniform mat4 u_View;
+uniform mat4 u_Proj;
+
 void main()
 {
-  gl_Position = proj * view * model * vec4(aPos, 1.0f);
-
-  color = aColor;
-  texCoords = aTexCoords;
+   gl_Position =  u_Proj * u_View * u_Model * vec4(aPos, 1.0);
+   texCoords = aTexCoords;
+   color = aColor;
 }
 
 
 #shader fragment
 #version 330 core
-out vec4 FragColor;
 
-in vec3 color;
+layout(location = 0) out vec4 FragColor;
+
 in vec2 texCoords;
+in vec3 color;
 
-uniform sampler2D u_Texture;
+uniform sampler2D tex;
+uniform int outline;
+uniform int entityID;
+
 void main()
 {
-   FragColor = texture(u_Texture, texCoords);
-   //FragColor = vec4(texCoords, 1.0f, 1.0f);
-   if(FragColor.a < 0.1)
+   FragColor = mix( texture(tex, texCoords), vec4(color, 1.0), 0.0);
+   if(outline == 1)
+      FragColor = vec4(0.1f, 0.5f, 0.8f, 1.0f);
+
+   if(FragColor.a <= 0.1)
       discard;
 }

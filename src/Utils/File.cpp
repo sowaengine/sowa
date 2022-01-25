@@ -1,3 +1,10 @@
+/**
+ * @file File.cpp
+ * @author Lexographics
+ * @brief 
+ * @version 0.1
+ * @date 2022-01-26
+ */
 #include "File.hpp"
 
 #include <fstream>

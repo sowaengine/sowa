@@ -5,9 +5,10 @@
  * @version 0.1
  * @date 2021-12-19
  */
+#ifndef FILE_H
+#define FILE_H
 #pragma once
-
-#include "Debug.hpp"
+	
 #include <string>
 
 namespace Ease::Utils
@@ -17,3 +18,4 @@ namespace Ease::Utils
 
 
 } // namespace Ease::Utils
+#endif

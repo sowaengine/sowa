@@ -3,40 +3,59 @@
  * @author Lexographics
  * @brief 
  * @version 0.1
- * @date 2021-12-12
+ * @date 2022-01-26
  */
-
+#ifndef APPLICATION_H
+#define APPLICATION_H
 #pragma once
 
-#include <string>
-#include "glad/glad.h"
-#include "Window/Window.hpp"
+#include <vector>
+#include <memory>
+#include "Resource/Project.hpp"
+
+#include "Scene/Scene.hpp"
+
+#ifdef EASE_EDITOR
+	#include "Editor/Editor.hpp"
+#endif
 
 
-namespace Ease
+#include <EaseGL.hpp>
+/**
+ * @brief Can only have one instance
+ */
+class Application  
 {
+	private:
+		Application();
+
+		void CreateFinalFramebuffer();
+		EaseGL::Shader m_FinalFramebufferShader;
+		EaseGL::Framebuffer m_FinalFramebuffer;
+		EaseGL::Framebuffer m_EditorFramebuffer; // framebuffer that is used on editor 'Viewport' tab
+
+		EditorData m_EditorData;
+
+		Scene* m_CurrentScene = nullptr;
 
 
-// Singleton class, dont instantiate
-class cl_Application
-{
-public:
-   static void Init();
+		std::unique_ptr<EaseGL::VertexArray> m_FramebufferVertexArray;
+#ifndef EASE_EDITOR
+		bool m_Running = true; // game automatically starts on non-editor builds
+#else
+		bool m_Running = false;
+#endif
 
+	public:
 
-   void InitApp();
+		void Run();
+		void Start();
+		void Stop();
 
-   void Run();
+		bool IsRunning() { return m_Running; }
+		
+		static Application& get_singleton();
 
-   void Quit(int code = 0);
-
-private:
-   cl_Application() = default;
-
-
-   Window m_Window{};
-   
+		~Application();
 };
-
-
-} // namespace Ease
+#endif

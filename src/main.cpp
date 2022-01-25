@@ -1,39 +1,31 @@
+/**
+ * @file main.cpp
+ * @author Lexographics
+ * @brief Entry Point
+ * @version 0.1
+ * @date 2022-01-26
+ */
 #include <iostream>
-
-#include "Resource/Project/Project.hpp"
+#include "Resource/Project.hpp"
 #include "Application/Application.hpp"
-#include "Resource/ResourceManager/ResourceManager.hpp"
-#include "Scene/SceneTree.hpp"
 
-#include "Debug.hpp"
-#include "Global.hpp"
 
-namespace Ease
+int main(int argc, char const *argv[])
 {
-   cl_Project* Global::Project;
-   cl_ResourceManager* Global::ResourceManager;
-   cl_Application* Global::Application;
-   cl_SceneTree* Global::SceneTree;
-}
+   std::cout << "Ease Engine" << std::endl;
 
-int main(int argc, char const **argv)
-{
-   std::cout << "\nEase Engine" << std::endl;
-   
-   Ease::Global::Application->Init();
-   Ease::Global::ResourceManager->Init();
-   Ease::Global::Project->InitProject(argv[0]);
-   Ease::Global::SceneTree->Init();
-   
-   try {
-      Ease::Global::Application->InitApp();
-      Ease::Global::Application->Run();
-   }
+   Project& project = Project::get_singleton();
+
+   project.LoadProject(std::string(argv[0]) + "_Data");
+   Application& app = Application::get_singleton();
+
+   try { app.Run(); }
    catch(const std::exception& e) {
+      // Todo: Log Error to a log file
       std::cerr << e.what() << '\n';
-      return EXIT_FAILURE;
    }
    
-   
-   return EXIT_SUCCESS;
+
+
+   return 0;
 }
