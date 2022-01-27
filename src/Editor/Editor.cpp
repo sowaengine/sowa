@@ -31,7 +31,7 @@ Editor::Editor()
    ImGui::CreateContext();
    ImGuiIO& io = ImGui::GetIO(); (void)io;
    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-   io.Fonts->AddFontFromFileTTF(Project::get_singleton().GetAbsolutePath("Fonts/Roboto-Medium.ttf").c_str(), 14.f);
+   io.Fonts->AddFontFromFileTTF(Project::get_singleton().GetAbsolutePath("Fonts/Roboto-Medium.ttf").c_str(), 16.f);
    ImGui::StyleColorsDark();
    SetStyle(0);
 
@@ -45,7 +45,7 @@ Editor::Editor()
 
    m_PlayTexture.LoadTexture(Project::get_singleton().GetAbsolutePath("Textures/play.png").c_str());
    m_StopTexture.LoadTexture(Project::get_singleton().GetAbsolutePath("Textures/stop.png").c_str());
-   
+   m_EntityIconTexture.LoadTexture(Project::get_singleton().GetAbsolutePath("Textures/entity_icon.png").c_str());
 }
 
 // static
@@ -149,8 +149,9 @@ void Editor::Update()
          ImGui::Checkbox("In Game Camera", &m_EditorData->useInGameCamera);
 
 
-
-         ImGui::Image(ImTextureID((GLuint64)m_EditorData->finalFramebufferTextureID), ImGui::GetContentRegionAvail());
+         ImVec2 regionAvail = ImGui::GetContentRegionAvail();
+         regionAvail.x = regionAvail.y * 16.f / 9.f;
+         ImGui::Image(ImTextureID((GLuint64)m_EditorData->finalFramebufferTextureID), regionAvail);
 
 
          static ImVec2 mouseDragStart;
@@ -190,7 +191,11 @@ void Editor::Update()
 
             ImGuiSelectableFlags flags = 0;
          
+            ImVec4 tintColor = ImVec4(1.f, 1.f, 1.f, 1.f);
+            if(entity.hasComponent<CameraComponent>() && entity.getComponent<CameraComponent>().current)
+               tintColor = ImVec4(0.2f, 0.5f, 1.f, 1.f);
 
+            ImGui::Image(ImTextureID((GLuint64)m_EntityIconTexture), ImVec2(16.f, 16.f), ImVec2(0.f, 0.f), ImVec2(1.f, 1.f), tintColor); ImGui::SameLine();
             if(ImGui::Selectable(common.name.c_str(), false, flags))
             //if(ImGui::CollapsingHeader(common.name.c_str(), flags))
             {

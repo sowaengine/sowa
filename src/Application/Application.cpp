@@ -179,12 +179,16 @@ void Application::Run()
 
       if(m_EditorData.start_stop_pressed)
       {
+         static bool oldState_useInGameCamera; // saves useInGameCamera state when game started, and reverts back to it when game stopped
          if(m_Running)
          {
             editor.SetStyle(0);
             m_CurrentScene = &mainScene;
             m_EditorData.currentScene = m_CurrentScene;
             m_EditorData.selectedEntity.SetRegistry(&m_CurrentScene->GetRegistry());
+
+            if(!oldState_useInGameCamera)
+               m_EditorData.useInGameCamera = false;
             Stop();
          }
          else
@@ -194,6 +198,9 @@ void Application::Run()
             m_EditorData.currentScene = m_CurrentScene;
             Scene::CopyScene(mainScene, runtimeScene);
             m_EditorData.selectedEntity.SetRegistry(&m_CurrentScene->GetRegistry());
+
+            oldState_useInGameCamera = m_EditorData.useInGameCamera;
+            m_EditorData.useInGameCamera = true;
             Start();
          }
 

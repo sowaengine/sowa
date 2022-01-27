@@ -59,6 +59,7 @@ class Editor
 
 		EaseGL::GLTexture m_PlayTexture;
 		EaseGL::GLTexture m_StopTexture;
+		EaseGL::GLTexture m_EntityIconTexture;
 	public:
 		static Editor& get_singleton();
 
