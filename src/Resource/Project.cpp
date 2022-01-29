@@ -36,6 +36,5 @@ void Project::LoadProject(const std::string& projectDir)
 std::string Project::GetAbsolutePath(const std::string& relativePath)
 {
    //assert(dataDir != "");
-   LOG("%s", std::string(m_ProjectDir.path().string() + "/" + relativePath).c_str() );
    return m_ProjectDir.path().string() + "/" + relativePath;
 }
