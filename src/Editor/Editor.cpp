@@ -42,10 +42,18 @@ Editor::Editor()
    ImGui_ImplOpenGL3_Init(glsl_version);
    ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)Window::get_singleton(), true);
 
+   Project& project = Project::get_singleton();
+   m_PlayTexture.LoadTexture(project.GetAbsolutePath("Textures/play.png").c_str());
+   m_StopTexture.LoadTexture(project.GetAbsolutePath("Textures/stop.png").c_str());
+   m_EntityIconTexture.LoadTexture(project.GetAbsolutePath("Textures/entity_icon.png").c_str());
 
-   m_PlayTexture.LoadTexture(Project::get_singleton().GetAbsolutePath("Textures/play.png").c_str());
-   m_StopTexture.LoadTexture(Project::get_singleton().GetAbsolutePath("Textures/stop.png").c_str());
-   m_EntityIconTexture.LoadTexture(Project::get_singleton().GetAbsolutePath("Textures/entity_icon.png").c_str());
+
+   AssetsPanelTextures.m_Directory.LoadTexture(project.GetAbsolutePath("Textures/directory.png").c_str());
+   AssetsPanelTextures.m_UnknownFile.LoadTexture(project.GetAbsolutePath("Textures/file.png").c_str());
+   AssetsPanelTextures.m_Image.LoadTexture(project.GetAbsolutePath("Textures/file_icon_image.png").c_str());
+   AssetsPanelTextures.m_Text.LoadTexture(project.GetAbsolutePath("Textures/file_icon_text.png").c_str());
+   AssetsPanelTextures.m_Lua.LoadTexture(project.GetAbsolutePath("Textures/file_icon_lua.png").c_str());
+   AssetsPanelTextures.m_Font.LoadTexture(project.GetAbsolutePath("Textures/file_icon_font.png").c_str());
 }
 
 // static
@@ -103,14 +111,13 @@ void Editor::Update()
          ImGui::EndMenuBar();
       }
 
-
+      ImGui::ShowDemoWindow();
 
       UpdateViewport();
       
       
       
-      if(ImGui::Begin("Assets"))
-      ImGui::End();
+      UpdateAssets();
 
       if(ImGui::Begin("Console"))
       {

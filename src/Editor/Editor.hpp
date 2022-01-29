@@ -15,6 +15,10 @@
 #include "Scene/Entity.hpp"
 #include <EaseGL.hpp>
 
+#include "Resource/Resource.hpp"
+#include <filesystem>
+
+
 struct EditorData
 {
 	GLuint finalFramebufferTextureID;
@@ -22,6 +26,7 @@ struct EditorData
 
 
 	Entity selectedEntity;
+	Resource* selectedResource = nullptr;
 
 
 	float viewportDragMouseDeltaX = 0.f;
@@ -46,6 +51,7 @@ class EditorOstream
 		EditorOstream() = default;
 };
 
+struct ClickData;
 class Editor  
 {
 	private:
@@ -54,6 +60,12 @@ class Editor
 		void UpdateViewport();
 		void UpdateScenePanel();
 		void UpdateInspector();
+		void UpdateAssets();
+
+		// Helper functions for UpdateAssets
+		ClickData DrawFolder(const std::string& name);
+		ClickData DrawFile(const std::string& name);
+		void DrawItem(std::filesystem::path& currentPath);
 
 		friend class Application;
 		EditorData* m_EditorData = nullptr;
@@ -62,6 +74,17 @@ class Editor
 		EaseGL::GLTexture m_PlayTexture;
 		EaseGL::GLTexture m_StopTexture;
 		EaseGL::GLTexture m_EntityIconTexture;
+
+		struct
+		{
+			EaseGL::GLTexture m_Directory;
+			EaseGL::GLTexture m_UnknownFile;
+			EaseGL::GLTexture m_Image;
+			EaseGL::GLTexture m_Text;
+			EaseGL::GLTexture m_Lua;
+			EaseGL::GLTexture m_Font;
+
+		} AssetsPanelTextures;
 	public:
 		static Editor& get_singleton();
 
@@ -74,6 +97,8 @@ class Editor
 		
 		EditorOstream Log;
 		std::string m_ConsoleText = "";
+
+		void SetSelectedResource(Resource* resource) { m_EditorData->selectedResource = resource; }
 };
 
 #include "EaseEngine.hpp"

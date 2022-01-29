@@ -56,6 +56,6 @@ void Editor::UpdateViewport()
       }
       
 
-      ImGui::End();
    }
+   ImGui::End();
 }

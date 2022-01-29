@@ -98,11 +98,36 @@ void Editor::UpdateInspector()
          });
          drawComponent<LuaScriptComponent>("LuaScript", selectedEntity, [](LuaScriptComponent& component)
          {
-            
+            if(ImGui::Selectable("Script"))
+               Editor::get_singleton().SetSelectedResource(component.script);
          });
          
       }
       
+      ImGui::Separator();
+      if(m_EditorData->selectedResource != nullptr)
+      {
+         std::vector<ResourceProperty>& props = m_EditorData->selectedResource->properties;
+
+         for(ResourceProperty& prop : props)
+         {
+            ImGui::Text("%s", prop.name.c_str()); ImGui::SameLine();
+            if(prop.type == PropertyType::STRING)
+            {
+               char propBuf[512];
+               memset(propBuf, 0, 512);
+               strcpy(propBuf, prop.dataStr.data());
+               
+               std::string textBoxID = "##prop_" + prop.name;
+               if(ImGui::InputText(textBoxID.c_str(), propBuf, 512, ImGuiInputTextFlags_EnterReturnsTrue))
+               {
+                  prop.dataStr = propBuf;
+                  if(prop.dataStr.size() == 0)
+                     prop.dataStr = "void";
+               }
+            }
+         }
+      }
 
       ImGui::End();
    }
