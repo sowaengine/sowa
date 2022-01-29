@@ -9,6 +9,7 @@
 #include "entt/entt.hpp"
 #include "Entity.hpp"
 #include "Components.hpp"
+#include "Application/Application.hpp"
 
 #include <iostream>
 
@@ -18,6 +19,17 @@ Scene::Scene()
 	
 Scene::~Scene()
 {
+}
+
+template<typename T>
+void CopyComponent(Entity& srcEntity, Entity& dstEntity)
+{
+   if(srcEntity.hasComponent<T>())
+   {
+      T& srcComp = srcEntity.getComponent<T>();
+      T& dstComp = dstEntity.addComponent<T>();
+      dstComp = srcComp;
+   }
 }
 
 //static
@@ -34,24 +46,11 @@ void Scene::CopyScene(Scene& src, Scene& dst)
       Entity dstEntity = dst.Create(common.name, srcEntity.ID());
 
       // Copy components
-      if(srcEntity.hasComponent<Transform2DComponent>())
-      {
-         auto& srcComp = srcEntity.getComponent<Transform2DComponent>();
-         auto& dstComp = dstEntity.addComponent<Transform2DComponent>();
-         dstComp = srcComp;
-      }
-      if(srcEntity.hasComponent<SpriteComponent>())
-      {
-         auto& srcComp = srcEntity.getComponent<SpriteComponent>();
-         auto& dstComp = dstEntity.addComponent<SpriteComponent>();
-         dstComp = srcComp;
-      }
-      if(srcEntity.hasComponent<CameraComponent>())
-      {
-         auto& srcComp = srcEntity.getComponent<CameraComponent>();
-         auto& dstComp = dstEntity.addComponent<CameraComponent>();
-         dstComp = srcComp;
-      }
+      CopyComponent<Transform2DComponent>(srcEntity, dstEntity);
+      CopyComponent<SpriteComponent>(srcEntity, dstEntity);
+      CopyComponent<CameraComponent>(srcEntity, dstEntity);
+      CopyComponent<LuaScriptComponent>(srcEntity, dstEntity);
+
    }
 
 }
@@ -72,4 +71,22 @@ Entity Scene::Create(const std::string& name, int targetID)
    entity.addComponent<CommonComponent>(name);
 
    return entity;
+}
+
+
+// static
+Entity Scene::GetEntityByName(const std::string& name)
+{
+   entt::registry& registry = Application::get_singleton().GetCurrentScene().GetRegistry();
+   auto view = registry.view<CommonComponent>();
+   for(auto it = view.rbegin(); it != view.rend(); ++it)
+   {
+      Entity entity(*it, &registry);
+      auto& common = entity.getComponent<CommonComponent>();
+      
+      if(common.name == name)
+         return entity;
+   }
+
+   return Entity(entt::entity(0), nullptr);
 }

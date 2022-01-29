@@ -10,7 +10,7 @@
 #pragma once
 
 #include "entt/entt.hpp"
-#include "Scene.hpp"
+#include "Components.hpp"
 
 class Entity  
 {
@@ -56,6 +56,9 @@ class Entity
       {
          auto comp = m_pRegistry->try_get<T>(m_EntityID);
          return comp != NULL;
-      }		
+      }
+
+      std::string GetName() { return getComponent<CommonComponent>().name; }
+      void SetName(const std::string& name) { getComponent<CommonComponent>().name = name; }
 };
 #endif

@@ -10,8 +10,8 @@
 #pragma once
 
 #include "entt/entt.hpp"
+#include "Entity.hpp"
 
-class Entity;
 class Scene  
 {
 	private:
@@ -22,6 +22,8 @@ class Scene
 
 		// Copies all content of a 'src' scene to 'dst' scene
 		static void CopyScene(Scene& src, Scene& dst);
+
+		static Entity GetEntityByName(const std::string& name);
 
 
 		/**
