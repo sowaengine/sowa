@@ -52,6 +52,8 @@ class Editor
 		Editor();
 
 		void UpdateViewport();
+		void UpdateScenePanel();
+		void UpdateInspector();
 
 		friend class Application;
 		EditorData* m_EditorData = nullptr;

@@ -57,32 +57,6 @@ Editor& Editor::get_singleton()
 
 
 
-template<typename T, typename UIFunction>
-static void drawComponent(const std::string& name, Entity& entity, UIFunction uiFunc)
-{
-   if(!entity.hasComponent<T>())
-      return;
-   auto& component = entity.getComponent<T>();
-   
-   //ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog;
-
-   ImGui::Separator();
-   bool clicked = ImGui::CollapsingHeader(name.c_str(), 0);
-   if(clicked)
-   {
-      ImGui::Indent();
-      uiFunc(component);
-
-      if(ImGui::Button( ("Remove " + name).c_str() ))
-      {
-         entity.removeComponent<T>();
-      }
-
-      ImGui::Unindent();
-   }
-}
-
-
 void Editor::Update() 
 {
    ImGui_ImplOpenGL3_NewFrame();
@@ -131,83 +105,9 @@ void Editor::Update()
 
 
 
-
-      if(ImGui::Begin("Viewport"))
-      {
-         ImTextureID playButtonTexture = (void*)1;
-         if(Application::get_singleton().IsRunning())
-            playButtonTexture = (void*)(GLuint64)m_StopTexture;
-         else
-            playButtonTexture = (void*)(GLuint64)m_PlayTexture;
-
-         if(ImGui::ImageButton(ImTextureID(playButtonTexture), ImVec2(24, 24)))
-         {
-            m_EditorData->start_stop_pressed = true;
-         }
-
-         ImGui::SameLine();
-         ImGui::Checkbox("In Game Camera", &m_EditorData->useInGameCamera);
-
-
-         ImVec2 regionAvail = ImGui::GetContentRegionAvail();
-         regionAvail.x = regionAvail.y * 16.f / 9.f;
-         ImGui::Image(ImTextureID((GLuint64)m_EditorData->finalFramebufferTextureID), regionAvail);
-
-
-         static ImVec2 mouseDragStart;
-         static bool dragging = false;
-         if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered())
-         {
-            mouseDragStart = ImGui::GetMousePos();
-            dragging = true;
-         }
-         if(!ImGui::IsMouseDown(ImGuiMouseButton_Right))
-         {
-            dragging = false;
-            m_EditorData->viewportDragMouseDeltaX = 0;
-            m_EditorData->viewportDragMouseDeltaY = 0;
-         }
-         
-         
-         if(dragging)
-         {
-            m_EditorData->viewportDragMouseDeltaX = mouseDragStart.x - ImGui::GetMousePos().x;
-            m_EditorData->viewportDragMouseDeltaY = mouseDragStart.y - ImGui::GetMousePos().y;
-            mouseDragStart = ImGui::GetMousePos();
-         }
-         
-
-         ImGui::End();
-      }
+      UpdateViewport();
       
-      if(ImGui::Begin("Scene"))
-      {
-         auto view = m_EditorData->currentScene->GetRegistry().view<CommonComponent>();
-         for(auto it = view.rbegin(); it != view.rend(); ++it)
-         {
-            Entity entity(*it, &m_EditorData->currentScene->GetRegistry());
-
-            CommonComponent common = entity.getComponent<CommonComponent>();
-
-            ImGuiSelectableFlags flags = 0;
-         
-            ImVec4 tintColor = ImVec4(1.f, 1.f, 1.f, 1.f);
-            if(entity.hasComponent<CameraComponent>() && entity.getComponent<CameraComponent>().current)
-               tintColor = ImVec4(0.2f, 0.5f, 1.f, 1.f);
-
-            ImGui::Image(ImTextureID((GLuint64)m_EntityIconTexture), ImVec2(16.f, 16.f), ImVec2(0.f, 0.f), ImVec2(1.f, 1.f), tintColor); ImGui::SameLine();
-            if(ImGui::Selectable(common.name.c_str(), false, flags))
-            //if(ImGui::CollapsingHeader(common.name.c_str(), flags))
-            {
-               m_EditorData->selectedEntity.SetEntityID(*it);
-               m_EditorData->selectedEntity.SetRegistry(&m_EditorData->currentScene->GetRegistry());
-
-               //ImGui::TreePop();
-            }
-         }
-
-         ImGui::End();
-      }
+      
       
       if(ImGui::Begin("Assets"))
       ImGui::End();
@@ -223,74 +123,9 @@ void Editor::Update()
          ImGui::End();
       }
 
-      
+      UpdateScenePanel();
 
-      if(ImGui::Begin("Inspector"))
-      {
-         if(m_EditorData->selectedEntity.IsValid())
-         {
-            Entity selectedEntity = m_EditorData->selectedEntity;
-
-            auto& commonComponent = selectedEntity.getComponent<CommonComponent>();
-            
-            
-            char nameBuf[512];
-            memset(nameBuf, 0, 512);
-            strcpy(nameBuf, commonComponent.name.data());
-            ImGui::Text("%s", "Name: "); ImGui::SameLine();
-            if(ImGui::InputText("##name", nameBuf, 512, ImGuiInputTextFlags_EnterReturnsTrue))
-            {
-               commonComponent.name = nameBuf;
-               if(commonComponent.name.size() == 0)
-                  commonComponent.name = "Unnamed";
-            }
-
-
-            // Adding component with right click
-            if(ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered())
-               ImGui::OpenPopup("INSPECTOR-RCLICK");
-            
-            if(ImGui::BeginPopup("INSPECTOR-RCLICK"))
-            {
-               if(ImGui::BeginMenu("Add Component"))
-               {
-                  if(!selectedEntity.hasComponent<Transform2DComponent>() && ImGui::MenuItem("Transform 2D"))
-                  {
-                     selectedEntity.addComponent<Transform2DComponent>();
-                  }
-                  if(!selectedEntity.hasComponent<CameraComponent>() && ImGui::MenuItem("Camera"))
-                  {
-                     selectedEntity.addComponent<CameraComponent>();
-                  }
-                  ImGui::EndMenu();
-               }
-
-               ImGui::EndPopup();
-            }
-
-            // Draw Components              // Maybe set ids like name+id so all components have different ids, not necessary for now
-            drawComponent<Transform2DComponent>("Transform 2D", selectedEntity, [](Transform2DComponent& component)
-            {
-               ImGui::DragFloat2("Pos", &component.position.x);
-               ImGui::DragFloat2("Scale", &component.scale.x);
-
-               float deg = glm::degrees(component.rotation);
-               ImGui::DragFloat("Rotation", &deg);
-               component.rotation = glm::radians(deg);
-
-               if(ImGui::SliderInt("Z Index", &component.zIndex, 0, 1000))
-                  Editor::get_singleton().Log << "Z Index Not Implemented" << Log::Endl;
-            });
-            drawComponent<CameraComponent>("Camera", selectedEntity, [](CameraComponent& component)
-            {
-               ImGui::Checkbox("Current", &component.current);
-            });
-            
-         }
-         ImGui::End();
-      }
-         
-         
+      UpdateInspector();
 
       ImGui::End();
    }
