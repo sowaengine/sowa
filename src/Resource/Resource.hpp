@@ -9,6 +9,8 @@ enum class PropertyType
 {
 	NONE = 0,
 	STRING,
+	SCRIPT,
+	TEXTURE,
 };
 struct ResourceProperty
 {
@@ -27,11 +29,20 @@ class Resource
 {
 	protected:
 		friend class Editor;
+		friend class ResourceManager;
+		friend class Scene;
 
-		std::vector<ResourceProperty> properties;
+		std::vector<ResourceProperty*> properties;
+
+		uint32_t m_ResourceID;
+		std::string m_Name;
+
+		virtual void PropertiesUpdated() {} // Called when any property has changed
 	public:
 		Resource();
 		~Resource();
+
+		uint32_t GetID() { return m_ResourceID; }
 
 };
 #endif
