@@ -232,9 +232,10 @@ bool Scene::SaveScene(const std::string& path, Scene& scene)
       out << YAML::EndSeq << YAML::Newline;
 
       out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
-         for(const auto& e : scene.GetRegistry().view<CommonComponent>())
+         auto view = scene.GetRegistry().view<CommonComponent>();
+         for(auto it = view.rbegin(); it != view.rend(); ++it)
          {
-            Entity entity(e, &scene.GetRegistry());
+            Entity entity(*it, &scene.GetRegistry());
             
             SerializeEntity(out, entity);
          }
