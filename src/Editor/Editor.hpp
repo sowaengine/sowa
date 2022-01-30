@@ -25,8 +25,15 @@ struct EditorData
 	Scene* currentScene = nullptr;
 
 
+	enum class InspectorTarget
+	{
+		NONE = 0,
+		ENTITY,
+		RESOURCE,
+	};
 	Entity selectedEntity;
 	Resource* selectedResource = nullptr;
+	InspectorTarget inspectorTarget;
 
 
 	float viewportDragMouseDeltaX = 0.f;
@@ -64,7 +71,7 @@ class Editor
 
 		// Helper functions for UpdateAssets
 		ClickData DrawFolder(const std::string& name);
-		ClickData DrawFile(const std::string& name);
+		ClickData DrawFile(const std::string& name, const std::filesystem::path& relativePath);
 		void DrawItem(std::filesystem::path& currentPath);
 
 		friend class Application;
@@ -98,7 +105,7 @@ class Editor
 		EditorOstream Log;
 		std::string m_ConsoleText = "";
 
-		void SetSelectedResource(Resource* resource) { m_EditorData->selectedResource = resource; }
+		void SetSelectedResource(Resource* resource) { m_EditorData->selectedResource = resource; m_EditorData->inspectorTarget = EditorData::InspectorTarget::RESOURCE; }
 };
 
 #include "EaseEngine.hpp"

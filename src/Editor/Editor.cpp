@@ -13,9 +13,9 @@
 #include "backends/imgui_impl_opengl3.h"
 #include <EaseGL.hpp>
 
-#include <Scene/Components.hpp>
-#include <Scene/Scene.hpp>
-#include <Scene/Entity.hpp>
+#include "Scene/Components.hpp"
+#include "Scene/Scene.hpp"
+#include "Scene/Entity.hpp"
 
 #include "Resource/Project.hpp"
 #include "Application/Application.hpp"
@@ -97,6 +97,14 @@ void Editor::Update()
       {
          if(ImGui::BeginMenu("File"))
          {
+            if(ImGui::MenuItem("Save Scene"))
+            {
+               Scene::SaveScene(Project::get_singleton().GetAbsolutePath("test.escn"), Application::get_singleton().GetCurrentScene());
+            }
+            if(ImGui::MenuItem("Load Scene"))
+            {
+               Scene::LoadScene(Project::get_singleton().GetAbsolutePath("test.escn"), Application::get_singleton().GetCurrentScene());
+            }
             ImGui::EndMenu();
          }
          if(ImGui::BeginMenu("Project"))

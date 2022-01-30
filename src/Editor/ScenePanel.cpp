@@ -31,6 +31,7 @@ void Editor::UpdateScenePanel()
          {
             m_EditorData->selectedEntity.SetEntityID(*it);
             m_EditorData->selectedEntity.SetRegistry(&m_EditorData->currentScene->GetRegistry());
+            m_EditorData->inspectorTarget = EditorData::InspectorTarget::ENTITY;
 
             //ImGui::TreePop();
          }

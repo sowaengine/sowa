@@ -18,7 +18,10 @@ static void drawComponent(const std::string& name, Entity& entity, UIFunction ui
    //ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoAutoOpenOnLog;
 
    ImGui::Separator();
+   std::string headerID = entity.GetName() + "_" + name; // entity15_sprite
+   ImGui::PushID(headerID.c_str());
    bool clicked = ImGui::CollapsingHeader(name.c_str(), 0);
+   ImGui::PopID();
    if(clicked)
    {
       ImGui::Indent();
@@ -37,93 +40,121 @@ void Editor::UpdateInspector()
 {
    if(ImGui::Begin("Inspector"))
    {
-      // Edit Selected Entity
-      if(m_EditorData->selectedEntity.IsValid())
+
+      if(m_EditorData->inspectorTarget == EditorData::InspectorTarget::ENTITY)
       {
-         Entity selectedEntity = m_EditorData->selectedEntity;
-
-         auto& commonComponent = selectedEntity.getComponent<CommonComponent>();
-         
-         
-         char nameBuf[512];
-         memset(nameBuf, 0, 512);
-         strcpy(nameBuf, commonComponent.name.data());
-         ImGui::Text("%s", "Name: "); ImGui::SameLine();
-         if(ImGui::InputText("##name", nameBuf, 512, ImGuiInputTextFlags_EnterReturnsTrue))
+         if(m_EditorData->selectedEntity.IsValid())
          {
-            commonComponent.name = nameBuf;
-            if(commonComponent.name.size() == 0)
-               commonComponent.name = "Unnamed";
-         }
+            Entity selectedEntity = m_EditorData->selectedEntity;
 
-
-         // Adding component with right click
-         if(ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered())
-            ImGui::OpenPopup("INSPECTOR-RCLICK");
-         
-         if(ImGui::BeginPopup("INSPECTOR-RCLICK"))
-         {
-            if(ImGui::BeginMenu("Add Component"))
+            auto& commonComponent = selectedEntity.getComponent<CommonComponent>();
+            
+            
+            char nameBuf[512];
+            memset(nameBuf, 0, 512);
+            strcpy(nameBuf, commonComponent.name.data());
+            ImGui::Text("%s", "Name: "); ImGui::SameLine();
+            if(ImGui::InputText("##name", nameBuf, 512, ImGuiInputTextFlags_EnterReturnsTrue))
             {
-               if(!selectedEntity.hasComponent<Transform2DComponent>() && ImGui::MenuItem("Transform 2D"))
-               {
-                  selectedEntity.addComponent<Transform2DComponent>();
-               }
-               if(!selectedEntity.hasComponent<CameraComponent>() && ImGui::MenuItem("Camera"))
-               {
-                  selectedEntity.addComponent<CameraComponent>();
-               }
-               ImGui::EndMenu();
+               commonComponent.name = nameBuf;
+               if(commonComponent.name.size() == 0)
+                  commonComponent.name = "Unnamed";
             }
 
-            ImGui::EndPopup();
-         }
 
-         // Draw Components              // Maybe set ids like name+id so all components have different ids, not necessary for now
-         drawComponent<Transform2DComponent>("Transform 2D", selectedEntity, [](Transform2DComponent& component)
-         {
-            ImGui::DragFloat2("Pos", &component.position.x);
-            ImGui::DragFloat2("Scale", &component.scale.x);
-
-            float deg = glm::degrees(component.rotation);
-            ImGui::DragFloat("Rotation", &deg);
-            component.rotation = glm::radians(deg);
-
-            if(ImGui::SliderInt("Z Index", &component.zIndex, 0, 1000))
-               Editor::get_singleton().Log << "Z Index Not Implemented" << Log::Endl;
-         });
-         drawComponent<CameraComponent>("Camera", selectedEntity, [](CameraComponent& component)
-         {
-            ImGui::Checkbox("Current", &component.current);
-         });
-         drawComponent<LuaScriptComponent>("LuaScript", selectedEntity, [](LuaScriptComponent& component)
-         {
-            if(ImGui::Selectable("Script"))
-               Editor::get_singleton().SetSelectedResource(component.script);
-         });
-         
-      }
-      
-      ImGui::Separator();
-      if(m_EditorData->selectedResource != nullptr)
-      {
-         std::vector<ResourceProperty>& props = m_EditorData->selectedResource->properties;
-
-         for(ResourceProperty& prop : props)
-         {
-            ImGui::Text("%s", prop.name.c_str()); ImGui::SameLine();
-            if(prop.type == PropertyType::STRING)
+            // Adding component with right click
+            if(ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered())
+               ImGui::OpenPopup("INSPECTOR-RCLICK");
+            
+            if(ImGui::BeginPopup("INSPECTOR-RCLICK"))
             {
-               char propBuf[512];
-               memset(propBuf, 0, 512);
-               strcpy(propBuf, prop.dataStr.data());
-               
-               std::string textBoxID = "##prop_" + prop.name;
-               if(ImGui::InputText(textBoxID.c_str(), propBuf, 512, ImGuiInputTextFlags_EnterReturnsTrue))
+               if(ImGui::BeginMenu("Add Component"))
                {
-                  prop.dataStr = propBuf;
-                  if(prop.dataStr.size() == 0)
-                     prop.dataStr = "void";
+                  if(!selectedEntity.hasComponent<Transform2DComponent>() && ImGui::MenuItem("Transform 2D"))
+                  {
+                     selectedEntity.addComponent<Transform2DComponent>();
+                  }
+                  if(!selectedEntity.hasComponent<CameraComponent>() && ImGui::MenuItem("Camera"))
+                  {
+                     selectedEntity.addComponent<CameraComponent>();
+                  }
+                  if(!selectedEntity.hasComponent<LuaScriptComponent>() && ImGui::MenuItem("LuaScript"))
+                  {
+                     selectedEntity.addComponent<LuaScriptComponent>();
+                  }
+                  if(!selectedEntity.hasComponent<SpriteComponent>() && ImGui::MenuItem("Sprite"))
+                  {
+                     selectedEntity.addComponent<SpriteComponent>();
+                  }
+                  ImGui::EndMenu();
+               }
+
+               ImGui::EndPopup();
+            }
+
+            // Draw Components              // Maybe set ids like name+id so all components have different ids, not necessary for now
+            drawComponent<Transform2DComponent>("Transform 2D", selectedEntity, [](Transform2DComponent& component)
+            {
+               ImGui::DragFloat2("Pos", &component.position.x);
+               ImGui::DragFloat2("Scale", &component.scale.x);
+
+               float deg = glm::degrees(component.rotation);
+               ImGui::DragFloat("Rotation", &deg);
+               component.rotation = glm::radians(deg);
+
+               if(ImGui::SliderInt("Z Index", &component.zIndex, 0, 1000))
+                  Editor::get_singleton().Log << "Z Index Not Implemented" << Log::Endl;
+            });
+            drawComponent<CameraComponent>("Camera", selectedEntity, [](CameraComponent& component)
+            {
+               ImGui::Checkbox("Current", &component.current);
+            });
+            drawComponent<LuaScriptComponent>("LuaScript", selectedEntity, [](LuaScriptComponent& component)
+            {
+               if(ImGui::Selectable("Script"))
+                  Editor::get_singleton().SetSelectedResource(component.script.get());
+            });
+            drawComponent<SpriteComponent>("Sprite", selectedEntity, [](SpriteComponent& component)
+            {
+               if(ImGui::Selectable("Texture"))
+                  Editor::get_singleton().SetSelectedResource(component.textureRes.get());
+            });
+            
+         }
+      }
+      else if(m_EditorData->inspectorTarget == EditorData::InspectorTarget::RESOURCE)
+      {
+         if(m_EditorData->selectedResource != nullptr)
+         {
+            std::vector<ResourceProperty*>& props = m_EditorData->selectedResource->properties;
+            
+            for(ResourceProperty* prop : props)
+            {
+               ImGui::Text("%s", prop->name.c_str());
+               if(prop->type == PropertyType::SCRIPT || prop->type == PropertyType::TEXTURE)
+               {
+                  ImGui::Button("##prop", ImVec2(ImGui::GetContentRegionAvail().x, 20));
+                  if(ImGui::IsItemHovered())
+                  {
+                     ImGui::BeginTooltip();
+                     ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+                     ImGui::TextUnformatted(prop->dataStr.c_str());
+                     ImGui::PopTextWrapPos();
+                     ImGui::EndTooltip();
+                  }
+
+                  if(ImGui::BeginDragDropTarget())
+                  {
+                     const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("__ASSETS_ITEM_FILE_PATH__");
+                     if(payload != nullptr)
+                     {
+                        const char* path = (const char*)payload->Data;
+                        prop->dataStr = path;
+                        m_EditorData->selectedResource->PropertiesUpdated();
+                     }
+
+                     ImGui::EndDragDropTarget();
+                  }
                }
             }
          }

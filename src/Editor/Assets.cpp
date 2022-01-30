@@ -32,7 +32,7 @@ ClickData Editor::DrawFolder(const std::string& name)
 
    return data;
 }
-ClickData Editor::DrawFile(const std::string& name)
+ClickData Editor::DrawFile(const std::string& name, const std::filesystem::path& relativePath)
 {
    ClickData data;
    
@@ -47,7 +47,17 @@ ClickData Editor::DrawFile(const std::string& name)
    if(extension == ".ttf")
       image = AssetsPanelTextures.m_Font;
 
+
+   ImGui::PushID(name.c_str());
    ImGui::ImageButton(ImTextureID(image), ImVec2(64, 64));
+   ImGui::PopID();
+   if(ImGui::BeginDragDropSource())
+   {
+      ImGui::SetDragDropPayload("__ASSETS_ITEM_FILE_PATH__",
+            relativePath.c_str(), relativePath.string().size() + 1,
+            ImGuiCond_Always);
+      ImGui::EndDragDropSource();
+   }
    if(ImGui::IsItemHovered())
    {
       data.doubleClicked = ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left);
@@ -78,7 +88,7 @@ void Editor::DrawItem(std::filesystem::path& currentPath)
    {
       if(!dirEntry.is_directory())
       {
-         DrawFile(dirEntry.path().filename().string());
+         DrawFile(dirEntry.path().filename().string(), dirEntry.path());
       }
    }
    
