@@ -11,10 +11,23 @@
 #include "Components.hpp"
 #include "Application/Application.hpp"
 
+#include "yaml-cpp/yaml.h"
 #include <iostream>
+#include <fstream>
+#include <chrono>
+#include <random>
+
+#include "Debug.hpp"
 
 Scene::Scene()
 {
+   auto ticks = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+   for(int i=0; i<ticks%256; i++)
+      rand();
+}
+static uint32_t GenerateRandom()
+{
+   return rand();
 }
 	
 Scene::~Scene()
@@ -55,13 +68,14 @@ void Scene::CopyScene(Scene& src, Scene& dst)
 
 }
 
+
 void Scene::ClearScene()
 {
    auto view = m_Registry.view<CommonComponent>();
    m_Registry.destroy(view.begin(), view.end());
 }
 
-Entity Scene::Create(const std::string& name, int targetID) 
+Entity Scene::Create(const std::string& name, int targetID /*= -1*/, uint32_t targetUUID /*= 0*/) 
 {
    entt::entity id =
       targetID == -1 ? m_Registry.create()
@@ -69,6 +83,7 @@ Entity Scene::Create(const std::string& name, int targetID)
    Entity entity(id, &m_Registry);
    
    entity.addComponent<CommonComponent>(name);
+   entity.getComponent<CommonComponent>().id = targetUUID == 0 ? GenerateRandom() : targetUUID;
 
    return entity;
 }
@@ -90,3 +105,5 @@ Entity Scene::GetEntityByName(const std::string& name)
 
    return Entity(entt::entity(0), nullptr);
 }
+
+

@@ -16,6 +16,8 @@ class Scene
 {
 	private:
 		entt::registry m_Registry;
+
+		std::string m_Name;
 	public:
 		Scene();
 		~Scene();
@@ -25,6 +27,8 @@ class Scene
 
 		static Entity GetEntityByName(const std::string& name);
 
+		static bool SaveScene(const std::string& path, Scene& scene);
+		static bool LoadScene(const std::string& path, Scene& scene);
 
 		/**
 		 * @brief 
@@ -33,12 +37,16 @@ class Scene
 		 * @param targetID create it with a specific id 
 		 * @return Entity 
 		 */
-		Entity Create(const std::string& name, int targetID = -1);
+		Entity Create(const std::string& name, int targetID = -1, uint32_t targetUUID = 0);
 
 		entt::registry& GetRegistry() { return m_Registry; }
 
 
 		// Clears all content of the scene (entities)
 		void ClearScene();
+
+
+		std::string GetName() { return m_Name; }
+		void SetName(const std::string& name) { m_Name = name; }
 };
 #endif

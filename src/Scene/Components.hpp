@@ -15,11 +15,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <EaseGL.hpp>
 
+#include "Resource/LuaScript.hpp"
+#include "sol/sol.hpp"
+#include <vector>
+
+#include "Resource/TextureResource.hpp"
+#include "Resource/ResourceManager.hpp"
+#include <memory>
+
 // Holds data like name, id etc. all entities should have it
 struct CommonComponent
 {
    std::string name;
-
+   uint32_t id;
 
    CommonComponent(const std::string& _name)
       : name(_name)
@@ -53,21 +61,29 @@ struct Transform2DComponent
    }
 };
 
+
+
 struct SpriteComponent
 {
-   EaseGL::GLTexture* ptexture;
+   std::shared_ptr<TextureResource> textureRes;
 
-   SpriteComponent() : ptexture(nullptr) { }
-   SpriteComponent(EaseGL::GLTexture* _ptexture)
-      : ptexture(_ptexture)
-   {
-   }
+   SpriteComponent() : textureRes(ResourceManager::get_singleton().NewTextureResource()) { }
 };
 
 
 struct CameraComponent
 {
    bool current = false;
+};
+
+
+struct LuaScriptComponent
+{
+   std::shared_ptr<LuaScript> script;
+
+   sol::function updateFunc;
+
+   LuaScriptComponent() : script(ResourceManager::get_singleton().NewLuaScript()) {}
 };
 
 
