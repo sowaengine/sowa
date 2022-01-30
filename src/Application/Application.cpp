@@ -22,6 +22,9 @@
 
 #include "Renderer/Renderer.hpp"
 
+#include "Lang/LuaServer.hpp"
+#include "Resource/LuaScript.hpp"
+
 
 Application::Application()
 {
@@ -81,6 +84,9 @@ void Application::Run()
    m_CurrentScene = &mainScene;
    m_EditorData.currentScene = m_CurrentScene;
 
+   LuaServer& luaServer = LuaServer::get_singleton();
+   
+
 
    glm::vec2 editor2DCameraPos = {0.0f, 0.0f};
 
@@ -93,16 +99,23 @@ void Application::Run()
    cam.current = true;
    camEntity.addComponent<Transform2DComponent>();
 
+   LuaScript cameraScript(project.GetAbsolutePath("Scripts/Camera.lua"));
+   //camEntity.addComponent<LuaScriptComponent>().script = &cameraScript;
+
+   LuaScript playerScript(project.GetAbsolutePath("Scripts/Player.lua"));
+
    for(int i=0; i<2; i++)
    {
-      Entity entity = mainScene.Create("Entity" + std::to_string(i));
+      Entity entity = mainScene.Create("Player " + std::to_string(i+1));
       auto& tc = entity.addComponent<Transform2DComponent>();
       tc.position = glm::vec2(i * 150 + 100, 300);
       tc.scale = glm::vec2(1.0f, 1.0f);
       tc.rotation = (i+1)*10;
 
-      auto& sprite = entity.addComponent<SpriteComponent>();
-      sprite.ptexture = &tex;
+      //auto& sprite = entity.addComponent<SpriteComponent>();
+      //sprite.ptexture = &tex;
+
+      //entity.addComponent<LuaScriptComponent>().script = &playerScript;
    }
 
    
@@ -137,7 +150,11 @@ void Application::Run()
       for(const auto& e : m_CurrentScene->GetRegistry().view<Transform2DComponent, SpriteComponent>())
       {
          Entity entity(e, &m_CurrentScene->GetRegistry());
-         EaseGL::GLTexture* ptexture = entity.getComponent<SpriteComponent>().ptexture;
+         auto& sc = entity.getComponent<SpriteComponent>();
+
+         if(!sc.textureRes->IsValid()) continue;
+         EaseGL::GLTexture* ptexture = sc.textureRes->GetTexturePtr();
+         if(ptexture == nullptr) continue;
          
          glm::mat4 model = entity.getComponent<Transform2DComponent>().GetTransform(glm::vec2(ptexture->Width(), ptexture->Height()));
          
@@ -207,7 +224,19 @@ void Application::Run()
          m_Running = !m_Running;
          m_EditorData.start_stop_pressed = false;
       }
-      
+
+
+      if(m_Running)
+      {
+         for(const auto& e : m_CurrentScene->GetRegistry().view<LuaScriptComponent>())
+         {
+            Entity entity(e, &m_CurrentScene->GetRegistry());
+            LuaScriptComponent& component = entity.getComponent<LuaScriptComponent>();
+
+            luaServer.GetState()["this"] = entity;
+            component.updateFunc();
+         }
+      }
 
       window.SwapBuffers();
       window.PollEvents();
@@ -218,6 +247,14 @@ void Application::Run()
 void Application::Start()
 {
    Editor::get_singleton().Log << "App Started" << Log::Endl;
+
+   for(const auto& e : m_CurrentScene->GetRegistry().view<LuaScriptComponent>())
+   {
+      Entity entity(e, &m_CurrentScene->GetRegistry());
+      LuaScriptComponent& component = entity.getComponent<LuaScriptComponent>();
+
+      LuaServer::get_singleton().BindLuaScriptComponent(component, entity);
+   }
 }
 
 void Application::Stop()

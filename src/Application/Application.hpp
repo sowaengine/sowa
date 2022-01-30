@@ -53,6 +53,8 @@ class Application
 		void Stop();
 
 		bool IsRunning() { return m_Running; }
+
+		Scene& GetCurrentScene() { return *m_CurrentScene; }
 		
 		static Application& get_singleton();
 
