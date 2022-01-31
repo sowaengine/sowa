@@ -248,7 +248,7 @@ bool Scene::SaveScene(const std::string& path, Scene& scene)
 }
 
 
-std::shared_ptr<TextureResource> GetResourceFromList(std::vector<std::shared_ptr<TextureResource>> list, uint32_t id)
+std::shared_ptr<TextureResource> GetResourceFromList(const std::vector<std::shared_ptr<TextureResource>>& list, uint32_t id)
 {
    for(std::shared_ptr<TextureResource> resource : list)
    {
@@ -258,7 +258,7 @@ std::shared_ptr<TextureResource> GetResourceFromList(std::vector<std::shared_ptr
    LOG_ERROR("Cannot find texture with id: %d", id);
    return nullptr;
 }
-std::shared_ptr<LuaScript> GetResourceFromList(std::vector<std::shared_ptr<LuaScript>> list, uint32_t id)
+std::shared_ptr<LuaScript> GetResourceFromList(const std::vector<std::shared_ptr<LuaScript>>& list, uint32_t id)
 {
    for(std::shared_ptr<LuaScript> resource : list)
    {
