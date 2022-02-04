@@ -130,6 +130,22 @@ void Application::Run()
 
       glm::mat4 proj2d = glm::ortho(0.0f, (float)window.Width(), 0.0f, (float)window.Height(), 0.01f, 11.1f); // projection matrix used in 2d rendering
       glm::mat4 camera2dTransform = glm::translate(glm::mat4(1.0f), {editor2DCameraPos.x, editor2DCameraPos.y, 1.0f}); // default 2d camera z is 1.0f
+
+      glm::mat4 transform(1.0f);
+      transform = glm::scale(transform, {100.f, 100.f, 1.f});
+      static float rot = 0.f;
+
+      
+      renderer.BeginBatch2D();
+      for(int i=0; i<5; i++)
+      {
+         transform = glm::translate(transform, glm::vec3(2.f, 0.f, 0.f));
+         //transform = glm::rotate(transform, glm::radians(rot), glm::vec3(0.f, 0.f ,1.f));
+         renderer.DrawBatch2D(transform, camera2dTransform, proj2d, &tex);
+      }
+      renderer.EndBatch2D();
+
+
       // Find current camera
       if(m_EditorData.useInGameCamera)
       {
@@ -146,7 +162,8 @@ void Application::Run()
       }
 
       // Draw Here
-      renderer.Begin2D();
+      //renderer.Begin2D();
+      renderer.BeginBatch2D();
       for(const auto& e : m_CurrentScene->GetRegistry().view<Transform2DComponent, SpriteComponent>())
       {
          Entity entity(e, &m_CurrentScene->GetRegistry());
@@ -162,13 +179,13 @@ void Application::Run()
          // first draw it a little bigger on behind to make it look outlined (temporary solution)
          if(entity == m_EditorData.selectedEntity)
          {
-            renderer.Get2DShader().Uniform("outline", 1);
-            renderer.DrawSprite(glm::scale(model, {1.05f, 1.05f, 1.0f}), camera2dTransform, proj2d, ptexture);
-            renderer.Get2DShader().Uniform("outline", 0);
+            renderer.DrawBatch2D(glm::scale(model, {1.05f, 1.05f, 1.0f}), camera2dTransform, proj2d, ptexture);
          }
          
-         renderer.DrawSprite(model, camera2dTransform, proj2d, ptexture);
+         renderer.DrawBatch2D(model, camera2dTransform, proj2d, ptexture);
       }
+      renderer.EndBatch2D();
+
 
       m_FinalFramebuffer.Unbind();
 
