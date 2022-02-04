@@ -11,7 +11,7 @@ ADDITIONAL_OBJS :=
 
 
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d) include/ thirdparty/ thirdparty/imgui-docking/
+INC_DIRS := $(shell find $(SRC_DIRS) -type d) include/ thirdparty/ thirdparty/imgui-docking/ include/freetype/
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 LIB_DIRS := lib/
 LIB_FLAGS := $(addprefix -L,$(LIB_DIRS))
