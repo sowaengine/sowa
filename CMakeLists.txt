@@ -1,0 +1,42 @@
+cmake_minimum_required(VERSION 3.0.0)
+project(Ease VERSION 0.1.0)
+
+include(CTest)
+enable_testing()
+
+
+
+find_package(OpenGL REQUIRED)
+find_package(glfw3 3.3 REQUIRED)
+link_libraries(${CMAKE_DL_LIBS} glfw raylib yaml-cpp spdlog box2d)
+
+include_directories(
+   ${OPENGL_INCLUDE_DIR}
+   ${GLFW_INCLUDE_DIRS}
+)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+file(GLOB_RECURSE SOURCES
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+)
+
+
+set(CMAKE_CXX_STANDARD 17)
+
+if(UNIX)
+   # set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} -no-pie)
+   # set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -no-pie)
+   # set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -no-pie)
+endif()
+
+
+add_executable(Ease ${SOURCES})
+
+
+
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+include(CPack)
