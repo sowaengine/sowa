@@ -26,12 +26,6 @@ file(GLOB_RECURSE SOURCES
 
 set(CMAKE_CXX_STANDARD 17)
 
-if(UNIX)
-   # set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} -no-pie)
-   # set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -no-pie)
-   # set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -no-pie)
-endif()
-
 
 add_executable(Ease ${SOURCES})
 
