@@ -5,6 +5,7 @@
 
 #include <string>
 #include "raylib.h"
+#include "imgui-docking/imgui.h"
 
 
 namespace Ease
@@ -62,6 +63,11 @@ namespace Ease
          */
         inline int GetVideoHeight() { return m_VideoHeight; }
         
+        inline int GetWindowWidth() { return GetScreenWidth(); }
+        inline int GetWindowHeight() { return GetScreenHeight(); }
+
+        inline RenderTexture2D& GetFinalFramebufferTexture() { return m_Target; }
+
         void CreateWindow(int width, int height, const std::string& title);
 
 

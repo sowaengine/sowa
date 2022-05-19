@@ -33,9 +33,6 @@ namespace Ease
    {
    }
    
-   // TODO: add imgui
-   // Editor initializes imgui
-   // 
 
    void Application::Run()
    {
@@ -125,7 +122,9 @@ namespace Ease
       animSprite.SelectedAnimation() = "anim";
       animSprite.FPS() = 4;
 
+      IMGUI_CHECKVERSION();
       SetupRLImGui(true);
+      ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
       InitModules();
       StartGame();

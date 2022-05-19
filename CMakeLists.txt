@@ -24,12 +24,12 @@ file(GLOB_RECURSE SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
+set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(modules)
 add_subdirectory(thirdparty)
 
 
 
-set(CMAKE_CXX_STANDARD 17)
 
 
 add_executable(Ease ${SOURCES})

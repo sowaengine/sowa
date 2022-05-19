@@ -37,14 +37,17 @@ namespace Ease
 
 
       BeginDrawing();
-      ClearBackground(BLACK);
+      ClearBackground(BLUE);
       DrawTexturePro(m_Target.texture,
          (Rectangle){ 0.0f, 0.0f, (float)m_Target.texture.width, (float)-m_Target.texture.height },
          (Rectangle){ (GetScreenWidth() - ((float)m_VideoWidth*scale))*0.5f, (GetScreenHeight() - ((float)m_VideoHeight*scale))*0.5f,
          (float)m_VideoWidth*scale, (float)m_VideoHeight*scale }, (Vector2){ 0, 0 }, 0.0f, WHITE);
-      
+
+         static ImFont* pDefaultFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("res/Roboto-Medium.ttf", 16.f);
          BeginRLImGui();
+         ImGui::PushFont(pDefaultFont);
          Application::get_singleton().Modules_OnImGuiRender();
+         ImGui::PopFont();
          EndRLImGui();
 
          
