@@ -1,9 +1,22 @@
+/**
+ * @file Ease.Editor.cc
+ * @author Lexographics
+ * @brief Core Editor Module for Ease Engine
+ * @version 0.1
+ * @date 2022-05-19
+ */
 #include <iostream>
+#include <vector>
+#include <string>
 #include "../include/Ease.hpp"
 #include "../include/dylib.hpp"
+#include "imgui-docking/imgui.h"
 
 class EaseEditor : public Ease::BaseModule
 {
+   public:
+      // Panels
+      
    public:
       ~EaseEditor()
       {
@@ -17,13 +30,15 @@ class EaseEditor : public Ease::BaseModule
 
       void Update() override
       {
-         static int i = 0;
-         i++;
+         
+      }
 
-         if(i % 60 == 0)
-         {
-            std::cout << "Editor Update" << std::endl;
-         }
+      void OnImGuiRender() override
+      {
+         ImGui::ShowDemoWindow();
+
+         ImGui::Begin("Test");
+         ImGui::End();
       }
 
 };

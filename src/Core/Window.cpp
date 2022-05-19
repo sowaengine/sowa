@@ -44,8 +44,6 @@ namespace Ease
          (float)m_VideoWidth*scale, (float)m_VideoHeight*scale }, (Vector2){ 0, 0 }, 0.0f, WHITE);
       
          BeginRLImGui();
-         ImGui::ShowDemoWindow();
-         
          Application::get_singleton().Modules_OnImGuiRender();
          EndRLImGui();
 
