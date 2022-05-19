@@ -62,6 +62,7 @@ namespace Ease
 
         void InitModules();
         void UpdateModules();
+        void Modules_OnImGuiRender();
         
     private:
         Application();

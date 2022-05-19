@@ -19,6 +19,9 @@
 #include "ECS/Components/Components.hpp"
 #include "ECS/Systems/Systems.h"
 
+#include "imgui-docking/imgui.h"
+#include "rlImGui/rlImGui.h"
+
 namespace Ease
 {
    Application::Application()
@@ -122,7 +125,7 @@ namespace Ease
       animSprite.SelectedAnimation() = "anim";
       animSprite.FPS() = 4;
 
-      
+      SetupRLImGui(true);
 
       InitModules();
       StartGame();
@@ -187,8 +190,11 @@ namespace Ease
       for(auto& pair : m_Modules)
          pair.second->CallUpdate();
    }
-
-
+   void Application::Modules_OnImGuiRender()
+   {
+      for(auto& pair : m_Modules)
+         pair.second->CallOnImGuiRender();
+   }
 
    Application::ModuleLoadResult Application::LoadModule(const std::string& author, const std::string& moduleName, int minimumVersion)
    {

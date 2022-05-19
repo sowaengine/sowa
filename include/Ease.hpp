@@ -23,6 +23,7 @@ namespace Ease
 
          virtual void Start() {}
          virtual void Update() {}
+         virtual void OnImGuiRender() {}
 
          struct {
             std::string authorName = "";

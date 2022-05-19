@@ -23,4 +23,8 @@ namespace Ease
    {
       m_pModule->Update();
    }
+   void NativeModule::CallOnImGuiRender()
+   {
+      m_pModule->OnImGuiRender();
+   }
 } // namespace Ease

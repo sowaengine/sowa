@@ -21,6 +21,7 @@ namespace Ease
         
         void CallStart();
         void CallUpdate();
+        void CallOnImGuiRender();
 
         inline void SetModule(BaseModule* _module) { m_pModule = _module;}
 

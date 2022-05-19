@@ -9,8 +9,8 @@
     #define GLSL_VERSION        100
 #endif
 
-
-
+#include "rlImGui/rlImGui.h"
+#include "Application.h"
 
 
 namespace Ease
@@ -42,6 +42,15 @@ namespace Ease
          (Rectangle){ 0.0f, 0.0f, (float)m_Target.texture.width, (float)-m_Target.texture.height },
          (Rectangle){ (GetScreenWidth() - ((float)m_VideoWidth*scale))*0.5f, (GetScreenHeight() - ((float)m_VideoHeight*scale))*0.5f,
          (float)m_VideoWidth*scale, (float)m_VideoHeight*scale }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+      
+         BeginRLImGui();
+         ImGui::ShowDemoWindow();
+         
+         Application::get_singleton().Modules_OnImGuiRender();
+         EndRLImGui();
+
+         
+
       EndDrawing();
    }
 
