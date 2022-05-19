@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Scene/Entity.h"
+#include "ECS/Entity/Entity.h"
 #include "entt/entt.hpp"
 
 namespace Ease

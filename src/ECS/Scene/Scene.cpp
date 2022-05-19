@@ -1,5 +1,5 @@
 #include "Scene.h"
-#include "Components/Components.hpp"
+#include "ECS/Components/Components.hpp"
 
 namespace Ease
 {
