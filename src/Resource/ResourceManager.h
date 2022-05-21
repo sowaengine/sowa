@@ -7,6 +7,7 @@
 #include <memory>
 #include "Resource/Texture/Texture.h"
 #include "Resource/NativeModule/NativeModule.h"
+#include "Resource/EditorTheme/EditorTheme.h"
 
 typedef uint32_t ResourceID;
 
@@ -23,6 +24,7 @@ namespace Ease
         
 
         std::shared_ptr<T> LoadResource(const char* path);
+        bool SaveResource(const char* path, std::shared_ptr<T> resource);
         bool DeleteResource(ResourceID id)
         {
             std::shared_ptr<T> res = m_Resources[id];
@@ -49,6 +51,13 @@ namespace Ease
     std::shared_ptr<Ease::NativeModule> ResourceManager<Ease::NativeModule>::LoadResource(const char* path);
     template<>
     ResourceManager<Ease::NativeModule>& ResourceManager<Ease::NativeModule>::GetLoader();
+
+    template<>
+    std::shared_ptr<Ease::EditorTheme> ResourceManager<Ease::EditorTheme>::LoadResource(const char* path);
+    template<>
+    bool ResourceManager<Ease::EditorTheme>::SaveResource(const char* path, std::shared_ptr<Ease::EditorTheme> resource);
+    template<>
+    ResourceManager<Ease::EditorTheme>& ResourceManager<Ease::EditorTheme>::GetLoader();
 } // namespace Ease
 
 #endif
