@@ -70,6 +70,6 @@ namespace Ease
    
    bool Window::ShouldClose()
    {
-      return WindowShouldClose();
+      return WindowShouldClose() && !IsKeyPressed(KEY_ESCAPE);
    }
 } // namespace Ease
