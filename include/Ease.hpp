@@ -9,6 +9,8 @@
 #define EASE_VERSION_MINOR 1
 #define EASE_VERSION_PATCH 0
 
+#define EASE_VERSION_STRING "0.1.0"
+
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
 

@@ -23,6 +23,8 @@
 class EaseEditor : public Ease::BaseModule
 {
    public:
+      std::string m_EditorStatusText{"Ease Engine v" EASE_VERSION_STRING};
+
       struct Panel
       {
          bool visible = false;
@@ -154,8 +156,7 @@ class EaseEditor : public Ease::BaseModule
             {
                std::shared_ptr<Ease::EditorTheme> theme = std::make_shared<Ease::EditorTheme>();
                theme->LoadFromStyle(ImGui::GetStyle());
-               Ease::ResourceManager<Ease::EditorTheme>::GetLoader().SaveResource("res/theme.escfg", theme);
-
+               Ease::ResourceManager<Ease::EditorTheme>::GetLoader().SaveResource("res/theme_new.escfg", theme);
             }
 
 
@@ -172,6 +173,44 @@ class EaseEditor : public Ease::BaseModule
             ImGui::End();
          }
          ImGui::ShowDemoWindow();
+
+         const ImGuiViewport* viewport = ImGui::GetMainViewport();
+         ImGui::SetNextWindowPos(
+            ImVec2(viewport->Pos.x,
+                  viewport->Pos.y + viewport->Size.y - ImGui::GetFrameHeight())
+         );
+         ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, ImGui::GetFrameHeight()));
+         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0);
+         ImGui::PushStyleColor(ImGuiCol_MenuBarBg,     ImVec4(0.17f, 0.50f, 0.70f, 1.f)); // (45, 128, 178)
+         ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.20f, 0.55f, 0.75f, 1.f)); // (51, 140, 191)
+         if(ImGui::Begin("##statusbar", nullptr, 
+              ImGuiWindowFlags_NoCollapse
+            | ImGuiWindowFlags_NoDecoration
+            | ImGuiWindowFlags_NoDocking
+            | ImGuiWindowFlags_NoMove
+            | ImGuiWindowFlags_NoResize
+            | ImGuiWindowFlags_NoSavedSettings
+            | ImGuiWindowFlags_MenuBar
+            | ImGuiWindowFlags_NoScrollbar
+            | ImGuiWindowFlags_NoScrollWithMouse))
+         {
+            ImGui::PopStyleVar();
+
+            if(ImGui::BeginMenuBar())
+            {
+               ImGui::MenuItem("This is a Button");
+               ImGui::MenuItem("This is a Button too");
+               ImGui::MenuItem("This is a Button too too");
+
+               ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - (ImGui::CalcTextSize(m_EditorStatusText.c_str()).x * 1.2f) );
+               ImGui::Text("%s", m_EditorStatusText.c_str());
+
+               ImGui::EndMenuBar();
+            }
+            ImGui::End();
+
+            ImGui::PopStyleColor(2);
+         } else { ImGui::PopStyleVar(); ImGui::PopStyleColor(2); }
          
          ImGui::End();
 
