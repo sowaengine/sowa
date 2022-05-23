@@ -75,9 +75,40 @@ class EaseEditor : public Ease::BaseModule
          }
          static void scene()
          {
-            RLImGuiImageSize(
-               &Ease::Application::get_singleton().GetWindow().GetFinalFramebufferTexture().texture,
-               ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
+            Ease::Window& window = Ease::Application::get_singleton().GetWindow();
+            const Texture* image = &window.GetFinalFramebufferTexture().texture;
+            Rectangle srcRect{};
+               srcRect.x = 0.f;
+               srcRect.y = (float)image->height;
+               srcRect.width = (float)image->width;
+               srcRect.height = -(float)image->height;
+               
+            int dstWidth = ImGui::GetContentRegionAvail().x;
+            int dstHeight = ImGui::GetContentRegionAvail().y;
+            float aspect = (float)window.GetWindowWidth() / (float)window.GetWindowHeight();
+            if(ImGui::GetContentRegionAvail().x * aspect > ImGui::GetContentRegionAvail().y 
+              && ImGui::GetContentRegionAvail().y * aspect < ImGui::GetContentRegionAvail().x)
+            {
+               dstWidth = ImGui::GetContentRegionAvail().y * aspect;
+               dstHeight = ImGui::GetContentRegionAvail().y;
+
+               float regionAvail = ImGui::GetContentRegionAvail().x;
+               ImGui::SetCursorPosX(((regionAvail - dstWidth) / 2) + ImGui::GetCursorStartPos().x);
+            }
+            else
+            {
+               dstWidth = ImGui::GetContentRegionAvail().x;
+               dstHeight = ImGui::GetContentRegionAvail().x / aspect;
+               
+               float regionAvail = ImGui::GetContentRegionAvail().y;
+               ImGui::SetCursorPosY(((regionAvail - dstHeight) / 2.f) + ImGui::GetCursorStartPos().y);
+            }
+            
+            RLImGuiImageRect(
+               image,
+               dstWidth, dstHeight,
+               srcRect
+            );
          }
       } draw;
 
@@ -166,13 +197,13 @@ class EaseEditor : public Ease::BaseModule
          /** </Menu Bar> **/
          ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(0.f, 0.f), ImGuiDockNodeFlags_PassthruCentralNode);
 
+         ImGui::ShowDemoWindow();
          for(Panel& panel : panels)
          {
             ImGui::Begin(panel.title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse);
                panel.drawFunc();
             ImGui::End();
          }
-         ImGui::ShowDemoWindow();
 
          const ImGuiViewport* viewport = ImGui::GetMainViewport();
          ImGui::SetNextWindowPos(
