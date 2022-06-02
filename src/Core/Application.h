@@ -28,7 +28,7 @@ namespace Ease
 
         Window& GetWindow() { return m_Window; }
 
-
+        void Log(const std::string& message); // Logs given string to console (And Editor Console on editor builds)
         
 
         enum class ModuleLoadResult
@@ -53,7 +53,7 @@ namespace Ease
          * @param _module module resource to add
          */
         void AddModule(const std::string& name, std::shared_ptr<NativeModule> _module);
-
+        std::shared_ptr<NativeModule> GetModule(const std::string& name);
 
 
         void StartGame();

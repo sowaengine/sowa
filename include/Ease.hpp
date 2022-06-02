@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 
 #define EASE_VERSION_MAJOR 0
@@ -14,6 +15,7 @@
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
 
+typedef void(*UserFunc)();
 
 namespace Ease
 {
@@ -33,6 +35,14 @@ namespace Ease
             uint32_t version;
 
          } metadata;
+
+
+         struct UserValue
+         {
+            std::string str_value{};
+         };
+         std::unordered_map<std::string, UserFunc> userFuncs;
+         std::unordered_map<std::string, UserValue> userValues;
    };
 
 }

@@ -79,10 +79,9 @@ namespace Ease
          Ease::Entity text = m_pCurrentScene->Create("Text");
          auto& text_tc = text.AddComponent<Component::Transform2D>();
          text_tc.Position() = {600.f, -300.f};
-         text_tc.Rotation() = 139.f;
 
          auto& text_font = text.AddComponent<Component::TextRenderer2D>();
-         text_font.Text() = "25.04";
+         text_font.Text() = "EASE ENGINE";
          text_font.Color() = {25.f, 4.f, 202.1f, 255.f};
          
          entities.push_back(text);
@@ -139,7 +138,7 @@ namespace Ease
 
          for(auto& ent : entities)
          {
-            ent.GetComponent<Component::Transform2D>().Rotation() += 2.2f;
+            //ent.GetComponent<Component::Transform2D>().Rotation() += 2.2f;
          }
 
          UpdateModules();
@@ -161,6 +160,18 @@ namespace Ease
 #pragma endregion
 
          m_Window.End();
+      }
+   }
+
+   void Application::Log(const std::string& message)
+   {
+      std::cout << "[APP] " << message << std::endl;
+
+      static std::shared_ptr<NativeModule> editor = GetModule("Ease.Editor");
+      if(editor != nullptr)
+      {
+         editor->GetModule()->userValues["PrintMsg"].str_value = message;
+         editor->GetModule()->userFuncs["Print"]();
       }
    }
    
@@ -219,6 +230,10 @@ namespace Ease
    void Application::AddModule(const std::string& name, std::shared_ptr<NativeModule> _module)
    {
       m_Modules[name] = _module;
+   }
+   std::shared_ptr<NativeModule> Application::GetModule(const std::string& name)
+   {
+      return m_Modules[name];
    }
    
    

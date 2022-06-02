@@ -4,6 +4,11 @@
  * @brief Core Editor Module for Ease Engine
  * @version 0.1
  * @date 2022-05-19
+ * 
+ * @userFuncs
+ *    Print  >  prints given string to editor console
+ * @userValues
+ *    PrintMsg > string that will be printed to console @see UserFunc:Print
  */
 #include <iostream>
 #include <string>
@@ -20,10 +25,17 @@
 #include "../src/Resource/Texture/Texture.h"
 #include "../src/Resource/EditorTheme/EditorTheme.h"
 
+class EaseEditor;
+static EaseEditor* g_Editor = nullptr;
+
+static void Print();
+
+
 class EaseEditor : public Ease::BaseModule
 {
    public:
       std::string m_EditorStatusText{"Ease Engine v" EASE_VERSION_STRING};
+      std::string m_ConsoleText{""};
 
       struct Panel
       {
@@ -110,17 +122,26 @@ class EaseEditor : public Ease::BaseModule
                srcRect
             );
          }
+         static void console()
+         {
+            ImGui::Text("%s", g_Editor->m_ConsoleText.c_str());
+            
+            if(ImGui::Button("Clear"))
+               g_Editor->m_ConsoleText = "";
+         }
       } draw;
 
       void Start() override
       {
          //ImGui::SetCurrentContext(Ease::Application::GetImGuiContext());
 
+         userFuncs["Print"] = Print;
+
          panels.emplace_back("Hierarchy", draw.empty);
          panels.emplace_back("Scene"    , draw.scene);
          panels.emplace_back("Inspector", draw.empty);
          panels.emplace_back("Project"  , draw.empty);
-         panels.emplace_back("Console"  , draw.empty);
+         panels.emplace_back("Console"  , draw.console);
 
 
          Ease::ResourceManager<Ease::EditorTheme> themeLoader = Ease::ResourceManager<Ease::EditorTheme>::GetLoader();
@@ -374,6 +395,7 @@ DYLIB_API Ease::BaseModule* Create()
    lib->metadata.authorName = "Ease";
    lib->metadata.moduleName = "Editor";
    lib->metadata.version = 1;
+   g_Editor = lib;
    return lib;
 }
 
@@ -382,3 +404,9 @@ DYLIB_API void Destroy(Ease::BaseModule* lib)
    delete reinterpret_cast<EaseEditor*>(lib);
 }
 
+
+void Print()
+{
+   g_Editor->m_ConsoleText += g_Editor->userValues["PrintMsg"].str_value + "\n";
+   std::cout << "[Editor] " << g_Editor->userValues["PrintMsg"].str_value << std::endl;
+}

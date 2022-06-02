@@ -24,6 +24,7 @@ namespace Ease
         void CallOnImGuiRender();
 
         inline void SetModule(BaseModule* _module) { m_pModule = _module;}
+        inline BaseModule* GetModule() { return m_pModule; }
 
         void SetDeleteFunc(std::function<void(BaseModule*)> func) { m_DeleteFunc = func; }
     private:
