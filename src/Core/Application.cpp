@@ -69,7 +69,7 @@ namespace Ease
       // myModule->CallStart();
 
       
-      Entity ent1 = m_pCurrentScene->Create("Entity1");
+      /*Entity ent1 = m_pCurrentScene->Create("Entity1");
       auto& transform2d = ent1.AddComponent<Component::Transform2D>();
       transform2d.Position() = {200.f, -200.f};
       transform2d.Scale() = {10.f, 10.f};
@@ -119,7 +119,7 @@ namespace Ease
       auto& animSprite = ent1.AddComponent<Component::AnimatedSprite2D>();
       animSprite.SetAnimation("anim", anim);
       animSprite.SelectedAnimation() = "anim";
-      animSprite.FPS() = 4;
+      animSprite.FPS() = 4;*/
 
       IMGUI_CHECKVERSION();
       SetupRLImGui(true);
@@ -136,28 +136,8 @@ namespace Ease
          if(m_AppRunning)
             UpdateGame();
 
-         for(auto& ent : entities)
-         {
-            //ent.GetComponent<Component::Transform2D>().Rotation() += 2.2f;
-         }
-
          UpdateModules();
 
-
-#pragma region movement
-         if(IsKeyDown(KEY_D))
-            transform2d.Position().x += 4.f;
-         if(IsKeyDown(KEY_A))
-            transform2d.Position().x -= 4.f;
-
-         if(IsKeyDown(KEY_W))
-            transform2d.Position().y += 4.f;
-         if(IsKeyDown(KEY_S))
-            transform2d.Position().y -= 4.f;
-
-         if(IsKeyDown(KEY_SPACE))
-            transform2d.Rotation() += 2.f;
-#pragma endregion
 
          m_Window.End();
       }

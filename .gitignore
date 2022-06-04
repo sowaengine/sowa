@@ -38,8 +38,6 @@ build/
 
 todo.md
 
-# Scene files
-*.escn
 
 # Folder that contains contents of a test game
 Game/
