@@ -1,5 +1,14 @@
 Type: Scene
 
+ResourceList:
+  Texture:
+    0:
+      Path: res/characters.png
+
+    1:
+      Path: res/icon.png
+
+
 EntityList:
   0:
     Name: Entity1

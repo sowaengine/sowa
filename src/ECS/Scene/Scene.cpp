@@ -5,6 +5,7 @@
 #include "yaml-cpp/yaml.h"
 #include "Utils/YAML.h"
 #include "Core/Application.h"
+#include "Resource/ResourceManager.h"
 
 namespace Ease
 {
@@ -108,6 +109,27 @@ namespace Ease
          yaml << YAML::Key << "Type" << YAML::Value << "Scene";
          yaml << YAML::Newline;
          yaml << YAML::Newline;
+         // <Resources>
+         yaml << YAML::Key << "ResourceList" << YAML::Value;
+         yaml << YAML::BeginMap;
+         { // <Ease::Texture>
+            yaml << YAML::Key << "Texture" << YAML::Value << YAML::BeginMap;
+            ResourceManager<Ease::Texture> loader_texture = ResourceManager<Ease::Texture>::GetLoader();
+            std::map<ResourceID, std::shared_ptr<Ease::Texture>> textures = loader_texture.GetResources();
+            
+            for(auto[id, texture] : textures)
+            {
+               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                  yaml << YAML::Key << "Path" << YAML::Value << texture->GetFilepath();
+                  yaml << YAML::Newline;
+               yaml << YAML::EndMap;
+            }
+
+            yaml << YAML::EndMap;
+         }  // </Ease::Texture>
+         yaml << YAML::Newline << YAML::EndMap;
+         // </Resources>
+
          yaml << YAML::Key << "EntityList" << YAML::Value;
          yaml << YAML::BeginMap;
             auto view = m_Registry.view<Ease::Component::Common>();
@@ -133,6 +155,23 @@ namespace Ease
          return false;
       }
 
+      YAML::Node resources = node["ResourceList"];
+      if(resources)
+      {
+         { // <Ease::Texture>
+            if(YAML::Node resource_node = resources["Texture"]; resource_node)
+            {
+               ResourceManager<Ease::Texture>& resource_loader = ResourceManager<Ease::Texture>::GetLoader();
+               for(auto it = resource_node.begin(); it != resource_node.end(); ++it)
+               {
+                  uint32_t id = it->first.as<uint32_t>(0);
+                  YAML::Node tex_node = it->second;
+                  resource_loader.LoadResource(tex_node["Path"].as<std::string>("").c_str(), id);
+               }
+            }
+         } // </Ease::Texture>
+      }
+      
       YAML::Node entities = node["EntityList"];
       if(entities)
       {

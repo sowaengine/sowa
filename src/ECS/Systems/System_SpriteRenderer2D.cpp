@@ -22,6 +22,8 @@ namespace Ease::Systems
          auto& transformc = entity.GetComponent<Component::Transform2D>();
          auto& spritec = entity.GetComponent<Component::SpriteRenderer2D>();
          
+         if(!loader.HasResource(spritec.TextureID())) continue;
+         
          Renderer::get_singleton().DrawQuad(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), *loader.GetResource(spritec.TextureID()).get(), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f));
       }
    }

@@ -244,6 +244,9 @@ class EaseEditor : public Ease::BaseModule
 
          std::shared_ptr<Ease::EditorTheme> theme = themeLoader.LoadResource("res/theme.escfg");
          ImGui::GetStyle() = theme->GetStyle();
+
+         Ease::Application::get_singleton().GetCurrentScene()->LoadFromFile("scene.escn");
+         // Ease::Application::get_singleton().GetCurrentScene()->SaveToFile("scene.escn");
       }
 
       void Update() override

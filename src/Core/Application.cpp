@@ -54,9 +54,9 @@ namespace Ease
          projectSettings._window.VideoHeight
       );
 
-      ResourceManager<Ease::Texture>& textureLoader = ResourceManager<Ease::Texture>::GetLoader();
+      /*ResourceManager<Ease::Texture>& textureLoader = ResourceManager<Ease::Texture>::GetLoader();
       std::shared_ptr<Texture> tex = textureLoader.LoadResource("res/characters.png");
-      std::shared_ptr<Texture> iconTex = textureLoader.LoadResource("res/icon.png");
+      std::shared_ptr<Texture> iconTex = textureLoader.LoadResource("res/icon.png");*/
 
       
       // ResourceManager<Ease::NativeModule>& moduleLoader = ResourceManager<Ease::NativeModule>::GetLoader();

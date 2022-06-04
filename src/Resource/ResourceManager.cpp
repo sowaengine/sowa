@@ -6,6 +6,7 @@
 #include "yaml-cpp/yaml.h"
 #include <fstream>
 #include "Utils/YAML.h"
+#include <iostream>
 
 namespace Ease
 {
@@ -14,18 +15,18 @@ namespace Ease
 
    /* ==============<Ease::Texture>============== */
    template<>
-   std::shared_ptr<Ease::Texture> ResourceManager<Ease::Texture>::LoadResource(const char* path)
+   std::shared_ptr<Ease::Texture> ResourceManager<Ease::Texture>::LoadResource(const char* path, ResourceID id)
    {
       static ResourceID resCounter = 0;
 
       std::shared_ptr<Ease::Texture> tex = std::make_shared<Ease::Texture>();
 
-      m_Resources[resCounter] = tex;
+      ResourceID resID = id != 0 ? id : resCounter++;
+      m_Resources[resID] = tex;
       tex->SetTexture(LoadTexture(path));
-      tex->SetResourceID(resCounter);
+      tex->SetResourceID(resID);
+      tex->m_Filepath = path;
 
-
-      resCounter++;
       return tex;
    }
 
@@ -41,7 +42,7 @@ namespace Ease
    
    /* ==============<Ease::NativeModule>============== */
    template<>
-   std::shared_ptr<Ease::NativeModule> ResourceManager<Ease::NativeModule>::LoadResource(const char* path)
+   std::shared_ptr<Ease::NativeModule> ResourceManager<Ease::NativeModule>::LoadResource(const char* path, ResourceID id)
    {
       static ResourceID resCounter = 0;
 
@@ -60,10 +61,10 @@ namespace Ease
       nativeModule->SetModule(myModule);
       nativeModule->SetDeleteFunc(deleteFunc);
 
-      m_Resources[resCounter] = nativeModule;
-      nativeModule->SetResourceID(resCounter);
+      ResourceID resID = id != 0 ? id : resCounter++;
+      m_Resources[resID] = nativeModule;
+      nativeModule->SetResourceID(resID);
 
-      resCounter++;
       return nativeModule;
    }
 
@@ -79,7 +80,7 @@ namespace Ease
 
    /* ==============<Ease::EditorTheme>============== */
    template<>
-   std::shared_ptr<Ease::EditorTheme> ResourceManager<Ease::EditorTheme>::LoadResource(const char* path)
+   std::shared_ptr<Ease::EditorTheme> ResourceManager<Ease::EditorTheme>::LoadResource(const char* path, ResourceID id)
    {
       static ResourceID resCounter = 0;
 
@@ -190,10 +191,10 @@ namespace Ease
       style.Colors[ImGuiCol_ModalWindowDimBg]     = theme["ModalWindowDimBg"].as<ImVec4>(ImVec4(0.2f, 0.2f, 0.2f, 0.35f));
       
 
-      m_Resources[resCounter] = themeRes;
-      themeRes->SetResourceID(resCounter);
+      ResourceID resID = id != 0 ? id : resCounter++;
+      m_Resources[resID] = themeRes;
+      themeRes->SetResourceID(resID);
 
-      resCounter++;
       return themeRes;
    }
    template<>

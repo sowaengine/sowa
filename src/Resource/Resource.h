@@ -18,7 +18,7 @@ namespace Ease
          
          BaseResource() = default;
          ~BaseResource() = default;
-      private:
+      protected:
          ResourceID m_ResourceID;
    };
 

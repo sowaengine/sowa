@@ -21,6 +21,8 @@ namespace Ease::Systems
          Entity entity(entityID, &pScene->m_Registry);
          auto& transformc = entity.GetComponent<Component::Transform2D>();
          auto& animsprc = entity.GetComponent<Component::AnimatedSprite2D>();
+         
+         if(animsprc.SelectedAnimation() == "" || !loader.HasResource(animsprc.GetCurrentTexture())) continue;
 
          animsprc.Step(GetFrameTime());
 
