@@ -58,6 +58,7 @@ namespace Ease
 
         void StartGame();
         void UpdateGame();
+        Ease::Scene* GetCurrentScene() { return m_pCurrentScene; }
 
 
         void InitModules();

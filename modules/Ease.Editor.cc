@@ -17,6 +17,7 @@
 #include "../include/Ease.hpp"
 #include "../include/dylib.hpp"
 #include "imgui-docking/imgui.h"
+#include "imgui-docking/misc/cpp/imgui_stdlib.h"
 #include "../src/Core/Application.h"
 #include "rlImGui/rlImGui.h"
 #include <memory>
@@ -24,6 +25,7 @@
 #include "../src/Resource/ResourceManager.h"
 #include "../src/Resource/Texture/Texture.h"
 #include "../src/Resource/EditorTheme/EditorTheme.h"
+#include "ECS/Components/Components.hpp"
 
 class EaseEditor;
 static EaseEditor* g_Editor = nullptr;
@@ -36,6 +38,14 @@ class EaseEditor : public Ease::BaseModule
    public:
       std::string m_EditorStatusText{"Ease Engine v" EASE_VERSION_STRING};
       std::string m_ConsoleText{""};
+
+      Ease::Entity m_SelectedEntity{};
+      enum class InspectorMode // What data does inspector displays. (entity, resource, texture etc.)
+      {
+         NONE = 0,
+         ENTITY = 1, // Components
+      };
+      InspectorMode m_InspectorMode;
 
       struct Panel
       {
@@ -122,6 +132,92 @@ class EaseEditor : public Ease::BaseModule
                srcRect
             );
          }
+         static void hierarchy()
+         {
+            Ease::Scene* pScene = Ease::Application::get_singleton().GetCurrentScene();
+            auto view = pScene->m_Registry.view<Ease::Component::Common>();
+            for(auto it = view.begin(); it < view.end(); ++it)
+            {
+               Ease::Entity e(*it, &pScene->m_Registry);
+               std::string name = e.GetComponent<Ease::Component::Common>().Name();
+               
+               if(name.length() > 0 && ImGui::Selectable(name.c_str()))
+               {
+                  g_Editor->m_SelectedEntity.SetEntityID(*it);
+                  g_Editor->m_SelectedEntity.SetRegistry(&pScene->m_Registry);
+                  g_Editor->m_InspectorMode = InspectorMode::ENTITY;
+               }
+            }
+         }
+         template <typename T, typename Func>
+         static void DrawComponent(const char* compName, Func func, Ease::Entity& entity)
+         {
+            if(!entity.HasComponent<T>())
+               return;
+            auto& component = entity.GetComponent<T>();
+
+            ImGui::Separator();
+            if(ImGui::CollapsingHeader(compName))
+            {
+               ImGui::Indent();
+               func(component);
+               if(ImGui::Button((std::string("Remove ") + compName).c_str()))
+               {
+                  entity.RemoveComponent<T>();
+               }
+               ImGui::Unindent();
+            }
+         }
+         static void inspector()
+         {
+            if(g_Editor->m_InspectorMode == InspectorMode::ENTITY)
+            {
+               if(g_Editor->m_SelectedEntity.IsValid())
+               {
+                  Ease::Entity entity = g_Editor->m_SelectedEntity;
+                  std::string& name = entity.GetComponent<Ease::Component::Common>().Name();
+
+                  char buf[8];
+                  
+                  ImGui::Text("Name"); ImGui::SameLine();
+                  ImGui::InputText("##Name", &name);
+                  if(name.length() == 0)
+                     name = "Entity";
+
+                  DrawComponent<Ease::Component::AnimatedSprite2D>("AnimatedSprite2D", [](Ease::Component::AnimatedSprite2D& component){
+                     ImGui::Text("AnimatedSprite2D");
+                  }, entity);
+                  DrawComponent<Ease::Component::SpriteRenderer2D>("SpriteRenderer2D", [](Ease::Component::SpriteRenderer2D& component){
+                     ImGui::Text("SpriteRenderer2D");
+                  }, entity);
+                  DrawComponent<Ease::Component::TextRenderer2D>("TextRenderer2D", [](Ease::Component::TextRenderer2D& component){
+                     ImGui::InputText("Text", &component.Text());
+                     ImGui::DragFloat("Font Size", &component.FontSize());
+                     
+                     float color[4];
+                     memcpy(color, &component.Color().r, 4 * sizeof(float));
+                     color[0] /= 255.f;
+                     color[1] /= 255.f;
+                     color[2] /= 255.f;
+                     color[3] /= 255.f;
+                     ImGui::ColorPicker4("Color", color, ImGuiColorEditFlags_Uint8);
+                     color[0] *= 255.f;
+                     color[1] *= 255.f;
+                     color[2] *= 255.f;
+                     color[3] *= 255.f;
+                     memcpy(&component.Color().r, color, 4 * sizeof(float));
+                  }, entity);
+                  DrawComponent<Ease::Component::Transform2D>("Transform2D", [](Ease::Component::Transform2D& component){
+                     ImGui::DragFloat2("Position", &component.Position().x);
+                     ImGui::DragFloat2("Scale", &component.Scale().x);
+                     float rot = DEG2RAD * component.Rotation();
+                     ImGui::SliderAngle("Rotation", &rot);
+                     component.Rotation() = rot * RAD2DEG;
+                     // ImGui::DragInt("ZIndex", &component.ZIndex());
+                  }, entity);
+               }
+            }
+         }
          static void console()
          {
             ImGui::Text("%s", g_Editor->m_ConsoleText.c_str());
@@ -137,9 +233,9 @@ class EaseEditor : public Ease::BaseModule
 
          userFuncs["Print"] = Print;
 
-         panels.emplace_back("Hierarchy", draw.empty);
+         panels.emplace_back("Hierarchy", draw.hierarchy);
          panels.emplace_back("Scene"    , draw.scene);
-         panels.emplace_back("Inspector", draw.empty);
+         panels.emplace_back("Inspector", draw.inspector);
          panels.emplace_back("Project"  , draw.empty);
          panels.emplace_back("Console"  , draw.console);
 

@@ -6,6 +6,7 @@ set(SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/imgui_tables.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/imgui_widgets.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/imgui.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/misc/cpp/imgui_stdlib.cpp
 
 
    #rlImGui
