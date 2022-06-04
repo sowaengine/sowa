@@ -16,6 +16,8 @@ namespace Ease::Component
    
    void AnimatedSprite2D::Step(float ms)
    {
+      if(m_SelectedAnimation == "") return;
+      
       m_TicksPast += ms;
       if(m_TicksPast > 1.f / m_FPS)
       {
