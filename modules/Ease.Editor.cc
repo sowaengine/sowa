@@ -324,7 +324,7 @@ class EaseEditor : public Ease::BaseModule
          std::shared_ptr<Ease::EditorTheme> theme = themeLoader.LoadResource("res/theme.escfg");
          ImGui::GetStyle() = theme->GetStyle();
 
-         Ease::Application::get_singleton().GetCurrentScene()->LoadFromFile("scene.escn");
+         //Ease::Application::get_singleton().GetCurrentScene()->LoadFromFile("scene.escn");
          // Ease::Application::get_singleton().GetCurrentScene()->SaveToFile("scene.escn");
       }
 
@@ -361,6 +361,14 @@ class EaseEditor : public Ease::BaseModule
          /** <Menu Bar> **/
          if(ImGui::BeginMainMenuBar())
          {
+            if(ImGui::BeginMenu("Scene"))
+            {
+               if(ImGui::MenuItem("Save Scene"))
+               {
+                  Ease::Application::get_singleton().GetCurrentScene()->Save();
+               }
+               ImGui::EndMenu();
+            }
 
             if(ImGui::BeginMenu("View"))
             {
@@ -558,7 +566,7 @@ class EaseEditor : public Ease::BaseModule
                   if(project_changed)
                   {
                      project_changed = false;
-                     projectSettings.SaveProject(projectSettings.projectpath.c_str());
+                     projectSettings.SaveProject();
                   }
                }
                ImGui::SetWindowPos(ImVec2(

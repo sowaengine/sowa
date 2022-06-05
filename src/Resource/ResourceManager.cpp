@@ -7,6 +7,7 @@
 #include <fstream>
 #include "Utils/YAML.h"
 #include <iostream>
+#include "Core/ProjectSettings.h"
 
 namespace Ease
 {
@@ -23,7 +24,8 @@ namespace Ease
 
       ResourceID resID = id != 0 ? id : resCounter++;
       m_Resources[resID] = tex;
-      tex->SetTexture(LoadTexture(path));
+      std::filesystem::path fullpath = Ease::ProjectSettings::get_singleton().projectpath / path;
+      tex->SetTexture(LoadTexture(fullpath.c_str()));
       tex->SetResourceID(resID);
       tex->m_Filepath = path;
 

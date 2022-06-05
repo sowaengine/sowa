@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string>
+#include <filesystem>
 
 namespace Ease
 {
@@ -32,9 +33,9 @@ namespace Ease
         } _application;
 
         bool LoadProject(const char* path);
-        bool SaveProject(const char* path);
+        bool SaveProject();
 
-        std::string projectpath{""};
+        std::filesystem::path projectpath{""};
     private:
         ProjectSettings();
         ~ProjectSettings();

@@ -24,7 +24,7 @@ namespace Ease
    {
       projectpath = path;
 
-      YAML::Node project = YAML::LoadFile(path);
+      YAML::Node project = YAML::LoadFile(projectpath / "project.ease");
 
 
       int version = project["v"].as<int>(0); 
@@ -54,7 +54,7 @@ namespace Ease
       return true;
    }
 
-   bool ProjectSettings::SaveProject(const char* path)
+   bool ProjectSettings::SaveProject()
    {
       static const int version = 1;
 
@@ -94,7 +94,7 @@ namespace Ease
          /** </Window> */
       yaml << YAML::EndMap;
 
-      std::ofstream ofstream(path);
+      std::ofstream ofstream(projectpath / "project.ease");
       ofstream << yaml.c_str();
       return true;
    }

@@ -44,7 +44,7 @@ namespace Ease
 
       ProjectSettings& projectSettings = ProjectSettings::get_singleton();
 
-      projectSettings.LoadProject("project.ease"); 
+      projectSettings.LoadProject("./TestGame");
 
       m_Window.CreateWindow(
          projectSettings._window.WindowWidth,
