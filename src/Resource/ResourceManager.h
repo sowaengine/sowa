@@ -43,7 +43,7 @@ namespace Ease
             return m_Resources[id];
         }
 
-        inline std::map<ResourceID, std::shared_ptr<T>> GetResources() { return m_Resources; }
+        inline std::map<ResourceID, std::shared_ptr<T>>& GetResources() { return m_Resources; }
     private:
         std::map<ResourceID, std::shared_ptr<T>> m_Resources;
     };

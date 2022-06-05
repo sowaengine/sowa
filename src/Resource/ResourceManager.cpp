@@ -60,7 +60,7 @@ namespace Ease
       nativeBehaviour->SetBehaviour(nullptr);
       nativeBehaviour->SetCreateFunc(createFunc);
       nativeBehaviour->SetDeleteFunc(deleteFunc);
-      nativeBehaviour->m_Filepath = path;
+      nativeBehaviour->m_Filepath = behaviourPath;
 
       ResourceID resID = id != 0 ? id : resCounter++;
       m_Resources[resID] = nativeBehaviour;

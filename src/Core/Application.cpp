@@ -119,11 +119,11 @@ namespace Ease
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
       InitModules();
+      m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
+
       #ifndef EASE_EDITOR
          StartGame();
       #endif
-
-      m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
       while (!m_Window.ShouldClose())
       {
          m_Window.Begin();
@@ -156,11 +156,41 @@ namespace Ease
    {
       if(m_AppRunning) return;
       m_AppRunning = true;
+
+      static ResourceManager<Ease::NativeBehaviour>& loader_nativeBehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
+      auto behaviours = loader_nativeBehaviour.GetResources();
+      for(auto [id, behaviour] : behaviours)
+      {
+         behaviour->Create();
+      }
+      for(auto [id, behaviour] : behaviours)
+      {
+         behaviour->CallStart();
+      }
    }
 
 
    void Application::UpdateGame()
    {
+      static ResourceManager<Ease::NativeBehaviour>& loader_nativeBehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
+      auto behaviours = loader_nativeBehaviour.GetResources();
+      for(auto [id, behaviour] : behaviours)
+      {
+         behaviour->CallUpdate();
+      }
+   }
+
+   void Application::StopGame()
+   {
+      if(!m_AppRunning) return;
+      m_AppRunning = false;
+
+      static ResourceManager<Ease::NativeBehaviour>& loader_nativeBehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
+      auto behaviours = loader_nativeBehaviour.GetResources();
+      for(auto [id, behaviour] : behaviours)
+      {
+         behaviour->Delete();
+      }
    }
    
 

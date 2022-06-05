@@ -58,6 +58,7 @@ namespace Ease
 
         void StartGame();
         void UpdateGame();
+        void StopGame();
         Ease::Scene* GetCurrentScene() { return m_pCurrentScene; }
 
 
