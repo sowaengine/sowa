@@ -6,6 +6,8 @@
 #include "Utils/YAML.h"
 #include "Core/Application.h"
 #include "Resource/ResourceManager.h"
+#include <filesystem>
+#include "Core/ProjectSettings.h"
 
 namespace Ease
 {
@@ -110,10 +112,14 @@ namespace Ease
       yaml << YAML::EndMap;
    }
    
-   // todo: serialization / deserialization of resources on scene files
+   bool Scene::Save()
+   {
+      return SaveToFile(path.c_str());
+   }
    bool Scene::SaveToFile(const char* file)
    {
-      Application::get_singleton().Log(std::string("Saving scene to ") + file);
+      std::filesystem::path savepath = ProjectSettings::get_singleton().projectpath / file;
+      Application::get_singleton().Log(std::string("Saving scene to ") + savepath.string());
       YAML::Emitter yaml;
       yaml << YAML::BeginMap;
          yaml << YAML::Key << "Type" << YAML::Value << "Scene";
@@ -148,7 +154,7 @@ namespace Ease
          yaml << YAML::EndMap;
       yaml << YAML::EndMap;
 
-      std::ofstream ofstream(file);
+      std::ofstream ofstream(savepath);
       ofstream << yaml.c_str();
       return true;
    }
@@ -156,9 +162,11 @@ namespace Ease
    bool Scene::LoadFromFile(const char* file)
    {
       m_Registry.clear();
-      Application::get_singleton().Log(std::string("Loading scene from ") + file);
+      std::filesystem::path inpath = ProjectSettings::get_singleton().projectpath / file;
+      path = file;
+      Application::get_singleton().Log(std::string("Loading scene from ") + inpath.string());
 
-      YAML::Node node = YAML::LoadFile(file);
+      YAML::Node node = YAML::LoadFile(inpath);
       if(node["Type"].as<std::string>("") != "Scene")
       {
          Application::get_singleton().Log(std::string("Wrong file type ") + node["Type"].as<std::string>("") + ", expected 'Scene'" );

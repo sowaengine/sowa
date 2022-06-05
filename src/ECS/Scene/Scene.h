@@ -5,6 +5,7 @@
 
 #include "ECS/Entity/Entity.h"
 #include "entt/entt.hpp"
+#include <filesystem>
 
 namespace Ease
 {
@@ -20,8 +21,10 @@ namespace Ease
 
         entt::registry m_Registry;
 
-        bool SaveToFile(const char* path);
-        bool LoadFromFile(const char* path);
+        bool Save();
+        bool SaveToFile(const char* file);
+        bool LoadFromFile(const char* file);
+        std::filesystem::path path;
     private:
     };
 } // namespace Ease
