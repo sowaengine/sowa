@@ -47,7 +47,7 @@ namespace Ease
    {
       static ResourceID resCounter = 0;
 
-      std::string behaviourPath = path;
+      std::string behaviourPath = ProjectSettings::get_singleton().projectpath / path;
       behaviourPath += dylib::extension;
 
       dylib lib;
@@ -56,11 +56,11 @@ namespace Ease
       auto createFunc = lib.get_function<BaseBehaviour*()>("Create");
       auto deleteFunc = lib.get_function<void(BaseBehaviour*)>("Destroy");
 
-      BaseBehaviour* myBehaviour = createFunc();
-
       std::shared_ptr<Ease::NativeBehaviour> nativeBehaviour = std::make_shared<Ease::NativeBehaviour>();
-      nativeBehaviour->SetBehaviour(myBehaviour);
+      nativeBehaviour->SetBehaviour(nullptr);
+      nativeBehaviour->SetCreateFunc(createFunc);
       nativeBehaviour->SetDeleteFunc(deleteFunc);
+      nativeBehaviour->m_Filepath = path;
 
       ResourceID resID = id != 0 ? id : resCounter++;
       m_Resources[resID] = nativeBehaviour;
