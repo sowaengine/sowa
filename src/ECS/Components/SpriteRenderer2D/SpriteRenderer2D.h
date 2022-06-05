@@ -14,8 +14,10 @@ namespace Ease::Component
 
 
         uint32_t& TextureID() { return m_TextureID; }
+        bool& Visible() { return m_Visible; }
     private:
         uint32_t m_TextureID;
+        bool m_Visible = true;
     };
 }
 

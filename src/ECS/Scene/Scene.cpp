@@ -104,6 +104,7 @@ namespace Ease
 
                yaml << YAML::Key << "SpriteRenderer2D" << YAML::BeginMap;
                   yaml << YAML::Key << "Texture" << YAML::Value << component.TextureID();
+                  yaml << YAML::Key << "Visible" << YAML::Value << component.Visible();
                yaml << YAML::EndMap;
             }
             // </SpriteRenderer2D>
@@ -116,6 +117,7 @@ namespace Ease
                   yaml << YAML::Key << "Text" << YAML::Value << component.Text();
                   yaml << YAML::Key << "Color" << YAML::Value << component.Color();
                   yaml << YAML::Key << "FontSize" << YAML::Value << component.FontSize();
+                  yaml << YAML::Key << "Visible" << YAML::Value << component.Visible();
                yaml << YAML::EndMap;
             }
             // </TextRenderer2D>
@@ -274,6 +276,7 @@ namespace Ease
                {
                   Component::SpriteRenderer2D& component = entity.AddComponent<Component::SpriteRenderer2D>();
                   component.TextureID() = component_node["Texture"].as<ResourceID>(0);
+                  component.Visible() = component_node["Visible"].as<bool>(true);
                }
                if(YAML::Node component_node = components["TextRenderer2D"]; component_node)
                {
@@ -281,6 +284,7 @@ namespace Ease
                   component.Text() = component_node["Text"].as<std::string>("");
                   component.Color() = component_node["Color"].as<glm::vec4>(glm::vec4{255.f, 255.f, 255.f, 255.f});
                   component.FontSize() = component_node["FontSize"].as<float>(64.f);
+                  component.Visible() = component_node["Visible"].as<bool>(true);
                   // component.ZIndex() = component_node["ZIndex"].as<int>(0);
                }
                if(YAML::Node component_node = components["Transform2D"]; component_node)

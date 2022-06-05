@@ -116,7 +116,7 @@ class EaseEditor : public Ease::BaseModule
                dstHeight = ImGui::GetContentRegionAvail().y;
 
                float regionAvail = ImGui::GetContentRegionAvail().x;
-               ImGui::SetCursorPosX(((regionAvail - dstWidth) / 2) + ImGui::GetCursorStartPos().x);
+               ImGui::SetCursorPosX(((regionAvail - dstWidth) / 2) + ImGui::GetCursorPosX());
             }
             else
             {
@@ -124,7 +124,7 @@ class EaseEditor : public Ease::BaseModule
                dstHeight = ImGui::GetContentRegionAvail().x / aspect;
                
                float regionAvail = ImGui::GetContentRegionAvail().y;
-               ImGui::SetCursorPosY(((regionAvail - dstHeight) / 2.f) + ImGui::GetCursorStartPos().y);
+               ImGui::SetCursorPosY(((regionAvail - dstHeight) / 2.f) + ImGui::GetCursorPosY());
             }
             
             RLImGuiImageRect(
@@ -238,7 +238,7 @@ class EaseEditor : public Ease::BaseModule
                      ImGui::Text("AnimatedSprite2D");
                   }, entity);
                   DrawComponent<Ease::Component::SpriteRenderer2D>("SpriteRenderer2D", [](Ease::Component::SpriteRenderer2D& component){
-                     ImGui::Text("SpriteRenderer2D");
+                     ImGui::Checkbox("Visible", &component.Visible());
                   }, entity);
                   DrawComponent<Ease::Component::TextRenderer2D>("TextRenderer2D", [](Ease::Component::TextRenderer2D& component){
                      ImGui::InputText("Text", &component.Text());
@@ -256,6 +256,8 @@ class EaseEditor : public Ease::BaseModule
                      color[2] *= 255.f;
                      color[3] *= 255.f;
                      memcpy(&component.Color().r, color, 4 * sizeof(float));
+
+                     ImGui::Checkbox("Visible", &component.Visible());
                   }, entity);
                   DrawComponent<Ease::Component::Transform2D>("Transform2D", [](Ease::Component::Transform2D& component){
                      ImGui::DragFloat2("Position", &component.Position().x);

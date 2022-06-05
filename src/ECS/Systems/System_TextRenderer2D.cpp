@@ -17,6 +17,8 @@ namespace Ease::Systems
          auto& transformc = entity.GetComponent<Component::Transform2D>();
          auto& textrendererc = entity.GetComponent<Component::TextRenderer2D>();
 
+         if(!textrendererc.Visible()) continue;
+
          Renderer::get_singleton().DrawText(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color());
       }
    }
