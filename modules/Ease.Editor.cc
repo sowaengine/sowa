@@ -215,6 +215,35 @@ class EaseEditor : public Ease::BaseModule
                      component.Rotation() = rot * RAD2DEG;
                      // ImGui::DragInt("ZIndex", &component.ZIndex());
                   }, entity);
+
+                  if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                  {
+                     ImGui::OpenPopup("__POPUP__INSPECTOR_RCLICK");
+                  }
+                  if(ImGui::BeginPopup("__POPUP__INSPECTOR_RCLICK"))
+                  {
+                     if(ImGui::BeginMenu("Add Component"))
+                     {
+                        if(!entity.HasComponent<Ease::Component::AnimatedSprite2D>())
+                           if(ImGui::MenuItem("AnimatedSprite2D"))
+                              entity.AddComponent<Ease::Component::AnimatedSprite2D>();
+
+                        if(!entity.HasComponent<Ease::Component::SpriteRenderer2D>())
+                           if(ImGui::MenuItem("SpriteRenderer2D"))
+                              entity.AddComponent<Ease::Component::SpriteRenderer2D>();
+                        
+                        if(!entity.HasComponent<Ease::Component::TextRenderer2D>())
+                           if(ImGui::MenuItem("TextRenderer2D"))
+                              entity.AddComponent<Ease::Component::TextRenderer2D>();
+                        
+                        if(!entity.HasComponent<Ease::Component::Transform2D>())
+                           if(ImGui::MenuItem("Transform2D"))
+                              entity.AddComponent<Ease::Component::Transform2D>();
+                        
+                        ImGui::EndMenu();
+                     }
+                     ImGui::EndPopup();
+                  }
                }
             }
          }
@@ -236,7 +265,7 @@ class EaseEditor : public Ease::BaseModule
          panels.emplace_back("Hierarchy", draw.hierarchy);
          panels.emplace_back("Scene"    , draw.scene);
          panels.emplace_back("Inspector", draw.inspector);
-         panels.emplace_back("Project"  , draw.empty);
+         // panels.emplace_back("Project"  , draw.empty);
          panels.emplace_back("Console"  , draw.console);
 
 
