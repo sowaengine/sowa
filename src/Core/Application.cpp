@@ -22,6 +22,8 @@
 #include "imgui-docking/imgui.h"
 #include "rlImGui/rlImGui.h"
 
+#define EASE_EDITOR
+
 namespace Ease
 {
    Application::Application()
@@ -54,19 +56,10 @@ namespace Ease
          projectSettings._window.VideoHeight
       );
 
-      /*ResourceManager<Ease::Texture>& textureLoader = ResourceManager<Ease::Texture>::GetLoader();
-      std::shared_ptr<Texture> tex = textureLoader.LoadResource("res/characters.png");
-      std::shared_ptr<Texture> iconTex = textureLoader.LoadResource("res/icon.png");*/
-
-      
-      // ResourceManager<Ease::NativeModule>& moduleLoader = ResourceManager<Ease::NativeModule>::GetLoader();
-      // std::shared_ptr<Ease::NativeModule> myModule = moduleLoader.LoadResource("modules/myLib.so");
-
-      std::cout << (int)LoadModule("Ease", "Core", 1) << std::endl;
-      std::cout << (int)LoadModule("Ease", "Editor", 1) << std::endl;
-
-      
-      // myModule->CallStart();
+      LoadModule("Ease", "Core", 1);
+      #ifdef EASE_EDITOR
+         LoadModule("Ease", "Editor", 1);
+      #endif
 
       
       /*Entity ent1 = m_pCurrentScene->Create("Entity1");
@@ -126,7 +119,11 @@ namespace Ease
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
       InitModules();
-      StartGame();
+      #ifndef EASE_EDITOR
+         StartGame();
+      #endif
+
+      m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
       while (!m_Window.ShouldClose())
       {
          m_Window.Begin();
@@ -213,7 +210,10 @@ namespace Ease
    }
    std::shared_ptr<NativeModule> Application::GetModule(const std::string& name)
    {
-      return m_Modules[name];
+      if(m_Modules.count(name) == 1)
+         return m_Modules[name];
+      else
+         return nullptr;
    }
    
    
