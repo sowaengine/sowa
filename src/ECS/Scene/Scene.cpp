@@ -33,6 +33,16 @@ namespace Ease
 
       return entity;
    }
+   
+   void Scene::Destroy(Ease::Entity& entity)
+   {
+      if(m_Registry.valid((entt::entity)entity.ID()))
+      {
+         m_Registry.destroy((entt::entity)entity.ID());
+      }
+      entity.SetEntityID(entt::null);
+      entity.SetRegistry(nullptr);
+   }
 
 
    static void YAMLSerializeEntity(Ease::Entity entity, YAML::Emitter& yaml)
