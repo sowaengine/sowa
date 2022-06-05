@@ -28,6 +28,7 @@ namespace Ease
         struct {
             std::string Name = "Ease Engine";
             std::string Description = "";
+            std::string MainScene = "";
         } _application;
 
         bool LoadProject(const char* path);

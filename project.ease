@@ -6,6 +6,7 @@ v: 1
 Application:
   Name: Game Ease
   Description: This is a game made with Ease Engine
+  MainScene: scene.escn
 
 Window:
   WindowWidth: 1280

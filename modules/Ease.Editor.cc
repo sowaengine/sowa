@@ -508,6 +508,11 @@ class EaseEditor : public Ease::BaseModule
                         ImGui::Text("Description"); ImGui::SameLine();
                         ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - ImGui::GetCursorPosX());
                         if(ImGui::InputText("##App_Desc", &projectSettings._application.Description))
+                           project_changed = true;
+
+                        ImGui::Text("MainScene"); ImGui::SameLine();
+                        ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - ImGui::GetCursorPosX());
+                        if(ImGui::InputText("##App_MainScene", &projectSettings._application.MainScene))
                            project_changed = true; 
                      }
                      if(general_selected_tab == TAB_GENERAL_WINDOW)

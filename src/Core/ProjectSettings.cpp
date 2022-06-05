@@ -48,6 +48,7 @@ namespace Ease
 
             _application.Name = __application["Name"].as<std::string>(_application.Name);
             _application.Description = __application["Description"].as<std::string>(_application.Description);
+            _application.MainScene = __application["MainScene"].as<std::string>(_application.MainScene);
          }
       }
       return true;
@@ -74,6 +75,7 @@ namespace Ease
          yaml << YAML::Value << YAML::BeginMap;
             yaml << YAML::Key << "Name" << YAML::Value << _application.Name;
             yaml << YAML::Key << "Description" << YAML::Value << _application.Description;
+            yaml << YAML::Key << "MainScene" << YAML::Value << _application.MainScene;
             yaml << YAML::Newline;
          yaml << YAML::EndMap << YAML::Newline;
          /** </Application> */
