@@ -3,10 +3,18 @@
 
 namespace Ease::Systems
 {
-   void ProcessAll(Ease::Scene* pScene)
+   void ProcessAll(Ease::Scene* pScene, SystemsFlags flags)
    {
-      Systems::System_SpriteRenderer2D(pScene);
-      Systems::System_AnimatedSprite2D(pScene);
-      Systems::System_TextRenderer2D(pScene);
+      if(flags & SystemsFlags::SpriteRenderer2D)
+         Systems::System_SpriteRenderer2D(pScene);
+
+      if(flags & SystemsFlags::NativeBehaviourList)
+         Systems::System_NativeBehaviourList(pScene);
+
+      if(flags & SystemsFlags::AnimatedSprite2D)
+         Systems::System_AnimatedSprite2D(pScene);
+         
+      if(flags & SystemsFlags::TextRenderer2D)
+         Systems::System_TextRenderer2D(pScene);
    }
 } // namespace Ease::Systems
