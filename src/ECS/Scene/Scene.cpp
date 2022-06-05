@@ -143,6 +143,21 @@ namespace Ease
 
             yaml << YAML::EndMap;
          }  // </Ease::Texture>
+         { // <Ease::NativeBehaviour>
+            yaml << YAML::Key << "NativeBehaviour" << YAML::Value << YAML::BeginMap;
+            ResourceManager<Ease::NativeBehaviour> loader_nativebehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
+            std::map<ResourceID, std::shared_ptr<Ease::NativeBehaviour>> behaviours = loader_nativebehaviour.GetResources();
+            
+            for(auto[id, behaviour] : behaviours)
+            {
+               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                  yaml << YAML::Key << "Path" << YAML::Value << behaviour->GetFilepath();
+                  yaml << YAML::Newline;
+               yaml << YAML::EndMap;
+            }
+
+            yaml << YAML::EndMap;
+         }  // </Ease::NativeBehaviour>
          yaml << YAML::Newline << YAML::EndMap;
          // </Resources>
 
@@ -188,6 +203,18 @@ namespace Ease
                }
             }
          } // </Ease::Texture>
+         { // <Ease::NativeBehaviour>
+            if(YAML::Node behaviour_node = resources["NativeBehaviour"]; behaviour_node)
+            {
+               ResourceManager<Ease::NativeBehaviour>& behaviour_loader = ResourceManager<Ease::NativeBehaviour>::GetLoader();
+               for(auto it = behaviour_node.begin(); it != behaviour_node.end(); ++it)
+               {
+                  uint32_t id = it->first.as<uint32_t>(0);
+                  YAML::Node bhv_node = it->second;
+                  behaviour_loader.LoadResource(bhv_node["Path"].as<std::string>("").c_str(), id);
+               }
+            }
+         } // </Ease::NativeBehaviour>
       }
       
       YAML::Node entities = node["EntityList"];
