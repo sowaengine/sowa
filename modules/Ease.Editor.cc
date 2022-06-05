@@ -98,6 +98,16 @@ class EaseEditor : public Ease::BaseModule
          }
          static void scene()
          {
+            if(ImGui::Button(">", ImVec2(32.f, 32.f)))
+            {
+               Ease::Application::get_singleton().StartGame();
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("||", ImVec2(32.f, 32.f)))
+            {
+               Ease::Application::get_singleton().StopGame();
+            }
+            
             Ease::Window& window = Ease::Application::get_singleton().GetWindow();
             const Texture* image = &window.GetFinalFramebufferTexture().texture;
             Rectangle srcRect{};
