@@ -4,6 +4,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <ECS/Entity/Entity.h>
 
 
 #define EASE_VERSION_MAJOR 0
@@ -19,6 +20,8 @@ typedef void(*UserFunc)();
 
 namespace Ease
 {
+   class Entity;
+
    class BaseModule
    {
       public:
@@ -45,6 +48,17 @@ namespace Ease
          std::unordered_map<std::string, UserValue> userValues;
    };
 
+   class BaseBehaviour
+   {
+      public:
+         BaseBehaviour() {}
+         virtual ~BaseBehaviour() {}
+
+         virtual void Start() {}
+         virtual void Update() {}
+
+         Ease::Entity self;
+   };
 }
 
 
