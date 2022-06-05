@@ -128,7 +128,7 @@ namespace Ease
       {
          m_Window.Begin();
          
-         Ease::Systems::ProcessAll(m_pCurrentScene);
+         Ease::Systems::ProcessAll(m_pCurrentScene, m_AppRunning ? SystemsFlags::Update_WhenRunning : SystemsFlags::Update_Always);
 
          if(m_AppRunning)
             UpdateGame();
@@ -163,21 +163,13 @@ namespace Ease
       {
          behaviour->Create();
       }
-      for(auto [id, behaviour] : behaviours)
-      {
-         behaviour->CallStart();
-      }
+      m_pCurrentScene->StartScene();
    }
 
 
    void Application::UpdateGame()
    {
-      static ResourceManager<Ease::NativeBehaviour>& loader_nativeBehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
-      auto behaviours = loader_nativeBehaviour.GetResources();
-      for(auto [id, behaviour] : behaviours)
-      {
-         behaviour->CallUpdate();
-      }
+      
    }
 
    void Application::StopGame()
