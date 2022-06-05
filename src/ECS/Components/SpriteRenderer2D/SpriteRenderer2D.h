@@ -9,7 +9,7 @@ namespace Ease::Component
     class SpriteRenderer2D
     {
     public:
-        SpriteRenderer2D() : m_TextureID(0) {};
+        SpriteRenderer2D();
         ~SpriteRenderer2D();
 
 
