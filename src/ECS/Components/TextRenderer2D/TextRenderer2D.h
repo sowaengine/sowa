@@ -11,6 +11,7 @@ namespace Ease::Component
     {
     public:
         TextRenderer2D();
+        TextRenderer2D(const std::string& text) : m_Text(text) {}
         ~TextRenderer2D();
         
         std::string& Text() { return m_Text; }
@@ -18,8 +19,8 @@ namespace Ease::Component
         float& FontSize() { return m_FontSize; }
     private:
         std::string m_Text;
-        glm::vec4 m_Color;
-        float m_FontSize;
+        glm::vec4 m_Color{255.f, 255.f, 255.f, 255.f};
+        float m_FontSize = 64.f;
     };
 }
 

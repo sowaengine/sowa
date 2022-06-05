@@ -136,17 +136,66 @@ class EaseEditor : public Ease::BaseModule
          {
             Ease::Scene* pScene = Ease::Application::get_singleton().GetCurrentScene();
             auto view = pScene->m_Registry.view<Ease::Component::Common>();
-            for(auto it = view.begin(); it < view.end(); ++it)
+            bool entity_rclicked = false; // is user right clicked on any entity this frame
+            for(auto it = view.rbegin(); it < view.rend(); ++it)
             {
                Ease::Entity e(*it, &pScene->m_Registry);
                std::string name = e.GetComponent<Ease::Component::Common>().Name();
                
-               if(name.length() > 0 && ImGui::Selectable(name.c_str()))
+               if(name.length() > 0 && ImGui::MenuItem(name.c_str()))
                {
                   g_Editor->m_SelectedEntity.SetEntityID(*it);
                   g_Editor->m_SelectedEntity.SetRegistry(&pScene->m_Registry);
                   g_Editor->m_InspectorMode = InspectorMode::ENTITY;
+
                }
+               if(ImGui::IsItemClicked(ImGuiMouseButton_Right))
+               {
+                  ImGui::OpenPopup("__POPUP__HIERARCHY_ENTITY_RCLICK");
+                  entity_rclicked = true;
+                  g_Editor->m_SelectedEntity.SetEntityID(*it);
+                  g_Editor->m_SelectedEntity.SetRegistry(&pScene->m_Registry);
+               }
+            }
+            if(ImGui::BeginPopup("__POPUP__HIERARCHY_ENTITY_RCLICK"))
+            {
+               if(ImGui::MenuItem("Delete"))
+               {
+                  Ease::Application::get_singleton().GetCurrentScene()->Destroy(g_Editor->m_SelectedEntity);
+               }
+               ImGui::EndPopup();
+            }
+
+            if(!entity_rclicked && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+            {
+               ImGui::OpenPopup("__POPUP__HIERARCHY_RCLICK");
+            }
+            if(ImGui::BeginPopup("__POPUP__HIERARCHY_RCLICK"))
+            {
+               if(ImGui::BeginMenu("New"))
+               {
+                  if(ImGui::MenuItem("Empty Entity"))
+                  {
+                     Ease::Entity e = Ease::Application::get_singleton().GetCurrentScene()->Create("Empty Entity");
+                     g_Editor->m_SelectedEntity = e;
+                  }
+                  if(ImGui::MenuItem("Sprite2D"))
+                  {
+                     Ease::Entity e = Ease::Application::get_singleton().GetCurrentScene()->Create("Sprite2D");
+                     e.AddComponent<Ease::Component::Transform2D>();
+                     e.AddComponent<Ease::Component::SpriteRenderer2D>();
+                     g_Editor->m_SelectedEntity = e;
+                  }
+                  if(ImGui::MenuItem("Text2D"))
+                  {
+                     Ease::Entity e = Ease::Application::get_singleton().GetCurrentScene()->Create("Text2D");
+                     e.AddComponent<Ease::Component::Transform2D>();
+                     e.AddComponent<Ease::Component::TextRenderer2D>("Text");
+                     g_Editor->m_SelectedEntity = e;
+                  }
+                  ImGui::EndMenu();
+               }
+               ImGui::EndPopup();
             }
          }
          template <typename T, typename Func>
