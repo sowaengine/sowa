@@ -25,6 +25,8 @@ namespace Ease
         bool SaveToFile(const char* file);
         bool LoadFromFile(const char* file);
         std::filesystem::path path;
+        
+        void StartScene();
     private:
     };
 } // namespace Ease

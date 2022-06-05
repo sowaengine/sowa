@@ -11,9 +11,28 @@
 
 namespace Ease
 {
+   void Scene::StartScene()
+   {
+      static ResourceManager<Ease::NativeBehaviour>& loader_nativeBehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
+      auto view = m_Registry.view<Component::NativeBehaviourList>();
+      for(const auto& entityID : view)
+      {
+         Entity entity(entityID, &m_Registry);
+         Component::NativeBehaviourList& nblist = entity.GetComponent<Component::NativeBehaviourList>();
+         std::vector<ResourceID>& list = nblist.GetList();
+
+         
+         for(ResourceID id : list)
+         {
+            std::shared_ptr<NativeBehaviour> behaviour = loader_nativeBehaviour.GetResource(id);
+            behaviour->GetBehaviour()->self = entity;
+            behaviour->CallStart();
+         }
+      }
+   }
    Scene::Scene()
    {
-
+      
    }
 
    Scene::~Scene()
@@ -68,6 +87,16 @@ namespace Ease
                yaml << YAML::EndMap;
             }
             // </AnimatedSprite2D>
+            // <NativeBehaviourList>
+            if(entity.HasComponent<Component::NativeBehaviourList>())
+            {
+               Component::NativeBehaviourList& component = entity.GetComponent<Component::NativeBehaviourList>();
+
+               yaml << YAML::Key << "NativeBehaviourList" << YAML::BeginMap;
+                  yaml << YAML::Key << "List" << YAML::Value << component.GetList();
+               yaml << YAML::EndMap;
+            }
+            // </NativeBehaviourList>
             // <SpriteRenderer2D>
             if(entity.HasComponent<Component::SpriteRenderer2D>())
             {
@@ -235,6 +264,11 @@ namespace Ease
                   Component::AnimatedSprite2D& component = entity.AddComponent<Component::AnimatedSprite2D>();
                   std::cout << "AnimatedSprite2D not serializable!" << std::endl;
                   // component.() = component_node[""].as<>();
+               }
+               if(YAML::Node component_node = components["NativeBehaviourList"]; component_node)
+               {
+                  Component::NativeBehaviourList& component = entity.AddComponent<Component::NativeBehaviourList>();
+                  component.GetList() = component_node["List"].as<std::vector<uint32_t>>(std::vector<uint32_t>{});
                }
                if(YAML::Node component_node = components["SpriteRenderer2D"]; component_node)
                {
