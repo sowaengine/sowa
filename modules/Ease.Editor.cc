@@ -247,6 +247,18 @@ class EaseEditor : public Ease::BaseModule
                   DrawComponent<Ease::Component::AnimatedSprite2D>("AnimatedSprite2D", [](Ease::Component::AnimatedSprite2D& component){
                      ImGui::Text("AnimatedSprite2D");
                   }, entity);
+                  DrawComponent<Ease::Component::Group>("Group", [](Ease::Component::Group& component){
+                     ImGui::Text("Groups");
+                     for(size_t i = 0; i < component.Groups().size(); i++)
+                     {
+                        ImGui::InputText((std::string("##GROUP_INPUT") + std::to_string(i)).c_str(), &component.Groups()[i]);
+                     }
+                     if(ImGui::Button("+", ImVec2(32.f, 32.f)))
+                        component.Groups().emplace_back("Group");
+                     ImGui::SameLine();
+                     if(ImGui::Button("-", ImVec2(32.f, 32.f)) && component.Groups().size() > 0)
+                        component.Groups().pop_back();
+                  }, entity);
                   DrawComponent<Ease::Component::SpriteRenderer2D>("SpriteRenderer2D", [](Ease::Component::SpriteRenderer2D& component){
                      ImGui::Checkbox("Visible", &component.Visible());
                   }, entity);
