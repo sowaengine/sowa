@@ -87,6 +87,16 @@ namespace Ease
                yaml << YAML::EndMap;
             }
             // </AnimatedSprite2D>
+            // <Group>
+            if(entity.HasComponent<Component::Group>())
+            {
+               Component::Group& component = entity.GetComponent<Component::Group>();
+
+               yaml << YAML::Key << "Group" << YAML::BeginMap;
+                  yaml << YAML::Key << "Groups" << YAML::Value << component.Groups();
+               yaml << YAML::EndMap;
+            }
+            // </Group>
             // <NativeBehaviourList>
             if(entity.HasComponent<Component::NativeBehaviourList>())
             {
@@ -266,6 +276,11 @@ namespace Ease
                   Component::AnimatedSprite2D& component = entity.AddComponent<Component::AnimatedSprite2D>();
                   std::cout << "AnimatedSprite2D not serializable!" << std::endl;
                   // component.() = component_node[""].as<>();
+               }
+               if(YAML::Node component_node = components["Group"]; component_node)
+               {
+                  Component::Group& component = entity.AddComponent<Component::Group>();
+                  component.Groups() = component_node["Groups"].as<std::vector<std::string>>(std::vector<std::string>{});
                }
                if(YAML::Node component_node = components["NativeBehaviourList"]; component_node)
                {
