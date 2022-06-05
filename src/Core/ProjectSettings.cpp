@@ -22,9 +22,7 @@ namespace Ease
 
    bool ProjectSettings::LoadProject(const char* path)
    {
-      //std::ifstream ifstream(path);
-      //std::stringstream str;
-      //str << ifstream.rdbuf();
+      projectpath = path;
 
       YAML::Node project = YAML::LoadFile(path);
 
@@ -68,6 +66,7 @@ namespace Ease
 
       yaml << YAML::BeginMap;
          yaml << YAML::Key << "v" << YAML::Value << version;
+         yaml << YAML::Newline << YAML::Newline;
          
 
          /**  <Application> */
@@ -75,6 +74,7 @@ namespace Ease
          yaml << YAML::Value << YAML::BeginMap;
             yaml << YAML::Key << "Name" << YAML::Value << _application.Name;
             yaml << YAML::Key << "Description" << YAML::Value << _application.Description;
+            yaml << YAML::Newline;
          yaml << YAML::EndMap << YAML::Newline;
          /** </Application> */
 
@@ -87,7 +87,8 @@ namespace Ease
             yaml << YAML::Key << "VideoWidth" << YAML::Value << _window.VideoWidth;
             yaml << YAML::Key << "VideoHeight" << YAML::Value << _window.VideoHeight;
             yaml << YAML::Key << "Fullscreen" << YAML::Value << _window.Fullscreen;
-         yaml << YAML::EndMap << YAML::Newline;
+            yaml << YAML::Newline;
+         yaml << YAML::EndMap;
          /** </Window> */
       yaml << YAML::EndMap;
 

@@ -32,6 +32,8 @@ namespace Ease
 
         bool LoadProject(const char* path);
         bool SaveProject(const char* path);
+
+        std::string projectpath{""};
     private:
         ProjectSettings();
         ~ProjectSettings();

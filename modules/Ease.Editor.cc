@@ -19,6 +19,7 @@
 #include "imgui-docking/imgui.h"
 #include "imgui-docking/misc/cpp/imgui_stdlib.h"
 #include "../src/Core/Application.h"
+#include "Core/ProjectSettings.h"
 #include "rlImGui/rlImGui.h"
 #include <memory>
 #include <unordered_map>
@@ -258,7 +259,7 @@ class EaseEditor : public Ease::BaseModule
                   }, entity);
                   DrawComponent<Ease::Component::Transform2D>("Transform2D", [](Ease::Component::Transform2D& component){
                      ImGui::DragFloat2("Position", &component.Position().x);
-                     ImGui::DragFloat2("Scale", &component.Scale().x);
+                     ImGui::DragFloat2("Scale", &component.Scale().x, 0.005f);
                      float rot = DEG2RAD * component.Rotation();
                      ImGui::SliderAngle("Rotation", &rot);
                      component.Rotation() = rot * RAD2DEG;
@@ -355,6 +356,7 @@ class EaseEditor : public Ease::BaseModule
 
          static bool modal_about_ease = false;
          static bool modal_editor_settings = false;
+         static bool modal_project_settings = false;
 
          /** <Menu Bar> **/
          if(ImGui::BeginMainMenuBar())
@@ -362,6 +364,14 @@ class EaseEditor : public Ease::BaseModule
 
             if(ImGui::BeginMenu("View"))
             {
+               ImGui::EndMenu();
+            }
+            
+            if(ImGui::BeginMenu("Project"))
+            {
+               if(ImGui::MenuItem("Project Settings"))
+                  modal_project_settings = true;
+
                ImGui::EndMenu();
             }
 
@@ -444,6 +454,116 @@ class EaseEditor : public Ease::BaseModule
          ImGui::End();
 
 
+         if(modal_project_settings)
+         {
+            Ease::Window& window = Ease::Application::get_singleton().GetWindow();
+            ImGui::SetNextWindowSize(ImVec2(
+               (window.GetWindowWidth() / 1.75f),
+               (window.GetWindowHeight() / 1.5f)
+            ));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowTitleAlign, ImVec2(0.5f, 0.5f));
+            if(ImGui::Begin("Project Settings", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse))
+            {
+               static int selected_tab = 0;
+               static bool project_changed = false;
+               
+               const int TAB_GENERAL = 0;
+               const int TAB_TEST        = 1;
+
+               Ease::ProjectSettings& projectSettings = Ease::ProjectSettings::get_singleton();
+
+   
+               if(ImGui::Button("General"))
+                  selected_tab = TAB_GENERAL;
+               
+               ImGui::SameLine();
+               if(ImGui::Button("Test"))
+                  selected_tab = TAB_TEST;
+               
+
+               if(selected_tab == TAB_GENERAL)
+               {
+                  if(ImGui::BeginTable("__PROJECT__PROJECTSETTINGS_GENERAL_", 2, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
+                  {
+                     static int general_selected_tab = 0;
+                     
+                     const int TAB_GENERAL_APPLICATION = 0;
+                     const int TAB_GENERAL_WINDOW      = 1;
+
+
+                     ImGui::TableNextColumn();
+                     if(ImGui::MenuItem("Application"))
+                        general_selected_tab = TAB_GENERAL_APPLICATION;
+                     if(ImGui::MenuItem("Window"))
+                        general_selected_tab = TAB_GENERAL_WINDOW;
+
+                     ImGui::TableNextColumn();
+                     if(general_selected_tab == TAB_GENERAL_APPLICATION)
+                     {
+                        ImGui::Text("Name"); ImGui::SameLine();
+                        ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - ImGui::GetCursorPosX());
+                        if(ImGui::InputText("##App_Name", &projectSettings._application.Name))
+                           project_changed = true;
+                        
+                        ImGui::Text("Description"); ImGui::SameLine();
+                        ImGui::SetNextItemWidth(ImGui::GetWindowSize().x - ImGui::GetCursorPosX());
+                        if(ImGui::InputText("##App_Desc", &projectSettings._application.Description))
+                           project_changed = true; 
+                     }
+                     if(general_selected_tab == TAB_GENERAL_WINDOW)
+                     {
+                        ImGui::Text("Window Size"); ImGui::SameLine();
+                        int window_size[2] = { projectSettings._window.WindowWidth, projectSettings._window.WindowHeight };
+                        if(ImGui::DragInt2("##Win_Window_Size", window_size, 1.f, 1, 0))
+                           project_changed = true;
+                        projectSettings._window.WindowWidth = window_size[0];
+                        projectSettings._window.WindowHeight = window_size[1];
+
+                        ImGui::Text("Video Size"); ImGui::SameLine();
+                        int video_size[2] = { projectSettings._window.VideoWidth, projectSettings._window.VideoHeight };
+                        if(ImGui::DragInt2("##Win_Video_Size", video_size, 1.f, 1, 0))
+                           project_changed = true;
+                        projectSettings._window.VideoWidth = video_size[0];
+                        projectSettings._window.VideoHeight = video_size[1];
+
+                        ImGui::Text("Fullscreen"); ImGui::SameLine();
+                        if(ImGui::Checkbox("##Win_Fullscreen", &projectSettings._window.Fullscreen))
+                           project_changed = true;
+                     }
+                     
+                     ImGui::EndTable();
+                  }
+               }
+
+               if(selected_tab == TAB_TEST)
+               {
+                  ImGui::Text("Test items");
+                  ImGui::Text("Test items");
+                  ImGui::Text("Test items");
+                  ImGui::Text("Test items");
+               }
+
+               ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2) - (ImGui::CalcTextSize("Close").x * (3.f / 2.f)));
+               if (ImGui::Button( "Close", ImVec2(
+                     ImGui::CalcTextSize("Close").x * 3,
+                     ImGui::CalcTextSize("Close").y * 1.5)))
+               {
+                  modal_project_settings = false;
+
+                  if(project_changed)
+                  {
+                     project_changed = false;
+                     projectSettings.SaveProject(projectSettings.projectpath.c_str());
+                  }
+               }
+               ImGui::SetWindowPos(ImVec2(
+                  (window.GetWindowWidth() / 2) - (ImGui::GetWindowSize().x / 2),
+                  (window.GetWindowHeight() / 2) - (ImGui::GetWindowSize().y / 2)
+               ));
+            }
+            ImGui::PopStyleVar();
+            ImGui::End();
+         }
 
          if(modal_editor_settings)
          {

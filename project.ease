@@ -1,14 +1,15 @@
-# Ease Engine Project
+# Ease Engine project file
+# Do not modify
 
 v: 1
 
 Application:
-  Name : "Ease Game"
-  Description : "This is a game made with Ease Engine"
+  Name: Game Ease
+  Description: This is a game made with Ease Engine
 
 Window:
-  WindowWidth : 1280
-  WindowHeight : 720
-  VideoWidth : 1920
-  VideoHeight : 1080
-  Fullscreen : false
+  WindowWidth: 1280
+  WindowHeight: 720
+  VideoWidth: 1920
+  VideoHeight: 1080
+  Fullscreen: false
