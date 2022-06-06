@@ -14,8 +14,10 @@ namespace Ease::Component
       ~NativeBehaviourList();
       
       inline std::vector<ResourceID>& GetList() { return m_List; }
+      inline std::vector<Ease::BaseBehaviour*>& GetBehaviourList() { return m_BehaviourList; }
    private:
       std::vector<ResourceID> m_List;
+      std::vector<Ease::BaseBehaviour*> m_BehaviourList;
    };
 }
 

@@ -57,7 +57,6 @@ namespace Ease
       auto deleteFunc = lib.get_function<void(BaseBehaviour*)>("Destroy");
 
       std::shared_ptr<Ease::NativeBehaviour> nativeBehaviour = std::make_shared<Ease::NativeBehaviour>();
-      nativeBehaviour->SetBehaviour(nullptr);
       nativeBehaviour->SetCreateFunc(createFunc);
       nativeBehaviour->SetDeleteFunc(deleteFunc);
       nativeBehaviour->m_Filepath = path;

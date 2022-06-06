@@ -16,14 +16,13 @@ namespace Ease::Systems
       {
          Entity entity(entityID, &pScene->m_Registry);
          Component::NativeBehaviourList& nblist = entity.GetComponent<Component::NativeBehaviourList>();
-         std::vector<ResourceID>& list = nblist.GetList();
+         std::vector<Ease::BaseBehaviour*>& behaviourList = nblist.GetBehaviourList();
 
          
-         for(ResourceID id : list)
+         for(Ease::BaseBehaviour* behaviour : behaviourList)
          {
-            std::shared_ptr<NativeBehaviour> behaviour = loader_nativeBehaviour.GetResource(id);
-            behaviour->GetBehaviour()->self = entity;
-            behaviour->CallUpdate();
+            behaviour->self = entity;
+            behaviour->Update();
          }
       }
    }

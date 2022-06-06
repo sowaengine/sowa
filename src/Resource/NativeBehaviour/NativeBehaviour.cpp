@@ -3,7 +3,6 @@
 namespace Ease
 {
    NativeBehaviour::NativeBehaviour()
-      : m_pBehaviour(nullptr)
    {
 
    }
@@ -13,27 +12,19 @@ namespace Ease
       Delete();
    }
    
-   void NativeBehaviour::Create()
+   Ease::BaseBehaviour* NativeBehaviour::Create()
    {
-      if(m_pBehaviour != nullptr)
-         Delete();
-      m_pBehaviour = m_CreateFunc();
+      Ease::BaseBehaviour* behaviour = m_CreateFunc();
+      m_Behaviours.push_back(behaviour);
+      return behaviour;
    }
    
    void NativeBehaviour::Delete()
    {
-      if(m_pBehaviour != nullptr)
-         m_DeleteFunc(m_pBehaviour);
-      m_pBehaviour = nullptr;
-   }
-   
-   void NativeBehaviour::CallStart()
-   {
-      m_pBehaviour->Start();
-   }
-   
-   void NativeBehaviour::CallUpdate()
-   {
-      m_pBehaviour->Update();
+      for(size_t i=0; i<m_Behaviours.size(); i++)
+      {
+         m_DeleteFunc(m_Behaviours[i]);
+      }
+      m_Behaviours.clear();
    }
 } // namespace Ease

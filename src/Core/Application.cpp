@@ -157,12 +157,6 @@ namespace Ease
       if(m_AppRunning) return;
       m_AppRunning = true;
 
-      static ResourceManager<Ease::NativeBehaviour>& loader_nativeBehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
-      auto behaviours = loader_nativeBehaviour.GetResources();
-      for(auto [id, behaviour] : behaviours)
-      {
-         behaviour->Create();
-      }
       m_pCurrentScene->StartScene();
    }
 

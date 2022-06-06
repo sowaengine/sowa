@@ -8,6 +8,7 @@
 #include "Resource/Resource.h"
 #include "Ease.hpp"
 #include <functional>
+#include <vector>
 
 typedef uint32_t ResourceID;
 
@@ -19,14 +20,11 @@ namespace Ease
         NativeBehaviour();
         ~NativeBehaviour();
         
-        void Create();
+        Ease::BaseBehaviour* Create();
         void Delete();
 
-        void CallStart();
-        void CallUpdate();
 
-        inline void SetBehaviour(BaseBehaviour* behaviour) { m_pBehaviour = behaviour;}
-        inline BaseBehaviour* GetBehaviour() { return m_pBehaviour; }
+        inline std::vector<Ease::BaseBehaviour*>& GetBehaviour() { return m_Behaviours; }
 
         void SetCreateFunc(std::function<BaseBehaviour*()> func) { m_CreateFunc = func; }
         void SetDeleteFunc(std::function<void(BaseBehaviour*)> func) { m_DeleteFunc = func; }
@@ -35,10 +33,11 @@ namespace Ease
         std::string m_Filepath{""};
     private:
         friend class Application;
-        BaseBehaviour* m_pBehaviour;
 
         std::function<BaseBehaviour*()> m_CreateFunc;
         std::function<void(BaseBehaviour*)> m_DeleteFunc;
+        
+        std::vector<Ease::BaseBehaviour*> m_Behaviours;
     };
 } // namespace Ease
 

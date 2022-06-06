@@ -19,7 +19,14 @@ namespace Ease
       {
          Entity entity(entityID, &m_Registry);
          Component::NativeBehaviourList& nblist = entity.GetComponent<Component::NativeBehaviourList>();
+         std::vector<ResourceID>& list = nblist.GetList();
          std::vector<Ease::BaseBehaviour*>& behaviourList = nblist.GetBehaviourList();
+         behaviourList.clear();
+         for(size_t i=0; i<list.size(); i++)
+         {
+            Ease::BaseBehaviour* behaviour = loader_nativeBehaviour.GetResource(list[i])->Create();
+            behaviourList.emplace_back(behaviour);
+         }
          
          for(Ease::BaseBehaviour* behaviour : behaviourList)
          {
