@@ -316,4 +316,39 @@ namespace Ease
 
       return true;
    }
+   
+   Ease::Entity Scene::GetEntityInGroup(const std::string& group)
+   {
+      auto view = m_Registry.view<Component::Group>();
+      for(auto it = view.rbegin(); it != view.rend(); ++it)
+      {
+         Ease::Entity e(*it, &m_Registry);
+         
+         auto groups = e.GetComponent<Component::Group>().Groups();
+         for(std::string& g : groups)
+         {
+            if(g == group)
+               return e;
+         }
+      }
+      return Entity(entt::null, nullptr);
+   }
+   
+   std::vector<Ease::Entity> Scene::GetEntitiesInGroup(const std::string& group)
+   {
+      std::vector<Ease::Entity> entities;
+      auto view = m_Registry.view<Component::Group>();
+      for(auto it = view.rbegin(); it != view.rend(); ++it)
+      {
+         Ease::Entity e(*it, &m_Registry);
+         
+         auto groups = e.GetComponent<Component::Group>().Groups();
+         for(std::string& g : groups)
+         {
+            if(g == group)
+               entities.push_back(e);
+         }
+      }
+      return entities;
+   }
 } // namespace Ease
