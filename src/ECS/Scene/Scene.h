@@ -32,7 +32,19 @@ namespace Ease
         std::vector<Ease::Entity> GetEntitiesInGroup(const std::string& group);
         
         void StartScene();
+
+        
+        void CopyEntity(Ease::Entity entity);
+        void AddCopiedEntity(Ease::Entity entity);
+        void ClearCopiedEntities();
+        Ease::Entity PasteCopiedEntity();
+        std::vector<Ease::Entity> PasteCopiedEntities();
+        uint32_t GetCopiedEntityCount();
     private:
+        /**
+         * @brief Registry that holds copied entities
+         */
+        entt::registry m_CopyRegistry;
     };
 } // namespace Ease
 

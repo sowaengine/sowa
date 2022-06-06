@@ -19,17 +19,102 @@ namespace Ease
       {
          Entity entity(entityID, &m_Registry);
          Component::NativeBehaviourList& nblist = entity.GetComponent<Component::NativeBehaviourList>();
-         std::vector<ResourceID>& list = nblist.GetList();
-
+         std::vector<Ease::BaseBehaviour*>& behaviourList = nblist.GetBehaviourList();
          
-         for(ResourceID id : list)
+         for(Ease::BaseBehaviour* behaviour : behaviourList)
          {
-            std::shared_ptr<NativeBehaviour> behaviour = loader_nativeBehaviour.GetResource(id);
-            behaviour->GetBehaviour()->self = entity;
-            behaviour->CallStart();
+            behaviour->self = entity;
+            behaviour->Start();
          }
       }
    }
+   
+
+   void Scene::CopyEntity(Ease::Entity entity)
+   {
+      ClearCopiedEntities();
+      AddCopiedEntity(entity);
+   }
+   
+   template<typename T>
+   void CopyComponent(Ease::Entity& srcEntity, Ease::Entity& dstEntity)
+   {
+      if(srcEntity.HasComponent<T>())
+      {
+         auto& srcComponent = srcEntity.GetComponent<T>();
+         auto& dstComponent = dstEntity.AddComponent<T>();
+
+         dstComponent = srcComponent;
+      }
+   }
+
+   void Scene::AddCopiedEntity(Ease::Entity entity)
+   {
+      entt::entity copyID = m_CopyRegistry.create((entt::entity)entity.ID());
+      Ease::Entity copyEntity(copyID, &m_CopyRegistry);
+
+      // Copy components
+      auto& common = copyEntity.AddComponent<Component::Common>();
+      common.Name() = entity.GetComponent<Component::Common>().Name();
+
+      CopyComponent<Component::Transform2D>(entity, copyEntity);
+      CopyComponent<Component::TextRenderer2D>(entity, copyEntity);
+      CopyComponent<Component::SpriteRenderer2D>(entity, copyEntity);
+      CopyComponent<Component::NativeBehaviourList>(entity, copyEntity);
+   }
+   
+   void Scene::ClearCopiedEntities()
+   {
+      m_CopyRegistry.clear();
+   }
+
+   /**
+    * @brief Create an Entity From {srcRegistry} on {scene}
+    */
+   Ease::Entity CreateEntityFromRegistry(entt::entity id, entt::registry& srcRegistry, Ease::Scene& scene)
+   {
+      Ease::Entity copyEntity(id, &srcRegistry);
+      Ease::Entity entity = scene.Create(copyEntity.GetComponent<Component::Common>().Name());
+
+      
+      // Copy components
+      CopyComponent<Component::Transform2D>(copyEntity, entity);
+      CopyComponent<Component::TextRenderer2D>(copyEntity, entity);
+      CopyComponent<Component::SpriteRenderer2D>(copyEntity, entity);
+      CopyComponent<Component::NativeBehaviourList>(copyEntity, entity);
+
+      return entity;
+   }
+   
+   Ease::Entity Scene::PasteCopiedEntity()
+   {
+      if(m_CopyRegistry.size() < 1)
+         throw std::runtime_error("There is no copied entity");
+      
+      entt::entity copyEntityID = m_CopyRegistry.view<Component::Common>()[0];
+      Ease::Entity newEntity = CreateEntityFromRegistry(copyEntityID, m_CopyRegistry, *this);
+      return newEntity;
+   }
+   
+   std::vector<Ease::Entity> Scene::PasteCopiedEntities()
+   {
+      if(m_CopyRegistry.size() < 1)
+         throw std::runtime_error("There are no copied entities");
+      
+      std::vector<Ease::Entity> entities;
+      auto view = m_CopyRegistry.view<Component::Common>();
+      for(int i=0; view.size(); i++)
+      {
+         entities.push_back(CreateEntityFromRegistry(view[i], m_CopyRegistry, *this));
+      }
+      return entities;
+   }
+   
+   uint32_t Scene::GetCopiedEntityCount()
+   {
+      return m_CopyRegistry.size();
+   }
+
    Scene::Scene()
    {
       

@@ -174,6 +174,10 @@ class EaseEditor : public Ease::BaseModule
                {
                   Ease::Application::get_singleton().GetCurrentScene()->Destroy(g_Editor->m_SelectedEntity);
                }
+               if(ImGui::MenuItem("Copy"))
+               {
+                  Ease::Application::get_singleton().GetCurrentScene()->CopyEntity(g_Editor->m_SelectedEntity);
+               }
                ImGui::EndPopup();
             }
 
@@ -205,6 +209,11 @@ class EaseEditor : public Ease::BaseModule
                      g_Editor->m_SelectedEntity = e;
                   }
                   ImGui::EndMenu();
+               }
+
+               if(Ease::Application::get_singleton().GetCurrentScene()->GetCopiedEntityCount() > 0 && ImGui::MenuItem("Paste"))
+               {
+                  Ease::Application::get_singleton().GetCurrentScene()->PasteCopiedEntity();
                }
                ImGui::EndPopup();
             }
@@ -437,7 +446,7 @@ class EaseEditor : public Ease::BaseModule
          /** </Menu Bar> **/
          ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(0.f, 0.f), ImGuiDockNodeFlags_PassthruCentralNode);
 
-         ImGui::ShowDemoWindow();
+         // ImGui::ShowDemoWindow();
          for(Panel& panel : panels)
          {
             ImGui::Begin(panel.title.c_str(), nullptr, ImGuiWindowFlags_NoCollapse);
