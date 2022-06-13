@@ -8,9 +8,6 @@ namespace Ease::Systems
       if(flags & SystemsFlags::SpriteRenderer2D)
          Systems::System_SpriteRenderer2D(pScene);
 
-      if(flags & SystemsFlags::NativeBehaviourList)
-         Systems::System_NativeBehaviourList(pScene);
-
       if(flags & SystemsFlags::AnimatedSprite2D)
          Systems::System_AnimatedSprite2D(pScene);
          

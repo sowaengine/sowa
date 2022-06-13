@@ -13,27 +13,7 @@ namespace Ease
 {
    void Scene::StartScene()
    {
-      static ResourceManager<Ease::NativeBehaviour>& loader_nativeBehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
-      auto view = m_Registry.view<Component::NativeBehaviourList>();
-      for(const auto& entityID : view)
-      {
-         Entity entity(entityID, &m_Registry);
-         Component::NativeBehaviourList& nblist = entity.GetComponent<Component::NativeBehaviourList>();
-         std::vector<ResourceID>& list = nblist.GetList();
-         std::vector<Ease::BaseBehaviour*>& behaviourList = nblist.GetBehaviourList();
-         behaviourList.clear();
-         for(size_t i=0; i<list.size(); i++)
-         {
-            Ease::BaseBehaviour* behaviour = loader_nativeBehaviour.GetResource(list[i])->Create();
-            behaviourList.emplace_back(behaviour);
-         }
-         
-         for(Ease::BaseBehaviour* behaviour : behaviourList)
-         {
-            behaviour->self = entity;
-            behaviour->Start();
-         }
-      }
+      
    }
    
 
@@ -67,7 +47,7 @@ namespace Ease
       CopyComponent<Component::Transform2D>(entity, copyEntity);
       CopyComponent<Component::TextRenderer2D>(entity, copyEntity);
       CopyComponent<Component::SpriteRenderer2D>(entity, copyEntity);
-      CopyComponent<Component::NativeBehaviourList>(entity, copyEntity);
+      CopyComponent<Component::Group>(entity, copyEntity);
    }
    
    void Scene::ClearCopiedEntities()
@@ -88,7 +68,7 @@ namespace Ease
       CopyComponent<Component::Transform2D>(copyEntity, entity);
       CopyComponent<Component::TextRenderer2D>(copyEntity, entity);
       CopyComponent<Component::SpriteRenderer2D>(copyEntity, entity);
-      CopyComponent<Component::NativeBehaviourList>(copyEntity, entity);
+      CopyComponent<Component::Group>(copyEntity, entity);
 
       return entity;
    }
@@ -189,16 +169,6 @@ namespace Ease
                yaml << YAML::EndMap;
             }
             // </Group>
-            // <NativeBehaviourList>
-            if(entity.HasComponent<Component::NativeBehaviourList>())
-            {
-               Component::NativeBehaviourList& component = entity.GetComponent<Component::NativeBehaviourList>();
-
-               yaml << YAML::Key << "NativeBehaviourList" << YAML::BeginMap;
-                  yaml << YAML::Key << "List" << YAML::Value << component.GetList();
-               yaml << YAML::EndMap;
-            }
-            // </NativeBehaviourList>
             // <SpriteRenderer2D>
             if(entity.HasComponent<Component::SpriteRenderer2D>())
             {
@@ -276,21 +246,6 @@ namespace Ease
 
             yaml << YAML::EndMap;
          }  // </Ease::Texture>
-         { // <Ease::NativeBehaviour>
-            yaml << YAML::Key << "NativeBehaviour" << YAML::Value << YAML::BeginMap;
-            ResourceManager<Ease::NativeBehaviour> loader_nativebehaviour = ResourceManager<Ease::NativeBehaviour>::GetLoader();
-            std::map<ResourceID, std::shared_ptr<Ease::NativeBehaviour>> behaviours = loader_nativebehaviour.GetResources();
-            
-            for(auto[id, behaviour] : behaviours)
-            {
-               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-                  yaml << YAML::Key << "Path" << YAML::Value << behaviour->GetFilepath();
-                  yaml << YAML::Newline;
-               yaml << YAML::EndMap;
-            }
-
-            yaml << YAML::EndMap;
-         }  // </Ease::NativeBehaviour>
          yaml << YAML::Newline << YAML::EndMap;
          // </Resources>
 
@@ -336,18 +291,6 @@ namespace Ease
                }
             }
          } // </Ease::Texture>
-         { // <Ease::NativeBehaviour>
-            if(YAML::Node behaviour_node = resources["NativeBehaviour"]; behaviour_node)
-            {
-               ResourceManager<Ease::NativeBehaviour>& behaviour_loader = ResourceManager<Ease::NativeBehaviour>::GetLoader();
-               for(auto it = behaviour_node.begin(); it != behaviour_node.end(); ++it)
-               {
-                  uint32_t id = it->first.as<uint32_t>(0);
-                  YAML::Node bhv_node = it->second;
-                  behaviour_loader.LoadResource(bhv_node["Path"].as<std::string>("").c_str(), id);
-               }
-            }
-         } // </Ease::NativeBehaviour>
       }
       
       YAML::Node entities = node["EntityList"];
@@ -373,11 +316,6 @@ namespace Ease
                {
                   Component::Group& component = entity.AddComponent<Component::Group>();
                   component.Groups() = component_node["Groups"].as<std::vector<std::string>>(std::vector<std::string>{});
-               }
-               if(YAML::Node component_node = components["NativeBehaviourList"]; component_node)
-               {
-                  Component::NativeBehaviourList& component = entity.AddComponent<Component::NativeBehaviourList>();
-                  component.GetList() = component_node["List"].as<std::vector<uint32_t>>(std::vector<uint32_t>{});
                }
                if(YAML::Node component_node = components["SpriteRenderer2D"]; component_node)
                {

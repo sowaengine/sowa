@@ -6,7 +6,6 @@
 #include <map>
 #include <memory>
 #include "Resource/Texture/Texture.h"
-#include "Resource/NativeBehaviour/NativeBehaviour.h"
 #include "Resource/NativeModule/NativeModule.h"
 #include "Resource/EditorTheme/EditorTheme.h"
 
@@ -53,11 +52,6 @@ namespace Ease
     std::shared_ptr<Ease::Texture> ResourceManager<Ease::Texture>::LoadResource(const char* path, ResourceID id);
     template<>
     ResourceManager<Ease::Texture>& ResourceManager<Ease::Texture>::GetLoader();
-    
-    template<>
-    std::shared_ptr<Ease::NativeBehaviour> ResourceManager<Ease::NativeBehaviour>::LoadResource(const char* path, ResourceID id);
-    template<>
-    ResourceManager<Ease::NativeBehaviour>& ResourceManager<Ease::NativeBehaviour>::GetLoader();
 
     template<>
     std::shared_ptr<Ease::NativeModule> ResourceManager<Ease::NativeModule>::LoadResource(const char* path, ResourceID id);

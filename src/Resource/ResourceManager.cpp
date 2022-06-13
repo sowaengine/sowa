@@ -40,42 +40,6 @@ namespace Ease
       return loader;
    }
    /* ==============</Ease::Texture>============== */
-
-   /* ==============<Ease::NativeBehaviour>============== */
-   template<>
-   std::shared_ptr<Ease::NativeBehaviour> ResourceManager<Ease::NativeBehaviour>::LoadResource(const char* path, ResourceID id)
-   {
-      static ResourceID resCounter = 0;
-
-      std::string behaviourPath = ProjectSettings::get_singleton().projectpath / path;
-      behaviourPath += dylib::extension;
-
-      dylib lib;
-      lib.open(behaviourPath.c_str());
-      
-      auto createFunc = lib.get_function<BaseBehaviour*()>("Create");
-      auto deleteFunc = lib.get_function<void(BaseBehaviour*)>("Destroy");
-
-      std::shared_ptr<Ease::NativeBehaviour> nativeBehaviour = std::make_shared<Ease::NativeBehaviour>();
-      nativeBehaviour->SetCreateFunc(createFunc);
-      nativeBehaviour->SetDeleteFunc(deleteFunc);
-      nativeBehaviour->m_Filepath = path;
-
-      ResourceID resID = id != 0 ? id : resCounter++;
-      m_Resources[resID] = nativeBehaviour;
-      nativeBehaviour->SetResourceID(resID);
-
-      return nativeBehaviour;
-   }
-
-   template<>
-   ResourceManager<Ease::NativeBehaviour>& ResourceManager<Ease::NativeBehaviour>::GetLoader()
-   {
-      static ResourceManager<Ease::NativeBehaviour> moduleLoader;
-
-      return moduleLoader;
-   }
-   /* ==============</Ease::NativeBehaviour>============== */
    
    /* ==============<Ease::NativeModule>============== */
    template<>
