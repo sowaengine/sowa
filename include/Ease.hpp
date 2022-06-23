@@ -16,11 +16,44 @@
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
 
+#define EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, Behaviour) do { \
+   struct Factory : Ease::NativeBehaviourFactory \
+   { \
+      public: \
+         Ease::NativeBehaviour* Create() override \
+         { \
+            Behaviour* b = new TestComponent(); \
+            return b; \
+         } \
+         void Destroy(Ease::NativeBehaviour* b) override \
+         { \
+            delete reinterpret_cast<Behaviour*>(b); \
+         } \
+          \
+   } factory; \
+   lib->nativeBehaviours[#Behaviour] = factory; \
+} while(0); \
+
 typedef void(*UserFunc)();
 
 namespace Ease
 {
    class Entity;
+
+
+   class NativeBehaviour
+   {
+      public:
+         virtual void Start() {}
+         virtual void Update() {}
+   };
+   struct NativeBehaviourFactory
+   {
+      public:
+         virtual NativeBehaviour* Create() = 0;
+         virtual void Destroy(NativeBehaviour*) = 0;
+   };
+
 
    class BaseModule
    {
@@ -46,6 +79,8 @@ namespace Ease
          };
          std::unordered_map<std::string, UserFunc> userFuncs;
          std::unordered_map<std::string, UserValue> userValues;
+
+         std::unordered_map<std::string, NativeBehaviourFactory> nativeBehaviours;
    };
 }
 

@@ -19,13 +19,22 @@ class EaseCore : public Ease::BaseModule
       {
          static int i = 0;
          i++;
-
-         if(i % 60 == 0)
-         {
-            std::cout << "EaseCore Update" << std::endl;
-         }
       }
 
+};
+
+class TestComponent : public Ease::NativeBehaviour
+{
+   public:
+      void Start() override
+      {
+         std::cout << "TestComponent Start" << std::endl;
+      }
+
+      void Update() override
+      {
+         std::cout << "TestComponent Start" << std::endl;
+      }
 };
 
 
@@ -36,6 +45,8 @@ DYLIB_API Ease::BaseModule* Create()
    lib->metadata.authorName = "Ease";
    lib->metadata.moduleName = "Core";
    lib->metadata.version = 1;
+
+   EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, TestComponent);
    return lib;
 }
 
