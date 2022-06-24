@@ -2,6 +2,8 @@
 #include "ECS/Components/Components.hpp"
 #include <iostream>
 #include <fstream>
+#include <unordered_map>
+#include <map>
 #include "yaml-cpp/yaml.h"
 #include "Utils/YAML.hpp"
 #include "Core/Application.hpp"
@@ -81,10 +83,12 @@ namespace Ease
       auto& common = copyEntity.AddComponent<Component::Common>();
       common.Name() = entity.GetComponent<Component::Common>().Name();
 
-      CopyComponent<Component::Transform2D>(entity, copyEntity);
-      CopyComponent<Component::TextRenderer2D>(entity, copyEntity);
-      CopyComponent<Component::SpriteRenderer2D>(entity, copyEntity);
+      CopyComponent<Component::AnimatedSprite2D>(entity, copyEntity);
       CopyComponent<Component::Group>(entity, copyEntity);
+      CopyComponent<Component::NativeBehaviourClass>(entity, copyEntity);
+      CopyComponent<Component::SpriteRenderer2D>(entity, copyEntity);
+      CopyComponent<Component::TextRenderer2D>(entity, copyEntity);
+      CopyComponent<Component::Transform2D>(entity, copyEntity);
    }
    
    void Scene::ClearCopiedEntities()
@@ -102,10 +106,12 @@ namespace Ease
 
       
       // Copy components
-      CopyComponent<Component::Transform2D>(copyEntity, entity);
-      CopyComponent<Component::TextRenderer2D>(copyEntity, entity);
-      CopyComponent<Component::SpriteRenderer2D>(copyEntity, entity);
+      CopyComponent<Component::AnimatedSprite2D>(copyEntity, entity);
       CopyComponent<Component::Group>(copyEntity, entity);
+      CopyComponent<Component::NativeBehaviourClass>(copyEntity, entity);
+      CopyComponent<Component::SpriteRenderer2D>(copyEntity, entity);
+      CopyComponent<Component::TextRenderer2D>(copyEntity, entity);
+      CopyComponent<Component::Transform2D>(copyEntity, entity);
 
       return entity;
    }
@@ -192,7 +198,7 @@ namespace Ease
                Component::AnimatedSprite2D& component = entity.GetComponent<Component::AnimatedSprite2D>();
 
                yaml << YAML::Key << "AnimatedSprite2D" << YAML::BeginMap;
-                  yaml << YAML::Key << "Note" << YAML::Value << "AnimatedSprite2D not serializable right now";
+                  yaml << YAML::Key << "Animations" << YAML::Value << component.Animations();
                yaml << YAML::EndMap;
             }
             // </AnimatedSprite2D>
@@ -293,6 +299,28 @@ namespace Ease
 
             yaml << YAML::EndMap;
          }  // </Ease::Texture>
+         { // <Ease::SpriteSheetAnimation>
+            yaml << YAML::Key << "SpriteSheetAnimation" << YAML::Value << YAML::BeginMap;
+            ResourceManager<Ease::SpriteSheetAnimation> loader_anims = ResourceManager<Ease::SpriteSheetAnimation>::GetLoader();
+            std::map<ResourceID, std::shared_ptr<Ease::SpriteSheetAnimation>> anims = loader_anims.GetResources();
+            
+            for(auto[id, anim] : anims)
+            {
+               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                  yaml << YAML::Key << "HFrames" << YAML::Value << anim->HFrames();
+                  yaml << YAML::Key << "VFrames" << YAML::Value << anim->VFrames();
+                  yaml << YAML::Key << "SelectedRow" << YAML::Value << anim->SelectedRow();
+                  yaml << YAML::Key << "FrameCount" << YAML::Value << anim->FrameCount();
+                  yaml << YAML::Key << "StartFrame" << YAML::Value << anim->StartFrame();
+                  yaml << YAML::Key << "FPS" << YAML::Value << anim->FPS();
+
+                  yaml << YAML::Key << "Texture" << YAML::Value << anim->Texture();
+                  yaml << YAML::Newline;
+               yaml << YAML::EndMap;
+            }
+
+            yaml << YAML::EndMap;
+         }  // </Ease::Texture>
          yaml << YAML::Newline << YAML::EndMap;
          // </Resources>
 
@@ -338,6 +366,27 @@ namespace Ease
                }
             }
          } // </Ease::Texture>
+         { // <Ease::SpriteSheetAnimation>
+            if(YAML::Node resource_node = resources["SpriteSheetAnimation"]; resource_node)
+            {
+               ResourceManager<Ease::SpriteSheetAnimation>& resource_loader = ResourceManager<Ease::SpriteSheetAnimation>::GetLoader();
+               for(auto it = resource_node.begin(); it != resource_node.end(); ++it)
+               {
+                  uint32_t id = it->first.as<uint32_t>(0);
+                  YAML::Node tex_node = it->second;
+                  
+                  std::shared_ptr<Ease::SpriteSheetAnimation> anim = resource_loader.LoadResource(nullptr, id);
+                  anim->HFrames() = tex_node["HFrames"].as<int>(0);
+                  anim->VFrames() = tex_node["VFrames"].as<int>(0);
+                  anim->SelectedRow() = tex_node["SelectedRow"].as<int>(0);
+                  anim->FrameCount() = tex_node["FrameCount"].as<int>(0);
+                  anim->StartFrame() = tex_node["StartFrame"].as<int>(0);
+                  anim->FPS() = tex_node["FPS"].as<int>(0);
+
+                  anim->Texture() = tex_node["Texture"].as<ResourceID>(0);
+               }
+            }
+         } // </Ease::SpriteSheetAnimation>
       }
       
       YAML::Node entities = node["EntityList"];
@@ -356,8 +405,10 @@ namespace Ease
                if(YAML::Node component_node = components["AnimatedSprite2D"]; component_node)
                {
                   Component::AnimatedSprite2D& component = entity.AddComponent<Component::AnimatedSprite2D>();
-                  std::cout << "AnimatedSprite2D not serializable!" << std::endl;
-                  // component.() = component_node[""].as<>();
+                  component.Animations() = component_node["Animations"].as<std::map<std::string, ResourceID>>();
+                  
+                  if(std::string anim_name = component_node["SelectedAnimation"].as<std::string>(""); anim_name != "")
+                     component.SelectAnimation(anim_name);
                }
                if(YAML::Node component_node = components["Group"]; component_node)
                {
