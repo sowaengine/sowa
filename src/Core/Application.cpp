@@ -120,15 +120,6 @@ namespace Ease
 
       InitModules();
       m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
-      for(auto& b : m_NativeBehaviours)
-      {
-         std::cout << b.first << std::endl;
-
-         Ease::NativeBehaviour* x = b.second->Create();
-         x->Start();
-         x->Update();
-         b.second->Destroy(x);
-      }
 
       #ifndef EASE_EDITOR
          StartGame();
@@ -172,7 +163,7 @@ namespace Ease
 
    void Application::UpdateGame()
    {
-      
+      m_pCurrentScene->UpdateScene();
    }
 
    void Application::StopGame()
@@ -180,7 +171,7 @@ namespace Ease
       if(!m_AppRunning) return;
       m_AppRunning = false;
 
-      
+      m_pCurrentScene->StopScene();
    }
    
 
@@ -241,6 +232,14 @@ namespace Ease
    {
       if(m_Modules.count(name) == 1)
          return m_Modules[name];
+      else
+         return nullptr;
+   }
+
+   Ease::NativeBehaviourFactory* Application::GetFactory(const std::string& name)
+   {
+      if(m_NativeBehaviours.count(name) == 1)
+         return m_NativeBehaviours[name];
       else
          return nullptr;
    }

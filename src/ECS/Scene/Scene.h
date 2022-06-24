@@ -32,6 +32,8 @@ namespace Ease
         std::vector<Ease::Entity> GetEntitiesInGroup(const std::string& group);
         
         void StartScene();
+        void UpdateScene();
+        void StopScene();
 
         
         void CopyEntity(Ease::Entity entity);

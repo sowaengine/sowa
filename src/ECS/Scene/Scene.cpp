@@ -13,7 +13,44 @@ namespace Ease
 {
    void Scene::StartScene()
    {
-      
+      auto view = m_Registry.view<Component::NativeBehaviourClass>();
+      for(auto& e : view)
+      {
+         Entity entity(e, &m_Registry);
+         
+         Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
+         nbehaviour.Factory() = Application::get_singleton().GetFactory(nbehaviour.ClassName());
+
+         nbehaviour.Behaviour() = nbehaviour.Factory()->Create();
+         nbehaviour.Behaviour()->self = entity;
+         nbehaviour.Behaviour()->Start();
+      }
+   }
+   void Scene::UpdateScene()
+   {
+      auto view = m_Registry.view<Component::NativeBehaviourClass>();
+      for(auto& e : view)
+      {
+         Entity entity(e, &m_Registry);
+         
+         Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
+
+         nbehaviour.Behaviour()->Update();
+      }
+   }
+   void Scene::StopScene()
+   {
+      auto view = m_Registry.view<Component::NativeBehaviourClass>();
+      for(auto& e : view)
+      {
+         Entity entity(e, &m_Registry);
+         
+         Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
+
+         nbehaviour.Behaviour()->self = Entity(entt::null, nullptr);
+         nbehaviour.Factory()->Destroy(nbehaviour.Behaviour());
+         // nbehaviour.Behaviour()->Start();
+      }
    }
    
 
@@ -169,6 +206,16 @@ namespace Ease
                yaml << YAML::EndMap;
             }
             // </Group>
+            // <NativeBehaviourClass>
+            if(entity.HasComponent<Component::NativeBehaviourClass>())
+            {
+               Component::NativeBehaviourClass& component = entity.GetComponent<Component::NativeBehaviourClass>();
+
+               yaml << YAML::Key << "NativeBehaviourClass" << YAML::BeginMap;
+                  yaml << YAML::Key << "ClassName" << YAML::Value << component.ClassName();
+               yaml << YAML::EndMap;
+            }
+            // </NativeBehaviourClass>
             // <SpriteRenderer2D>
             if(entity.HasComponent<Component::SpriteRenderer2D>())
             {
@@ -316,6 +363,11 @@ namespace Ease
                {
                   Component::Group& component = entity.AddComponent<Component::Group>();
                   component.Groups() = component_node["Groups"].as<std::vector<std::string>>(std::vector<std::string>{});
+               }
+               if(YAML::Node component_node = components["NativeBehaviourClass"]; component_node)
+               {
+                  Component::NativeBehaviourClass& component = entity.AddComponent<Component::NativeBehaviourClass>();
+                  component.ClassName() = component_node["ClassName"].as<std::string>(std::string{});
                }
                if(YAML::Node component_node = components["SpriteRenderer2D"]; component_node)
                {

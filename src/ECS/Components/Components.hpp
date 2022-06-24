@@ -4,6 +4,7 @@
 #include "AnimatedSprite2D/AnimatedSprite2D.h"
 #include "Common/Common.h"
 #include "Group/Group.h"
+#include "NativeBehaviourClass/NativeBehaviourClass.hpp"
 #include "SpriteRenderer2D/SpriteRenderer2D.h"
 #include "TextRenderer2D/TextRenderer2D.h"
 #include "Transform2D/Transform2D.h"

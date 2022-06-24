@@ -56,6 +56,7 @@ namespace Ease
         std::shared_ptr<NativeModule> GetModule(const std::string& name);
 
         void AddNativeBehaviour(const std::string& name, NativeBehaviourFactory* behaviour);
+        Ease::NativeBehaviourFactory* GetFactory(const std::string& name);
 
 
         void StartGame();

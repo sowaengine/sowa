@@ -46,6 +46,8 @@ namespace Ease
       public:
          virtual void Start() {}
          virtual void Update() {}
+
+         Ease::Entity self{};
    };
    struct NativeBehaviourFactory
    {
