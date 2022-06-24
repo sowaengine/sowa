@@ -1,5 +1,5 @@
-#ifndef YAML_H
-#define YAML_H
+#ifndef _E_YAML_HPP__
+#define _E_YAML_HPP__
 
 #pragma once
 

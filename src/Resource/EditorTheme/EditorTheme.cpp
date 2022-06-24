@@ -1,4 +1,4 @@
-#include "EditorTheme.h"
+#include "EditorTheme.hpp"
 
 namespace Ease
 {

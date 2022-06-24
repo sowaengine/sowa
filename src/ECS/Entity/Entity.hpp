@@ -1,5 +1,5 @@
-#ifndef ENTITY_H
-#define ENTITY_H
+#ifndef _E_ENTITY_HPP__
+#define _E_ENTITY_HPP__
 
 #pragma once
 

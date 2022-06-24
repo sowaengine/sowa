@@ -1,4 +1,4 @@
-#include "AnimatedSprite2D.h"
+#include "AnimatedSprite2D.hpp"
 #include "Debug.hpp"
 
 namespace Ease::Component

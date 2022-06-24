@@ -1,5 +1,5 @@
-#include "Systems.h"
-#include "ECS/Scene/Scene.h"
+#include "Systems.hpp"
+#include "ECS/Scene/Scene.hpp"
 
 namespace Ease::Systems
 {

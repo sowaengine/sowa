@@ -1,11 +1,11 @@
-#ifndef RENDERER_H
-#define RENDERER_H
+#ifndef _E_RENDERER_HPP__
+#define _E_RENDERER_HPP__
 
 #pragma once
 
 #include <glm/glm.hpp>
 #include <string>
-#include "Resource/Texture/Texture.h"
+#include "Resource/Texture/Texture.hpp"
 
 namespace Ease
 {

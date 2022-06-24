@@ -1,13 +1,13 @@
-#include "Scene.h"
+#include "Scene.hpp"
 #include "ECS/Components/Components.hpp"
 #include <iostream>
 #include <fstream>
 #include "yaml-cpp/yaml.h"
-#include "Utils/YAML.h"
-#include "Core/Application.h"
-#include "Resource/ResourceManager.h"
+#include "Utils/YAML.hpp"
+#include "Core/Application.hpp"
+#include "Resource/ResourceManager.hpp"
 #include <filesystem>
-#include "Core/ProjectSettings.h"
+#include "Core/ProjectSettings.hpp"
 
 namespace Ease
 {

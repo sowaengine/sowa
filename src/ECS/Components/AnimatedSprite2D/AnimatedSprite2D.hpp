@@ -1,5 +1,5 @@
-#ifndef ANIMATEDSPRITE2D_H
-#define ANIMATEDSPRITE2D_H
+#ifndef _E_ANIMATEDSPRITE2D_HPP__
+#define _E_ANIMATEDSPRITE2D_HPP__
 
 #pragma once
 #include <stdint.h>

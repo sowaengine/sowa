@@ -1,10 +1,10 @@
-#ifndef EASEENGINE_H
-#define EASEENGINE_H
+#ifndef _E_EASE_HPP__
+#define _E_EASE_HPP__
 #pragma once
 
 #include <string>
 #include <unordered_map>
-#include "ECS/Entity/Entity.h"
+#include "ECS/Entity/Entity.hpp"
 
 
 #define EASE_VERSION_MAJOR 0

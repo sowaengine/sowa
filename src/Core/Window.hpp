@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef _E_WINDOW_HPP__
+#define _E_WINDOW_HPP__
 #pragma once
 
 

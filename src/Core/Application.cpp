@@ -1,4 +1,4 @@
-#include "Application.h"
+#include "Application.hpp"
 //#include "Debug.hpp"
 #include <iostream>
 #include "Ease.hpp"
@@ -6,18 +6,18 @@
 #include "raylib.h"
 
 
-#include "Core/Renderer.h"
+#include "Core/Renderer.hpp"
 
-#include "Resource/ResourceManager.h"
-#include "Resource/NativeModule/NativeModule.h"
+#include "Resource/ResourceManager.hpp"
+#include "Resource/NativeModule/NativeModule.hpp"
 
-#include "Window.h"
-#include "ProjectSettings.h"
+#include "Window.hpp"
+#include "ProjectSettings.hpp"
 
-#include "ECS/Entity/Entity.h"
-#include "ECS/Scene/Scene.h"
+#include "ECS/Entity/Entity.hpp"
+#include "ECS/Scene/Scene.hpp"
 #include "ECS/Components/Components.hpp"
-#include "ECS/Systems/Systems.h"
+#include "ECS/Systems/Systems.hpp"
 
 #include "imgui-docking/imgui.h"
 #include "rlImGui/rlImGui.h"

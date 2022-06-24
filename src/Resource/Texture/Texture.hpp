@@ -1,12 +1,12 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef _E_TEXTURE_HPP__
+#define _E_TEXTURE_HPP__
 
 #pragma once
 
 #include <stdint.h>
 #include <string>
 #include "raylib.h"
-#include "../Resource.h"
+#include "../Resource.hpp"
 
 typedef uint32_t ResourceID;
 

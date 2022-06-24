@@ -1,13 +1,13 @@
-#include "ResourceManager.h"
+#include "ResourceManager.hpp"
 
-#include "Resource/Texture/Texture.h"
+#include "Resource/Texture/Texture.hpp"
 #include "raylib.h"
 #include "dylib.hpp"
 #include "yaml-cpp/yaml.h"
 #include <fstream>
-#include "Utils/YAML.h"
+#include "Utils/YAML.hpp"
 #include <iostream>
-#include "Core/ProjectSettings.h"
+#include "Core/ProjectSettings.hpp"
 
 namespace Ease
 {

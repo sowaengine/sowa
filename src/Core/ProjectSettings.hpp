@@ -1,5 +1,5 @@
-#ifndef PROJECTSETTINGS_H
-#define PROJECTSETTINGS_H
+#ifndef _E_PROJECTSETTINGS_HPP__
+#define _E_PROJECTSETTINGS_HPP__
 
 #pragma once
 

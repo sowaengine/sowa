@@ -1,9 +1,9 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef _E_SCENE_HPP__
+#define _E_SCENE_HPP__
 
 #pragma once
 
-#include "ECS/Entity/Entity.h"
+#include "ECS/Entity/Entity.hpp"
 #include "entt/entt.hpp"
 #include <filesystem>
 #include <vector>

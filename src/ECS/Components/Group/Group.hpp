@@ -1,5 +1,5 @@
-#ifndef GROUP_H
-#define GROUP_H
+#ifndef _E_GROUP_HPP__
+#define _E_GROUP_HPP__
 
 #pragma once
 #include <string>

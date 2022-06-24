@@ -1,4 +1,4 @@
-#include "ProjectSettings.h"
+#include "ProjectSettings.hpp"
 
 #include "yaml-cpp/yaml.h"
 

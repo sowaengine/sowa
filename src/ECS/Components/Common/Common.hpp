@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef _E_COMMON_HPP__
+#define _E_COMMON_HPP__
 
 #pragma once
 #include <string>

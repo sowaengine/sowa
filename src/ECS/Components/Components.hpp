@@ -1,12 +1,12 @@
-#ifndef COMPONENTS_H
-#define COMPONENTS_H
+#ifndef _E_COMPONENTS_HPP__
+#define _E_COMPONENTS_HPP__
 
-#include "AnimatedSprite2D/AnimatedSprite2D.h"
-#include "Common/Common.h"
-#include "Group/Group.h"
+#include "AnimatedSprite2D/AnimatedSprite2D.hpp"
+#include "Common/Common.hpp"
+#include "Group/Group.hpp"
 #include "NativeBehaviourClass/NativeBehaviourClass.hpp"
-#include "SpriteRenderer2D/SpriteRenderer2D.h"
-#include "TextRenderer2D/TextRenderer2D.h"
-#include "Transform2D/Transform2D.h"
+#include "SpriteRenderer2D/SpriteRenderer2D.hpp"
+#include "TextRenderer2D/TextRenderer2D.hpp"
+#include "Transform2D/Transform2D.hpp"
 
-#endif // COMPONENTS_H
+#endif // _E_COMPONENTS_HPP__

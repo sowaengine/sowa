@@ -1,13 +1,13 @@
-#ifndef RESOURCEMANAGER_H
-#define RESOURCEMANAGER_H
+#ifndef _E_RESOURCEMANAGER_HPP__
+#define _E_RESOURCEMANAGER_HPP__
 
 #pragma once
 
 #include <map>
 #include <memory>
-#include "Resource/Texture/Texture.h"
-#include "Resource/NativeModule/NativeModule.h"
-#include "Resource/EditorTheme/EditorTheme.h"
+#include "Resource/Texture/Texture.hpp"
+#include "Resource/NativeModule/NativeModule.hpp"
+#include "Resource/EditorTheme/EditorTheme.hpp"
 
 typedef uint32_t ResourceID;
 

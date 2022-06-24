@@ -1,5 +1,5 @@
-#ifndef TRANSFORM2D_H
-#define TRANSFORM2D_H
+#ifndef _E_TRANSFORM2D_HPP__
+#define _E_TRANSFORM2D_HPP__
 
 #pragma once
 

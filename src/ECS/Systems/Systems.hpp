@@ -1,9 +1,9 @@
-#ifndef SYSTEMS_H
-#define SYSTEMS_H
+#ifndef _E_SYSTEMS_HPP__
+#define _E_SYSTEMS_HPP__
 
 #pragma once
 
-#include "ECS/Scene/Scene.h"
+#include "ECS/Scene/Scene.hpp"
 
 namespace Ease
 {

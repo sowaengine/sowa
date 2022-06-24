@@ -1,5 +1,5 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#ifndef _E_APPLICATION_HPP__
+#define _E_APPLICATION_HPP__
 
 #pragma once
 
@@ -8,10 +8,10 @@
 #include <memory>
 #include <unordered_map>
 
-#include "Window.h"
+#include "Window.hpp"
 #include "Ease.hpp"
-#include "ECS/Scene/Scene.h"
-#include "Resource/NativeModule/NativeModule.h"
+#include "ECS/Scene/Scene.hpp"
+#include "Resource/NativeModule/NativeModule.hpp"
 
 namespace Ease
 {

@@ -1,4 +1,4 @@
-#include "Group.h"
+#include "Group.hpp"
 
 namespace Ease::Component
 {

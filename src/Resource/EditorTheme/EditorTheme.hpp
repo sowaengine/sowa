@@ -1,11 +1,11 @@
-#ifndef EDITORTHEME_H
-#define EDITORTHEME_H
+#ifndef _E_EDITORTHEME_HPP__
+#define _E_EDITORTHEME_HPP__
 
 #pragma once
 
 #include <stdint.h>
 #include "imgui-docking/imgui.h"
-#include "../Resource.h"
+#include "../Resource.hpp"
 
 typedef uint32_t ResourceID;
 

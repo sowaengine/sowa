@@ -1,5 +1,5 @@
-#ifndef TEXTRENDERER2D_H
-#define TEXTRENDERER2D_H
+#ifndef _E_TEXTRENDERER_HPP__
+#define _E_TEXTRENDERER_HPP__
 
 #pragma once
 #include <string>

@@ -1,5 +1,5 @@
-#ifndef SPRITERENDERER2D_H
-#define SPRITERENDERER2D_H
+#ifndef _E_SPRITERENDERER_HPP__
+#define _E_SPRITERENDERER_HPP__
 
 #pragma once
 #include <stdint.h>

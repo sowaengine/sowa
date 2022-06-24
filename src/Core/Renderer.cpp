@@ -1,5 +1,5 @@
-#include "Renderer.h"
-#include "Resource/Texture/Texture.h"
+#include "Renderer.hpp"
+#include "Resource/Texture/Texture.hpp"
 
 #include "raylib.h"
 #include "rlgl.h"

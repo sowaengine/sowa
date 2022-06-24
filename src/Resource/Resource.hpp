@@ -1,5 +1,5 @@
-#ifndef RESOURCE_H
-#define RESOURCE_H
+#ifndef _E_RESOURCE_HPP__
+#define _E_RESOURCE_HPP__
 
 #pragma once
 

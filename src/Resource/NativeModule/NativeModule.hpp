@@ -1,11 +1,11 @@
-#ifndef NATIVEMODULE_H
-#define NATIVEMODULE_H
+#ifndef _E_NATIVEMODULE_HPP__
+#define _E_NATIVEMODULE_HPP__
 
 #pragma once
 
 #include <stdint.h>
 #include "Ease.hpp"
-#include "Resource/Resource.h"
+#include "Resource/Resource.hpp"
 #include "Ease.hpp"
 #include <functional>
 
