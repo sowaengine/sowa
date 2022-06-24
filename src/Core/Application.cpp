@@ -163,7 +163,7 @@ namespace Ease
 
    void Application::UpdateGame()
    {
-      
+      m_pCurrentScene->UpdateScene();
    }
 
    void Application::StopGame()
@@ -171,7 +171,7 @@ namespace Ease
       if(!m_AppRunning) return;
       m_AppRunning = false;
 
-      
+      m_pCurrentScene->StopScene();
    }
    
 
@@ -210,6 +210,10 @@ namespace Ease
       if(myModule->m_pModule->metadata.version < minimumVersion)
          return ModuleLoadResult::OUTDATED_VERSION;
 
+      for(auto& [name, behaviour] : myModule->m_pModule->nativeBehaviours)
+      {
+         AddNativeBehaviour((author + ".") + name, behaviour);
+      }
       
       AddModule(std::string(author + "." + moduleName), myModule);
       return ModuleLoadResult::SUCCESS;
@@ -219,10 +223,23 @@ namespace Ease
    {
       m_Modules[name] = _module;
    }
+   
+   void Application::AddNativeBehaviour(const std::string& name, NativeBehaviourFactory* behaviour)
+   {
+      m_NativeBehaviours[name] = behaviour;
+   }
    std::shared_ptr<NativeModule> Application::GetModule(const std::string& name)
    {
       if(m_Modules.count(name) == 1)
          return m_Modules[name];
+      else
+         return nullptr;
+   }
+
+   Ease::NativeBehaviourFactory* Application::GetFactory(const std::string& name)
+   {
+      if(m_NativeBehaviours.count(name) == 1)
+         return m_NativeBehaviours[name];
       else
          return nullptr;
    }
