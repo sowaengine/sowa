@@ -5,20 +5,9 @@
 #include <stdint.h>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <string>
-
-namespace Ease
-{
-    struct Animation
-    {
-        int hFrames;
-        int vFrames;
-        int SelectedRow;
-        int frameCount;
-        int startFrame;
-        uint32_t TextureID;
-    };
-} // namespace Ease
+#include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 
 
 namespace Ease::Component
@@ -32,21 +21,25 @@ namespace Ease::Component
         void Step(float ms);
 
         
-        void SetAnimation(const std::string& name, const Animation& animation) { m_Animations[name] = animation; }
-        Ease::Animation& GetAnimation(const std::string& name) { return m_Animations[name]; }
-        std::unordered_map<std::string, Ease::Animation>& Animations() { return m_Animations; }
+        void SetAnimation(const std::string& name, ResourceID animation);
+        ResourceID GetAnimation(const std::string& name) { return m_Animations[name]; }
+        std::map<std::string, ResourceID>& Animations() { return m_Animations; }
 
         int& CurrentFrame() { return m_CurrentFrame; }
         int& FPS() { return m_FPS; }
-        std::string& SelectedAnimation() { return m_SelectedAnimation; }
+        const std::string& GetSelectedAnimationName() { return m_SelectedAnimationName; }
+        ResourceID GetSelectedAnimation() { return m_SelectedAnimation; }
+
+        void SelectAnimation(const std::string& name);
 
 
-        uint32_t GetCurrentTexture() { return GetAnimation(m_SelectedAnimation).TextureID; }
+        ResourceID GetCurrentTexture();
     private:
         int m_CurrentFrame;
         int m_FPS;
-        std::string m_SelectedAnimation = "";
-        std::unordered_map<std::string, Ease::Animation> m_Animations;
+        ResourceID m_SelectedAnimation;
+        std::string m_SelectedAnimationName = "";
+        std::map<std::string, ResourceID> m_Animations;
 
 
         float m_TicksPast;

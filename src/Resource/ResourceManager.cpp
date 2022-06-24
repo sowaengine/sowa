@@ -78,6 +78,29 @@ namespace Ease
    }
    /* ==============</Ease::NativeModule>============== */
 
+   /* ==============<Ease::SpriteSheetAnimation>============== */
+   template<>
+   std::shared_ptr<Ease::SpriteSheetAnimation> ResourceManager<Ease::SpriteSheetAnimation>::LoadResource(const char* path, ResourceID id)
+   {
+      static ResourceID resCounter = 0;
+
+      std::shared_ptr<Ease::SpriteSheetAnimation> anim = std::make_shared<Ease::SpriteSheetAnimation>();
+
+      ResourceID resID = id != 0 ? id : resCounter++;
+      m_Resources[resID] = anim;
+      anim->SetResourceID(resID);
+
+      return anim;
+   }
+
+   template<>
+   ResourceManager<Ease::SpriteSheetAnimation>& ResourceManager<Ease::SpriteSheetAnimation>::GetLoader()
+   {
+      static ResourceManager<Ease::SpriteSheetAnimation> animLoader;
+
+      return animLoader;
+   }
+   /* ==============</Ease::SpriteSheetAnimation>============== */
 
    /* ==============<Ease::EditorTheme>============== */
    template<>

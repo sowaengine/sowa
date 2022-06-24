@@ -7,6 +7,7 @@
 #include <memory>
 #include "Resource/Texture/Texture.hpp"
 #include "Resource/NativeModule/NativeModule.hpp"
+#include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 #include "Resource/EditorTheme/EditorTheme.hpp"
 
 typedef uint32_t ResourceID;
@@ -57,6 +58,11 @@ namespace Ease
     std::shared_ptr<Ease::NativeModule> ResourceManager<Ease::NativeModule>::LoadResource(const char* path, ResourceID id);
     template<>
     ResourceManager<Ease::NativeModule>& ResourceManager<Ease::NativeModule>::GetLoader();
+
+    template<>
+    std::shared_ptr<Ease::SpriteSheetAnimation> ResourceManager<Ease::SpriteSheetAnimation>::LoadResource(const char* path, ResourceID id);
+    template<>
+    ResourceManager<Ease::SpriteSheetAnimation>& ResourceManager<Ease::SpriteSheetAnimation>::GetLoader();
 
     template<>
     std::shared_ptr<Ease::EditorTheme> ResourceManager<Ease::EditorTheme>::LoadResource(const char* path, ResourceID id);
