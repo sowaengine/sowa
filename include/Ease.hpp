@@ -30,7 +30,7 @@
             delete reinterpret_cast<Behaviour*>(b); \
          } \
           \
-   } factory; \
+   }; Factory* factory = new Factory; \
    lib->nativeBehaviours[#Behaviour] = factory; \
 } while(0); \
 
@@ -50,8 +50,8 @@ namespace Ease
    struct NativeBehaviourFactory
    {
       public:
-         virtual NativeBehaviour* Create() = 0;
-         virtual void Destroy(NativeBehaviour*) = 0;
+         virtual NativeBehaviour* Create() { return nullptr; }
+         virtual void Destroy(NativeBehaviour*) {}
    };
 
 
@@ -80,7 +80,7 @@ namespace Ease
          std::unordered_map<std::string, UserFunc> userFuncs;
          std::unordered_map<std::string, UserValue> userValues;
 
-         std::unordered_map<std::string, NativeBehaviourFactory> nativeBehaviours;
+         std::unordered_map<std::string, NativeBehaviourFactory*> nativeBehaviours;
    };
 }
 

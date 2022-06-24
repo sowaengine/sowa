@@ -120,6 +120,15 @@ namespace Ease
 
       InitModules();
       m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
+      for(auto& b : m_NativeBehaviours)
+      {
+         std::cout << b.first << std::endl;
+
+         Ease::NativeBehaviour* x = b.second->Create();
+         x->Start();
+         x->Update();
+         b.second->Destroy(x);
+      }
 
       #ifndef EASE_EDITOR
          StartGame();
@@ -210,6 +219,10 @@ namespace Ease
       if(myModule->m_pModule->metadata.version < minimumVersion)
          return ModuleLoadResult::OUTDATED_VERSION;
 
+      for(auto& [name, behaviour] : myModule->m_pModule->nativeBehaviours)
+      {
+         AddNativeBehaviour((author + ".") + name, behaviour);
+      }
       
       AddModule(std::string(author + "." + moduleName), myModule);
       return ModuleLoadResult::SUCCESS;
@@ -218,6 +231,11 @@ namespace Ease
    void Application::AddModule(const std::string& name, std::shared_ptr<NativeModule> _module)
    {
       m_Modules[name] = _module;
+   }
+   
+   void Application::AddNativeBehaviour(const std::string& name, NativeBehaviourFactory* behaviour)
+   {
+      m_NativeBehaviours[name] = behaviour;
    }
    std::shared_ptr<NativeModule> Application::GetModule(const std::string& name)
    {

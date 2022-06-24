@@ -55,6 +55,8 @@ namespace Ease
         void AddModule(const std::string& name, std::shared_ptr<NativeModule> _module);
         std::shared_ptr<NativeModule> GetModule(const std::string& name);
 
+        void AddNativeBehaviour(const std::string& name, NativeBehaviourFactory* behaviour);
+
 
         void StartGame();
         void UpdateGame();
@@ -76,6 +78,7 @@ namespace Ease
         Scene* m_pCurrentScene;
 
         std::unordered_map<std::string, std::shared_ptr<NativeModule>> m_Modules;
+        std::unordered_map<std::string, NativeBehaviourFactory*> m_NativeBehaviours;
 
         bool m_AppRunning = false;
     };
