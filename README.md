@@ -19,7 +19,5 @@
 
 
 ### Dependencies
-   - spdlog
    - yaml-cpp
-   - glfw
    - raylib
