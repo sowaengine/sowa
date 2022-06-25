@@ -6,7 +6,7 @@ enable_testing()
 
 
 link_directories(thirdparty/)
-link_libraries(${CMAKE_DL_LIBS} raylib yaml-cpp)
+link_libraries(${CMAKE_DL_LIBS} raylib yaml-cpp box2d)
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
