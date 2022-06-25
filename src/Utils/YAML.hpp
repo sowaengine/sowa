@@ -6,6 +6,9 @@
 #include "imgui-docking/imgui.h"
 #include "yaml-cpp/yaml.h"
 #include "glm/glm.hpp"
+#include "box2d/box2d.h"
+#include "ECS/Components/PhysicsBody2D/PhysicsBody2D.hpp"
+#include <iostream>
 
 namespace YAML
 {
@@ -121,6 +124,91 @@ namespace YAML
             return true;
         }
     };
+
+    template<>
+    struct convert<b2Vec2>
+    {
+        static Node encode(const b2Vec2& vec)
+        {
+            Node node;
+            node.push_back(vec.x);
+            node.push_back(vec.y);
+            return node;
+        }
+        static bool decode(const Node& node, b2Vec2& vec)
+        {
+            if(!node.IsSequence() || node.size() != 2)
+                return false;
+            
+            vec.x = node[0].as<float>();
+            vec.y = node[1].as<float>();
+            return true;
+        }
+    };
+
+    template<>
+    struct convert<Ease::PhysicsBodyType>
+    {
+        static Node encode(const Ease::PhysicsBodyType& bodyType)
+        {
+            Node node;
+            if(bodyType == Ease::PhysicsBodyType::STATIC)
+                node.push_back("STATIC");
+            else if(bodyType == Ease::PhysicsBodyType::DYNAMIC)
+                node.push_back("DYNAMIC");
+            else if(bodyType == Ease::PhysicsBodyType::KINEMATIC)
+                node.push_back("KINEMATIC");
+            else
+                node.push_back("STATIC");
+            return node;
+        }
+        static bool decode(const Node& node, Ease::PhysicsBodyType& bodyType)
+        {
+            if(std::string type = node.as<std::string>(std::string{""}); type != "")
+            {
+                if(type == "STATIC")
+                    bodyType = Ease::PhysicsBodyType::STATIC;
+                else if(type == "DYNAMIC")
+                    bodyType = Ease::PhysicsBodyType::DYNAMIC;
+                else if(type == "KINEMATIC")
+                    bodyType = Ease::PhysicsBodyType::KINEMATIC;
+                else
+                    return false;
+                return true;
+            }
+            return false;
+        }
+    };
+
+    template<>
+    struct convert<Ease::ColliderShape2D>
+    {
+        static Node encode(const Ease::ColliderShape2D& shape)
+        {
+            Node node;
+            if(shape == Ease::ColliderShape2D::BOX)
+                node.push_back("BOX");
+            else if(shape == Ease::ColliderShape2D::CIRCLE)
+                node.push_back("CIRCLE");
+            else
+                node.push_back("BOX");
+            return node;
+        }
+        static bool decode(const Node& node, Ease::ColliderShape2D& shape)
+        {
+            if(std::string type = node.as<std::string>(std::string{""}); type != "")
+            {
+                if(type == "BOX")
+                    shape = Ease::ColliderShape2D::BOX;
+                else if(type == "CIRCLE")
+                    shape = Ease::ColliderShape2D::CIRCLE;
+                else
+                    return false;
+                return true;
+            }
+            return false;
+        }
+    };
     
 
     YAML::Emitter& operator<<(YAML::Emitter& out, const ImVec2& vec);
@@ -129,6 +217,11 @@ namespace YAML
     YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec2& vec);
     YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec3& vec);
     YAML::Emitter& operator<<(YAML::Emitter& out, const glm::vec4& vec);
+
+    YAML::Emitter& operator<<(YAML::Emitter& out, const b2Vec2& vec);
+
+    YAML::Emitter& operator<<(YAML::Emitter& out, const Ease::PhysicsBodyType& type);
+    YAML::Emitter& operator<<(YAML::Emitter& out, const Ease::ColliderShape2D& shape);
 } // namespace YAML
 
 
