@@ -15,6 +15,49 @@ namespace Ease
 {
    void Scene::StartScene()
    {
+      m_pPhysicsWorld2D = std::make_shared<b2World>(m_Gravity);
+
+      {
+         auto view = m_Registry.view<Component::Transform2D, Component::PhysicsBody2D>();
+         for(auto& e : view)
+         {
+            Entity entity(e, &m_Registry);
+            auto& tc = entity.GetComponent<Component::Transform2D>();
+            auto& body = entity.GetComponent<Component::PhysicsBody2D>();
+
+            body.m_b2BodyDef.type = body.GetInternalBodyType();
+            body.m_b2BodyDef.position.Set(SCREEN_TO_WORLD(tc.Position().x), SCREEN_TO_WORLD(tc.Position().y));
+            body.m_b2BodyDef.angle = -tc.Rotation() * DEG2RAD;
+
+            body.m_b2Body = m_pPhysicsWorld2D->CreateBody(&body.m_b2BodyDef);
+
+            for(Collider2D& collider : body.Colliders())
+            {
+               if(collider.shape == ColliderShape2D::BOX)
+               {
+                  collider.polyShape.SetAsBox(
+                     SCREEN_TO_WORLD(collider.width / 2.f), SCREEN_TO_WORLD(collider.height / 2.f),
+                     b2Vec2(SCREEN_TO_WORLD(collider.offset.x), SCREEN_TO_WORLD(collider.offset.y)),
+                     DEG2RAD * collider.rotation);
+                  
+                  collider.fixtureDef.shape = &collider.polyShape;
+               }
+               if(collider.shape == ColliderShape2D::CIRCLE)
+               {
+                  collider.circleShape.m_p = { SCREEN_TO_WORLD(collider.offset.x), SCREEN_TO_WORLD(collider.offset.y) };
+                  collider.circleShape.m_radius = SCREEN_TO_WORLD(collider.radius);
+
+                  collider.fixtureDef.shape = &collider.circleShape;
+               }
+               collider.fixtureDef.density = collider.density;
+               collider.fixtureDef.friction = collider.friction;
+               collider.fixtureDef.restitution = collider.restitution;
+               collider.fixtureDef.restitutionThreshold = collider.restitutionThreshold;
+               collider.fixture = body.m_b2Body->CreateFixture(&collider.fixtureDef);
+            }
+         }
+      }
+
       auto view = m_Registry.view<Component::NativeBehaviourClass>();
       for(auto& e : view)
       {
@@ -42,6 +85,8 @@ namespace Ease
    }
    void Scene::StopScene()
    {
+      m_pPhysicsWorld2D = nullptr;
+
       auto view = m_Registry.view<Component::NativeBehaviourClass>();
       for(auto& e : view)
       {
@@ -477,7 +522,6 @@ namespace Ease
                         collider.friction = yaml_collider["Friction"].as<float>(collider.friction);
                         collider.restitution = yaml_collider["Restitution"].as<float>(collider.restitution);
                         collider.restitutionThreshold = yaml_collider["RestitutionThreshold"].as<float>(collider.restitutionThreshold);
-                        std::cout << entity.GetComponent<Ease::Component::Common>().Name() << " : " << (int)collider.shape << std::endl;
                         colliders.push_back(collider);
                      }
                   }
