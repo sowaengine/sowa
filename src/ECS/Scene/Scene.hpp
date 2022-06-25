@@ -3,10 +3,11 @@
 
 #pragma once
 
-#include "ECS/Entity/Entity.hpp"
-#include "entt/entt.hpp"
 #include <filesystem>
 #include <vector>
+#include "entt/entt.hpp"
+#include "box2d/box2d.h"
+#include "ECS/Entity/Entity.hpp"
 
 namespace Ease
 {
@@ -42,11 +43,18 @@ namespace Ease
         Ease::Entity PasteCopiedEntity();
         std::vector<Ease::Entity> PasteCopiedEntities();
         uint32_t GetCopiedEntityCount();
+
+
+        b2Vec2& Gravity() { return m_Gravity; }
+        std::shared_ptr<b2World> PhysicsWorld2D() { return m_pPhysicsWorld2D; }
     private:
         /**
          * @brief Registry that holds copied entities
          */
         entt::registry m_CopyRegistry;
+
+        b2Vec2 m_Gravity{0.f, -10.f};
+        std::shared_ptr<b2World> m_pPhysicsWorld2D;
     };
 } // namespace Ease
 
