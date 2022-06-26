@@ -16,6 +16,19 @@
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
 
+#define WORLD_TO_SCREEN(x) (x * 25.f)
+#define SCREEN_TO_WORLD(x) (x / 25.f)
+
+#ifndef PI
+    #define PI 3.1416f
+#endif
+#ifndef DEG2RAD
+    #define DEG2RAD (PI/180.0f)
+#endif
+#ifndef RAD2DEG
+    #define RAD2DEG (180.0f/PI)
+#endif
+
 #define EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, Behaviour) do { \
    struct Factory : Ease::NativeBehaviourFactory \
    { \
