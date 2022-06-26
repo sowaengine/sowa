@@ -269,6 +269,9 @@ class EaseEditor : public Ease::BaseModule
                      if(ImGui::Button("-", ImVec2(32.f, 32.f)) && component.Groups().size() > 0)
                         component.Groups().pop_back();
                   }, entity);
+                  DrawComponent<Ease::Component::NativeBehaviourClass>("NativeBehaviourClass", [](Ease::Component::NativeBehaviourClass& component){
+                     ImGui::InputText("Class Name", &component.ClassName());
+                  }, entity);
                   DrawComponent<Ease::Component::PhysicsBody2D>("PhysicsBody2D", [](Ease::Component::PhysicsBody2D& component){
                      int bodyType = (int)component.BodyType();
                      if((int)Ease::PhysicsBodyType::STATIC != 0
