@@ -1,4 +1,4 @@
-#include "Window.h"
+#include "Window.hpp"
 #include "raylib.h"
 #include "Ease.hpp"
 #include <iostream>
@@ -10,7 +10,7 @@
 #endif
 
 #include "rlImGui/rlImGui.h"
-#include "Application.h"
+#include "Application.hpp"
 
 
 namespace Ease

@@ -1,19 +1,20 @@
-#include "Systems.h"
-#include "ECS/Scene/Scene.h"
+#include "Systems.hpp"
+#include "ECS/Scene/Scene.hpp"
 
-#include "ECS/Components/Transform2D/Transform2D.h"
-#include "ECS/Components/AnimatedSprite2D/AnimatedSprite2D.h"
+#include "ECS/Components/Transform2D/Transform2D.hpp"
+#include "ECS/Components/AnimatedSprite2D/AnimatedSprite2D.hpp"
 
-#include "Core/Renderer.h"
-#include "Resource/ResourceManager.h"
-#include "Resource/Texture/Texture.h"
+#include "Core/Renderer.hpp"
+#include "Resource/ResourceManager.hpp"
+#include "Resource/Texture/Texture.hpp"
+#include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 
 namespace Ease::Systems
 {
    void System_AnimatedSprite2D(Ease::Scene* pScene)
    {
-      ResourceManager<Ease::Texture>& loader = ResourceManager<Ease::Texture>::GetLoader();
-      
+      ResourceManager<Ease::Texture>& tex_loader = ResourceManager<Ease::Texture>::GetLoader();
+      ResourceManager<Ease::SpriteSheetAnimation>& anim_loader = ResourceManager<Ease::SpriteSheetAnimation>::GetLoader();
 
       auto view = pScene->m_Registry.view<Component::Transform2D, Component::AnimatedSprite2D>();
       for(const auto& entityID : view)
@@ -22,18 +23,26 @@ namespace Ease::Systems
          auto& transformc = entity.GetComponent<Component::Transform2D>();
          auto& animsprc = entity.GetComponent<Component::AnimatedSprite2D>();
          
-         if(animsprc.SelectedAnimation() == "" || !loader.HasResource(animsprc.GetCurrentTexture())) continue;
+         if(animsprc.GetSelectedAnimationName() == "")
+         {
+            if(animsprc.Animations().size() == 0) continue;
+
+            auto it = animsprc.Animations().begin();
+            // std::advance(it, 0);
+            animsprc.SelectAnimation(it->first);
+         }
+         if(!tex_loader.HasResource(animsprc.GetCurrentTexture())) continue;
 
          animsprc.Step(GetFrameTime());
 
          glm::vec2 uv1;
          glm::vec2 uv2;
 
-         Ease::Texture tex = *loader.GetResource(animsprc.GetCurrentTexture()).get();
-         Ease::Animation anim = animsprc.GetAnimation(animsprc.SelectedAnimation());
+         Ease::Texture tex = *tex_loader.GetResource(animsprc.GetCurrentTexture()).get();
+         std::shared_ptr<Ease::SpriteSheetAnimation> anim = anim_loader.GetResource(animsprc.GetSelectedAnimation());
          
-         glm::vec2 size = { 1.0f / anim.hFrames, 1.0f / anim.vFrames };
-         glm::vec2 pos = { anim.startFrame + animsprc.CurrentFrame() * size.x, anim.SelectedRow * size.y };
+         glm::vec2 size = { 1.0f / anim->HFrames(), 1.0f / anim->VFrames() };
+         glm::vec2 pos = { anim->StartFrame() + animsprc.CurrentFrame() * size.x, anim->SelectedRow() * size.y };
 
          uv1 = pos;
          uv2 = pos + size;

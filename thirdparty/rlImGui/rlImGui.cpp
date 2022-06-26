@@ -84,7 +84,7 @@ static void rlImGuiSetClipText(void*, const char* text)
 static void rlImGuiNewFrame()
 {
     ImGuiIO& io = ImGui::GetIO();
-
+    ReloadImGuiFonts();
     io.DisplaySize.x = float(GetScreenWidth());
     io.DisplaySize.y = float(GetScreenHeight());
 

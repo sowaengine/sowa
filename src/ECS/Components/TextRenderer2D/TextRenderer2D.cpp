@@ -1,4 +1,4 @@
-#include "TextRenderer2D.h"
+#include "TextRenderer2D.hpp"
 
 namespace Ease::Component
 {

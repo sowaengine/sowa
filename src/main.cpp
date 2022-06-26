@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Debug.hpp"
 
-#include "Core/Application.h"
+#include "Core/Application.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 
 int main(int argc, char const *argv[])

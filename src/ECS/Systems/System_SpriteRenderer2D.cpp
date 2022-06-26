@@ -1,12 +1,12 @@
-#include "Systems.h"
-#include "ECS/Scene/Scene.h"
+#include "Systems.hpp"
+#include "ECS/Scene/Scene.hpp"
 
-#include "ECS/Components/Transform2D/Transform2D.h"
-#include "ECS/Components/SpriteRenderer2D/SpriteRenderer2D.h"
+#include "ECS/Components/Transform2D/Transform2D.hpp"
+#include "ECS/Components/SpriteRenderer2D/SpriteRenderer2D.hpp"
 
-#include "Core/Renderer.h"
-#include "Resource/ResourceManager.h"
-#include "Resource/Texture/Texture.h"
+#include "Core/Renderer.hpp"
+#include "Resource/ResourceManager.hpp"
+#include "Resource/Texture/Texture.hpp"
 
 namespace Ease::Systems
 {

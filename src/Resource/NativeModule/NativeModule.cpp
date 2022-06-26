@@ -1,4 +1,4 @@
-#include "NativeModule.h"
+#include "NativeModule.hpp"
 
 namespace Ease
 {

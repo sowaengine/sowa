@@ -1,10 +1,10 @@
-#include "Systems.h"
-#include "ECS/Scene/Scene.h"
+#include "Systems.hpp"
+#include "ECS/Scene/Scene.hpp"
 
-#include "ECS/Components/Transform2D/Transform2D.h"
-#include "ECS/Components/TextRenderer2D/TextRenderer2D.h"
+#include "ECS/Components/Transform2D/Transform2D.hpp"
+#include "ECS/Components/TextRenderer2D/TextRenderer2D.hpp"
 
-#include "Core/Renderer.h"
+#include "Core/Renderer.hpp"
 
 namespace Ease::Systems
 {

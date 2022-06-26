@@ -5,17 +5,14 @@ include(CTest)
 enable_testing()
 
 
-find_package(OpenGL REQUIRED)
-find_package(glfw3 3.3 REQUIRED)
-link_libraries(${CMAKE_DL_LIBS} glfw raylib yaml-cpp spdlog box2d)
+link_directories(thirdparty/)
+link_libraries(${CMAKE_DL_LIBS} raylib yaml-cpp box2d)
 
-include_directories(
-   ${OPENGL_INCLUDE_DIR}
-   ${GLFW_INCLUDE_DIRS}
-)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/glm)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/raylib/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui-docking)
 

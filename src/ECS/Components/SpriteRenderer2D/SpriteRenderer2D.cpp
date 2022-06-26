@@ -1,4 +1,4 @@
-#include "SpriteRenderer2D.h"
+#include "SpriteRenderer2D.hpp"
 
 namespace Ease::Component
 {

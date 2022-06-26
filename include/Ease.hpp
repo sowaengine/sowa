@@ -1,10 +1,10 @@
-#ifndef EASEENGINE_H
-#define EASEENGINE_H
+#ifndef _E_EASE_HPP__
+#define _E_EASE_HPP__
 #pragma once
 
 #include <string>
 #include <unordered_map>
-#include "ECS/Entity/Entity.h"
+#include "ECS/Entity/Entity.hpp"
 
 
 #define EASE_VERSION_MAJOR 0
@@ -16,11 +16,59 @@
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
 
+#define WORLD_TO_SCREEN(x) (x * 25.f)
+#define SCREEN_TO_WORLD(x) (x / 25.f)
+
+#ifndef PI
+    #define PI 3.1416f
+#endif
+#ifndef DEG2RAD
+    #define DEG2RAD (PI/180.0f)
+#endif
+#ifndef RAD2DEG
+    #define RAD2DEG (180.0f/PI)
+#endif
+
+#define EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, Behaviour) do { \
+   struct Factory : Ease::NativeBehaviourFactory \
+   { \
+      public: \
+         Ease::NativeBehaviour* Create() override \
+         { \
+            Behaviour* b = new TestComponent(); \
+            return b; \
+         } \
+         void Destroy(Ease::NativeBehaviour* b) override \
+         { \
+            delete reinterpret_cast<Behaviour*>(b); \
+         } \
+          \
+   }; Factory* factory = new Factory; \
+   lib->nativeBehaviours[#Behaviour] = factory; \
+} while(0); \
+
 typedef void(*UserFunc)();
 
 namespace Ease
 {
    class Entity;
+
+
+   class NativeBehaviour
+   {
+      public:
+         virtual void Start() {}
+         virtual void Update() {}
+
+         Ease::Entity self{};
+   };
+   struct NativeBehaviourFactory
+   {
+      public:
+         virtual NativeBehaviour* Create() { return nullptr; }
+         virtual void Destroy(NativeBehaviour*) {}
+   };
+
 
    class BaseModule
    {
@@ -46,6 +94,8 @@ namespace Ease
          };
          std::unordered_map<std::string, UserFunc> userFuncs;
          std::unordered_map<std::string, UserValue> userValues;
+
+         std::unordered_map<std::string, NativeBehaviourFactory*> nativeBehaviours;
    };
 }
 

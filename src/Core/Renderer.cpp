@@ -1,5 +1,5 @@
-#include "Renderer.h"
-#include "Resource/Texture/Texture.h"
+#include "Renderer.hpp"
+#include "Resource/Texture/Texture.hpp"
 
 #include "raylib.h"
 #include "rlgl.h"
@@ -22,6 +22,28 @@ namespace Ease
       
       
       DrawTexturePro(texture.GetTexture(), rect, dest, origin, rotation, WHITE);
+   }
+
+   void Renderer::DrawQuadColor(const glm::vec2& center, const glm::vec2& size, float rotation, Color color, const glm::vec2& offset)
+   {
+      rlPushMatrix();
+         rlTranslatef(center.x, -center.y, 0.f);
+         rlRotatef(rotation, 0, 0, 1);
+         rlTranslatef(-size.x / 2.f, -size.y / 2.f, 0.f);
+         rlTranslatef(offset.x, offset.y, 0.f);
+         
+         DrawRectangle(0, 0, size.x, size.y, color);
+         //DrawRectanglePro(rect, {size.x / 2.f, size.y / 2.f}, rotation, color);
+      rlPopMatrix();
+   }
+   void Renderer::DrawCircleColor(const glm::vec2& center, float radius, float rotation, Color color, const glm::vec2& offset)
+   {
+      rlPushMatrix();
+         rlTranslatef(center.x, -center.y, 0.f);
+         rlRotatef(rotation, 0, 0, 1);
+         rlTranslatef(offset.x, offset.y, 0.f);
+         DrawCircle(0, 0, radius, color);
+      rlPopMatrix();
    }
    
    
