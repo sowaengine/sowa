@@ -283,6 +283,9 @@ class EaseEditor : public Ease::BaseModule
                      {
                         ImGui::Indent();
 
+                        if(ImGui::Button("+", ImVec2(32.f, 32.f)))
+                           component.Colliders().emplace_back();
+
                         int i=0;
                         for(Ease::Collider2D& collider : component.Colliders())
                         {
@@ -372,21 +375,15 @@ class EaseEditor : public Ease::BaseModule
                   {
                      if(ImGui::BeginMenu("Add Component"))
                      {
-                        if(!entity.HasComponent<Ease::Component::AnimatedSprite2D>())
-                           if(ImGui::MenuItem("AnimatedSprite2D"))
-                              entity.AddComponent<Ease::Component::AnimatedSprite2D>();
-
-                        if(!entity.HasComponent<Ease::Component::SpriteRenderer2D>())
-                           if(ImGui::MenuItem("SpriteRenderer2D"))
-                              entity.AddComponent<Ease::Component::SpriteRenderer2D>();
-                        
-                        if(!entity.HasComponent<Ease::Component::TextRenderer2D>())
-                           if(ImGui::MenuItem("TextRenderer2D"))
-                              entity.AddComponent<Ease::Component::TextRenderer2D>();
-                        
-                        if(!entity.HasComponent<Ease::Component::Transform2D>())
-                           if(ImGui::MenuItem("Transform2D"))
-                              entity.AddComponent<Ease::Component::Transform2D>();
+#define POPUP_ADDCOMPONENT(t) {if(!entity.HasComponent<Ease::Component::t>()) if(ImGui::MenuItem(#t)) entity.AddComponent<Ease::Component::t>();}
+                        POPUP_ADDCOMPONENT(AnimatedSprite2D);
+                        POPUP_ADDCOMPONENT(Group);
+                        POPUP_ADDCOMPONENT(NativeBehaviourClass);
+                        POPUP_ADDCOMPONENT(PhysicsBody2D);
+                        POPUP_ADDCOMPONENT(SpriteRenderer2D);
+                        POPUP_ADDCOMPONENT(TextRenderer2D);
+                        POPUP_ADDCOMPONENT(Transform2D);
+#undef POPUP_ADDCOMPONENT
                         
                         ImGui::EndMenu();
                      }
