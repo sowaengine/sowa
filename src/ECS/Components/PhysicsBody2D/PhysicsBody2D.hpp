@@ -25,9 +25,9 @@ namespace Ease
         ColliderShape2D shape = ColliderShape2D::BOX;
         b2Vec2 offset{0.f, 0.f};
         float rotation;
-        int width;
-        int height;
-        int radius;
+        int width = 128.f;
+        int height = 128.f;
+        int radius = 64.f;
 
         float density = 0.2f;
         float friction = 0.2f;

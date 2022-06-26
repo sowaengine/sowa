@@ -18,14 +18,14 @@
 #include "../include/dylib.hpp"
 #include "imgui-docking/imgui.h"
 #include "imgui-docking/misc/cpp/imgui_stdlib.h"
-#include "../src/Core/Application.h"
-#include "Core/ProjectSettings.h"
+#include "../src/Core/Application.hpp"
+#include "Core/ProjectSettings.hpp"
 #include "rlImGui/rlImGui.h"
 #include <memory>
 #include <unordered_map>
-#include "../src/Resource/ResourceManager.h"
-#include "../src/Resource/Texture/Texture.h"
-#include "../src/Resource/EditorTheme/EditorTheme.h"
+#include "../src/Resource/ResourceManager.hpp"
+#include "../src/Resource/Texture/Texture.hpp"
+#include "../src/Resource/EditorTheme/EditorTheme.hpp"
 #include "ECS/Components/Components.hpp"
 
 class EaseEditor;
@@ -45,6 +45,7 @@ class EaseEditor : public Ease::BaseModule
       {
          NONE = 0,
          ENTITY = 1, // Components
+         TEXTURE = 2,
       };
       InspectorMode m_InspectorMode;
 
@@ -267,6 +268,70 @@ class EaseEditor : public Ease::BaseModule
                      ImGui::SameLine();
                      if(ImGui::Button("-", ImVec2(32.f, 32.f)) && component.Groups().size() > 0)
                         component.Groups().pop_back();
+                  }, entity);
+                  DrawComponent<Ease::Component::PhysicsBody2D>("PhysicsBody2D", [](Ease::Component::PhysicsBody2D& component){
+                     int bodyType = (int)component.BodyType();
+                     if((int)Ease::PhysicsBodyType::STATIC != 0
+                     || (int)Ease::PhysicsBodyType::DYNAMIC != 1
+                     || (int)Ease::PhysicsBodyType::KINEMATIC != 2)
+                        std::cout << "ERROR: Ease::PhysicsBodyType layout mismatch" << std::endl;
+
+                     ImGui::Combo("Shape", &bodyType, "Static\0Dynamic\0Kinematic\0\0");
+                     component.BodyType() = (Ease::PhysicsBodyType)bodyType;
+
+                     if(ImGui::CollapsingHeader("Colliders"))
+                     {
+                        ImGui::Indent();
+
+                        int i=0;
+                        for(Ease::Collider2D& collider : component.Colliders())
+                        {
+                           i++;
+                           if(ImGui::CollapsingHeader(std::to_string(i).c_str()))
+                           {
+                              ImGui::Indent();
+                              ImGui::PushID(i);
+
+                              int shape = (int)collider.shape;
+                              if((int)Ease::ColliderShape2D::BOX != 0
+                              || (int)Ease::ColliderShape2D::CIRCLE != 1)
+                                 std::cout << "ERROR: Ease::ColliderShape2D layout mismatch" << std::endl;
+
+                              ImGui::Combo("Shape", &shape, "Box\0Circle\0\0");
+                              collider.shape = (Ease::ColliderShape2D)shape;
+                              
+                              ImGui::DragFloat2("Offset", &collider.offset.x);
+                              
+                              float rad = DEG2RAD * collider.rotation;
+                              ImGui::SliderAngle("Rotation", &rad);
+                              collider.rotation = RAD2DEG * rad;
+
+                              if(collider.shape == Ease::ColliderShape2D::BOX)
+                              {
+                                 float size[2];
+                                 size[0] = collider.width;
+                                 size[1] = collider.height;
+                                 ImGui::DragFloat2("Size", size);
+                                 collider.width = size[0];
+                                 collider.height = size[1];
+                              }
+                              else if(collider.shape == Ease::ColliderShape2D::CIRCLE)
+                              {
+                                 ImGui::DragInt("Radius", &collider.radius);
+                              }
+
+                              ImGui::DragFloat("Density", &collider.density, 0.05f, 0.f, 10.f);
+                              ImGui::DragFloat("Friction", &collider.friction, 0.05f, 0.f, 10.f);
+                              ImGui::DragFloat("Restitution", &collider.restitution, 0.05f, 0.f, 10.f);
+                              ImGui::DragFloat("RestitutionThreshold", &collider.restitutionThreshold, 0.05f, 0.f, 10.f);
+
+                              ImGui::PopID();
+                              ImGui::Unindent();
+                           }
+                        }
+
+                        ImGui::Unindent();
+                     }
                   }, entity);
                   DrawComponent<Ease::Component::SpriteRenderer2D>("SpriteRenderer2D", [](Ease::Component::SpriteRenderer2D& component){
                      ImGui::Checkbox("Visible", &component.Visible());
