@@ -7,6 +7,7 @@
 #include <fstream>
 #include "Utils/YAML.hpp"
 #include <iostream>
+#include "Core/Sound/SoundDevice.hpp"
 #include "Core/ProjectSettings.hpp"
 #include "Utils/File.hpp"
 
@@ -14,6 +15,34 @@ namespace Ease
 {
    // Resource specific implementations
 
+   /* ==============<Ease::AudioStream>============== */
+   template<>
+   std::shared_ptr<Ease::AudioStream> ResourceManager<Ease::AudioStream>::LoadResource(const char* path, ResourceID id)
+   {
+      static ResourceID resCounter = 0;
+
+      std::shared_ptr<Ease::AudioStream> audio = std::make_shared<Ease::AudioStream>();
+
+      ResourceID resID = id != 0 ? id : resCounter++;
+      m_Resources[resID] = audio;
+      std::filesystem::path fullpath = Ease::ProjectSettings::get_singleton().projectpath / path;
+      audio->SetResourceID(resID);
+      audio->m_Filepath = path;
+      
+      SoundDevice& device = SoundDevice::get_singleton();
+      audio->m_Buffer = device.LoadSoundBuffer(path);
+
+      return audio;
+   }
+
+   template<>
+   ResourceManager<Ease::AudioStream>& ResourceManager<Ease::AudioStream>::GetLoader()
+   {
+      static ResourceManager<Ease::AudioStream> loader;
+
+      return loader;
+   }
+   /* ==============</Ease::AudioStream>============== */
 
    /* ==============<Ease::Texture>============== */
    template<>
