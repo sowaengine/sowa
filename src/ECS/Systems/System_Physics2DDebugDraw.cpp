@@ -7,11 +7,15 @@
 #include "Core/Renderer.hpp"
 #include "box2d/box2d.h"
 #include "rlgl.h"
+#include "Core/ProjectSettings.hpp"
 
 namespace Ease::Systems
 {
    void System_Physics2DDebugDraw(Ease::Scene* pScene)
     {
+        if(!Ease::ProjectSettings::get_singleton().debug_draw)
+            return;
+        
         auto view = pScene->m_Registry.view<Component::Transform2D, Component::PhysicsBody2D>();
         for(const auto& entityID : view)
         {

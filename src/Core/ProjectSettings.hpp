@@ -36,6 +36,13 @@ namespace Ease
         bool SaveProject();
 
         std::filesystem::path projectpath{""};
+
+#ifdef EASE_EDITOR
+        bool debug_draw = true;
+#else
+        bool debug_draw = false;
+#endif
+
     private:
         ProjectSettings();
         ~ProjectSettings();
