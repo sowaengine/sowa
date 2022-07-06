@@ -20,6 +20,7 @@ namespace Ease
             ~SoundSource();
 
             void Play(std::shared_ptr<Ease::AudioStream> stream);
+            void Stop(std::shared_ptr<Ease::AudioStream> stream);
 
             bool& Looping() { return m_Loop; }
             void UpdateData();

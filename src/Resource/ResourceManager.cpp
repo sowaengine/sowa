@@ -25,12 +25,12 @@ namespace Ease
 
       ResourceID resID = id != 0 ? id : resCounter++;
       m_Resources[resID] = audio;
-      std::filesystem::path fullpath = Ease::ProjectSettings::get_singleton().projectpath / path;
+      std::filesystem::path fullpath = Ease::File::Path(path);
       audio->SetResourceID(resID);
       audio->m_Filepath = path;
       
       SoundDevice& device = SoundDevice::get_singleton();
-      audio->m_Buffer = device.LoadSoundBuffer(path);
+      audio->m_Buffer = device.LoadSoundBuffer(fullpath.c_str());
 
       return audio;
    }

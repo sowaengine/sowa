@@ -22,6 +22,16 @@ namespace Ease
 
         alSourcePlay(m_Source);
     }
+    void SoundSource::Stop(std::shared_ptr<Ease::AudioStream> stream)
+    {
+        if(stream->m_Buffer != m_Buffer)
+        {
+            m_Buffer = stream->m_Buffer;
+            alSourcei(m_Source, AL_BUFFER, (ALint)m_Buffer);
+        }
+
+        alSourceStop(m_Source);
+    }
 
     void SoundSource::UpdateData()
     {

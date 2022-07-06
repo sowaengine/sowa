@@ -1,4 +1,5 @@
 #include "AudioStreamPlayer.hpp"
+#include "Resource/ResourceManager.hpp"
 
 namespace Ease::Component
 {
@@ -14,6 +15,15 @@ namespace Ease::Component
 
    void AudioStreamPlayer::Play()
    {
-      m_Source.Play(m_Stream);
+      m_Source.Play(GetStream());
+   }
+   void AudioStreamPlayer::Stop()
+   {
+      m_Source.Stop(GetStream());
+   }
+
+   std::shared_ptr<Ease::AudioStream>& AudioStreamPlayer::GetStream()
+   {
+      return Ease::ResourceManager<Ease::AudioStream>::GetLoader().GetResource(m_Stream);
    }
 }

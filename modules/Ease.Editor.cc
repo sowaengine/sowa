@@ -257,6 +257,19 @@ class EaseEditor : public Ease::BaseModule
                   DrawComponent<Ease::Component::AnimatedSprite2D>("AnimatedSprite2D", [](Ease::Component::AnimatedSprite2D& component){
                      ImGui::Text("AnimatedSprite2D");
                   }, entity);
+                  DrawComponent<Ease::Component::AudioStreamPlayer>("AudioStreamPlayer", [](Ease::Component::AudioStreamPlayer& component){
+                     static bool playing = false;
+                     if(ImGui::Checkbox("Playing", &playing))
+                     {
+                        if(playing)
+                           component.Play();
+                        else
+                           component.Stop();
+                     }
+                     
+                     if(ImGui::Checkbox("Loop", &component.Looping()))
+                        component.UpdateData();
+                  }, entity);
                   DrawComponent<Ease::Component::Group>("Group", [](Ease::Component::Group& component){
                      ImGui::Text("Groups");
                      for(size_t i = 0; i < component.Groups().size(); i++)

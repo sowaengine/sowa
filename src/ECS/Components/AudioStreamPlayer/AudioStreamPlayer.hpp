@@ -14,16 +14,18 @@ namespace Ease::Component
         ~AudioStreamPlayer();
 
 
-        std::shared_ptr<Ease::AudioStream>& Stream() { return m_Stream; }
+        ResourceID& Stream() { return m_Stream; }
+        std::shared_ptr<Ease::AudioStream>& GetStream();
 
         bool& Looping() { return m_Source.Looping(); }
         void Play();
+        void Stop();
 
         void UpdateData() { m_Source.UpdateData(); }
     private:
         SoundSource m_Source;
 
-        std::shared_ptr<Ease::AudioStream> m_Stream;
+        ResourceID m_Stream;
     };
 }
 

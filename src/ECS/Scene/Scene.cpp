@@ -234,10 +234,6 @@ namespace Ease
 
          // <Components>
          yaml << YAML::Key << "Components" << YAML::BeginMap;
-
-            // animated sprite note for later
-            // hold sequence of animation ids
-            // todo: make animation a resource
             // <AnimatedSprite2D>
             if(entity.HasComponent<Component::AnimatedSprite2D>())
             {
@@ -248,6 +244,16 @@ namespace Ease
                yaml << YAML::EndMap;
             }
             // </AnimatedSprite2D>
+            // <AudioStreamPlayer>
+            if(entity.HasComponent<Component::AudioStreamPlayer>())
+            {
+               Component::AudioStreamPlayer& component = entity.GetComponent<Component::AudioStreamPlayer>();
+
+               yaml << YAML::Key << "AudioStreamPlayer" << YAML::BeginMap;
+                  yaml << YAML::Key << "AudioStream" << YAML::Value << component.Stream();
+               yaml << YAML::EndMap;
+            }
+            // </AudioStreamPlayer>
             // <Group>
             if(entity.HasComponent<Component::Group>())
             {
@@ -402,7 +408,22 @@ namespace Ease
             }
 
             yaml << YAML::EndMap;
-         }  // </Ease::Texture>
+         }  // </Ease::SpriteSheetAnimation>
+         { // <Ease::AudioStream>
+            yaml << YAML::Key << "AudioStream" << YAML::Value << YAML::BeginMap;
+            ResourceManager<Ease::AudioStream> loader_AudioStream = ResourceManager<Ease::AudioStream>::GetLoader();
+            std::map<ResourceID, std::shared_ptr<Ease::AudioStream>> streams = loader_AudioStream.GetResources();
+            
+            for(auto[id, stream] : streams)
+            {
+               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                  yaml << YAML::Key << "Path" << YAML::Value << stream->GetFilepath();
+                  yaml << YAML::Newline;
+               yaml << YAML::EndMap;
+            }
+
+            yaml << YAML::EndMap;
+         }  // </Ease::AudioStream>
          yaml << YAML::Newline << YAML::EndMap;
          // </Resources>
 
@@ -423,7 +444,7 @@ namespace Ease
    {
       m_Registry.clear();
       std::filesystem::path inpath = Ease::File::Path(file);
-      path = inpath;
+      path = file;
       Application::get_singleton().Log(std::string("Loading scene from ") + inpath.string());
 
       YAML::Node node = YAML::LoadFile(inpath);
@@ -469,6 +490,19 @@ namespace Ease
                }
             }
          } // </Ease::SpriteSheetAnimation>
+         { // <Ease::AudioStream>
+            if(YAML::Node resource_node = resources["AudioStream"]; resource_node)
+            {
+               ResourceManager<Ease::AudioStream>& resource_loader = ResourceManager<Ease::AudioStream>::GetLoader();
+               for(auto it = resource_node.begin(); it != resource_node.end(); ++it)
+               {
+                  uint32_t id = it->first.as<uint32_t>(0);
+                  YAML::Node tex_node = it->second;
+                  
+                  resource_loader.LoadResource(tex_node["Path"].as<std::string>("").c_str(), id);
+               }
+            }
+         } // </Ease::AudioStream>
       }
       
       YAML::Node entities = node["EntityList"];
@@ -491,6 +525,11 @@ namespace Ease
                   
                   if(std::string anim_name = component_node["SelectedAnimation"].as<std::string>(""); anim_name != "")
                      component.SelectAnimation(anim_name);
+               }
+               if(YAML::Node component_node = components["AudioStreamPlayer"]; component_node)
+               {
+                  Component::AudioStreamPlayer& component = entity.AddComponent<Component::AudioStreamPlayer>();
+                  component.Stream() = component_node["AudioStream"].as<ResourceID>(0);
                }
                if(YAML::Node component_node = components["Group"]; component_node)
                {
