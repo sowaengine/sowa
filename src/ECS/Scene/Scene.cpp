@@ -10,6 +10,7 @@
 #include "Resource/ResourceManager.hpp"
 #include <filesystem>
 #include "Core/ProjectSettings.hpp"
+#include "Utils/File.hpp"
 
 namespace Ease
 {
@@ -355,7 +356,7 @@ namespace Ease
    }
    bool Scene::SaveToFile(const char* file)
    {
-      std::filesystem::path savepath = ProjectSettings::get_singleton().projectpath / file;
+      std::filesystem::path savepath = Ease::File::Path(file);
       Application::get_singleton().Log(std::string("Saving scene to ") + savepath.string());
       YAML::Emitter yaml;
       yaml << YAML::BeginMap;
@@ -421,8 +422,8 @@ namespace Ease
    bool Scene::LoadFromFile(const char* file)
    {
       m_Registry.clear();
-      std::filesystem::path inpath = ProjectSettings::get_singleton().projectpath / file;
-      path = file;
+      std::filesystem::path inpath = Ease::File::Path(file);
+      path = inpath;
       Application::get_singleton().Log(std::string("Loading scene from ") + inpath.string());
 
       YAML::Node node = YAML::LoadFile(inpath);

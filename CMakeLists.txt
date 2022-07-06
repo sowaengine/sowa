@@ -16,6 +16,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/raylib/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui-docking)
 
+add_definitions(-DEASE_EDITOR)
+
 file(GLOB_RECURSE SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp

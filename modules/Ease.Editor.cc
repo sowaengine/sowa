@@ -419,7 +419,7 @@ class EaseEditor : public Ease::BaseModule
 
          Ease::ResourceManager<Ease::EditorTheme> themeLoader = Ease::ResourceManager<Ease::EditorTheme>::GetLoader();
 
-         std::shared_ptr<Ease::EditorTheme> theme = themeLoader.LoadResource("res/theme.escfg");
+         std::shared_ptr<Ease::EditorTheme> theme = themeLoader.LoadResource("abs://res/theme.escfg");
          ImGui::GetStyle() = theme->GetStyle();
 
          //Ease::Application::get_singleton().GetCurrentScene()->LoadFromFile("scene.escn");

@@ -8,6 +8,7 @@
 #include "Utils/YAML.hpp"
 #include <iostream>
 #include "Core/ProjectSettings.hpp"
+#include "Utils/File.hpp"
 
 namespace Ease
 {
@@ -24,7 +25,7 @@ namespace Ease
 
       ResourceID resID = id != 0 ? id : resCounter++;
       m_Resources[resID] = tex;
-      std::filesystem::path fullpath = Ease::ProjectSettings::get_singleton().projectpath / path;
+      std::filesystem::path fullpath = Ease::File::Path(path);
       tex->SetTexture(LoadTexture(fullpath.c_str()));
       tex->SetResourceID(resID);
       tex->m_Filepath = path;
@@ -47,7 +48,7 @@ namespace Ease
    {
       static ResourceID resCounter = 0;
 
-      std::string modulePath = path;
+      std::string modulePath = Ease::File::Path(path);
       modulePath += dylib::extension;
 
       dylib lib;
@@ -108,7 +109,7 @@ namespace Ease
    {
       static ResourceID resCounter = 0;
 
-      YAML::Node node = YAML::LoadFile(path);
+      YAML::Node node = YAML::LoadFile(Ease::File::Path(path));
       if(node["Type"].as<std::string>() != "EditorTheme")
          return nullptr;
       
@@ -340,7 +341,7 @@ namespace Ease
          yaml << YAML::EndMap;
       yaml << YAML::EndMap;
       
-      std::ofstream ofstream(path);
+      std::ofstream ofstream(Ease::File::Path(path));
       ofstream << yaml.c_str();
       return true;
    }

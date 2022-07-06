@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
    Ease::Application& app = Ease::Application::get_singleton();
    
    try {
-      app.Run();
+      app.Run(argc, argv);
    }
    catch(const std::exception& e) {
       ERROR("{}", e.what());

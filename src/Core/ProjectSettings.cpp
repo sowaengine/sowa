@@ -6,6 +6,8 @@
 #include <sstream>
 #include "Debug.hpp"
 #include "raylib.h"
+#include <iostream>
+#include "Utils/File.hpp"
 
 
 namespace Ease
@@ -26,6 +28,7 @@ namespace Ease
 
       YAML::Node project = YAML::LoadFile(projectpath / "project.ease");
 
+      Ease::File::InsertFilepathEndpoint("res", projectpath, true);
 
       int version = project["v"].as<int>(0); 
       
