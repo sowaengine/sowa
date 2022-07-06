@@ -2,6 +2,7 @@
 #define _E_COMPONENTS_HPP__
 
 #include "AnimatedSprite2D/AnimatedSprite2D.hpp"
+#include "AudioStreamPlayer/AudioStreamPlayer.hpp"
 #include "Common/Common.hpp"
 #include "Group/Group.hpp"
 #include "NativeBehaviourClass/NativeBehaviourClass.hpp"

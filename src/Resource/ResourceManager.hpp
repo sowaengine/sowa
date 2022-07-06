@@ -5,6 +5,7 @@
 
 #include <map>
 #include <memory>
+#include "Resource/AudioStream/AudioStream.hpp"
 #include "Resource/Texture/Texture.hpp"
 #include "Resource/NativeModule/NativeModule.hpp"
 #include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
@@ -48,6 +49,11 @@ namespace Ease
         std::map<ResourceID, std::shared_ptr<T>> m_Resources;
     };
 
+
+    template<>
+    std::shared_ptr<Ease::AudioStream> ResourceManager<Ease::AudioStream>::LoadResource(const char* path, ResourceID id);
+    template<>
+    ResourceManager<Ease::AudioStream>& ResourceManager<Ease::AudioStream>::GetLoader();
 
     template<>
     std::shared_ptr<Ease::Texture> ResourceManager<Ease::Texture>::LoadResource(const char* path, ResourceID id);
