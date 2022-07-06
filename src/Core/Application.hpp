@@ -12,6 +12,7 @@
 #include "Ease.hpp"
 #include "ECS/Scene/Scene.hpp"
 #include "Resource/NativeModule/NativeModule.hpp"
+#include <filesystem>
 
 namespace Ease
 {
@@ -24,7 +25,7 @@ namespace Ease
             return app;
         }
 
-        void Run();
+        void Run(int argc, char const *argv[]);
 
         Window& GetWindow() { return m_Window; }
 
@@ -44,7 +45,7 @@ namespace Ease
          * @param moduleName  module name without extension
          * @param minimumVersion minimum version allowed for module
          */
-        ModuleLoadResult LoadModule(const std::string& author, const std::string& moduleName, int minimumVersion);
+        ModuleLoadResult LoadModule(const std::filesystem::path& modulePath, int minimumVersion);
 
         /**
          * @brief Adds given module to application context

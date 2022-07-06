@@ -22,7 +22,8 @@
 #include "imgui-docking/imgui.h"
 #include "rlImGui/rlImGui.h"
 
-#define EASE_EDITOR
+#include "Utils/File.hpp"
+
 
 namespace Ease
 {
@@ -36,15 +37,28 @@ namespace Ease
    }
    
 
-   void Application::Run()
+   void Application::Run(int argc, char const *argv[])
    {
       SetTraceLogLevel(LOG_ERROR);
       
       //INFO("Ease Engine v{}.{}.{}", EASE_VERSION_MAJOR, EASE_VERSION_MINOR, EASE_VERSION_PATCH);
 
       ProjectSettings& projectSettings = ProjectSettings::get_singleton();
-
-      projectSettings.LoadProject("./TestGame");
+      Ease::File::InsertFilepathEndpoint("abs", "./");
+      bool project_loaded = false;
+      std::string lastArg = argv[0];
+      for(int i=1; i<argc; i++)
+      {
+         if(lastArg == "--project")
+         {
+            projectSettings.LoadProject(argv[i]);
+            project_loaded = true;
+         }
+         lastArg = argv[i];
+      }
+      if(!project_loaded)
+         projectSettings.LoadProject("./");
+      
 
       m_Window.CreateWindow(
          projectSettings._window.WindowWidth,
@@ -56,9 +70,9 @@ namespace Ease
          projectSettings._window.VideoHeight
       );
 
-      LoadModule("Ease", "Core", 1);
+      LoadModule("abs://modules/Ease.Core", 1);
       #ifdef EASE_EDITOR
-         LoadModule("Ease", "Editor", 1);
+         LoadModule("abs://modules/Ease.Editor", 1);
       #endif
 
       
@@ -194,28 +208,23 @@ namespace Ease
          pair.second->CallOnImGuiRender();
    }
 
-   Application::ModuleLoadResult Application::LoadModule(const std::string& author, const std::string& moduleName, int minimumVersion)
+   Application::ModuleLoadResult Application::LoadModule(const std::filesystem::path& modulePath, int minimumVersion)
    {
       static ResourceManager<NativeModule>& moduleLoader = ResourceManager<NativeModule>::GetLoader();
 
-      std::string modulePath = "modules/";
-      modulePath += author;
-      modulePath += ".";
-      modulePath += moduleName;
-
       std::shared_ptr<NativeModule> myModule = moduleLoader.LoadResource(modulePath.c_str());
       
-      if(author != myModule->m_pModule->metadata.authorName || moduleName != myModule->m_pModule->metadata.moduleName)
-         return ModuleLoadResult::UNDEFINED_MODULE;
+      // if(author != myModule->m_pModule->metadata.authorName || moduleName != myModule->m_pModule->metadata.moduleName)
+      //    return ModuleLoadResult::UNDEFINED_MODULE;
       if(myModule->m_pModule->metadata.version < minimumVersion)
          return ModuleLoadResult::OUTDATED_VERSION;
 
       for(auto& [name, behaviour] : myModule->m_pModule->nativeBehaviours)
       {
-         AddNativeBehaviour((author + ".") + name, behaviour);
+         AddNativeBehaviour(modulePath.filename().concat(".").concat(name), behaviour);
       }
       
-      AddModule(std::string(author + "." + moduleName), myModule);
+      AddModule(modulePath.filename(), myModule);
       return ModuleLoadResult::SUCCESS;
    }
 
