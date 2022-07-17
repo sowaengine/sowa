@@ -19,7 +19,7 @@ namespace Ease
    template<>
    std::shared_ptr<Ease::AudioStream> ResourceManager<Ease::AudioStream>::LoadResource(const char* path, ResourceID id)
    {
-      static ResourceID resCounter = 0;
+      static ResourceID resCounter = EASE_USER_GLOBAL_RESOURCE_ID_MAX + 1;
 
       std::shared_ptr<Ease::AudioStream> audio = std::make_shared<Ease::AudioStream>();
 
@@ -48,7 +48,7 @@ namespace Ease
    template<>
    std::shared_ptr<Ease::Texture> ResourceManager<Ease::Texture>::LoadResource(const char* path, ResourceID id)
    {
-      static ResourceID resCounter = 0;
+      static ResourceID resCounter = EASE_USER_GLOBAL_RESOURCE_ID_MAX + 1;
 
       std::shared_ptr<Ease::Texture> tex = std::make_shared<Ease::Texture>();
 
@@ -75,7 +75,7 @@ namespace Ease
    template<>
    std::shared_ptr<Ease::NativeModule> ResourceManager<Ease::NativeModule>::LoadResource(const char* path, ResourceID id)
    {
-      static ResourceID resCounter = 0;
+      static ResourceID resCounter = EASE_USER_GLOBAL_RESOURCE_ID_MAX + 1;
 
       std::string modulePath = Ease::File::Path(path);
       modulePath += dylib::extension;
@@ -112,7 +112,7 @@ namespace Ease
    template<>
    std::shared_ptr<Ease::SpriteSheetAnimation> ResourceManager<Ease::SpriteSheetAnimation>::LoadResource(const char* path, ResourceID id)
    {
-      static ResourceID resCounter = 0;
+      static ResourceID resCounter = EASE_USER_GLOBAL_RESOURCE_ID_MAX + 1;
 
       std::shared_ptr<Ease::SpriteSheetAnimation> anim = std::make_shared<Ease::SpriteSheetAnimation>();
 
@@ -136,7 +136,7 @@ namespace Ease
    template<>
    std::shared_ptr<Ease::EditorTheme> ResourceManager<Ease::EditorTheme>::LoadResource(const char* path, ResourceID id)
    {
-      static ResourceID resCounter = 0;
+      static ResourceID resCounter = EASE_USER_GLOBAL_RESOURCE_ID_MAX + 1;
 
       YAML::Node node = YAML::LoadFile(Ease::File::Path(path));
       if(node["Type"].as<std::string>() != "EditorTheme")

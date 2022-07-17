@@ -37,7 +37,13 @@ namespace Ease
 
         bool HasResource(ResourceID id)
         {
-            return m_Resources.count(id) == 1;
+            for(const auto& [resID, res] : m_Resources)
+            {
+                if(resID == id)
+                    return true;
+            }
+            return false;
+            // return m_Resources.count(id) == 1;
         }
         std::shared_ptr<T>& GetResource(ResourceID id)
         {
