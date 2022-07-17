@@ -53,6 +53,13 @@ namespace Ease
             _application.Description = __application["Description"].as<std::string>(_application.Description);
             _application.MainScene = __application["MainScene"].as<std::string>(_application.MainScene);
          }
+
+         if(project["Modules"])
+         {
+            YAML::Node __modules = project["Modules"];
+
+            _modules.modules = __modules["Modules"].as<std::vector<std::string>>();
+         }
       }
       return true;
    }
@@ -95,6 +102,13 @@ namespace Ease
             yaml << YAML::Newline;
          yaml << YAML::EndMap;
          /** </Window> */
+
+         /**  <Modules> */
+         yaml << YAML::Key << "Modules";
+         yaml << YAML::Value << YAML::BeginMap;
+            yaml << YAML::Key << "Modules" << YAML::Value << _modules.modules;
+         yaml << YAML::EndMap;
+         /** </Modules> */
       yaml << YAML::EndMap;
 
       std::ofstream ofstream(projectpath / "project.ease");

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <filesystem>
+#include <vector>
 
 namespace Ease
 {
@@ -31,6 +32,9 @@ namespace Ease
             std::string Description = "";
             std::string MainScene = "";
         } _application;
+        struct {
+            std::vector<std::string> modules;
+        } _modules;
 
         bool LoadProject(const char* path);
         bool SaveProject();
