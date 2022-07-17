@@ -8,7 +8,7 @@
 
 namespace Ease::Systems
 {
-   void System_TextRenderer2D(Ease::Scene* pScene)
+   void System_TextRenderer2D(Ease::Scene* pScene, bool pickable /* = false*/)
    {
       auto view = pScene->m_Registry.view<Component::Transform2D, Component::TextRenderer2D>();
       for(const auto& entityID : view)
@@ -19,7 +19,10 @@ namespace Ease::Systems
 
          if(!textrendererc.Visible()) continue;
 
-         Renderer::get_singleton().DrawText(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color());
+         if(pickable)
+            Renderer::get_singleton().DrawTextWithID(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color(), (uint32_t)entityID);
+         else
+            Renderer::get_singleton().DrawText(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color());
       }
    }
 } // namespace Ease::Systems

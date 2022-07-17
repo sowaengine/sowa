@@ -11,7 +11,7 @@
 
 namespace Ease::Systems
 {
-   void System_Physics2DDebugDraw(Ease::Scene* pScene)
+   void System_Physics2DDebugDraw(Ease::Scene* pScene, bool pickable /*= false*/)
     {
         if(!Ease::ProjectSettings::get_singleton().debug_draw)
             return;
@@ -27,37 +27,31 @@ namespace Ease::Systems
             {
                 if(collider.shape == ColliderShape2D::BOX)
                 {
-                    Renderer::get_singleton().DrawQuadColor(
-                        transformc.Position(),
-                        { collider.width, collider.height },
-                        transformc.Rotation(),
-                        (Color){60, 20, 150, 100},
-                        {collider.offset.x, -collider.offset.y}
-                    );
+                    if(!pickable)
+                    {
+                        Renderer::get_singleton().DrawQuadColor(
+                            transformc.Position(),
+                            { collider.width, collider.height },
+                            transformc.Rotation(),
+                            (Color){60, 20, 150, 100},
+                            {collider.offset.x, -collider.offset.y}
+                        );
+                    }
                 }
                 else if(collider.shape == ColliderShape2D::CIRCLE)
                 {
-                    Renderer::get_singleton().DrawCircleColor(
-                        transformc.Position(),
-                        collider.radius,
-                        transformc.Rotation(),
-                        (Color){60, 20, 150, 100},
-                        {collider.offset.x, -collider.offset.y}
-                    );
+                    if(!pickable)
+                    {
+                        Renderer::get_singleton().DrawCircleColor(
+                            transformc.Position(),
+                            collider.radius,
+                            transformc.Rotation(),
+                            (Color){60, 20, 150, 100},
+                            {collider.offset.x, -collider.offset.y}
+                        );
+                    }
                 }
             }
-            
-            /*Renderer::get_singleton().DrawQuadColor(
-                transformc.Position(),
-                {body.CollisionWidth(), body.CollisionHeight()},
-                transformc.Rotation(),
-                (Color){60, 20, 150, 100});*/
-            
-            /*DrawRectangle(
-                transformc.Position().x - (body.CollisionWidth() / 2.f),
-                -transformc.Position().y - (body.CollisionHeight() / 2.f),
-                body.CollisionWidth(), body.CollisionHeight(), (Color){60, 20, 150, 100});
-                */
         }
     }
 } // namespace Ease::Systems

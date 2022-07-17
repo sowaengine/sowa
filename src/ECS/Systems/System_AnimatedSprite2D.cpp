@@ -11,7 +11,7 @@
 
 namespace Ease::Systems
 {
-   void System_AnimatedSprite2D(Ease::Scene* pScene)
+   void System_AnimatedSprite2D(Ease::Scene* pScene, bool pickable /* = false*/)
    {
       ResourceManager<Ease::Texture>& tex_loader = ResourceManager<Ease::Texture>::GetLoader();
       ResourceManager<Ease::SpriteSheetAnimation>& anim_loader = ResourceManager<Ease::SpriteSheetAnimation>::GetLoader();
@@ -47,7 +47,10 @@ namespace Ease::Systems
          uv1 = pos;
          uv2 = pos + size;
 
-         Renderer::get_singleton().DrawQuad(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), tex, uv1, uv2);
+         if(pickable)
+            Renderer::get_singleton().DrawQuadWithID(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), tex, (uint32_t)entityID, uv1, uv2);
+         else
+            Renderer::get_singleton().DrawQuad(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), tex, uv1, uv2);
       }
    }
 } // namespace Ease::Systems

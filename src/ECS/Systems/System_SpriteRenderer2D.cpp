@@ -10,7 +10,7 @@
 
 namespace Ease::Systems
 {
-   void System_SpriteRenderer2D(Ease::Scene* pScene)
+   void System_SpriteRenderer2D(Ease::Scene* pScene, bool pickable /* = false*/)
    {
       ResourceManager<Ease::Texture>& loader = ResourceManager<Ease::Texture>::GetLoader();
       
@@ -25,7 +25,10 @@ namespace Ease::Systems
          if(!loader.HasResource(spritec.TextureID())) continue;
          if(!spritec.Visible()) continue;
          
-         Renderer::get_singleton().DrawQuad(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), *loader.GetResource(spritec.TextureID()).get(), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f));
+         if(pickable)
+            Renderer::get_singleton().DrawQuadWithID(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), *loader.GetResource(spritec.TextureID()).get(), (uint32_t)entityID, glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f));
+         else
+            Renderer::get_singleton().DrawQuad(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), *loader.GetResource(spritec.TextureID()).get(), glm::vec2(0.f, 0.f), glm::vec2(1.f, 1.f));
       }
    }
 } // namespace Ease::Systems
