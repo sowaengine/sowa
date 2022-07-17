@@ -56,8 +56,9 @@ namespace Ease::Component
 
         PhysicsBodyType& BodyType() { return m_BodyType; }
 
-        const b2Vec2& Position() { return m_b2Body->GetPosition(); }
+        const b2Vec2& Position() { static b2Vec2 invalid; return m_b2Body ? m_b2Body->GetPosition() : invalid; }
         float Angle() { return m_b2Body->GetAngle(); }
+        bool HasBody() { return m_b2Body != nullptr; }
 
         std::vector<Collider2D>& Colliders() { return m_Colliders; }
     private:

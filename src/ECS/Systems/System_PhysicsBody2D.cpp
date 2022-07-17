@@ -7,6 +7,7 @@
 #include "Core/Renderer.hpp"
 #include "box2d/box2d.h"
 #include "rlgl.h"
+#include <iostream>
 
 namespace Ease::Systems
 {
@@ -23,11 +24,14 @@ namespace Ease::Systems
             Entity entity(entityID, &pScene->m_Registry);
             auto& transformc = entity.GetComponent<Component::Transform2D>();
             auto& body = entity.GetComponent<Component::PhysicsBody2D>();
-
-            const b2Vec2& pos = body.Position();
-            transformc.Position().x = WORLD_TO_SCREEN(pos.x);
-            transformc.Position().y = WORLD_TO_SCREEN(pos.y);
-            transformc.Rotation() = -body.Angle() * RAD2DEG;
+            
+            if(body.HasBody())
+            {
+                const b2Vec2& pos = body.Position();
+                transformc.Position().x = WORLD_TO_SCREEN(pos.x);
+                transformc.Position().y = WORLD_TO_SCREEN(pos.y);
+                transformc.Rotation() = -body.Angle() * RAD2DEG;
+            }
         }
     }
 } // namespace Ease::Systems
