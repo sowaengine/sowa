@@ -23,7 +23,7 @@
 #include "rlImGui/rlImGui.h"
 
 #include "Utils/File.hpp"
-
+#include "Input.hpp"
 
 namespace Ease
 {
@@ -39,7 +39,7 @@ namespace Ease
 
    void Application::Run(int argc, char const *argv[])
    {
-      SetTraceLogLevel(LOG_ERROR);
+      SetTraceLogLevel(LOG_WARNING);
       
       //INFO("Ease Engine v{}.{}.{}", EASE_VERSION_MAJOR, EASE_VERSION_MINOR, EASE_VERSION_PATCH);
 
@@ -70,9 +70,13 @@ namespace Ease
          projectSettings._window.VideoHeight
       );
 
-      LoadModule("abs://modules/Ease.Core", 1);
+      //LoadModule("abs://modules/Ease.Core", 1);
+      for(const std::string& path : projectSettings._modules.modules)
+      {
+         LoadModule(path, 1);
+      }
       #ifdef EASE_EDITOR
-         LoadModule("abs://modules/Ease.Editor", 1);
+         LoadModule("abs://Ease-Engine/modules/Ease.Editor", 1);
       #endif
 
       
@@ -133,21 +137,48 @@ namespace Ease
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
       InitModules();
-      m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
+      if(projectSettings._application.MainScene != "")
+         m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
 
       #ifndef EASE_EDITOR
          StartGame();
       #endif
+      
+
       while (!m_Window.ShouldClose())
       {
-         m_Window.Begin();
+         Camera2D cam2d;
+         {
+            auto& cam2dTransform = m_pCurrentScene->CurrentCameraTransform2D();
+            auto& cam2dcamera = m_pCurrentScene->CurrentCamera2D();
+
+            cam2d.zoom = cam2dcamera.Zoom() * ((cam2dTransform.Scale().x + cam2dTransform.Scale().y) * 0.5f);
+            cam2d.target.x = cam2dTransform.Position().x;
+            cam2d.target.y = -cam2dTransform.Position().y;
+            cam2d.offset = {m_Window.GetVideoWidth() * 0.5f, m_Window.GetVideoHeight() * 0.5f};
+            cam2d.rotation = cam2dTransform.Rotation();
+         }
          
-         Ease::Systems::ProcessAll(m_pCurrentScene, m_AppRunning ? SystemsFlags::Update_WhenRunning : SystemsFlags::Update_Always);
+         m_Window.BeginPicking();
+         BeginMode2D(cam2d);
+         Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_PickingDraw);
+         Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Draw, true);
+         EndMode2D();
+         m_Window.EndPicking();
+
+
+         m_Window.Begin();
+         BeginMode2D(cam2d);
+         Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Draw);
+         EndMode2D();
 
          if(m_AppRunning)
+         {
             UpdateGame();
-
+            Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Logic);
+         }
          UpdateModules();
+
 
 
          m_Window.End();
@@ -171,6 +202,9 @@ namespace Ease
       if(m_AppRunning) return;
       m_AppRunning = true;
 
+      Ease::ProjectSettings::get_singleton().debug_draw = false;
+      Scene::CopyScene(m_GameScene, m_CopyScene);
+
       m_pCurrentScene->StartScene();
    }
 
@@ -185,7 +219,15 @@ namespace Ease
       if(!m_AppRunning) return;
       m_AppRunning = false;
 
+      Ease::ProjectSettings::get_singleton().debug_draw = true;
+      Scene::CopyScene(m_CopyScene, m_GameScene);
+
       m_pCurrentScene->StopScene();
+   }
+
+   void Application::ChangeScene(const char* path)
+   {
+      m_pCurrentScene->LoadFromFile(path);
    }
    
 
