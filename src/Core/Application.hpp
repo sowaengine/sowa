@@ -63,26 +63,35 @@ namespace Ease
         void StartGame();
         void UpdateGame();
         void StopGame();
+        bool IsRunning() { return m_AppRunning; }
         Ease::Scene* GetCurrentScene() { return m_pCurrentScene; }
-
+        Ease::Entity GetPickedEntity() { return m_MousePickedEntity; }
+        
+        void ChangeScene(const char* path);
 
         void InitModules();
         void UpdateModules();
         void Modules_OnImGuiRender();
+
         
     private:
+        friend class Window;
+
         Application();
         ~Application();
 
         Window m_Window;
 
         Scene m_GameScene;
+        Scene m_CopyScene;
         Scene* m_pCurrentScene;
 
         std::unordered_map<std::string, std::shared_ptr<NativeModule>> m_Modules;
         std::unordered_map<std::string, NativeBehaviourFactory*> m_NativeBehaviours;
 
         bool m_AppRunning = false;
+
+        Ease::Entity m_MousePickedEntity;
     };
 } // namespace Ease
 
