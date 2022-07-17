@@ -12,10 +12,30 @@
 #include "Core/ProjectSettings.hpp"
 #include "Utils/File.hpp"
 
+#define CALL_FOR_ALL_COMPONENTS(func, ...) do {\
+   func<Ease::Component::AnimatedSprite2D>(__VA_ARGS__); \
+   func<Ease::Component::AudioStreamPlayer>(__VA_ARGS__); \
+   func<Ease::Component::Button>(__VA_ARGS__); \
+   func<Ease::Component::Camera2D>(__VA_ARGS__); \
+   func<Ease::Component::Group>(__VA_ARGS__); \
+   func<Ease::Component::NativeBehaviourClass>(__VA_ARGS__); \
+   func<Ease::Component::NinePatchRect>(__VA_ARGS__); \
+   func<Ease::Component::PhysicsBody2D>(__VA_ARGS__); \
+   func<Ease::Component::SpriteRenderer2D>(__VA_ARGS__); \
+   func<Ease::Component::TextRenderer2D>(__VA_ARGS__); \
+   func<Ease::Component::Transform2D>(__VA_ARGS__); \
+   func<Ease::Component::UITransform>(__VA_ARGS__); \
+} while (0)
+
 namespace Ease
 {
    void Scene::StartScene()
    {
+      m_SceneOldCamera2D.camera2d = m_SceneCamera2D.camera2d;
+      m_SceneOldCamera2D.transform2d = m_SceneCamera2D.transform2d;
+      m_SceneCamera2D.transform2d = Ease::Component::Transform2D();
+      m_SceneCamera2D.camera2d = Ease::Component::Camera2D();
+
       m_pPhysicsWorld2D = std::make_shared<b2World>(m_Gravity);
 
       {
@@ -59,7 +79,7 @@ namespace Ease
          }
       }
 
-      auto view = m_Registry.view<Component::NativeBehaviourClass>();
+      /*auto view = m_Registry.view<Component::NativeBehaviourClass>();
       for(auto& e : view)
       {
          Entity entity(e, &m_Registry);
@@ -67,10 +87,16 @@ namespace Ease
          Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
          nbehaviour.Factory() = Application::get_singleton().GetFactory(nbehaviour.ClassName());
 
-         nbehaviour.Behaviour() = nbehaviour.Factory()->Create();
-         nbehaviour.Behaviour()->self = entity;
-         nbehaviour.Behaviour()->Start();
-      }
+         if(nbehaviour.Factory())
+         {
+            nbehaviour.Behaviour() = nbehaviour.Factory()->Create();
+            if(nbehaviour.Behaviour())
+            {
+               nbehaviour.Behaviour()->self = entity;
+               nbehaviour.Behaviour()->Start();
+            }
+         }
+      }*/
    }
    void Scene::UpdateScene()
    {
@@ -80,12 +106,31 @@ namespace Ease
          Entity entity(e, &m_Registry);
          
          Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
+         
+         if(!nbehaviour.Factory())
+         {
+            nbehaviour.Factory() = Application::get_singleton().GetFactory(nbehaviour.ClassName());
 
-         nbehaviour.Behaviour()->Update();
+            if(nbehaviour.Factory())
+            {
+               nbehaviour.Behaviour() = nbehaviour.Factory()->Create();
+               if(nbehaviour.Behaviour())
+               {
+                  nbehaviour.Behaviour()->self = entity;
+                  nbehaviour.Behaviour()->Start();
+               }
+            }
+         }
+
+         if(nbehaviour.Behaviour())
+            nbehaviour.Behaviour()->Update();
       }
    }
    void Scene::StopScene()
    {
+      m_SceneCamera2D.camera2d = m_SceneOldCamera2D.camera2d;
+      m_SceneCamera2D.transform2d = m_SceneOldCamera2D.transform2d;
+
       m_pPhysicsWorld2D = nullptr;
 
       auto view = m_Registry.view<Component::NativeBehaviourClass>();
@@ -95,19 +140,13 @@ namespace Ease
          
          Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
 
-         nbehaviour.Behaviour()->self = Entity(entt::null, nullptr);
-         nbehaviour.Factory()->Destroy(nbehaviour.Behaviour());
-         // nbehaviour.Behaviour()->Start();
+         if(nbehaviour.Behaviour())
+            nbehaviour.Behaviour()->self = Entity(entt::null, nullptr);
+         if(nbehaviour.Factory())
+            nbehaviour.Factory()->Destroy(nbehaviour.Behaviour());
       }
    }
-   
 
-   void Scene::CopyEntity(Ease::Entity entity)
-   {
-      ClearCopiedEntities();
-      AddCopiedEntity(entity);
-   }
-   
    template<typename T>
    void CopyComponent(Ease::Entity& srcEntity, Ease::Entity& dstEntity)
    {
@@ -118,6 +157,26 @@ namespace Ease
 
          dstComponent = srcComponent;
       }
+   }
+
+// static
+   void Scene::CopyScene(Scene& src, Scene& dst)
+   {
+      dst.m_Registry.clear();
+      auto view = src.m_Registry.view<Ease::Component::Common>();
+      for(const auto& entityID : view)
+      {
+         Entity srcEntity(entityID, &src.m_Registry);
+         Entity dstEntity = dst.Create(srcEntity.GetComponent<Ease::Component::Common>().Name(), (uint32_t)entityID);
+
+         CALL_FOR_ALL_COMPONENTS(CopyComponent, srcEntity, dstEntity);
+      }
+   }
+
+   void Scene::CopyEntity(Ease::Entity entity)
+   {
+      ClearCopiedEntities();
+      AddCopiedEntity(entity);
    }
 
    void Scene::AddCopiedEntity(Ease::Entity entity)
@@ -254,6 +313,29 @@ namespace Ease
                yaml << YAML::EndMap;
             }
             // </AudioStreamPlayer>
+            // <Button>
+            if(entity.HasComponent<Component::Button>())
+            {
+               Component::Button& component = entity.GetComponent<Component::Button>();
+
+               yaml << YAML::Key << "Button" << YAML::BeginMap;
+                  yaml << YAML::Key << "Text" << YAML::Value << component.Text();
+                  yaml << YAML::Key << "Visible" << YAML::Value << component.Visible();
+                  yaml << YAML::Key << "Disabled" << YAML::Value << component.Disabled();
+               yaml << YAML::EndMap;
+            }
+            // </Button>
+            // <Camera2D>
+            if(entity.HasComponent<Component::Camera2D>())
+            {
+               Component::Camera2D& component = entity.GetComponent<Component::Camera2D>();
+
+               yaml << YAML::Key << "Camera2D" << YAML::BeginMap;
+                  yaml << YAML::Key << "Current" << YAML::Value << component.Current();
+                  yaml << YAML::Key << "Zoom" << YAML::Value << component.Zoom();
+               yaml << YAML::EndMap;
+            }
+            // </Camera2D>
             // <Group>
             if(entity.HasComponent<Component::Group>())
             {
@@ -347,6 +429,20 @@ namespace Ease
                yaml << YAML::EndMap;
             }
             // </Transform2D>
+            // <UITransform>
+            if(entity.HasComponent<Component::UITransform>())
+            {
+               Component::UITransform& component = entity.GetComponent<Component::UITransform>();
+
+               yaml << YAML::Key << "UITransform" << YAML::BeginMap;
+                  yaml << YAML::Key << "Position" << YAML::Value << component.Position();
+                  yaml << YAML::Key << "Scale" << YAML::Value << component.Scale();
+                  yaml << YAML::Key << "Size" << YAML::Value << component.Size();
+                  yaml << YAML::Key << "Rotation" << YAML::Value << component.Rotation();
+                  // yaml << YAML::Key << "ZIndex" << YAML::Value << component.ZIndex();
+               yaml << YAML::EndMap;
+            }
+            // </UITransform>
 
          yaml << YAML::EndMap;
          // </Components>
@@ -379,10 +475,13 @@ namespace Ease
             
             for(auto[id, texture] : textures)
             {
-               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-                  yaml << YAML::Key << "Path" << YAML::Value << texture->GetFilepath();
-                  yaml << YAML::Newline;
-               yaml << YAML::EndMap;
+               if(id > EASE_USER_GLOBAL_RESOURCE_ID_MAX)
+               {
+                  yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                     yaml << YAML::Key << "Path" << YAML::Value << texture->GetFilepath();
+                     yaml << YAML::Newline;
+                  yaml << YAML::EndMap;
+               }
             }
 
             yaml << YAML::EndMap;
@@ -394,17 +493,20 @@ namespace Ease
             
             for(auto[id, anim] : anims)
             {
-               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-                  yaml << YAML::Key << "HFrames" << YAML::Value << anim->HFrames();
-                  yaml << YAML::Key << "VFrames" << YAML::Value << anim->VFrames();
-                  yaml << YAML::Key << "SelectedRow" << YAML::Value << anim->SelectedRow();
-                  yaml << YAML::Key << "FrameCount" << YAML::Value << anim->FrameCount();
-                  yaml << YAML::Key << "StartFrame" << YAML::Value << anim->StartFrame();
-                  yaml << YAML::Key << "FPS" << YAML::Value << anim->FPS();
+               if(id > EASE_USER_GLOBAL_RESOURCE_ID_MAX)
+               {
+                  yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                     yaml << YAML::Key << "HFrames" << YAML::Value << anim->HFrames();
+                     yaml << YAML::Key << "VFrames" << YAML::Value << anim->VFrames();
+                     yaml << YAML::Key << "SelectedRow" << YAML::Value << anim->SelectedRow();
+                     yaml << YAML::Key << "FrameCount" << YAML::Value << anim->FrameCount();
+                     yaml << YAML::Key << "StartFrame" << YAML::Value << anim->StartFrame();
+                     yaml << YAML::Key << "FPS" << YAML::Value << anim->FPS();
 
-                  yaml << YAML::Key << "Texture" << YAML::Value << anim->Texture();
-                  yaml << YAML::Newline;
-               yaml << YAML::EndMap;
+                     yaml << YAML::Key << "Texture" << YAML::Value << anim->Texture();
+                     yaml << YAML::Newline;
+                  yaml << YAML::EndMap;
+               }
             }
 
             yaml << YAML::EndMap;
@@ -416,10 +518,13 @@ namespace Ease
             
             for(auto[id, stream] : streams)
             {
-               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-                  yaml << YAML::Key << "Path" << YAML::Value << stream->GetFilepath();
-                  yaml << YAML::Newline;
-               yaml << YAML::EndMap;
+               if(id > EASE_USER_GLOBAL_RESOURCE_ID_MAX)
+               {
+                  yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                     yaml << YAML::Key << "Path" << YAML::Value << stream->GetFilepath();
+                     yaml << YAML::Newline;
+                  yaml << YAML::EndMap;
+               }
             }
 
             yaml << YAML::EndMap;
@@ -440,9 +545,31 @@ namespace Ease
       return true;
    }
 
+   template<typename T>
+   void ClearResourceLoader()
+   {
+      auto& resources = ResourceManager<Ease::Texture>::GetLoader().GetResources();
+
+      for(auto it = resources.begin(); it != resources.end();)
+      {
+         if (it->first >= 10000)
+            it = resources.erase(it);
+         else
+            ++it;
+      }   
+   }
+
    bool Scene::LoadFromFile(const char* file)
    {
       m_Registry.clear();
+
+      //ResourceManager<Ease::Texture>::GetLoader().GetResources().clear();
+      //ResourceManager<Ease::SpriteSheetAnimation>::GetLoader().GetResources().clear();
+      //ResourceManager<Ease::AudioStream>::GetLoader().GetResources().clear();
+      ClearResourceLoader<Ease::Texture>();
+      ClearResourceLoader<Ease::SpriteSheetAnimation>();
+      ClearResourceLoader<Ease::AudioStream>();
+
       std::filesystem::path inpath = Ease::File::Path(file);
       path = file;
       Application::get_singleton().Log(std::string("Loading scene from ") + inpath.string());
@@ -531,6 +658,19 @@ namespace Ease
                   Component::AudioStreamPlayer& component = entity.AddComponent<Component::AudioStreamPlayer>();
                   component.Stream() = component_node["AudioStream"].as<ResourceID>(0);
                }
+               if(YAML::Node component_node = components["Button"]; component_node)
+               {
+                  Component::Button& component = entity.AddComponent<Component::Button>();
+                  component.Text() = component_node["Text"].as<std::string>(std::string{""});
+                  component.Visible() = component_node["Visible"].as<bool>(true);
+                  component.Disabled() = component_node["Disabled"].as<bool>(false);
+               }
+               if(YAML::Node component_node = components["Camera2D"]; component_node)
+               {
+                  Component::Camera2D& component = entity.AddComponent<Component::Camera2D>();
+                  component.Current() = component_node["Current"].as<bool>(false);
+                  component.Zoom() = component_node["Zoom"].as<float>(1.f);
+               }
                if(YAML::Node component_node = components["Group"]; component_node)
                {
                   Component::Group& component = entity.AddComponent<Component::Group>();
@@ -589,6 +729,14 @@ namespace Ease
                   component.Rotation() = component_node["Rotation"].as<float>(0.f);
                   // component.ZIndex() = component_node["ZIndex"].as<int>(0);
                }
+               if(YAML::Node component_node = components["UITransform"]; component_node)
+               {
+                  Component::UITransform& component = entity.AddComponent<Component::UITransform>();
+                  component.Position() = component_node["Position"].as<glm::vec2>(glm::vec2{0.f, 0.f});
+                  component.Scale() = component_node["Scale"].as<glm::vec2>(glm::vec2{1.f, 1.f});
+                  component.Size() = component_node["Size"].as<glm::vec2>(glm::vec2{64.f, 64.f});
+                  component.Rotation() = component_node["Rotation"].as<float>(0.f);
+               }
             }
          }
       }
@@ -629,5 +777,13 @@ namespace Ease
          }
       }
       return entities;
+   }
+
+   Ease::Entity Scene::GetEntityByID(uint32_t id)
+   {
+      if(m_Registry.valid((entt::entity)id))
+         return Ease::Entity((entt::entity)id, &m_Registry);
+      
+      return Ease::Entity(entt::null, nullptr);
    }
 } // namespace Ease
