@@ -39,6 +39,7 @@ namespace Ease
         }
         template<typename T>
         bool HasComponent() {
+            if(!IsValid()) return false;
             auto comp = m_pRegistry->try_get<T>(m_Entity);
             return comp != NULL;
         }
