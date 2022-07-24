@@ -1,37 +1,52 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(Ease VERSION 0.1.0)
 
+option(Editor "Build Editor executable" ON)
+
 include(CTest)
 enable_testing()
 
-
-link_directories(thirdparty/)
-link_libraries(${CMAKE_DL_LIBS} raylib yaml-cpp box2d openal sndfile)
-
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/glm)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/raylib/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui-docking)
-
-add_definitions(-DEASE_EDITOR)
-
-file(GLOB_RECURSE SOURCES
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+file(GLOB_RECURSE EASE_SOURCES
+   ${CMAKE_SOURCE_DIR}/Ease/src/*.cpp
 )
 
 set(CMAKE_CXX_STANDARD 17)
-add_subdirectory(modules)
-add_subdirectory(thirdparty)
+
+link_directories(Ease/thirdparty/)
+link_libraries(box2d)
+
+if(Editor)
+   add_compile_definitions(EASE_EDITOR)
+endif()
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/Modules)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty)
 
 
 
+add_executable(Ease ${EASE_SOURCES})
+
+target_link_directories(Ease PRIVATE Ease/thirdparty/)
+target_link_libraries(Ease PRIVATE ${CMAKE_DL_LIBS} raylib yaml-cpp box2d openal sndfile)
+
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/src/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/glm/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/raylib/include/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/)
+
+if(Editor)
+   add_compile_definitions(EASE_EDITOR)
+   set_target_properties(Ease PROPERTIES OUTPUT_NAME "Ease_Editor")
+else()
+   set_target_properties(Ease PROPERTIES OUTPUT_NAME "Easengine")
+endif()
 
 
-add_executable(Ease ${SOURCES})
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-02")
 
 
 
