@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(Ease VERSION 0.1.0)
+project(Ease VERSION 0.1.0 LANGUAGES CXX C)
 
 option(Editor "Build Editor executable" ON)
 
@@ -11,6 +11,7 @@ file(GLOB_RECURSE EASE_SOURCES
 )
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 
 link_directories(Ease/thirdparty/)
 link_libraries(box2d)
@@ -33,6 +34,7 @@ target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/src/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/glm/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/tinyfiledialogs/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/raylib/include/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/)
@@ -48,6 +50,8 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-02")
 
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_C_FLAGS_RELEASE "-02")
 
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

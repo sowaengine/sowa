@@ -24,6 +24,7 @@
 
 #include "Utils/File.hpp"
 #include "Core/Input.hpp"
+#include "Utils/Dialog.hpp"
 
 namespace Ease
 {
@@ -70,67 +71,15 @@ namespace Ease
          projectSettings._window.VideoHeight
       );
 
-      //LoadModule("abs://modules/Ease.Core", 1);
+
       for(const std::string& path : projectSettings._modules.modules)
       {
          LoadModule(path, 1);
       }
       #ifdef EASE_EDITOR
-         LoadModule("abs://Ease-Engine/Modules/Ease.Editor", 1);
+         LoadModule("abs://Modules/Ease.Editor", 1);
       #endif
 
-      
-      /*Entity ent1 = m_pCurrentScene->Create("Entity1");
-      auto& transform2d = ent1.AddComponent<Component::Transform2D>();
-      transform2d.Position() = {200.f, -200.f};
-      transform2d.Scale() = {10.f, 10.f};
-
-      std::vector<Ease::Entity> entities;
-      {
-         Ease::Entity text = m_pCurrentScene->Create("Text");
-         auto& text_tc = text.AddComponent<Component::Transform2D>();
-         text_tc.Position() = {600.f, -300.f};
-
-         auto& text_font = text.AddComponent<Component::TextRenderer2D>();
-         text_font.Text() = "EASE ENGINE";
-         text_font.Color() = {25.f, 4.f, 202.1f, 255.f};
-         
-         entities.push_back(text);
-      }
-      {
-         Ease::Entity text = m_pCurrentScene->Create("Text_Ease");
-         auto& text_tc = text.AddComponent<Component::Transform2D>();
-         text_tc.Position() = {1200.f, -300.f};
-
-         auto& text_font = text.AddComponent<Component::TextRenderer2D>();
-         text_font.Text() = "Ease Engine";
-         text_font.Color() = {4.f, 202.f, 20.21f, 255.f};
-         
-         entities.push_back(text);
-      }
-      {
-         Ease::Entity icon = m_pCurrentScene->Create("icon");
-         auto& tc = icon.AddComponent<Component::Transform2D>();
-         tc.Position() = {800, -650};
-         tc.Scale() = {0.25f, 0.25f};
-
-         auto& sprite = icon.AddComponent<Component::SpriteRenderer2D>();
-         sprite.TextureID() = iconTex->GetResourceID();
-      }
-
-      
-      Ease::Animation anim;
-      anim.TextureID = tex->GetResourceID();
-      anim.hFrames = 23;
-      anim.vFrames = 4;
-      anim.SelectedRow = 1;
-      anim.frameCount = 18;
-      anim.startFrame = 0;
-      
-      auto& animSprite = ent1.AddComponent<Component::AnimatedSprite2D>();
-      animSprite.SetAnimation("anim", anim);
-      animSprite.SelectedAnimation() = "anim";
-      animSprite.FPS() = 4;*/
 
       IMGUI_CHECKVERSION();
       SetupRLImGui(true);
@@ -180,6 +129,11 @@ namespace Ease
          UpdateModules();
 
 
+         if(IsKeyPressed(KEY_ENTER))
+         {
+            std::string dialogPath = Dialog::OpenFileDialog("Title", "", 0, {""}, false);
+            std::cout << dialogPath << std::endl;
+         }
 
          m_Window.End();
       }

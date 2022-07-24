@@ -11,5 +11,8 @@ set(EASE_SOURCES
 
    #rlImGui
    ${CMAKE_CURRENT_SOURCE_DIR}/rlImGui/rlImGui.cpp
+
+   #tinyfiledialogs
+   ${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs/tinyfiledialogs.c
    PARENT_SCOPE
 )
