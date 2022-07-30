@@ -4,8 +4,19 @@
 
 #include <string>
 #include <unordered_map>
+#include <functional>
+#include <iostream>
 #include "ECS/Entity/Entity.hpp"
 
+#if defined(_WIN32) || defined(_WIN64)
+   #define EASE_API extern "C" __declspec(dllexport)
+   
+   #define WIN32_LEAN_AND_MEAN
+      #include <windows.h>
+   #undef WIN32_LEAN_AND_MEAN
+#else
+   #define EASE_API extern "C"
+#endif
 
 #define EASE_VERSION_MAJOR 0
 #define EASE_VERSION_MINOR 1
@@ -55,6 +66,36 @@
    lib->nativeBehaviours[#Behaviour] = factory; \
 } while(0); \
 
+
+/**
+ * Initializing a module:
+ * 
+   MODULE_BEGIN(ModuleClass, "author", "modulename", version)
+      BIND_NATIVEBEHAVIOUR(MyComponent);
+   MODULE_END(ModuleClass)
+ * 
+ */
+// MODULE_BEGIN
+#define MODULE_BEGIN(_className, _authorName, _moduleName, _version) \
+EASE_API Ease::BaseModule* Create() {\
+   _className* lib; \
+   do { \
+      lib = new _className{}; \
+      lib->metadata.authorName = _authorName; \
+      lib->metadata.moduleName = _moduleName; \
+      lib->metadata.version = _version; \
+   } while(0);
+
+// MODULE_END
+#define MODULE_END(_className) \
+   return lib; \
+} \
+EASE_API void Destroy(Ease::BaseModule* lib) \
+{ delete reinterpret_cast<_className*>(lib); }
+
+// BIND_NATIVEBEHAVIOUR
+#define BIND_NATIVEBEHAVIOUR(Behaviour) EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, Behaviour)
+
 typedef void(*UserFunc)();
 
 namespace Ease
@@ -84,9 +125,9 @@ namespace Ease
          BaseModule() {}
          virtual ~BaseModule() {}
 
-         virtual void Start() {}
-         virtual void Update() {}
-         virtual void OnImGuiRender() {}
+         virtual void Start()         {  static unsigned char c=0; c++; }
+         virtual void Update()        {  static unsigned char c=0; c++; }
+         virtual void OnImGuiRender() {  static unsigned char c=0; c++; }
 
          struct {
             std::string authorName = "";
