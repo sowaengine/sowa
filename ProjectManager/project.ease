@@ -4,9 +4,9 @@
 v: 1
 
 Application:
-  Name: Game Ease
-  Description: This is a game made with Ease Engine
-  MainScene: res://scene.escn
+  Name: Easengine - Project Manager
+  Description: Project manager for easengine
+  MainScene: res://Main.escn
 
 Window:
   WindowWidth: 1280
@@ -14,3 +14,7 @@ Window:
   VideoWidth: 1920
   VideoHeight: 1080
   Fullscreen: false
+
+Modules:
+  Modules:
+    - res://Modules/Ease.ProjectManager

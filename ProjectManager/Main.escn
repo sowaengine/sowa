@@ -1,0 +1,12 @@
+Type: Scene
+
+ResourceList:
+  Texture:
+    {}
+  SpriteSheetAnimation:
+    {}
+  AudioStream:
+    {}
+
+EntityList:
+  {}
