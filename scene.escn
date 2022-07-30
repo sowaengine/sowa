@@ -3,18 +3,16 @@ Type: Scene
 ResourceList:
   Texture:
     0:
-      Path: res/characters.png
+      Path: res://res/characters.png
 
     1:
-      Path: res/icon.png
+      Path: res://res/icon.png
 
 
 EntityList:
   0:
     Name: Entity1
     Components:
-      AnimatedSprite2D:
-        Note: AnimatedSprite2D not serializable right now
       Transform2D:
         Position: [200, -200]
         Scale: [10, 10]
