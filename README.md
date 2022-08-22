@@ -1,9 +1,9 @@
-# Easengine
+# Sowa Engine
 
-<img src="https://raw.githubusercontent.com/Lexographics/Easengine/main/.gh_resources/icon-1024x.png" width="200" alt="Easengine logo"><br><br>
+<img src="https://raw.githubusercontent.com/Lexographics/Easengine/main/.gh_resources/icon-1024x.png" width="200" alt="Sowa Engine Logo"><br><br>
 
 
-**Easengine** is a 2D Game/Rendering Engine
+**Sowa Engine** is a 2D Game/Rendering Engine
 
 
 ### Notes

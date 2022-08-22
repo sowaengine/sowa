@@ -17,12 +17,3 @@ target_include_directories(Ease.Editor PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdpar
 target_include_directories(Ease.Editor PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
 target_include_directories(Ease.Editor PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/raylib/include/)
 target_include_directories(Ease.Editor PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/glm/)
-
-add_library(Mario.Menu SHARED Mario.Menu.cc)
-set_target_properties(Mario.Menu PROPERTIES PREFIX "")
-target_include_directories(Mario.Menu PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include)
-target_include_directories(Mario.Menu PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
-target_include_directories(Mario.Menu PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/)
-target_include_directories(Mario.Menu PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
-target_include_directories(Mario.Menu PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/raylib/include/)
-target_include_directories(Mario.Menu PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/glm/)
