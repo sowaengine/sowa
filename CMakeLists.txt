@@ -26,11 +26,13 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty)
 # Project Manager
 add_subdirectory(${CMAKE_SOURCE_DIR}/ProjectManager)
 
+# nmGfx
+add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx)
 
 add_executable(Ease ${EASE_SOURCES})
 
 target_link_directories(Ease PRIVATE Ease/thirdparty/)
-target_link_libraries(Ease PRIVATE ${CMAKE_DL_LIBS} raylib yaml-cpp box2d openal sndfile)
+target_link_libraries(Ease PRIVATE ${CMAKE_DL_LIBS} raylib yaml-cpp box2d openal sndfile nmGfx)
 
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/src/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/)
