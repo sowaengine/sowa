@@ -7,10 +7,9 @@ set(EASE_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/imgui_widgets.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/imgui.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/misc/cpp/imgui_stdlib.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/backends/imgui_impl_glfw.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/backends/imgui_impl_opengl3.cpp
 
-
-   #rlImGui
-   ${CMAKE_CURRENT_SOURCE_DIR}/rlImGui/rlImGui.cpp
 
    #tinyfiledialogs
    ${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs/tinyfiledialogs.c
