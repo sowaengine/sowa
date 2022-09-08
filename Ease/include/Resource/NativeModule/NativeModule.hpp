@@ -27,6 +27,9 @@ namespace Ease
         inline BaseModule* GetModule() { return m_pModule; }
 
         void SetDeleteFunc(std::function<void(BaseModule*)> func) { m_DeleteFunc = func; }
+
+        // Adds dynamic library extension based on operating system (.dll, .so, .dylib)
+        static std::string AddExtension(const std::string& base);
     private:
         friend class Application;
         BaseModule* m_pModule;

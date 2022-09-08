@@ -22,6 +22,7 @@ public:
     const std::string& GetFilepath() { return m_Filepath; }
 private:
     template<typename> friend class ResourceManager;
+    template<typename> friend class ResourceLoaderImpl;
     friend class SoundSource;
 
     std::string m_Filepath{""};

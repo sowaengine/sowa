@@ -27,6 +27,7 @@ namespace Ease
 
         inline ResourceID& Texture() { return m_Texture; }
     private:
+        template<typename> friend class ResourceLoaderImpl;
         int m_hFrames;
         int m_vFrames;
         int m_SelectedRow;
