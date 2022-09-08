@@ -11,6 +11,7 @@
 #include <filesystem>
 #include "Core/ProjectSettings.hpp"
 #include "Utils/File.hpp"
+#include "Resource/ResourceLoader.hpp"
 
 #define CALL_FOR_ALL_COMPONENTS(func, ...) do {\
    func<Ease::Component::AnimatedSprite2D>(__VA_ARGS__); \
@@ -78,54 +79,9 @@ namespace Ease
             }
          }
       }
-
-      /*auto view = m_Registry.view<Component::NativeBehaviourClass>();
-      for(auto& e : view)
-      {
-         Entity entity(e, &m_Registry);
-         
-         Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
-         nbehaviour.Factory() = Application::get_singleton().GetFactory(nbehaviour.ClassName());
-
-         if(nbehaviour.Factory())
-         {
-            nbehaviour.Behaviour() = nbehaviour.Factory()->Create();
-            if(nbehaviour.Behaviour())
-            {
-               nbehaviour.Behaviour()->self = entity;
-               nbehaviour.Behaviour()->Start();
-            }
-         }
-      }*/
    }
-   void Scene::UpdateScene()
-   {
-      auto view = m_Registry.view<Component::NativeBehaviourClass>();
-      for(auto& e : view)
-      {
-         Entity entity(e, &m_Registry);
-         
-         Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
-         
-         if(!nbehaviour.Factory())
-         {
-            nbehaviour.Factory() = Application::get_singleton().GetFactory(nbehaviour.ClassName());
 
-            if(nbehaviour.Factory())
-            {
-               nbehaviour.Behaviour() = nbehaviour.Factory()->Create();
-               if(nbehaviour.Behaviour())
-               {
-                  nbehaviour.Behaviour()->self = entity;
-                  nbehaviour.Behaviour()->Start();
-               }
-            }
-         }
 
-         if(nbehaviour.Behaviour())
-            nbehaviour.Behaviour()->Update();
-      }
-   }
    void Scene::StopScene()
    {
       m_SceneCamera2D.camera2d = m_SceneOldCamera2D.camera2d;
@@ -470,61 +426,52 @@ namespace Ease
          yaml << YAML::BeginMap;
          { // <Ease::Texture>
             yaml << YAML::Key << "Texture" << YAML::Value << YAML::BeginMap;
-            ResourceManager<Ease::Texture> loader_texture = ResourceManager<Ease::Texture>::GetLoader();
+            ResourceManager<Ease::Texture> loader_texture = GetResourceManager<Ease::Texture>();
             std::map<ResourceID, std::shared_ptr<Ease::Texture>> textures = loader_texture.GetResources();
             
             for(auto[id, texture] : textures)
             {
-               if(id > EASE_USER_GLOBAL_RESOURCE_ID_MAX)
-               {
-                  yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-                     yaml << YAML::Key << "Path" << YAML::Value << texture->GetFilepath();
-                     yaml << YAML::Newline;
-                  yaml << YAML::EndMap;
-               }
+               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                  yaml << YAML::Key << "Path" << YAML::Value << texture->GetFilepath();
+                  yaml << YAML::Newline;
+               yaml << YAML::EndMap;
             }
 
             yaml << YAML::EndMap;
          }  // </Ease::Texture>
          { // <Ease::SpriteSheetAnimation>
             yaml << YAML::Key << "SpriteSheetAnimation" << YAML::Value << YAML::BeginMap;
-            ResourceManager<Ease::SpriteSheetAnimation> loader_anims = ResourceManager<Ease::SpriteSheetAnimation>::GetLoader();
+            ResourceManager<Ease::SpriteSheetAnimation> loader_anims = GetResourceManager<Ease::SpriteSheetAnimation>();
             std::map<ResourceID, std::shared_ptr<Ease::SpriteSheetAnimation>> anims = loader_anims.GetResources();
             
             for(auto[id, anim] : anims)
             {
-               if(id > EASE_USER_GLOBAL_RESOURCE_ID_MAX)
-               {
-                  yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-                     yaml << YAML::Key << "HFrames" << YAML::Value << anim->HFrames();
-                     yaml << YAML::Key << "VFrames" << YAML::Value << anim->VFrames();
-                     yaml << YAML::Key << "SelectedRow" << YAML::Value << anim->SelectedRow();
-                     yaml << YAML::Key << "FrameCount" << YAML::Value << anim->FrameCount();
-                     yaml << YAML::Key << "StartFrame" << YAML::Value << anim->StartFrame();
-                     yaml << YAML::Key << "FPS" << YAML::Value << anim->FPS();
+               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                  yaml << YAML::Key << "HFrames" << YAML::Value << anim->HFrames();
+                  yaml << YAML::Key << "VFrames" << YAML::Value << anim->VFrames();
+                  yaml << YAML::Key << "SelectedRow" << YAML::Value << anim->SelectedRow();
+                  yaml << YAML::Key << "FrameCount" << YAML::Value << anim->FrameCount();
+                  yaml << YAML::Key << "StartFrame" << YAML::Value << anim->StartFrame();
+                  yaml << YAML::Key << "FPS" << YAML::Value << anim->FPS();
 
-                     yaml << YAML::Key << "Texture" << YAML::Value << anim->Texture();
-                     yaml << YAML::Newline;
-                  yaml << YAML::EndMap;
-               }
+                  yaml << YAML::Key << "Texture" << YAML::Value << anim->Texture();
+                  yaml << YAML::Newline;
+               yaml << YAML::EndMap;
             }
 
             yaml << YAML::EndMap;
          }  // </Ease::SpriteSheetAnimation>
          { // <Ease::AudioStream>
             yaml << YAML::Key << "AudioStream" << YAML::Value << YAML::BeginMap;
-            ResourceManager<Ease::AudioStream> loader_AudioStream = ResourceManager<Ease::AudioStream>::GetLoader();
+            ResourceManager<Ease::AudioStream> loader_AudioStream = GetResourceManager<Ease::AudioStream>();
             std::map<ResourceID, std::shared_ptr<Ease::AudioStream>> streams = loader_AudioStream.GetResources();
             
             for(auto[id, stream] : streams)
             {
-               if(id > EASE_USER_GLOBAL_RESOURCE_ID_MAX)
-               {
-                  yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-                     yaml << YAML::Key << "Path" << YAML::Value << stream->GetFilepath();
-                     yaml << YAML::Newline;
-                  yaml << YAML::EndMap;
-               }
+               yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
+                  yaml << YAML::Key << "Path" << YAML::Value << stream->GetFilepath();
+                  yaml << YAML::Newline;
+               yaml << YAML::EndMap;
             }
 
             yaml << YAML::EndMap;
@@ -545,30 +492,15 @@ namespace Ease
       return true;
    }
 
-   template<typename T>
-   void ClearResourceLoader()
-   {
-      auto& resources = ResourceManager<Ease::Texture>::GetLoader().GetResources();
-
-      for(auto it = resources.begin(); it != resources.end();)
-      {
-         if (it->first >= 10000)
-            it = resources.erase(it);
-         else
-            ++it;
-      }   
-   }
+   
 
    bool Scene::LoadFromFile(const char* file)
    {
       m_Registry.clear();
 
-      //ResourceManager<Ease::Texture>::GetLoader().GetResources().clear();
-      //ResourceManager<Ease::SpriteSheetAnimation>::GetLoader().GetResources().clear();
-      //ResourceManager<Ease::AudioStream>::GetLoader().GetResources().clear();
-      ClearResourceLoader<Ease::Texture>();
-      ClearResourceLoader<Ease::SpriteSheetAnimation>();
-      ClearResourceLoader<Ease::AudioStream>();
+      ClearResourceManager<Ease::Texture>();
+      ClearResourceManager<Ease::SpriteSheetAnimation>();
+      ClearResourceManager<Ease::AudioStream>();
 
       std::filesystem::path inpath = Ease::File::Path(file);
       path = file;
@@ -587,7 +519,7 @@ namespace Ease
          { // <Ease::Texture>
             if(YAML::Node resource_node = resources["Texture"]; resource_node)
             {
-               ResourceManager<Ease::Texture>& resource_loader = ResourceManager<Ease::Texture>::GetLoader();
+               ResourceManager<Ease::Texture>& resource_loader = GetResourceManager<Ease::Texture>();
                for(auto it = resource_node.begin(); it != resource_node.end(); ++it)
                {
                   uint32_t id = it->first.as<uint32_t>(0);
@@ -599,13 +531,13 @@ namespace Ease
          { // <Ease::SpriteSheetAnimation>
             if(YAML::Node resource_node = resources["SpriteSheetAnimation"]; resource_node)
             {
-               ResourceManager<Ease::SpriteSheetAnimation>& resource_loader = ResourceManager<Ease::SpriteSheetAnimation>::GetLoader();
+               ResourceManager<Ease::SpriteSheetAnimation>& resource_loader = GetResourceManager<Ease::SpriteSheetAnimation>();
                for(auto it = resource_node.begin(); it != resource_node.end(); ++it)
                {
                   uint32_t id = it->first.as<uint32_t>(0);
                   YAML::Node tex_node = it->second;
                   
-                  std::shared_ptr<Ease::SpriteSheetAnimation> anim = resource_loader.LoadResource(nullptr, id);
+                  Reference<Ease::SpriteSheetAnimation> anim = resource_loader.LoadResource("", id);
                   anim->HFrames() = tex_node["HFrames"].as<int>(0);
                   anim->VFrames() = tex_node["VFrames"].as<int>(0);
                   anim->SelectedRow() = tex_node["SelectedRow"].as<int>(0);
@@ -620,13 +552,13 @@ namespace Ease
          { // <Ease::AudioStream>
             if(YAML::Node resource_node = resources["AudioStream"]; resource_node)
             {
-               ResourceManager<Ease::AudioStream>& resource_loader = ResourceManager<Ease::AudioStream>::GetLoader();
+               ResourceManager<Ease::AudioStream>& resource_loader = GetResourceManager<Ease::AudioStream>();
                for(auto it = resource_node.begin(); it != resource_node.end(); ++it)
                {
                   uint32_t id = it->first.as<uint32_t>(0);
                   YAML::Node tex_node = it->second;
                   
-                  resource_loader.LoadResource(tex_node["Path"].as<std::string>("").c_str(), id);
+                  resource_loader.LoadResourceFromFile(tex_node["Path"].as<std::string>("").c_str(), id);
                }
             }
          } // </Ease::AudioStream>
@@ -709,6 +641,7 @@ namespace Ease
                if(YAML::Node component_node = components["SpriteRenderer2D"]; component_node)
                {
                   Component::SpriteRenderer2D& component = entity.AddComponent<Component::SpriteRenderer2D>();
+                  component.Texture() = nullptr;
                   component.TextureID() = component_node["Texture"].as<ResourceID>(0);
                   component.Visible() = component_node["Visible"].as<bool>(true);
                }

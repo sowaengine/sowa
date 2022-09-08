@@ -1,13 +1,14 @@
 #include "Core/Renderer.hpp"
 #include "Resource/Texture/Texture.hpp"
 
-#include "raylib.h"
-#include "rlgl.h"
+#include "Core/Application.hpp"
+#include "nmGfx/src/Core/Renderer.hpp"
+#include "Core/Matrix.hpp"
 #include <vector>
 
 namespace Ease
 {
-   void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& scale, float zIndex, float rotation, Texture& texture, const glm::vec2& uv1, const glm::vec2& uv2)
+   /*void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& scale, float zIndex, float rotation, Texture& texture, const glm::vec2& uv1, const glm::vec2& uv2)
    {
       Rectangle rect = (Rectangle) {
                (float)texture.GetTexture().width * uv1.x,
@@ -194,15 +195,20 @@ namespace Ease
       }
    }
 
-   
+*/   
    Renderer::Renderer()
    {
-      m_PickingShader = LoadShader("", "res/picking.frag");
+      
    }
 
    Renderer::~Renderer()
    {
-      UnloadShader(m_PickingShader);
+      
+   }
+
+   void Renderer::DrawTexture(const glm::vec2& position, const glm::vec2& scale, float zIndex, float rotation, Ease::Texture& texture, uint32_t id /*= 0*/)
+   {
+      Application::get_singleton()._renderer->DrawTexture(&texture._texture, nmGfx::CalculateModelMatrix({position.x, position.y, zIndex}, {0.f, 0.f, rotation}, {scale.x, scale.y, 1.f}), {1.f, 1.f, 1.f}, id);
    }
 
 } // namespace Ease

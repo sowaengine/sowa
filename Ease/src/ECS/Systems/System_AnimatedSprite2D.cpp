@@ -13,8 +13,8 @@ namespace Ease::Systems
 {
    void System_AnimatedSprite2D(Ease::Scene* pScene, bool pickable /* = false*/)
    {
-      ResourceManager<Ease::Texture>& tex_loader = ResourceManager<Ease::Texture>::GetLoader();
-      ResourceManager<Ease::SpriteSheetAnimation>& anim_loader = ResourceManager<Ease::SpriteSheetAnimation>::GetLoader();
+      ResourceManager<Ease::Texture>& tex_loader = pScene->GetResourceManager<Ease::Texture>();
+      ResourceManager<Ease::SpriteSheetAnimation>& anim_loader = pScene->GetResourceManager<Ease::SpriteSheetAnimation>();
 
       auto view = pScene->m_Registry.view<Component::Transform2D, Component::AnimatedSprite2D>();
       for(const auto& entityID : view)
@@ -33,7 +33,7 @@ namespace Ease::Systems
          }
          if(!tex_loader.HasResource(animsprc.GetCurrentTexture())) continue;
 
-         animsprc.Step(GetFrameTime());
+         // animsprc.Step(GetFrameTime());
 
          glm::vec2 uv1;
          glm::vec2 uv2;
@@ -47,10 +47,10 @@ namespace Ease::Systems
          uv1 = pos;
          uv2 = pos + size;
 
-         if(pickable)
-            Renderer::get_singleton().DrawQuadWithID(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), tex, (uint32_t)entityID, uv1, uv2);
-         else
-            Renderer::get_singleton().DrawQuad(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), tex, uv1, uv2);
+         // if(pickable)
+         //    Renderer::get_singleton().DrawQuadWithID(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), tex, (uint32_t)entityID, uv1, uv2);
+         // else
+         //    Renderer::get_singleton().DrawQuad(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), tex, uv1, uv2);
       }
    }
 } // namespace Ease::Systems

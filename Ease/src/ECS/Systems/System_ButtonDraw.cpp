@@ -13,7 +13,7 @@ namespace Ease::Systems
 {
    void System_ButtonDraw(Ease::Scene* pScene, bool pickable /* = false*/)
    {
-      ResourceManager<Ease::Texture>& loader = ResourceManager<Ease::Texture>::GetLoader();
+      ResourceManager<Ease::Texture>& loader = pScene->GetResourceManager<Ease::Texture>();
       
 
       auto view = pScene->m_Registry.view<Component::UITransform, Component::Button>();
@@ -48,13 +48,13 @@ namespace Ease::Systems
          
          if(pickable)
          {
-            Ease::Renderer::get_singleton().DrawNinePatchRectWithID(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch, (uint32_t)entityID);
+            //Ease::Renderer::get_singleton().DrawNinePatchRectWithID(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch, (uint32_t)entityID);
             //Ease::Renderer::get_singleton().DrawTextAligned(transformc.Position(), transformc.Size(), {0.5f, 0.5f}, 0, transformc.Rotation(), 128.f, buttonc.Text(), {80.f, 80.f, 80.f, 255.f});
          }
          else
          {
-            Ease::Renderer::get_singleton().DrawNinePatchRect(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch);
-            Ease::Renderer::get_singleton().DrawTextAligned(transformc.Position(), transformc.Size(), {0.5f, 0.5f}, 0, transformc.Rotation(), 128.f, buttonc.Text(), {80.f, 80.f, 80.f, 255.f});
+            //Ease::Renderer::get_singleton().DrawNinePatchRect(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch);
+            //Ease::Renderer::get_singleton().DrawTextAligned(transformc.Position(), transformc.Size(), {0.5f, 0.5f}, 0, transformc.Rotation(), 128.f, buttonc.Text(), {80.f, 80.f, 80.f, 255.f});
          }
       }
    }

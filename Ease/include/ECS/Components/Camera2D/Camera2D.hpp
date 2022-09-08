@@ -4,7 +4,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "raylib.h"
+// #include "raylib.h"
+#pragma warning ("Camera Broken")
 
 namespace Ease::Component
 {
@@ -14,12 +15,10 @@ namespace Ease::Component
         Camera2D();
         ~Camera2D();
         
-        float& Zoom() { return m_Camera.zoom; }
+        float& Zoom() { static float x = 0; return x; } // m_Camera.zoom; }
 
         bool& Current() { return m_Current; }
     private:
-
-        ::Camera2D m_Camera;
         bool m_Current = false;
     };
 }

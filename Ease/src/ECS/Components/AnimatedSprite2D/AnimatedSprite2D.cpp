@@ -18,19 +18,20 @@ namespace Ease::Component
    
    void AnimatedSprite2D::Step(float ms)
    {
-      if(m_SelectedAnimationName == "") return;
+      assert(false);
+      // if(m_SelectedAnimationName == "") return;
 
-      static auto loader = ResourceManager<SpriteSheetAnimation>::GetLoader();
-      std::shared_ptr<SpriteSheetAnimation> anim = loader.GetResource(m_SelectedAnimation);
+      // static auto loader = ResourceManager<SpriteSheetAnimation>::GetLoader();
+      // std::shared_ptr<SpriteSheetAnimation> anim = loader.GetResource(m_SelectedAnimation);
       
-      m_TicksPast += ms;
-      if(m_TicksPast > 1.f / m_FPS)
-      {
-         m_TicksPast -= 1.f / m_FPS;
-         m_CurrentFrame++;
+      // m_TicksPast += ms;
+      // if(m_TicksPast > 1.f / m_FPS)
+      // {
+      //    m_TicksPast -= 1.f / m_FPS;
+      //    m_CurrentFrame++;
 
-         m_CurrentFrame %= anim->FrameCount();
-      }
+      //    m_CurrentFrame %= anim->FrameCount();
+      // }
    }
 
    void AnimatedSprite2D::SetAnimation(const std::string& name, ResourceID animation)
@@ -40,25 +41,27 @@ namespace Ease::Component
 
    void AnimatedSprite2D::SelectAnimation(const std::string& name)
    {
-      static auto loader = ResourceManager<SpriteSheetAnimation>::GetLoader();
+      assert(false);
+      // static auto loader = ResourceManager<SpriteSheetAnimation>::GetLoader();
 
-      if(m_Animations.count(name) == 0) return;
-      if(!loader.HasResource(m_Animations[name])) return;
+      // if(m_Animations.count(name) == 0) return;
+      // if(!loader.HasResource(m_Animations[name])) return;
 
-      m_SelectedAnimationName = name;
-      m_SelectedAnimation = m_Animations[name];
+      // m_SelectedAnimationName = name;
+      // m_SelectedAnimation = m_Animations[name];
       
-      std::shared_ptr<SpriteSheetAnimation> anim = loader.GetResource(m_SelectedAnimation);
+      // std::shared_ptr<SpriteSheetAnimation> anim = loader.GetResource(m_SelectedAnimation);
 
-      m_FPS = anim->FPS();
+      // m_FPS = anim->FPS();
    }
 
    ResourceID AnimatedSprite2D::GetCurrentTexture()
    {
-      static auto loader = ResourceManager<SpriteSheetAnimation>::GetLoader();
+      assert(false);
+      // static auto loader = ResourceManager<SpriteSheetAnimation>::GetLoader();
 
-      if(loader.HasResource(m_SelectedAnimation))
-         return loader.GetResource(m_SelectedAnimation)->Texture();
+      // if(loader.HasResource(m_SelectedAnimation))
+      //    return loader.GetResource(m_SelectedAnimation)->Texture();
       return 0;
    }
 }

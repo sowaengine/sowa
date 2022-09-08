@@ -1,6 +1,12 @@
 #include <iostream>
 #include "Debug.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+
 #include "Core/Application.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 

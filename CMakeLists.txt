@@ -26,20 +26,24 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty)
 # Project Manager
 add_subdirectory(${CMAKE_SOURCE_DIR}/ProjectManager)
 
+# nmGfx
+add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx)
 
 add_executable(Ease ${EASE_SOURCES})
 
 target_link_directories(Ease PRIVATE Ease/thirdparty/)
-target_link_libraries(Ease PRIVATE ${CMAKE_DL_LIBS} raylib yaml-cpp box2d openal sndfile)
+target_link_libraries(Ease PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d openal sndfile nmGfx)
 
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/src/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/glm/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/tinyfiledialogs/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/raylib/include/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
 target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src)
+target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/)
 
 if(Editor)
    add_compile_definitions(EASE_EDITOR)
@@ -50,10 +54,10 @@ endif()
 
 
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-02")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_C_FLAGS_RELEASE "-02")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

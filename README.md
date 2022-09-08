@@ -20,7 +20,6 @@
 
 ### Dependencies
    - yaml-cpp
-   - raylib
    - box2d
    - OpenAL
    - sndfile

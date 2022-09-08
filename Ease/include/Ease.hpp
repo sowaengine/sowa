@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include "ECS/Entity/Entity.hpp"
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -39,14 +40,6 @@
 #ifndef RAD2DEG
     #define RAD2DEG (180.0f/PI)
 #endif
-
-#define EASE_DEFAULT_RESOURCE__TEXTURE2D_BUTTON_NORMAL   (1)
-#define EASE_DEFAULT_RESOURCE__TEXTURE2D_BUTTON_HOVER    (2)
-#define EASE_DEFAULT_RESOURCE__TEXTURE2D_BUTTON_CLICKED  (3)
-#define EASE_DEFAULT_RESOURCE__TEXTURE2D_BUTTON_DISABLED (4)
-
-#define EASE_BUILTIN_GLOBAL_RESOURCE_ID_MAX (1000)
-#define EASE_USER_GLOBAL_RESOURCE_ID_MAX (10000)
 
 #define EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, Behaviour) do { \
    struct Factory : Ease::NativeBehaviourFactory \
@@ -147,6 +140,9 @@ namespace Ease
          std::unordered_map<std::string, NativeBehaviourFactory*> nativeBehaviours;
    };
 }
+
+template<typename T>
+using Reference = std::shared_ptr<T>;
 
 
 #endif

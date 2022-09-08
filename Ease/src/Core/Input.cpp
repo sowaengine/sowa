@@ -1,12 +1,10 @@
 #include "Core/Input.hpp"
-#include "raylib.h"
 #include "Ease.hpp"
 #include "Core/Application.hpp"
 
-typedef Vector2 rVec2;
-
 namespace Ease
 {
+   /*
    Vec2 Input::GetMousePos()
    {
       Ease::Window& window = Ease::Application::get_singleton().GetWindow();
@@ -82,4 +80,5 @@ namespace Ease
       
       return ::IsMouseButtonReleased(btn);
    }
+   */
 } // namespace Ease
