@@ -533,9 +533,10 @@ class EaseEditor : public Ease::BaseModule
          panels.emplace_back("Console"  , draw.console);
 
 
-         Ease::ResourceManager<Ease::EditorTheme> themeLoader = Ease::ResourceManager<Ease::EditorTheme>::GetLoader();
+         Ease::ResourceLoader& themeLoader = Ease::ResourceLoader::get_singleton();
+         // Ease::ResourceManager<Ease::EditorTheme> themeLoader = Ease::Application::get_singleton().GetCurrentScene()->GetResourceManager<Ease::EditorTheme>();
 
-         std::shared_ptr<Ease::EditorTheme> theme = themeLoader.LoadResource("abs://res/theme.escfg");
+         Reference<Ease::EditorTheme> theme = themeLoader.LoadResource<Ease::EditorTheme>("abs://res/theme.escfg");
          ImGui::GetStyle() = theme->GetStyle();
 
          //Ease::Application::get_singleton().GetCurrentScene()->LoadFromFile("scene.escn");
@@ -623,7 +624,8 @@ class EaseEditor : public Ease::BaseModule
             {
                std::shared_ptr<Ease::EditorTheme> theme = std::make_shared<Ease::EditorTheme>();
                theme->LoadFromStyle(ImGui::GetStyle());
-               Ease::ResourceManager<Ease::EditorTheme>::GetLoader().SaveResource("res/theme_new.escfg", theme);
+               // Ease::ResourceManager<Ease::EditorTheme>::GetLoader().SaveResource("res/theme_new.escfg", theme);
+               assert(false && "Can not export themes");
             }
 
 
@@ -878,7 +880,7 @@ class EaseEditor : public Ease::BaseModule
 
          if(modal_about_ease)
          {
-            static std::shared_ptr<Ease::Texture> iconTexture = Ease::ResourceManager<Ease::Texture>::GetLoader().LoadResource("res/icon.png");
+            // static std::shared_ptr<Ease::Texture> iconTexture = Ease::ResourceManager<Ease::Texture>::GetLoader().LoadResource("res/icon.png");
          
             Ease::Window& window = Ease::Application::get_singleton().GetWindow();
             ImGui::SetNextWindowSize(ImVec2(
