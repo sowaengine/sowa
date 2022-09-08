@@ -38,7 +38,7 @@ static void Print();
 class EaseEditor : public Ease::BaseModule
 {
    public:
-      std::string m_EditorStatusText{"Ease Engine v" EASE_VERSION_STRING};
+      std::string m_EditorStatusText{"Sowa Engine v" EASE_VERSION_STRING};
       std::string m_ConsoleText{""};
 
       Ease::Entity m_SelectedEntity{};
@@ -109,14 +109,13 @@ class EaseEditor : public Ease::BaseModule
             {
                Ease::Application::get_singleton().StopGame();
             }
+            ImGui::SameLine();
+            static float editor_2dview_sensitivity = 1.f;
+            ImGui::SliderFloat("Sensitivity", &editor_2dview_sensitivity, 0.2f, 2.f, "%.1fx");
+            
             
             Ease::Window& window = Ease::Application::get_singleton().GetWindow();
-            const Texture* image = &window.GetFinalFramebufferTexture().texture;
-            Rectangle srcRect{};
-               srcRect.x = 0.f;
-               srcRect.y = (float)image->height;
-               srcRect.width = (float)image->width;
-               srcRect.height = -(float)image->height;
+            size_t imageID = Ease::Application::get_singleton().Renderer_GetAlbedoFramebufferID();
                
             int dstWidth = ImGui::GetContentRegionAvail().x;
             int dstHeight = ImGui::GetContentRegionAvail().y;
@@ -162,39 +161,37 @@ class EaseEditor : public Ease::BaseModule
                
                if(Editor_DragBegin)
                {
-                  cam2dTransform.Position().x -= io.MouseDelta.x * (1.f / cam2DCamera.Zoom());
-                  cam2dTransform.Position().y += io.MouseDelta.y * (1.f / cam2DCamera.Zoom());
+                  cam2dTransform.Position().x -= io.MouseDelta.x * cam2dTransform.Scale().x * editor_2dview_sensitivity;
+                  cam2dTransform.Position().y += io.MouseDelta.y * cam2dTransform.Scale().x * editor_2dview_sensitivity;
                }
 
                if(ImGui::IsWindowHovered())
                {
-                  cam2DCamera.Zoom() += io.MouseWheel * 0.1f * (cam2DCamera.Zoom());
-                  cam2DCamera.Zoom() = MAX(0.1f, cam2DCamera.Zoom());
+                  cam2dTransform.Scale().x -= io.MouseWheel * 0.1f * (cam2dTransform.Scale().x);
+                  cam2dTransform.Scale().x = MAX(0.1f, cam2dTransform.Scale().x);
+
+                  cam2dTransform.Scale().y = cam2dTransform.Scale().x;
                }
 
 
-               if(ImGui::IsWindowHovered() && Ease::Input::IsMouseButtonClicked(Ease::Input::Button::LEFT))
-               {
-                  Ease::Entity pickedEntity = app.GetPickedEntity();
-                  if(pickedEntity.IsValid())
-                  {
-                     g_Editor->m_SelectedEntity = pickedEntity;
-                     g_Editor->m_InspectorMode = InspectorMode::ENTITY;
-                  }
-                  else
-                  {
-                     g_Editor->m_SelectedEntity.SetEntityID(entt::null);
-                     g_Editor->m_SelectedEntity.SetRegistry(nullptr);
-                     g_Editor->m_InspectorMode = InspectorMode::NONE;
-                  }
-               }
+               //if(ImGui::IsWindowHovered() && Ease::Input::IsMouseButtonClicked(Ease::Input::Button::LEFT))
+               //{
+               //   Ease::Entity pickedEntity = app.GetPickedEntity();
+               //   if(pickedEntity.IsValid())
+               //   {
+               //      g_Editor->m_SelectedEntity = pickedEntity;
+               //      g_Editor->m_InspectorMode = InspectorMode::ENTITY;
+               //   }
+               //   else
+               //   {
+               //      g_Editor->m_SelectedEntity.SetEntityID(entt::null);
+               //      g_Editor->m_SelectedEntity.SetRegistry(nullptr);
+               //      g_Editor->m_InspectorMode = InspectorMode::NONE;
+               //   }
+               //}
             }
             
-            RLImGuiImageRect(
-               image,
-               dstWidth, dstHeight,
-               srcRect
-            );
+            ImGui::Image((void*)imageID, ImVec2(dstWidth, dstHeight));
          }
          static void hierarchy()
          {
@@ -892,7 +889,7 @@ class EaseEditor : public Ease::BaseModule
             if(ImGui::Begin("About Ease", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse))
             {
                ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2) - 64);
-               RLImGuiImageSize(&iconTexture->GetTexture(), 128, 128);
+               // RLImGuiImageSize(&iconTexture->GetTexture(), 128, 128);
 
                ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2) - (ImGui::CalcTextSize("Ease Engine").x / 2));
                ImGui::Text("Ease Engine");
