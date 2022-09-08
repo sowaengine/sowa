@@ -3,7 +3,6 @@
 namespace Ease::Component
 {
    SpriteRenderer2D::SpriteRenderer2D()
-      : m_TextureID(0)
    {   
 
    }

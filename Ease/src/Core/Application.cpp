@@ -153,7 +153,6 @@ namespace Ease
          if(m_AppRunning)
          {
             tc.Rotation() += 0.2f;
-            UpdateGame();
             Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Logic);
          }
          UpdateModules();
@@ -214,7 +213,7 @@ namespace Ease
 
    void Application::UpdateGame()
    {
-      m_pCurrentScene->UpdateScene();
+      
    }
 
    void Application::StopGame()

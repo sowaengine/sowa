@@ -24,6 +24,9 @@ namespace Ease::Component
 
    std::shared_ptr<Ease::AudioStream>& AudioStreamPlayer::GetStream()
    {
-      return Ease::ResourceManager<Ease::AudioStream>::GetLoader().GetResource(m_Stream);
+      // return Ease::ResourceManager<Ease::AudioStream>::GetLoader().GetResource(m_Stream);
+      assert(false);
+      static std::shared_ptr<Ease::AudioStream> nullret{nullptr};
+      return nullret;
    }
 }

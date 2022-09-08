@@ -1,6 +1,7 @@
 #include "ECS/Components/Button/Button.hpp"
 #include "Resource/ResourceManager.hpp"
 #include "Resource/Texture/Texture.hpp"
+#include "Resource/ResourceLoader.hpp"
 #include <iostream>
 
 namespace Ease::Component
@@ -25,20 +26,20 @@ namespace Ease::Component
       static Ease::Component::NinePatchRect s_HoverRect;
       static Ease::Component::NinePatchRect s_DisabledRect;
       static Ease::Component::NinePatchRect s_ClickedRect;
-      static auto& tex_loader = Ease::ResourceManager<Ease::Texture>::GetLoader();
+      static auto& tex_loader = Ease::ResourceLoader::get_singleton();
       static bool first = true;
       if(first)
       {
-         s_NormalRect.Texture() = tex_loader.LoadResource("abs://res/button_white.png", EASE_DEFAULT_RESOURCE__TEXTURE2D_BUTTON_NORMAL);
+         s_NormalRect.Texture() = tex_loader.LoadResource<Ease::Texture>("abs://res/button_white.png");
          s_NormalRect.Left() = s_NormalRect.Right() = s_NormalRect.Top() = s_NormalRect.Bottom() = 40;
 
-         s_HoverRect.Texture() = tex_loader.LoadResource("abs://res/button_dark.png", EASE_DEFAULT_RESOURCE__TEXTURE2D_BUTTON_HOVER);
+         s_HoverRect.Texture() = tex_loader.LoadResource<Ease::Texture>("abs://res/button_dark.png");
          s_HoverRect.Left() = s_HoverRect.Right() = s_HoverRect.Top() = s_HoverRect.Bottom() = 40;
 
-         s_DisabledRect.Texture() = tex_loader.LoadResource("abs://res/button_white.png", EASE_DEFAULT_RESOURCE__TEXTURE2D_BUTTON_DISABLED);
+         s_DisabledRect.Texture() = tex_loader.LoadResource<Ease::Texture>("abs://res/button_white.png");
          s_DisabledRect.Left() = s_DisabledRect.Right() = s_DisabledRect.Top() = s_DisabledRect.Bottom() = 40;
 
-         s_ClickedRect.Texture() = tex_loader.LoadResource("abs://res/button_white.png", EASE_DEFAULT_RESOURCE__TEXTURE2D_BUTTON_CLICKED);
+         s_ClickedRect.Texture() = tex_loader.LoadResource<Ease::Texture>("abs://res/button_white.png");
          s_ClickedRect.Left() = s_ClickedRect.Right() = s_ClickedRect.Top() = s_ClickedRect.Bottom() = 40;
 
          first = false;

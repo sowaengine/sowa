@@ -79,54 +79,9 @@ namespace Ease
             }
          }
       }
-
-      /*auto view = m_Registry.view<Component::NativeBehaviourClass>();
-      for(auto& e : view)
-      {
-         Entity entity(e, &m_Registry);
-         
-         Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
-         nbehaviour.Factory() = Application::get_singleton().GetFactory(nbehaviour.ClassName());
-
-         if(nbehaviour.Factory())
-         {
-            nbehaviour.Behaviour() = nbehaviour.Factory()->Create();
-            if(nbehaviour.Behaviour())
-            {
-               nbehaviour.Behaviour()->self = entity;
-               nbehaviour.Behaviour()->Start();
-            }
-         }
-      }*/
    }
-   void Scene::UpdateScene()
-   {
-      auto view = m_Registry.view<Component::NativeBehaviourClass>();
-      for(auto& e : view)
-      {
-         Entity entity(e, &m_Registry);
-         
-         Component::NativeBehaviourClass& nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
-         
-         if(!nbehaviour.Factory())
-         {
-            nbehaviour.Factory() = Application::get_singleton().GetFactory(nbehaviour.ClassName());
 
-            if(nbehaviour.Factory())
-            {
-               nbehaviour.Behaviour() = nbehaviour.Factory()->Create();
-               if(nbehaviour.Behaviour())
-               {
-                  nbehaviour.Behaviour()->self = entity;
-                  nbehaviour.Behaviour()->Start();
-               }
-            }
-         }
 
-         if(nbehaviour.Behaviour())
-            nbehaviour.Behaviour()->Update();
-      }
-   }
    void Scene::StopScene()
    {
       m_SceneCamera2D.camera2d = m_SceneOldCamera2D.camera2d;

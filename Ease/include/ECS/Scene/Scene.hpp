@@ -38,7 +38,6 @@ namespace Ease
         Ease::Entity GetEntityByID(uint32_t id);
         
         void StartScene();
-        void UpdateScene();
         void StopScene();
 
         // Copies all entities of src to dst
