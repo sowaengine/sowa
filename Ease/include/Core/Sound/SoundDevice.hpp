@@ -5,6 +5,7 @@
 #include <vector>
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <stddef.h>
 
 namespace Ease
 {
@@ -17,7 +18,8 @@ namespace Ease
                 return device;
             }
 
-            ALuint LoadSoundBuffer(const char* filename);
+            ALuint LoadSoundBuffer(unsigned char* data, size_t size);
+            ALuint LoadSoundBufferFromFile(const char* path);
             bool UnloadSoundBuffer(ALuint buffer);
         private:
             SoundDevice();
