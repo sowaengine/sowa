@@ -44,7 +44,7 @@ namespace Ease
         alcCloseDevice(pALCDevice);
     }
         
-    ALuint SoundDevice::LoadSoundBuffer(const char* path)
+    ALuint SoundDevice::LoadSoundBuffer(unsigned char* data, size_t size)
     {
         ALenum err, format;
         ALuint buffer;
@@ -53,16 +53,17 @@ namespace Ease
         short* membuf;
         sf_count_t num_frames;
         ALsizei num_bytes;
-
-        sndFile = sf_open(path, SFM_READ, &sfinfo);
+        
+        assert(false && "Can not load sound buffer from memory");
+        sndFile = sf_open("path", SFM_READ, &sfinfo);
         if(!sndFile)
         {
-            std::cout << path << " :: " << sf_strerror(sndFile) << std::endl;
+            std::cout << "path" << " :: " << sf_strerror(sndFile) << std::endl;
             throw std::runtime_error("Cannot load audio file");
         }
         if(sfinfo.frames < 1 || sfinfo.frames > (sf_count_t)(INT_MAX / sizeof(short)) / sfinfo.channels)
         {
-            std::cout << "Bad sample count: " << path << std::endl;
+            std::cout << "Bad sample count: " << "path" << std::endl;
             sf_close(sndFile);
             throw("");
         }
@@ -81,7 +82,7 @@ namespace Ease
         
         if(!format)
         {
-            std::cout << "Bad channel count: " << sfinfo.channels << ", Path: " << path << std::endl;
+            std::cout << "Bad channel count: " << sfinfo.channels << ", Path: " << "path" << std::endl;
             sf_close(sndFile);
             throw("");
         }
@@ -91,7 +92,77 @@ namespace Ease
         {
             free(membuf);
             sf_close(sndFile);
-            std::cout << "Failed to read samples : " << path << std::endl;
+            std::cout << "Failed to read samples : " << "path" << std::endl;
+            throw("");
+        }
+        num_bytes = (ALsizei)(num_frames * sfinfo.channels) * (ALsizei)sizeof(short);
+
+        buffer = 0;
+        alGenBuffers(1, &buffer);
+        alBufferData(buffer, format, membuf, num_bytes, sfinfo.samplerate);
+        
+        free(membuf);
+        sf_close(sndFile);
+
+        err = alGetError();
+        if(err != AL_NO_ERROR)
+        {
+            std::cout << "OpenAL ERROR : " << alGetString(err) << std::endl;
+            if(buffer && alIsBuffer(buffer))
+                alDeleteBuffers(1, &buffer);
+            throw("");
+        }
+        return buffer;
+    }
+
+    ALuint SoundDevice::LoadSoundBufferFromFile(const char* path)
+    {
+        ALenum err, format;
+        ALuint buffer;
+        SNDFILE* sndFile;
+        SF_INFO sfinfo;
+        short* membuf;
+        sf_count_t num_frames;
+        ALsizei num_bytes;
+        
+        sndFile = sf_open(path, SFM_READ, &sfinfo);
+        if(!sndFile)
+        {
+            std::cout << path << " :: " << sf_strerror(sndFile) << std::endl;
+            throw std::runtime_error("Cannot load audio file");
+        }
+        if(sfinfo.frames < 1 || sfinfo.frames > (sf_count_t)(INT_MAX / sizeof(short)) / sfinfo.channels)
+        {
+            std::cout << "Cannot load audio file. Bad sample count" << std::endl;
+            sf_close(sndFile);
+            throw("");
+        }
+
+        format = AL_NONE;
+        if(sfinfo.channels == 1)
+            format = AL_FORMAT_MONO16;
+        else if(sfinfo.channels == 2)
+            format = AL_FORMAT_STEREO16;
+        else if(sfinfo.channels == 3)
+            if(sf_command(sndFile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
+                format = AL_FORMAT_BFORMAT2D_16;
+        else if(sfinfo.channels == 4)
+            if(sf_command(sndFile, SFC_WAVEX_GET_AMBISONIC, NULL, 0) == SF_AMBISONIC_B_FORMAT)
+                format = AL_FORMAT_BFORMAT3D_16;
+        
+        if(!format)
+        {
+            std::cout << "Cannot load audio file. Bad channel count" << sfinfo.channels << std::endl;
+            sf_close(sndFile);
+            throw("");
+        }
+        membuf = static_cast<short*>(malloc((size_t)(sfinfo.frames * sfinfo.channels) * sizeof(short)));
+        num_frames = sf_readf_short(sndFile, membuf, sfinfo.frames);
+        if(num_frames < 1)
+        {
+            free(membuf);
+            sf_close(sndFile);
+            std::cout << "Cannot load audio file. Failed to read samples" << std::endl;
             throw("");
         }
         num_bytes = (ALsizei)(num_frames * sfinfo.channels) * (ALsizei)sizeof(short);

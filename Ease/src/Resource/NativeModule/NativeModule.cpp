@@ -7,17 +7,24 @@ namespace Ease
    template<>
    Reference<NativeModule> ResourceLoaderImpl<NativeModule>::LoadFromFile(const char* path)
    {
-      dylib lib;
-      lib.open(path);
-      
-      auto createFunc = lib.get_function<BaseModule*()>("Create");
-      auto deleteFunc = lib.get_function<void(BaseModule*)>("Destroy");
+      Reference<Ease::NativeModule> nativeModule;
+      try {
+         dylib lib;
+         lib.open(path);
+         
+         auto createFunc = lib.get_function<BaseModule*()>("Create");
+         auto deleteFunc = lib.get_function<void(BaseModule*)>("Destroy");
 
-      BaseModule* myModule = createFunc();
+         BaseModule* myModule = createFunc();
 
-      Reference<Ease::NativeModule> nativeModule = std::make_shared<Ease::NativeModule>();
-      nativeModule->SetModule(myModule);
-      nativeModule->SetDeleteFunc(deleteFunc);
+         nativeModule = std::make_shared<Ease::NativeModule>();
+         nativeModule->SetModule(myModule);
+         nativeModule->SetDeleteFunc(deleteFunc);
+      }
+      catch(const std::exception& e) {
+         std::cerr << "Error while loading shared library.\n" << e.what() << '\n';
+         return nullptr;
+      }
 
       return nativeModule;
    }

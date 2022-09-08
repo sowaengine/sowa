@@ -10,13 +10,18 @@ namespace Ease
    template<>
    Reference<EditorTheme> ResourceLoaderImpl<EditorTheme>::Load(unsigned char* data, size_t size)
    {
+      if(size <= 1)
+      {
+         std::cout << "Error loading editor theme." << std::endl;
+         return std::make_shared<EditorTheme>();
+      }
       Reference<EditorTheme> themeref = std::make_shared<EditorTheme>();
       ImGuiStyle& style = themeref->GetStyle();
 
       std::string text = std::string(reinterpret_cast<char*>(data), size);
       YAML::Node node = YAML::Load(text);
       if(node["Type"].as<std::string>() != "EditorTheme")
-         return nullptr;
+         return std::make_shared<EditorTheme>();
       
 
       // Default theme : ImGui::StyleColorsClassic();

@@ -63,9 +63,16 @@ namespace Ease::File
             fileSize = ifstream.tellg();
             ifstream.seekg(0, std::ios::beg);
             
-            std::vector<unsigned char> buffer(fileSize);
-            ifstream.read((char*)buffer.data(), fileSize);
-            return buffer;
+            if(fileSize > 0)
+            {
+                std::vector<unsigned char> buffer(fileSize);
+                ifstream.read((char*)buffer.data(), fileSize);
+                return buffer;
+            }
+            else
+            {
+                throw std::runtime_error(std::string("File not found: ") + path);
+            }
         }
         catch(const std::exception& e)
         {
