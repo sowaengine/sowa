@@ -10,6 +10,7 @@
 #include "ECS/Entity/Entity.hpp"
 #include "ECS/Components/Camera2D/Camera2D.hpp"
 #include "ECS/Components/Transform2D/Transform2D.hpp"
+#include "Resource/ResourceManager.hpp"
 
 namespace Ease
 {
@@ -56,6 +57,21 @@ namespace Ease
 
         Ease::Component::Camera2D& CurrentCamera2D() { return m_SceneCamera2D.camera2d; };
         Ease::Component::Transform2D& CurrentCameraTransform2D() { return m_SceneCamera2D.transform2d; }
+
+        template<typename T>
+        ResourceManager<T>& GetResourceManager()
+        {
+            static ResourceManager<T> manager;
+            return manager;
+        }
+
+        template<typename T>
+        void ClearResourceManager()
+        {
+            auto& resources = GetResourceManager<T>();
+            resources.GetResources().clear();
+        }
+        
     private:
         /**
          * @brief Registry that holds copied entities
