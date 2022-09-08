@@ -13,7 +13,7 @@ namespace Ease::Systems
 {
    void System_ButtonPicking(Ease::Scene* pScene)
    {
-      ResourceManager<Ease::Texture>& loader = ResourceManager<Ease::Texture>::GetLoader();
+      ResourceManager<Ease::Texture>& loader = pScene->GetResourceManager<Ease::Texture>();
       
 
       auto view = pScene->m_Registry.view<Component::UITransform, Component::Button>();
@@ -45,7 +45,7 @@ namespace Ease::Systems
             break;
          }
          
-         Ease::Renderer::get_singleton().DrawNinePatchRectWithID(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch, (uint32_t)entityID);
+         // Ease::Renderer::get_singleton().DrawNinePatchRectWithID(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch, (uint32_t)entityID);
       }
    }
 } // namespace Ease::Systems

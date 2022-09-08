@@ -6,7 +6,6 @@
 
 #include "Core/Renderer.hpp"
 #include "box2d/box2d.h"
-#include "rlgl.h"
 #include "Core/ProjectSettings.hpp"
 
 namespace Ease::Systems
@@ -29,26 +28,26 @@ namespace Ease::Systems
                 {
                     if(!pickable)
                     {
-                        Renderer::get_singleton().DrawQuadColor(
+                        /*Renderer::get_singleton().DrawQuadColor(
                             transformc.Position(),
                             { collider.width, collider.height },
                             transformc.Rotation(),
                             (Color){60, 20, 150, 100},
                             {collider.offset.x, -collider.offset.y}
-                        );
+                        );*/
                     }
                 }
                 else if(collider.shape == ColliderShape2D::CIRCLE)
                 {
                     if(!pickable)
                     {
-                        Renderer::get_singleton().DrawCircleColor(
+                        /*Renderer::get_singleton().DrawCircleColor(
                             transformc.Position(),
                             collider.radius,
                             transformc.Rotation(),
                             (Color){60, 20, 150, 100},
                             {collider.offset.x, -collider.offset.y}
-                        );
+                        );*/
                     }
                 }
             }

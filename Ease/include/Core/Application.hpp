@@ -14,6 +14,8 @@
 #include "Resource/NativeModule/NativeModule.hpp"
 #include <filesystem>
 
+namespace nmGfx { class Renderer; }
+
 namespace Ease
 {
     class Application
@@ -27,7 +29,7 @@ namespace Ease
 
         void Run(int argc, char const *argv[]);
 
-        Window& GetWindow() { return m_Window; }
+        Window& GetWindow() { return _window; }
 
         void Log(const std::string& message); // Logs given string to console (And Editor Console on editor builds)
         
@@ -73,14 +75,16 @@ namespace Ease
         void UpdateModules();
         void Modules_OnImGuiRender();
 
-        
+        uint32_t Renderer_GetAlbedoFramebufferID();
     private:
         friend class Window;
+        friend class Renderer;
 
         Application();
         ~Application();
 
-        Window m_Window;
+        std::unique_ptr<nmGfx::Renderer> _renderer;
+        Window _window;
 
         Scene m_GameScene;
         Scene m_CopyScene;

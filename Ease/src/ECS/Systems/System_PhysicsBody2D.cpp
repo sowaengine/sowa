@@ -6,7 +6,6 @@
 
 #include "Core/Renderer.hpp"
 #include "box2d/box2d.h"
-#include "rlgl.h"
 #include <iostream>
 
 namespace Ease::Systems

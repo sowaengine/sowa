@@ -8,10 +8,10 @@
 namespace Ease::Input
 {
     // Returns mouse pos in screen relative to center. center would be 0, 0
-    Ease::Vec2 GetMousePos();
+    //Ease::Vec2 GetMousePos();
 
     // Returns mouse pos in 2d game world. bottom right would be {VideoWidth / 2, VideoHeight / 2}
-    Ease::Vec2 GetGameMousePos();
+    //Ease::Vec2 GetGameMousePos();
 
     enum class Button
     {
@@ -19,9 +19,9 @@ namespace Ease::Input
         RIGHT   = 1,
         MIDDLE  = 2,
     };
-    bool IsMouseButtonDown(Button button);
-    bool IsMouseButtonClicked(Button button);
-    bool IsMouseButtonReleased(Button button);
+    //bool IsMouseButtonDown(Button button);
+    //bool IsMouseButtonClicked(Button button);
+    //bool IsMouseButtonReleased(Button button);
 } // namespace Ease::Input
 
 #endif

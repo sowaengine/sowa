@@ -19,10 +19,10 @@ namespace Ease::Systems
 
          if(!textrendererc.Visible()) continue;
 
-         if(pickable)
-            Renderer::get_singleton().DrawTextWithID(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color(), (uint32_t)entityID);
-         else
-            Renderer::get_singleton().DrawText(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color());
+         // if(pickable)
+         //    Renderer::get_singleton().DrawTextWithID(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color(), (uint32_t)entityID);
+         // else
+         //    Renderer::get_singleton().DrawText(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color());
       }
    }
 } // namespace Ease::Systems

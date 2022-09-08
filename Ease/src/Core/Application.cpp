@@ -3,16 +3,18 @@
 #include <iostream>
 #include "Ease.hpp"
 
-#include "raylib.h"
 
 
 #include "Core/Renderer.hpp"
 
 #include "Resource/ResourceManager.hpp"
 #include "Resource/NativeModule/NativeModule.hpp"
+#include "Resource/Texture/Texture.hpp"
+#include "Resource/ResourceLoader.hpp"
 
 #include "Core/Window.hpp"
 #include "Core/ProjectSettings.hpp"
+#include "Core/ExportGenerator.hpp"
 
 #include "ECS/Entity/Entity.hpp"
 #include "ECS/Scene/Scene.hpp"
@@ -20,11 +22,19 @@
 #include "ECS/Systems/Systems.hpp"
 
 #include "imgui-docking/imgui.h"
-#include "rlImGui/rlImGui.h"
+#include "imgui-docking/backends/imgui_impl_glfw.h"
+#include "imgui-docking/backends/imgui_impl_opengl3.h"
 
 #include "Utils/File.hpp"
 #include "Core/Input.hpp"
 #include "Utils/Dialog.hpp"
+#include "res/imgui.ini.h"
+#include "res/Roboto-Medium.ttf.h"
+
+#include "nmGfx/src/Core/Renderer.hpp"
+#include "nmGfx/src/Core/Window.hpp"
+#include "nmGfx/src/Core/Matrix.hpp"
+
 
 namespace Ease
 {
@@ -40,10 +50,6 @@ namespace Ease
 
    void Application::Run(int argc, char const *argv[])
    {
-      SetTraceLogLevel(LOG_WARNING);
-      
-      //INFO("Ease Engine v{}.{}.{}", EASE_VERSION_MAJOR, EASE_VERSION_MINOR, EASE_VERSION_PATCH);
-
       ProjectSettings& projectSettings = ProjectSettings::get_singleton();
       Ease::File::InsertFilepathEndpoint("abs", "./");
       bool project_loaded = false;
@@ -60,16 +66,33 @@ namespace Ease
       if(!project_loaded)
          projectSettings.LoadProject("./");
       
-
-      m_Window.CreateWindow(
+      _renderer = std::make_unique<nmGfx::Renderer>();
+      _renderer->Init(
          projectSettings._window.WindowWidth,
          projectSettings._window.WindowHeight,
-         projectSettings._application.Name
-      );
-      m_Window.SetVideoSize(
          projectSettings._window.VideoWidth,
-         projectSettings._window.VideoHeight
+         projectSettings._window.VideoHeight,
+         
+         projectSettings._application.Name.c_str(),
+         nmGfx::WindowFlags::NONE
       );
+      _window._windowHandle = &_renderer->GetWindow();
+      {
+         std::vector<unsigned char> shader = File::GetFileContent("abs://templates/default2d.glsl");
+         _renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char*>(shader.data()), shader.size()));
+      }
+      {
+         std::vector<unsigned char> shader = File::GetFileContent("abs://templates/default3d.glsl");
+         _renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char*>(shader.data()), shader.size()));
+      }
+      {
+         std::vector<unsigned char> shader = File::GetFileContent("abs://templates/fullscreen.glsl");
+         _renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char*>(shader.data()), shader.size()));
+      }
+      {
+         std::vector<unsigned char> shader = File::GetFileContent("abs://templates/skybox.glsl");
+         _renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char*>(shader.data()), shader.size()));
+      }
 
 
       for(const std::string& path : projectSettings._modules.modules)
@@ -82,8 +105,13 @@ namespace Ease
 
 
       IMGUI_CHECKVERSION();
-      SetupRLImGui(true);
+      ImGui::CreateContext();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+      // ImGui::GetIO().Fonts->AddFontFromFileTTF("res/Roboto-Medium.ttf", 14.f);
+      ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::roboto_medium_data.data(), Res::roboto_medium_data.size(), 14.f);
+      ImGui::LoadIniSettingsFromMemory(Res::imgui_default_layout.data(), Res::imgui_default_layout.size());
+      ImGui_ImplGlfw_InitForOpenGL(_renderer->GetWindow().GetGLFWwindow(), true);
+      ImGui_ImplOpenGL3_Init("#version 150");
 
       InitModules();
       if(projectSettings._application.MainScene != "")
@@ -93,50 +121,71 @@ namespace Ease
          StartGame();
       #endif
       
+      std::shared_ptr<nmGfx::Texture> tex = std::make_shared<nmGfx::Texture>();
+      tex->Load2DFromFile("res/icon.png");
 
-      while (!m_Window.ShouldClose())
+      ResourceLoader& loader = ResourceLoader::get_singleton();
+      std::shared_ptr<Ease::Texture> tex2 = loader.LoadResource<Ease::Texture>("abs://res/character.png");
+      Entity entity = GetCurrentScene()->Create("Sprite", 12412);
+      auto& spr = entity.AddComponent<Component::SpriteRenderer2D>();
+      auto& tc = entity.AddComponent<Component::Transform2D>();
+
+      tc.Scale() = glm::vec2{256.f, 256.f};
+      spr.Texture() = tex2;
+      
+      while (!_window.ShouldClose())
       {
-         Camera2D cam2d;
-         {
-            auto& cam2dTransform = m_pCurrentScene->CurrentCameraTransform2D();
-            auto& cam2dcamera = m_pCurrentScene->CurrentCamera2D();
-
-            cam2d.zoom = cam2dcamera.Zoom() * ((cam2dTransform.Scale().x + cam2dTransform.Scale().y) * 0.5f);
-            cam2d.target.x = cam2dTransform.Position().x;
-            cam2d.target.y = -cam2dTransform.Position().y;
-            cam2d.offset = {m_Window.GetVideoWidth() * 0.5f, m_Window.GetVideoHeight() * 0.5f};
-            cam2d.rotation = cam2dTransform.Rotation();
-         }
-         
-         m_Window.BeginPicking();
-         BeginMode2D(cam2d);
-         Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_PickingDraw);
-         Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Draw, true);
-         EndMode2D();
-         m_Window.EndPicking();
+         _renderer->GetWindow().PollEvents();
+         // Clear window
 
 
-         m_Window.Begin();
-         BeginMode2D(cam2d);
-         Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Draw);
-         EndMode2D();
+
+         Ease::Component::Transform2D& cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
+         _renderer->Begin2D(
+            nmGfx::CalculateModelMatrix(glm::vec3{cam2dtc.Position().x, cam2dtc.Position().y, 0.f}, cam2dtc.Rotation(), glm::vec3{cam2dtc.Scale().x, cam2dtc.Scale().y, 1.f})
+            );
+         // Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Draw);
+         Ease::Systems::System_SpriteRenderer2D(m_pCurrentScene);
+         // _renderer->DrawTexture(tex, nmGfx::CalculateModelMatrix({0.f, 0.f}, 0.f, {100.f, 100.f}), {1.f, 1.f, 1.f}, 12);
+         _renderer->End2D();
+
 
          if(m_AppRunning)
          {
+            tc.Rotation() += 0.2f;
             UpdateGame();
             Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Logic);
          }
          UpdateModules();
+         
+         ImGui_ImplOpenGL3_NewFrame();
+         ImGui_ImplGlfw_NewFrame();
+         ImGui::NewFrame();
 
+         Modules_OnImGuiRender();
+         ImGui::Render();
 
-         if(IsKeyPressed(KEY_ENTER))
-         {
-            std::string dialogPath = Dialog::OpenFileDialog("Title", "", 0, {""}, false);
-            std::cout << dialogPath << std::endl;
-         }
+         _renderer->ClearLayers();
+         _renderer->Draw2DLayer();
+         
+         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-         m_Window.End();
+         _renderer->GetWindow().SwapBuffers();
       }
+
+      ExportGenerator generator;
+      if(generator.BeginExport(ExportPlatform::LINUX))
+      {
+         generator.AddFile("res://Main.escn", false);
+         generator.AddFile("res://project.ease", false);
+
+         generator.AddFileTo("abs://templates/default3d.glsl", "templates/default3d.glsl", false);
+         generator.AddFileTo("abs://templates/default2d.glsl", "templates/default2d.glsl", false);
+         generator.AddFileTo("abs://templates/fullscreen.glsl", "templates/fullscreen.glsl", false);
+         generator.AddFileTo("abs://templates/skybox.glsl", "templates/skybox.glsl", false);
+         generator.AddFileTo("res://Modules/Ease.ProjectManager.so", "Modules/Ease.ProjectManager.so", false);
+      }
+      generator.EndExport();
    }
 
    void Application::Log(const std::string& message)
@@ -206,10 +255,12 @@ namespace Ease
 
    Application::ModuleLoadResult Application::LoadModule(const std::filesystem::path& modulePath, int minimumVersion)
    {
-      static ResourceManager<NativeModule>& moduleLoader = ResourceManager<NativeModule>::GetLoader();
+      static ResourceLoader& moduleLoader = Ease::ResourceLoader::get_singleton();
 
-      std::shared_ptr<NativeModule> myModule = moduleLoader.LoadResource(modulePath.c_str());
+      Reference<NativeModule> myModule = moduleLoader.LoadResourceFromFile<NativeModule>(NativeModule::AddExtension(modulePath).c_str());
       
+      if(myModule == nullptr)
+         return ModuleLoadResult::UNDEFINED_MODULE;
       // if(author != myModule->m_pModule->metadata.authorName || moduleName != myModule->m_pModule->metadata.moduleName)
       //    return ModuleLoadResult::UNDEFINED_MODULE;
       if(myModule->m_pModule->metadata.version < minimumVersion)
@@ -249,5 +300,8 @@ namespace Ease
          return nullptr;
    }
    
-   
+   uint32_t Application::Renderer_GetAlbedoFramebufferID()
+   {
+      return _renderer->GetData2D()._frameBuffer.GetAlbedoID();
+   }
 } // namespace Ease

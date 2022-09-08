@@ -3,6 +3,9 @@
 
 #pragma once
 #include <stdint.h>
+#include <memory>
+
+namespace Ease { class Texture; }
 
 namespace Ease::Component
 {
@@ -13,10 +16,12 @@ namespace Ease::Component
         ~SpriteRenderer2D();
 
 
-        uint32_t& TextureID() { return m_TextureID; }
+        std::shared_ptr<Ease::Texture>& Texture() { return _texture; }
+        unsigned int& TextureID() { return _textureID; }
         bool& Visible() { return m_Visible; }
     private:
-        uint32_t m_TextureID;
+        std::shared_ptr<Ease::Texture> _texture{nullptr};
+        unsigned int _textureID;
         bool m_Visible = true;
     };
 }
