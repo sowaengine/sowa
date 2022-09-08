@@ -3,6 +3,9 @@
 #include <iostream>
 #include "Utils/String.hpp"
 #include <unordered_map>
+#include <fstream>
+#include <string.h>
+#include <random>
 
 namespace Ease::File
 {
@@ -43,5 +46,59 @@ namespace Ease::File
         
         File_path_endpoints[endpoint] = path;
         return true;
+    }
+
+    // todo: load from archive
+    std::vector<unsigned char> GetFileContent(const char* path)
+    {
+        try
+        {
+            std::filesystem::path fullpath = File::Path(path);
+            
+            std::ifstream ifstream(fullpath, std::ifstream::binary);
+            ifstream.unsetf(std::ios::skipws);
+
+            std::streampos fileSize;
+            ifstream.seekg(0, std::ios::end);
+            fileSize = ifstream.tellg();
+            ifstream.seekg(0, std::ios::beg);
+            
+            std::vector<unsigned char> buffer(fileSize);
+            ifstream.read((char*)buffer.data(), fileSize);
+            return buffer;
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+            return std::vector<unsigned char>({'\0'});
+        }
+    }
+
+
+
+
+    std::filesystem::path CreateTempFile(unsigned char* data, size_t size)
+    {
+        if(!std::filesystem::is_directory(std::filesystem::temp_directory_path() / std::filesystem::path("swtmp")))
+        {
+            std::filesystem::create_directory(std::filesystem::temp_directory_path() / std::filesystem::path("swtmp"));
+        }
+
+        const char* letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwyz";
+        char filebuf[16] = {};
+        for(int i=0; i<16; i++)
+            filebuf[i] = letters[rand() % strlen(letters)];
+        
+        std::filesystem::path path =
+            std::filesystem::temp_directory_path() /
+            std::filesystem::path("swtmp") /
+            std::string(filebuf, 16);
+
+        std::ofstream ofstream;
+        ofstream.open(path, std::ios::binary | std::ios::out);
+        ofstream.write(reinterpret_cast<const char*>(data), size);
+        ofstream.close();
+
+        return path;
     }
 } // namespace Ease::File

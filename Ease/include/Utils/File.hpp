@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <filesystem>
 
 namespace Ease::File
@@ -31,6 +32,27 @@ namespace Ease::File
      */
     bool InsertFilepathEndpoint(const std::string& endpoint, const std::filesystem::path& path, bool force = false);
 
+
+
+    /**
+     * @brief Return file content and size of given file path
+     * 
+     * @param path with delimiter! (res://image.png ...)
+     * @return std::vector<unsigned char> file content
+     */
+    std::vector<unsigned char> GetFileContent(const char* path);
+
+
+
+
+    /**
+     * @brief Creates temp file with given data
+     * 
+     * @param data 
+     * @param size 
+     * @return std::filesystem::path of the file
+     */
+    std::filesystem::path CreateTempFile(unsigned char* data, size_t size);
 } // namespace Ease::File
 
 
