@@ -3,94 +3,86 @@
 
 #pragma once
 
-#include <filesystem>
-#include <vector>
-#include "entt/entt.hpp"
-#include "box2d/box2d.h"
-#include "ECS/Entity/Entity.hpp"
 #include "ECS/Components/Camera2D/Camera2D.hpp"
 #include "ECS/Components/Transform2D/Transform2D.hpp"
+#include "ECS/Entity/Entity.hpp"
 #include "Resource/ResourceManager.hpp"
+#include "box2d/box2d.h"
+#include "entt/entt.hpp"
+#include <filesystem>
+#include <vector>
 
-namespace Ease
-{
-    class Scene
-    {
-    public:
-        Scene();
-        ~Scene();
-        
+namespace Ease {
+class Scene {
+  public:
+	Scene();
+	~Scene();
 
-        Entity Create(const std::string& name, uint32_t id = 0);
-        void Destroy(Ease::Entity& entity);
+	Entity Create(const std::string &name, uint32_t id = 0);
+	void Destroy(Ease::Entity &entity);
 
-        entt::registry m_Registry;
+	entt::registry m_Registry;
 
-        bool Save();
-        bool SaveToFile(const char* file);
-        bool LoadFromFile(const char* file);
-        std::filesystem::path path;
+	bool Save();
+	bool SaveToFile(const char *file);
+	bool LoadFromFile(const char *file);
+	std::filesystem::path path;
 
-        // Returns first entity that is in given group
-        Ease::Entity GetEntityInGroup(const std::string& group);
-        std::vector<Ease::Entity> GetEntitiesInGroup(const std::string& group);
+	// Returns first entity that is in given group
+	Ease::Entity GetEntityInGroup(const std::string &group);
+	std::vector<Ease::Entity> GetEntitiesInGroup(const std::string &group);
 
-        Ease::Entity GetEntityByID(uint32_t id);
-        
-        void StartScene();
-        void StopScene();
+	Ease::Entity GetEntityByID(uint32_t id);
 
-        // Copies all entities of src to dst
-        static void CopyScene(Scene& src, Scene& dst);
-        
-        void CopyEntity(Ease::Entity entity);
-        void AddCopiedEntity(Ease::Entity entity);
-        void ClearCopiedEntities();
-        Ease::Entity PasteCopiedEntity();
-        std::vector<Ease::Entity> PasteCopiedEntities();
-        uint32_t GetCopiedEntityCount();
+	void StartScene();
+	void StopScene();
 
+	// Copies all entities of src to dst
+	static void CopyScene(Scene &src, Scene &dst);
 
-        b2Vec2& Gravity() { return m_Gravity; }
-        std::shared_ptr<b2World> PhysicsWorld2D() { return m_pPhysicsWorld2D; }
+	void CopyEntity(Ease::Entity entity);
+	void AddCopiedEntity(Ease::Entity entity);
+	void ClearCopiedEntities();
+	Ease::Entity PasteCopiedEntity();
+	std::vector<Ease::Entity> PasteCopiedEntities();
+	uint32_t GetCopiedEntityCount();
 
-        Ease::Component::Camera2D& CurrentCamera2D() { return m_SceneCamera2D.camera2d; };
-        Ease::Component::Transform2D& CurrentCameraTransform2D() { return m_SceneCamera2D.transform2d; }
+	b2Vec2 &Gravity() { return m_Gravity; }
+	std::shared_ptr<b2World> PhysicsWorld2D() { return m_pPhysicsWorld2D; }
 
-        template<typename T>
-        ResourceManager<T>& GetResourceManager()
-        {
-            static ResourceManager<T> manager;
-            return manager;
-        }
+	Ease::Component::Camera2D &CurrentCamera2D() { return m_SceneCamera2D.camera2d; };
+	Ease::Component::Transform2D &CurrentCameraTransform2D() { return m_SceneCamera2D.transform2d; }
 
-        template<typename T>
-        void ClearResourceManager()
-        {
-            auto& resources = GetResourceManager<T>();
-            resources.GetResources().clear();
-        }
-        
-    private:
-        /**
-         * @brief Registry that holds copied entities
-         */
-        entt::registry m_CopyRegistry;
+	template <typename T>
+	ResourceManager<T> &GetResourceManager() {
+		static ResourceManager<T> manager;
+		return manager;
+	}
 
-        b2Vec2 m_Gravity{0.f, -10.f};
-        std::shared_ptr<b2World> m_pPhysicsWorld2D;
+	template <typename T>
+	void ClearResourceManager() {
+		auto &resources = GetResourceManager<T>();
+		resources.GetResources().clear();
+	}
 
-        
-        struct {
-            Ease::Component::Camera2D camera2d;
-            Ease::Component::Transform2D transform2d;
-        } m_SceneCamera2D;
-        struct {
-            Ease::Component::Camera2D camera2d;
-            Ease::Component::Transform2D transform2d;
-        } m_SceneOldCamera2D;
-        
-    };
+  private:
+	/**
+	 * @brief Registry that holds copied entities
+	 */
+	entt::registry m_CopyRegistry;
+
+	b2Vec2 m_Gravity{0.f, -10.f};
+	std::shared_ptr<b2World> m_pPhysicsWorld2D;
+
+	struct {
+		Ease::Component::Camera2D camera2d;
+		Ease::Component::Transform2D transform2d;
+	} m_SceneCamera2D;
+	struct {
+		Ease::Component::Camera2D camera2d;
+		Ease::Component::Transform2D transform2d;
+	} m_SceneOldCamera2D;
+};
 } // namespace Ease
 
 #endif

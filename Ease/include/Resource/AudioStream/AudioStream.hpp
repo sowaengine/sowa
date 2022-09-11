@@ -3,31 +3,32 @@
 
 #pragma once
 
+#include "../Resource.hpp"
+#include <AL/al.h>
 #include <stdint.h>
 #include <string>
-#include <AL/al.h>
-#include "../Resource.hpp"
 
 typedef uint32_t ResourceID;
 
-namespace Ease
-{
+namespace Ease {
 
-class AudioStream : public BaseResource
-{
-public:
-    AudioStream();
-    ~AudioStream();
+class AudioStream : public BaseResource {
+  public:
+	AudioStream();
+	~AudioStream();
 
-    const std::string& GetFilepath() { return m_Filepath; }
-private:
-    template<typename> friend class ResourceManager;
-    template<typename> friend class ResourceLoaderImpl;
-    friend class SoundSource;
+	const std::string &GetFilepath() { return m_Filepath; }
 
-    std::string m_Filepath{""};
-    ALuint m_Buffer;
+  private:
+	template <typename>
+	friend class ResourceManager;
+	template <typename>
+	friend class ResourceLoaderImpl;
+	friend class SoundSource;
+
+	std::string m_Filepath{""};
+	ALuint m_Buffer;
 };
 
-}
+} // namespace Ease
 #endif

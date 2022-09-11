@@ -5,22 +5,24 @@
 
 #include <glm/glm.hpp>
 // #include "raylib.h"
-#pragma warning ("Camera Broken")
+#pragma warning("Camera Broken")
 
-namespace Ease::Component
-{
-    class Camera2D
-    {
-    public:
-        Camera2D();
-        ~Camera2D();
-        
-        float& Zoom() { static float x = 0; return x; } // m_Camera.zoom; }
+namespace Ease::Component {
+class Camera2D {
+  public:
+	Camera2D();
+	~Camera2D();
 
-        bool& Current() { return m_Current; }
-    private:
-        bool m_Current = false;
-    };
-}
+	float &Zoom() {
+		static float x = 0;
+		return x;
+	} // m_Camera.zoom; }
+
+	bool &Current() { return m_Current; }
+
+  private:
+	bool m_Current = false;
+};
+} // namespace Ease::Component
 
 #endif

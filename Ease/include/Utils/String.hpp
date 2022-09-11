@@ -5,10 +5,8 @@
 #include <string>
 #include <vector>
 
-namespace Ease
-{
-    std::vector<std::string> Split(const std::string& text, const std::string& delimiter);
+namespace Ease {
+std::vector<std::string> Split(const std::string &text, const std::string &delimiter);
 } // namespace Ease
-
 
 #endif // _E_STRING_HPP__

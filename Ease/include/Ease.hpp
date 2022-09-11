@@ -2,21 +2,21 @@
 #define _E_EASE_HPP__
 #pragma once
 
-#include <string>
-#include <unordered_map>
+#include "ECS/Entity/Entity.hpp"
 #include <functional>
 #include <iostream>
 #include <memory>
-#include "ECS/Entity/Entity.hpp"
+#include <string>
+#include <unordered_map>
 
 #if defined(_WIN32) || defined(_WIN64)
-   #define EASE_API extern "C" __declspec(dllexport)
-   
-   #define WIN32_LEAN_AND_MEAN
-      #include <windows.h>
-   #undef WIN32_LEAN_AND_MEAN
+#define EASE_API extern "C" __declspec(dllexport)
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#undef WIN32_LEAN_AND_MEAN
 #else
-   #define EASE_API extern "C"
+#define EASE_API extern "C"
 #endif
 
 #define EASE_VERSION_MAJOR 0
@@ -25,124 +25,120 @@
 
 #define EASE_VERSION_STRING "0.1.0"
 
-#define MAX(a, b) ((a)>(b)? (a) : (b))
-#define MIN(a, b) ((a)<(b)? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 #define WORLD_TO_SCREEN(x) (x * 25.f)
 #define SCREEN_TO_WORLD(x) (x / 25.f)
 
 #ifndef PI
-    #define PI 3.1416f
+#define PI 3.1416f
 #endif
 #ifndef DEG2RAD
-    #define DEG2RAD (PI/180.0f)
+#define DEG2RAD (PI / 180.0f)
 #endif
 #ifndef RAD2DEG
-    #define RAD2DEG (180.0f/PI)
+#define RAD2DEG (180.0f / PI)
 #endif
 
-#define EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, Behaviour) do { \
-   struct Factory : Ease::NativeBehaviourFactory \
-   { \
-      public: \
-         Ease::NativeBehaviour* Create() override \
-         { \
-            Behaviour* b = new Behaviour(); \
-            return b; \
-         } \
-         void Destroy(Ease::NativeBehaviour* b) override \
-         { \
-            delete reinterpret_cast<Behaviour*>(b); \
-         } \
-          \
-   }; Factory* factory = new Factory; \
-   lib->nativeBehaviours[#Behaviour] = factory; \
-} while(0); \
-
+#define EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, Behaviour)       \
+	do {                                                      \
+		struct Factory : Ease::NativeBehaviourFactory {       \
+		  public:                                             \
+			Ease::NativeBehaviour *Create() override {        \
+				Behaviour *b = new Behaviour();               \
+				return b;                                     \
+			}                                                 \
+			void Destroy(Ease::NativeBehaviour *b) override { \
+				delete reinterpret_cast<Behaviour *>(b);      \
+			}                                                 \
+		};                                                    \
+		Factory *factory = new Factory;                       \
+		lib->nativeBehaviours[#Behaviour] = factory;          \
+	} while (0);
 
 /**
  * Initializing a module:
- * 
+ *
    MODULE_BEGIN(ModuleClass, "author", "modulename", version)
-      BIND_NATIVEBEHAVIOUR(MyComponent);
+	  BIND_NATIVEBEHAVIOUR(MyComponent);
    MODULE_END(ModuleClass)
- * 
+ *
  */
 // MODULE_BEGIN
 #define MODULE_BEGIN(_className, _authorName, _moduleName, _version) \
-EASE_API Ease::BaseModule* Create() {\
-   _className* lib; \
-   do { \
-      lib = new _className{}; \
-      lib->metadata.authorName = _authorName; \
-      lib->metadata.moduleName = _moduleName; \
-      lib->metadata.version = _version; \
-   } while(0);
+	EASE_API Ease::BaseModule *Create() {                            \
+		_className *lib;                                             \
+		do {                                                         \
+			lib = new _className{};                                  \
+			lib->metadata.authorName = _authorName;                  \
+			lib->metadata.moduleName = _moduleName;                  \
+			lib->metadata.version = _version;                        \
+		} while (0);
 
 // MODULE_END
 #define MODULE_END(_className) \
-   return lib; \
-} \
-EASE_API void Destroy(Ease::BaseModule* lib) \
-{ delete reinterpret_cast<_className*>(lib); }
+	return lib;                \
+	}                          \
+	EASE_API void Destroy(Ease::BaseModule *lib) { delete reinterpret_cast<_className *>(lib); }
 
 // BIND_NATIVEBEHAVIOUR
 #define BIND_NATIVEBEHAVIOUR(Behaviour) EASEMODULE_BIND_NATIVEBEHAVIOUR(lib, Behaviour)
 
-typedef void(*UserFunc)();
+typedef void (*UserFunc)();
 
-namespace Ease
-{
-   class Entity;
+namespace Ease {
+class Entity;
 
+class NativeBehaviour {
+  public:
+	virtual void Start() {}
+	virtual void Update() {}
 
-   class NativeBehaviour
-   {
-      public:
-         virtual void Start() {}
-         virtual void Update() {}
+	Ease::Entity self{};
+};
+struct NativeBehaviourFactory {
+  public:
+	virtual NativeBehaviour *Create() { return nullptr; }
+	virtual void Destroy(NativeBehaviour *) {}
+};
 
-         Ease::Entity self{};
-   };
-   struct NativeBehaviourFactory
-   {
-      public:
-         virtual NativeBehaviour* Create() { return nullptr; }
-         virtual void Destroy(NativeBehaviour*) {}
-   };
+class BaseModule {
+  public:
+	BaseModule() {}
+	virtual ~BaseModule() {}
 
+	virtual void Start() {
+		static unsigned char c = 0;
+		c++;
+	}
+	virtual void Update() {
+		static unsigned char c = 0;
+		c++;
+	}
+	virtual void OnImGuiRender() {
+		static unsigned char c = 0;
+		c++;
+	}
 
-   class BaseModule
-   {
-      public:
-         BaseModule() {}
-         virtual ~BaseModule() {}
+	struct {
+		std::string authorName = "";
+		std::string moduleName = "";
+		uint32_t version;
 
-         virtual void Start()         {  static unsigned char c=0; c++; }
-         virtual void Update()        {  static unsigned char c=0; c++; }
-         virtual void OnImGuiRender() {  static unsigned char c=0; c++; }
+	} metadata;
 
-         struct {
-            std::string authorName = "";
-            std::string moduleName = "";
-            uint32_t version;
+	struct UserValue {
+		std::string str_value{};
+	};
+	std::unordered_map<std::string, UserFunc> userFuncs;
+	std::unordered_map<std::string, UserValue> userValues;
 
-         } metadata;
+	std::unordered_map<std::string, NativeBehaviourFactory *> nativeBehaviours;
+};
+} // namespace Ease
 
-
-         struct UserValue
-         {
-            std::string str_value{};
-         };
-         std::unordered_map<std::string, UserFunc> userFuncs;
-         std::unordered_map<std::string, UserValue> userValues;
-
-         std::unordered_map<std::string, NativeBehaviourFactory*> nativeBehaviours;
-   };
-}
-
-template<typename T>
+template <typename T>
 using Reference = std::shared_ptr<T>;
-
 
 #endif

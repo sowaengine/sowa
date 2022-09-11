@@ -3,55 +3,51 @@
 
 #pragma once
 
-#include <string>
 #include <filesystem>
+#include <string>
 #include <vector>
 
-namespace Ease
-{
-    class ProjectSettings
-    {
-    public:
-        static ProjectSettings& get_singleton()
-        {
-            static ProjectSettings settings;
-            return settings;
-        }
+namespace Ease {
+class ProjectSettings {
+  public:
+	static ProjectSettings &get_singleton() {
+		static ProjectSettings settings;
+		return settings;
+	}
 
-        struct {
-            int WindowWidth = 1280;
-            int WindowHeight = 720;
+	struct {
+		int WindowWidth = 1280;
+		int WindowHeight = 720;
 
-            int VideoWidth = 1920;
-            int VideoHeight = 1280;
+		int VideoWidth = 1920;
+		int VideoHeight = 1280;
 
-            bool Fullscreen = false;
-        } _window;
-        struct {
-            std::string Name = "Ease Engine";
-            std::string Description = "";
-            std::string MainScene = "";
-        } _application;
-        struct {
-            std::vector<std::string> modules;
-        } _modules;
+		bool Fullscreen = false;
+	} _window;
+	struct {
+		std::string Name = "Ease Engine";
+		std::string Description = "";
+		std::string MainScene = "";
+	} _application;
+	struct {
+		std::vector<std::string> modules;
+	} _modules;
 
-        bool LoadProject(const char* path);
-        bool SaveProject();
+	bool LoadProject(const char *path);
+	bool SaveProject();
 
-        std::filesystem::path projectpath{""};
+	std::filesystem::path projectpath{""};
 
 #ifdef EASE_EDITOR
-        bool debug_draw = true;
+	bool debug_draw = true;
 #else
-        bool debug_draw = false;
+	bool debug_draw = false;
 #endif
 
-    private:
-        ProjectSettings();
-        ~ProjectSettings();
-
-    };
+  private:
+	ProjectSettings();
+	~ProjectSettings();
+};
 } // namespace Ease
 
 #endif

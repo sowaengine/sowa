@@ -3,38 +3,38 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <string>
 #include "../Resource.hpp"
 #include "Core/GL/Texture.hpp"
 #include <memory>
+#include <stdint.h>
+#include <string>
 
 typedef uint32_t ResourceID;
 
-namespace Ease
-{
+namespace Ease {
 
-class Texture : public BaseResource
-{
-public:
-    Texture();
-    ~Texture();
+class Texture : public BaseResource {
+  public:
+	Texture();
+	~Texture();
 
-    
-    const std::string& GetFilepath() { return m_Filepath; }
-    inline int Width() { return _texture.GetWidth(); }
-    inline int Height() { return _texture.GetHeight(); }
-    inline int Channels() { return _texture.GetChannels(); }
+	const std::string &GetFilepath() { return m_Filepath; }
+	inline int Width() { return _texture.GetWidth(); }
+	inline int Height() { return _texture.GetHeight(); }
+	inline int Channels() { return _texture.GetChannels(); }
 
-    size_t TextureID() { return _texture.ID(); }
-private:
-    template<typename> friend class ResourceManager;
-    template<typename> friend class ResourceLoaderImpl;
-    friend class Renderer;
-    
-    nmGfx::Texture _texture{};
-    std::string m_Filepath{""};
+	size_t TextureID() { return _texture.ID(); }
+
+  private:
+	template <typename>
+	friend class ResourceManager;
+	template <typename>
+	friend class ResourceLoaderImpl;
+	friend class Renderer;
+
+	nmGfx::Texture _texture{};
+	std::string m_Filepath{""};
 };
 
-}
+} // namespace Ease
 #endif
