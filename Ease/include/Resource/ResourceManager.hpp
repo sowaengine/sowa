@@ -24,24 +24,28 @@ namespace Ease
         ~ResourceManager() {}
         
 
-        Reference<T> LoadResource(const char* path, ResourceID id = 0)
+        Reference<T> LoadResource(const char* path, ResourceID _id = 0)
         {
             Reference<T> resource = ResourceLoader::get_singleton().LoadResource<T>(path);
 
-            resource->SetResourceID(NewResourceID(id));
+            ResourceID id = NewResourceID(_id);
+            resource->SetResourceID(id);
+            m_Resources[id] = resource;
             return resource;
         }
-        Reference<T> LoadResourceFromFile(const char* path, ResourceID id = 0)
+        Reference<T> LoadResourceFromFile(const char* path, ResourceID _id = 0)
         {   
             Reference<T> resource = ResourceLoader::get_singleton().LoadResourceFromFile<T>(path);
 
-            resource->SetResourceID(NewResourceID(id));
+            ResourceID id = NewResourceID(_id);
+            resource->SetResourceID(id);
+            m_Resources[id] = resource;
             return resource;
         }
         bool SaveResource(const char* path, Reference<T> resource);
         bool DeleteResource(ResourceID id)
         {
-            std::shared_ptr<T> res = m_Resources[id];
+            Reference<T> res = m_Resources[id];
             m_Resources[id] = nullptr;
             delete res;
             return true;
@@ -57,14 +61,14 @@ namespace Ease
             return false;
             // return m_Resources.count(id) == 1;
         }
-        std::shared_ptr<T>& GetResource(ResourceID id)
+        Reference<T>& GetResource(ResourceID id)
         {
             return m_Resources[id];
         }
 
-        inline std::map<ResourceID, std::shared_ptr<T>>& GetResources() { return m_Resources; }
+        inline std::map<ResourceID, Reference<T>>& GetResources() { return m_Resources; }
     private:
-        std::map<ResourceID, std::shared_ptr<T>> m_Resources;
+        std::map<ResourceID, Reference<T>> m_Resources;
 
         // Generats new resource id (incrementing on each call). if baseID is non-zero, returns baseID
         ResourceID NewResourceID(ResourceID baseID)

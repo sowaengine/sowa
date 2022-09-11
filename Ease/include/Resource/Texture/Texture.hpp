@@ -22,6 +22,11 @@ public:
 
     
     const std::string& GetFilepath() { return m_Filepath; }
+    inline int Width() { return _texture.GetWidth(); }
+    inline int Height() { return _texture.GetHeight(); }
+    inline int Channels() { return _texture.GetChannels(); }
+
+    size_t TextureID() { return _texture.ID(); }
 private:
     template<typename> friend class ResourceManager;
     template<typename> friend class ResourceLoaderImpl;

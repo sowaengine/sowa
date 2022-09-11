@@ -20,7 +20,6 @@
 #include "imgui-docking/misc/cpp/imgui_stdlib.h"
 #include "Core/Application.hpp"
 #include "Core/ProjectSettings.hpp"
-#include "rlImGui/rlImGui.h"
 #include <memory>
 #include <unordered_map>
 #include "Resource/ResourceManager.hpp"
@@ -28,6 +27,7 @@
 #include "Resource/EditorTheme/EditorTheme.hpp"
 #include "ECS/Components/Components.hpp"
 #include "Core/Input.hpp"
+#include "Utils/Dialog.hpp"
 
 class EaseEditor;
 static EaseEditor* g_Editor = nullptr;
@@ -173,7 +173,7 @@ class EaseEditor : public Ease::BaseModule
                   cam2dTransform.Scale().y = cam2dTransform.Scale().x;
                }
 
-
+               // todo: app.GetPickedEntity
                //if(ImGui::IsWindowHovered() && Ease::Input::IsMouseButtonClicked(Ease::Input::Button::LEFT))
                //{
                //   Ease::Entity pickedEntity = app.GetPickedEntity();
@@ -445,6 +445,27 @@ class EaseEditor : public Ease::BaseModule
                   }, entity);
                   DrawComponent<Ease::Component::SpriteRenderer2D>("SpriteRenderer2D", [](Ease::Component::SpriteRenderer2D& component){
                      ImGui::Checkbox("Visible", &component.Visible());
+                     if(component.Texture() == nullptr)
+                     {
+                        auto& texManager = Ease::Application::get_singleton().GetCurrentScene()->GetResourceManager<Ease::Texture>();
+                        if(texManager.HasResource(component.TextureID()))
+                        {
+                           ImGui::Image((void*)texManager.GetResource(component.TextureID())->TextureID(), ImVec2(64.f, 64.f));
+                        }
+                        else
+                        {
+                           ImGui::InvisibleButton("##Texture", ImVec2(64.f, 64.f));
+                        }
+                     }
+                     else
+                        ImGui::Image((void*)component.Texture()->TextureID(), ImVec2(64.f, 64.f));
+                     ImGui::SameLine();
+
+                     ImGui::Text("%s: ", "Texture ID"); ImGui::SameLine();
+                     int texID = component.TextureID();
+                     ImGui::InputInt("##Path", &texID);
+                     component.TextureID() = texID;
+
                   }, entity);
                   DrawComponent<Ease::Component::TextRenderer2D>("TextRenderer2D", [](Ease::Component::TextRenderer2D& component){
                      ImGui::InputText("Text", &component.Text());
@@ -625,7 +646,17 @@ class EaseEditor : public Ease::BaseModule
                std::shared_ptr<Ease::EditorTheme> theme = std::make_shared<Ease::EditorTheme>();
                theme->LoadFromStyle(ImGui::GetStyle());
                // Ease::ResourceManager<Ease::EditorTheme>::GetLoader().SaveResource("res/theme_new.escfg", theme);
-               assert(false && "Can not export themes");
+               std::cout << "Can not export themes" << std::endl;
+            }
+
+            if(ImGui::BeginMenu("Resources"))
+            {
+               if(ImGui::MenuItem("Import"))
+               {
+                  
+               }
+
+               ImGui::EndMenu();
             }
 
 

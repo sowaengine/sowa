@@ -107,7 +107,6 @@ namespace Ease
       IMGUI_CHECKVERSION();
       ImGui::CreateContext();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-      // ImGui::GetIO().Fonts->AddFontFromFileTTF("res/Roboto-Medium.ttf", 14.f);
       ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::roboto_medium_data.data(), Res::roboto_medium_data.size(), 14.f);
       ImGui::LoadIniSettingsFromMemory(Res::imgui_default_layout.data(), Res::imgui_default_layout.size());
       ImGui_ImplGlfw_InitForOpenGL(_renderer->GetWindow().GetGLFWwindow(), true);
@@ -130,8 +129,10 @@ namespace Ease
       auto& spr = entity.AddComponent<Component::SpriteRenderer2D>();
       auto& tc = entity.AddComponent<Component::Transform2D>();
 
-      tc.Scale() = glm::vec2{256.f, 256.f};
-      spr.Texture() = tex2;
+      tc.Scale() = glm::vec2{10.f, 10.f};
+      //spr.Texture() = tex2;
+      auto& texLoader = GetCurrentScene()->GetResourceManager<Ease::Texture>();
+      texLoader.LoadResource("abs://res/character.png", 122);
       
       while (!_window.ShouldClose())
       {
@@ -144,9 +145,7 @@ namespace Ease
          _renderer->Begin2D(
             nmGfx::CalculateModelMatrix(glm::vec3{cam2dtc.Position().x, cam2dtc.Position().y, 0.f}, cam2dtc.Rotation(), glm::vec3{cam2dtc.Scale().x, cam2dtc.Scale().y, 1.f})
             );
-         // Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Draw);
          Ease::Systems::System_SpriteRenderer2D(m_pCurrentScene);
-         // _renderer->DrawTexture(tex, nmGfx::CalculateModelMatrix({0.f, 0.f}, 0.f, {100.f, 100.f}), {1.f, 1.f, 1.f}, 12);
          _renderer->End2D();
 
 

@@ -21,7 +21,7 @@ namespace Ease::Component
         bool& Visible() { return m_Visible; }
     private:
         std::shared_ptr<Ease::Texture> _texture{nullptr};
-        unsigned int _textureID;
+        unsigned int _textureID{0};
         bool m_Visible = true;
     };
 }

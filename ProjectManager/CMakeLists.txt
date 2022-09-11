@@ -8,3 +8,4 @@ target_include_directories(Ease.ProjectManager PRIVATE ${CMAKE_SOURCE_DIR}/Ease/
 target_include_directories(Ease.ProjectManager PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
 target_include_directories(Ease.ProjectManager PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/raylib/include/)
 target_include_directories(Ease.ProjectManager PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/glm/)
+target_include_directories(Ease.ProjectManager PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src/)

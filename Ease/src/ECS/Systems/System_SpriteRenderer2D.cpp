@@ -41,7 +41,10 @@ namespace Ease::Systems
 
          Renderer::get_singleton().DrawTexture(
             transformc.Position(),
-            transformc.Scale(),
+            {
+               transformc.Scale().x * (tex->Width()),
+               transformc.Scale().y * (tex->Height())
+            },
             transformc.ZIndex(),
             transformc.Rotation(),
             *tex,
