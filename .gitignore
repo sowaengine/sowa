@@ -42,4 +42,5 @@ todo.md
 # Folder that contains contents of a test game
 Game/
 logs/
+*.log
 imgui.ini
