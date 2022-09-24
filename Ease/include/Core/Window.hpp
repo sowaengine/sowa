@@ -2,8 +2,11 @@
 #define _E_WINDOW_HPP__
 #pragma once
 
-#include "nmGfx/src/Core/Window.hpp"
 #include <string>
+
+namespace nmGfx {
+class Window;
+}
 
 namespace Ease {
 class Window {
@@ -16,16 +19,16 @@ class Window {
 	 *
 	 * @return int
 	 */
-	inline int GetVideoWidth() { return _windowHandle->GetVideoWidth(); }
+	int GetVideoWidth();
 	/**
 	 * @brief Video Size : Render resolution of scene, different than window size
 	 *
 	 * @return int
 	 */
-	inline int GetVideoHeight() { return _windowHandle->GetVideoHeight(); }
+	int GetVideoHeight();
 
-	inline int GetWindowWidth() { return _windowHandle->GetWindowWidth(); }
-	inline int GetWindowHeight() { return _windowHandle->GetWindowHeight(); }
+	int GetWindowWidth();
+	int GetWindowHeight();
 
 	bool ShouldClose();
 
