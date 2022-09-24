@@ -9,45 +9,102 @@
 #define DEBUG_HPP_
 #pragma once
 
-#include "spdlog/spdlog.h"
 #include <cassert>
 #include <chrono>
+#include <cmath>
+#include <ctime>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <stack>
 #include <stdexcept>
 #include <stdlib.h>
 #include <unistd.h>
 
-//#define LOG(format, ...) fprintf (stderr, format "\n", __VA_ARGS__);
-//#define LOG_ERROR(format, ...) fprintf (stderr, "ERROR: " format "\n" , __VA_ARGS__);
-
-#define INFO(format, ...) /* info doesn't save to log file */ \
-	spdlog::info(format, __VA_ARGS__);
-
-#define WARNING(format, ...)                        \
-	spdlog::get("Ease")->warn(format, __VA_ARGS__); \
-	spdlog::warn(format, __VA_ARGS__);
-
-#define ERROR(format, ...)                           \
-	spdlog::get("Ease")->error(format, __VA_ARGS__); \
-	spdlog::error(format, __VA_ARGS__);
+#include "fmt/core.h"
 
 namespace Debug {
-class Timer {
-  public:
-	Timer(std::string name)
-		: m_Name(name),
-		  m_Start(std::chrono::high_resolution_clock::now()) {
+
+/**
+ * @brief Internal print function used by Other logging functions
+ * @see Debug::Log
+ * @see Debug::Info
+ * @see Debug::Error
+ * @see Debug::Warn
+ *
+ * @tparam Args
+ * @param levelText type of printing (Log, Error, Warn, Info etc.)
+ * @param toFile
+ * @param format
+ * @param args
+ */
+template <typename... Args>
+void Print(const std::string &levelText, bool toFile, const std::string &format, Args... args) {
+	std::time_t t = std::time(nullptr);
+	std::tm tp = *std::localtime(&t);
+	std::stringstream time;
+	time << std::put_time(&tp, "%Y-%m-%d %H:%M:%S");
+
+	static std::ofstream logStream;
+	static bool first = true;
+	if (first) {
+		first = false;
+
+		std::stringstream date;
+		date << std::put_time(&tp, "%Y-%m-%d");
+
+		logStream.open(fmt::format("./sowa-{}.log", date.str()), std::ios_base::app);
 	}
 
-	~Timer() {
+	std::string msg = fmt::format("[{}] [{}]: {}\n", time.str(), levelText, fmt::format(format, args...));
+
+	std::cout << msg << std::flush;
+	if (toFile)
+		logStream << msg << std::flush;
+}
+
+// Only prints to console
+template <typename... Args>
+void Log(const std::string &format, Args... args) {
+	Debug::Print("LOG", false, format, args...);
+}
+
+// Used for logging info that should be seen in log file (system spec etc.)
+template <typename... Args>
+void Info(const std::string &format, Args... args) {
+	Debug::Print("INFO", true, format, args...);
+}
+
+//
+template <typename... Args>
+void Warn(const std::string &format, Args... args) {
+	Debug::Print("WARN", true, format, args...);
+}
+
+//
+template <typename... Args>
+void Error(const std::string &format, Args... args) {
+	Debug::Print("ERROR", true, format, args...);
+}
+
+class ScopeTimer {
+  public:
+	ScopeTimer(std::string name)
+		: _Name(name),
+		  _Start(std::chrono::high_resolution_clock::now()) {
+	}
+
+	~ScopeTimer() {
 		auto now = std::chrono::high_resolution_clock::now();
-		auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(now - m_Start).count();
-		// LOG("Timer %s: %ldusec", m_Name.c_str(), deltaTime);
-		INFO("Timer {}: {}ms", m_Name.c_str(), deltaTime * 0.001);
+		auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(now - _Start).count();
+
+		Debug::Log("Scope Timer '{}': {}s", _Name.c_str(), std::round(deltaTime / 1000.f) / 1000.f);
 	}
 
   private:
-	std::string m_Name;
-	std::chrono::time_point<std::chrono::high_resolution_clock> m_Start;
+	std::string _Name;
+	std::chrono::time_point<std::chrono::high_resolution_clock> _Start;
 };
 } // namespace Debug
 #endif
