@@ -106,5 +106,28 @@ class ScopeTimer {
 	std::string _Name;
 	std::chrono::time_point<std::chrono::high_resolution_clock> _Start;
 };
+
+struct FuncEntry {
+	std::string _FuncName;
+	std::string _File;
+	int _Line;
+
+	FuncEntry();
+	FuncEntry(const std::string &funcName, const std::string &file, int line);
+	~FuncEntry();
+};
+typedef std::stack<FuncEntry> CallStack;
+
+struct FuncEntryRegister {
+	FuncEntryRegister() = delete;
+	FuncEntryRegister(const std::string &funcName, const std::string &file, int line);
+	~FuncEntryRegister();
+};
+
+void DumpStacktrace();
+
 } // namespace Debug
+
+#define SW_ENTRY() Debug::FuncEntryRegister __sw_entry(__FUNCTION__, __FILE__, __LINE__);
+
 #endif

@@ -1,9 +1,7 @@
 #include "Core/Application.hpp"
-//#include "Debug.hpp"
+#include "Debug.hpp"
 #include "Ease.hpp"
 #include <iostream>
-
-#include "Core/Renderer.hpp"
 
 #include "Resource/NativeModule/NativeModule.hpp"
 #include "Resource/ResourceLoader.hpp"
@@ -13,6 +11,7 @@
 #include "Core/EngineContext.hpp"
 #include "Core/ExportGenerator.hpp"
 #include "Core/ProjectSettings.hpp"
+#include "Core/Renderer.hpp"
 #include "Core/Window.hpp"
 
 #include "ECS/Components/Components.hpp"
@@ -43,7 +42,10 @@ Application::~Application() {
 }
 
 void Application::Run(int argc, char const *argv[]) {
+	SW_ENTRY()
+
 	Ease::EngineContext *ctx = EngineContext::CreateContext();
+	auto __ = Debug::ScopeTimer("Application");
 
 	ProjectSettings &projectSettings = ProjectSettings::get_singleton();
 	Ease::File::InsertFilepathEndpoint("abs", "./");
