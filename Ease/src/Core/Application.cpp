@@ -10,6 +10,7 @@
 #include "Resource/ResourceManager.hpp"
 #include "Resource/Texture/Texture.hpp"
 
+#include "Core/EngineContext.hpp"
 #include "Core/ExportGenerator.hpp"
 #include "Core/ProjectSettings.hpp"
 #include "Core/Window.hpp"
@@ -42,6 +43,8 @@ Application::~Application() {
 }
 
 void Application::Run(int argc, char const *argv[]) {
+	Ease::EngineContext *ctx = EngineContext::CreateContext();
+
 	ProjectSettings &projectSettings = ProjectSettings::get_singleton();
 	Ease::File::InsertFilepathEndpoint("abs", "./");
 	bool project_loaded = false;
@@ -83,20 +86,24 @@ void Application::Run(int argc, char const *argv[]) {
 		_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(shader.data()), shader.size()));
 	}
 
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	// ImGui::GetIO().WantSaveIniSettings = false;
+	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::roboto_medium_data.data(), Res::roboto_medium_data.size(), 14.f);
+	// ImGui::LoadIniSettingsFromMemory(Res::imgui_default_layout.data(), Res::imgui_default_layout.size());
+	ImGui_ImplGlfw_InitForOpenGL(_renderer->GetWindow().GetGLFWwindow(), true);
+	ImGui_ImplOpenGL3_Init("#version 150");
+
+	Reference<Ease::EditorTheme> theme = Ease::ResourceLoader::get_singleton().LoadResource<Ease::EditorTheme>("abs://res/theme.escfg");
+	ImGui::GetStyle() = theme->GetStyle();
+
 	for (const std::string &path : projectSettings._modules.modules) {
 		LoadModule(path, 1);
 	}
 #ifdef EASE_EDITOR
 	LoadModule("abs://Modules/Ease.Editor", 1);
 #endif
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::roboto_medium_data.data(), Res::roboto_medium_data.size(), 14.f);
-	ImGui::LoadIniSettingsFromMemory(Res::imgui_default_layout.data(), Res::imgui_default_layout.size());
-	ImGui_ImplGlfw_InitForOpenGL(_renderer->GetWindow().GetGLFWwindow(), true);
-	ImGui_ImplOpenGL3_Init("#version 150");
 
 	InitModules();
 	if (projectSettings._application.MainScene != "")
@@ -105,20 +112,6 @@ void Application::Run(int argc, char const *argv[]) {
 #ifndef EASE_EDITOR
 	StartGame();
 #endif
-
-	std::shared_ptr<nmGfx::Texture> tex = std::make_shared<nmGfx::Texture>();
-	tex->Load2DFromFile("res/icon.png");
-
-	ResourceLoader &loader = ResourceLoader::get_singleton();
-	std::shared_ptr<Ease::Texture> tex2 = loader.LoadResource<Ease::Texture>("abs://res/character.png");
-	Entity entity = GetCurrentScene()->Create("Sprite", 12412);
-	auto &spr = entity.AddComponent<Component::SpriteRenderer2D>();
-	auto &tc = entity.AddComponent<Component::Transform2D>();
-
-	tc.Scale() = glm::vec2{10.f, 10.f};
-	// spr.Texture() = tex2;
-	auto &texLoader = GetCurrentScene()->GetResourceManager<Ease::Texture>();
-	texLoader.LoadResource("abs://res/character.png", 122);
 
 	while (!_window.ShouldClose()) {
 		_renderer->GetWindow().PollEvents();
@@ -131,7 +124,6 @@ void Application::Run(int argc, char const *argv[]) {
 		_renderer->End2D();
 
 		if (m_AppRunning) {
-			tc.Rotation() += 0.2f;
 			Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Logic);
 		}
 		UpdateModules();
@@ -150,29 +142,16 @@ void Application::Run(int argc, char const *argv[]) {
 
 		_renderer->GetWindow().SwapBuffers();
 	}
-
-	ExportGenerator generator;
-	if (generator.BeginExport(ExportPlatform::LINUX)) {
-		generator.AddFile("res://Main.escn", false);
-		generator.AddFile("res://project.ease", false);
-
-		generator.AddFileTo("abs://templates/default3d.glsl", "templates/default3d.glsl", false);
-		generator.AddFileTo("abs://templates/default2d.glsl", "templates/default2d.glsl", false);
-		generator.AddFileTo("abs://templates/fullscreen.glsl", "templates/fullscreen.glsl", false);
-		generator.AddFileTo("abs://templates/skybox.glsl", "templates/skybox.glsl", false);
-		generator.AddFileTo("res://Modules/Ease.ProjectManager.so", "Modules/Ease.ProjectManager.so", false);
-	}
-	generator.EndExport();
 }
 
 void Application::Log(const std::string &message) {
 	std::cout << "[APP] " << message << std::endl;
 
-	static std::shared_ptr<NativeModule> editor = GetModule("Ease.Editor");
-	if (editor != nullptr) {
-		editor->GetModule()->userValues["PrintMsg"].str_value = message;
-		editor->GetModule()->userFuncs["Print"]();
-	}
+	// static std::shared_ptr<NativeModule> editor = GetModule("Ease.Editor");
+	// if (editor != nullptr) {
+	// 	editor->GetModule()->userValues["PrintMsg"].str_value = message;
+	// 	editor->GetModule()->userFuncs["Print"]();
+	// }
 }
 
 void Application::StartGame() {
@@ -222,7 +201,7 @@ void Application::Modules_OnImGuiRender() {
 Application::ModuleLoadResult Application::LoadModule(const std::filesystem::path &modulePath, int minimumVersion) {
 	static ResourceLoader &moduleLoader = Ease::ResourceLoader::get_singleton();
 
-	Reference<NativeModule> myModule = moduleLoader.LoadResourceFromFile<NativeModule>(NativeModule::AddExtension(modulePath).c_str());
+	Reference<NativeModule> myModule = moduleLoader.LoadResourceFromFile<NativeModule>(NativeModule::AddExtension(modulePath.string()).c_str());
 
 	if (myModule == nullptr)
 		return ModuleLoadResult::UNDEFINED_MODULE;
@@ -232,10 +211,10 @@ Application::ModuleLoadResult Application::LoadModule(const std::filesystem::pat
 		return ModuleLoadResult::OUTDATED_VERSION;
 
 	for (auto &[name, behaviour] : myModule->m_pModule->nativeBehaviours) {
-		AddNativeBehaviour(modulePath.filename().concat(".").concat(name), behaviour);
+		AddNativeBehaviour(modulePath.filename().concat(".").concat(name).string(), behaviour);
 	}
 
-	AddModule(modulePath.filename(), myModule);
+	AddModule(modulePath.filename().string(), myModule);
 	return ModuleLoadResult::SUCCESS;
 }
 
