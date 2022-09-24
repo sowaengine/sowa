@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 namespace Ease {
-class Texture;
+class ImageTexture;
 }
 
 namespace Ease::Component {
@@ -15,12 +15,12 @@ class SpriteRenderer2D {
 	SpriteRenderer2D();
 	~SpriteRenderer2D();
 
-	std::shared_ptr<Ease::Texture> &Texture() { return _texture; }
+	std::shared_ptr<Ease::ImageTexture> &Texture() { return _texture; }
 	unsigned int &TextureID() { return _textureID; }
 	bool &Visible() { return m_Visible; }
 
   private:
-	std::shared_ptr<Ease::Texture> _texture{nullptr};
+	std::shared_ptr<Ease::ImageTexture> _texture{nullptr};
 	unsigned int _textureID{0};
 	bool m_Visible = true;
 };

@@ -24,16 +24,16 @@ Ease::Component::NinePatchRect Button::GetDefaultButtonTexture(ButtonState state
 	static auto &tex_loader = Ease::ResourceLoader::get_singleton();
 	static bool first = true;
 	if (first) {
-		s_NormalRect.Texture() = tex_loader.LoadResource<Ease::Texture>("abs://res/button_white.png");
+		s_NormalRect.Texture() = tex_loader.LoadResource<Ease::ImageTexture>("abs://res/button_white.png");
 		s_NormalRect.Left() = s_NormalRect.Right() = s_NormalRect.Top() = s_NormalRect.Bottom() = 40;
 
-		s_HoverRect.Texture() = tex_loader.LoadResource<Ease::Texture>("abs://res/button_dark.png");
+		s_HoverRect.Texture() = tex_loader.LoadResource<Ease::ImageTexture>("abs://res/button_dark.png");
 		s_HoverRect.Left() = s_HoverRect.Right() = s_HoverRect.Top() = s_HoverRect.Bottom() = 40;
 
-		s_DisabledRect.Texture() = tex_loader.LoadResource<Ease::Texture>("abs://res/button_white.png");
+		s_DisabledRect.Texture() = tex_loader.LoadResource<Ease::ImageTexture>("abs://res/button_white.png");
 		s_DisabledRect.Left() = s_DisabledRect.Right() = s_DisabledRect.Top() = s_DisabledRect.Bottom() = 40;
 
-		s_ClickedRect.Texture() = tex_loader.LoadResource<Ease::Texture>("abs://res/button_white.png");
+		s_ClickedRect.Texture() = tex_loader.LoadResource<Ease::ImageTexture>("abs://res/button_white.png");
 		s_ClickedRect.Left() = s_ClickedRect.Right() = s_ClickedRect.Top() = s_ClickedRect.Bottom() = 40;
 
 		first = false;

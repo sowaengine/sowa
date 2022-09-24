@@ -7,11 +7,12 @@
 #include "ECS/Components/Transform2D/Transform2D.hpp"
 #include "ECS/Entity/Entity.hpp"
 #include "Resource/ResourceManager.hpp"
-#include "box2d/box2d.h"
+#include "Utils/Math.hpp"
 #include "entt/entt.hpp"
 #include <filesystem>
 #include <vector>
 
+class b2World;
 namespace Ease {
 class Scene {
   public:
@@ -47,7 +48,7 @@ class Scene {
 	std::vector<Ease::Entity> PasteCopiedEntities();
 	uint32_t GetCopiedEntityCount();
 
-	b2Vec2 &Gravity() { return m_Gravity; }
+	Vec2 &Gravity() { return m_Gravity; }
 	std::shared_ptr<b2World> PhysicsWorld2D() { return m_pPhysicsWorld2D; }
 
 	Ease::Component::Camera2D &CurrentCamera2D() { return m_SceneCamera2D.camera2d; };
@@ -71,7 +72,7 @@ class Scene {
 	 */
 	entt::registry m_CopyRegistry;
 
-	b2Vec2 m_Gravity{0.f, -10.f};
+	Vec2 m_Gravity{0.f, -10.f};
 	std::shared_ptr<b2World> m_pPhysicsWorld2D;
 
 	struct {

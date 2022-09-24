@@ -201,7 +201,7 @@ Renderer::Renderer() {
 Renderer::~Renderer() {
 }
 
-void Renderer::DrawTexture(const glm::vec2 &position, const glm::vec2 &scale, float zIndex, float rotation, Ease::Texture &texture, uint32_t id /*= 0*/) {
+void Renderer::DrawTexture(const glm::vec2 &position, const glm::vec2 &scale, float zIndex, float rotation, Ease::ImageTexture &texture, uint32_t id /*= 0*/) {
 	Application::get_singleton()._renderer->DrawTexture(&texture._texture, nmGfx::CalculateModelMatrix({position.x, position.y, zIndex}, {0.f, 0.f, rotation}, {scale.x, scale.y, 1.f}), {1.f, 1.f, 1.f}, id);
 }
 

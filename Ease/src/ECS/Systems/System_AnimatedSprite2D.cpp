@@ -11,7 +11,7 @@
 
 namespace Ease::Systems {
 void System_AnimatedSprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
-	ResourceManager<Ease::Texture> &tex_loader = pScene->GetResourceManager<Ease::Texture>();
+	ResourceManager<Ease::ImageTexture> &tex_loader = pScene->GetResourceManager<Ease::ImageTexture>();
 	ResourceManager<Ease::SpriteSheetAnimation> &anim_loader = pScene->GetResourceManager<Ease::SpriteSheetAnimation>();
 
 	auto view = pScene->m_Registry.view<Component::Transform2D, Component::AnimatedSprite2D>();
@@ -36,7 +36,7 @@ void System_AnimatedSprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
 		glm::vec2 uv1;
 		glm::vec2 uv2;
 
-		Ease::Texture tex = *tex_loader.GetResource(animsprc.GetCurrentTexture()).get();
+		Ease::ImageTexture tex = *tex_loader.GetResource(animsprc.GetCurrentTexture()).get();
 		std::shared_ptr<Ease::SpriteSheetAnimation> anim = anim_loader.GetResource(animsprc.GetSelectedAnimation());
 
 		glm::vec2 size = {1.0f / anim->HFrames(), 1.0f / anim->VFrames()};

@@ -47,7 +47,7 @@ namespace Ease::Component {
 class PhysicsBody2D {
   public:
 	PhysicsBody2D();
-	~PhysicsBody2D();
+	virtual ~PhysicsBody2D() {}
 
 	PhysicsBodyType &BodyType() { return m_BodyType; }
 

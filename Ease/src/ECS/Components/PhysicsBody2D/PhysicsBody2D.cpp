@@ -4,8 +4,6 @@ namespace Ease::Component {
 PhysicsBody2D::PhysicsBody2D() {
 }
 
-PhysicsBody2D::~PhysicsBody2D() {
-}
 
 b2BodyType PhysicsBody2D::GetInternalBodyType() {
 	return m_BodyType == PhysicsBodyType::DYNAMIC	  ? b2_dynamicBody

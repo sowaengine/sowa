@@ -13,12 +13,13 @@ typedef uint32_t ResourceID;
 
 namespace Ease {
 
-class Texture : public BaseResource {
+class ImageTexture : public BaseResource {
   public:
-	Texture();
-	~Texture();
+	ImageTexture();
+	~ImageTexture();
 
 	const std::string &GetFilepath() { return m_Filepath; }
+	void SetFilepath(const std::string &path) { m_Filepath = path; }
 	inline int Width() { return _texture.GetWidth(); }
 	inline int Height() { return _texture.GetHeight(); }
 	inline int Channels() { return _texture.GetChannels(); }

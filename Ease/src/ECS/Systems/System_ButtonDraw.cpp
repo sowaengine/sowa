@@ -11,7 +11,7 @@
 
 namespace Ease::Systems {
 void System_ButtonDraw(Ease::Scene *pScene, bool pickable /* = false*/) {
-	ResourceManager<Ease::Texture> &loader = pScene->GetResourceManager<Ease::Texture>();
+	ResourceManager<Ease::ImageTexture> &loader = pScene->GetResourceManager<Ease::ImageTexture>();
 
 	auto view = pScene->m_Registry.view<Component::UITransform, Component::Button>();
 	for (const auto &entityID : view) {

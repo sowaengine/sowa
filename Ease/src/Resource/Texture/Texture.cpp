@@ -3,16 +3,16 @@
 
 namespace Ease {
 template <>
-std::shared_ptr<Ease::Texture> ResourceLoaderImpl<Ease::Texture>::Load(unsigned char *data, size_t size) {
-	std::shared_ptr<Ease::Texture> tex = std::make_shared<Ease::Texture>();
+std::shared_ptr<Ease::ImageTexture> ResourceLoaderImpl<Ease::ImageTexture>::Load(unsigned char *data, size_t size) {
+	std::shared_ptr<Ease::ImageTexture> tex = std::make_shared<Ease::ImageTexture>();
 	if (!tex->_texture.Load2DFromMemory(data, size))
 		return nullptr;
 	return tex;
 }
 
-Texture::Texture() {
+ImageTexture::ImageTexture() {
 }
 
-Texture::~Texture() {
+ImageTexture::~ImageTexture() {
 }
 } // namespace Ease
