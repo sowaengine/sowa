@@ -141,4 +141,14 @@ class BaseModule {
 template <typename T>
 using Reference = std::shared_ptr<T>;
 
+namespace Ease {
+
+// Singleton Servers
+enum class Server : uint32_t {
+	NONE = 0,
+	SCRIPTSERVER_AS, // AngelScript Language Server
+};
+
+} // namespace Ease
+
 #endif

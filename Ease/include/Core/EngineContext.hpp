@@ -1,6 +1,7 @@
 #ifndef _E_ENGINECONTEXT_HPP__
 #define _E_ENGINECONTEXT_HPP__
 
+#include "Ease.hpp"
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -9,18 +10,18 @@ namespace Ease {
 class EngineContext {
   public:
 	template <typename T>
-	void RegisterSingleton(const std::string &name, T &singleton) {
-		_singletons[name] = reinterpret_cast<void *>(&singleton);
+	void RegisterSingleton(Ease::Server id, T &singleton) {
+		_singletons[id] = reinterpret_cast<void *>(&singleton);
 	}
 
 	template <typename T>
-	T *GetSingleton(const std::string &name) {
-		if (_singletons.count(name) != 1) {
-			std::cout << "Singleton '" << name << "' doesn't exists" << std::endl;
+	T *GetSingleton(Ease::Server id) {
+		if (_singletons.count(id) != 1) {
+			std::cout << "Singleton '" << (uint32_t)id << "' doesn't exists" << std::endl;
 			return nullptr;
 		}
 
-		T *singleton = reinterpret_cast<T *>(_singletons[name]);
+		T *singleton = reinterpret_cast<T *>(_singletons[id]);
 		return singleton;
 	}
 
@@ -29,7 +30,7 @@ class EngineContext {
 	}
 
   private:
-	std::unordered_map<std::string, void *> _singletons{};
+	std::unordered_map<Ease::Server, void *> _singletons{};
 
   private:
 	EngineContext();
