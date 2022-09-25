@@ -4,6 +4,8 @@
 
 #include "Servers/ScriptServer/ScriptServer.hpp"
 
+#include "angelscript/angelscript.h"
+
 class asIScriptEngine;
 class asIScriptContext;
 class asIScriptModule;
@@ -17,6 +19,8 @@ class ScriptServerAS : public ScriptServer {
 	// Call after registering general functions
 	virtual void BeginContext() override;
 	virtual void CallFunc(const char *moduleName, const char *funcDecl) override;
+
+	virtual void SetNamespace(const char *name) override;
 
   private:
 	friend class Application;

@@ -1,5 +1,7 @@
 #include "Servers/ScriptServer/ScriptServerAS.hpp"
 #include "Debug.hpp"
+#include "Servers/ScriptServer/ASContext.hpp"
+
 #include "angelscript/angelscript.h"
 #include "angelscript/scriptarray/scriptarray.h"
 #include "angelscript/scriptbuilder/scriptbuilder.h"
@@ -35,6 +37,26 @@ ScriptServerAS::ScriptServerAS() {
 	RegisterScriptArray(_pEngine, false);
 	RegisterStdString(_pEngine);
 	RegisterStdStringUtils(_pEngine);
+	ASContext::RegisterReprFunc("string", [](void *obj) { return *(std::string *)obj; });
+
+	// Register generic functions, types
+
+	//* vv<Debug>vv */
+	SetNamespace("Debug");
+
+	std::string printdecl = "void {}(string &in";
+	for (int i = 0; i < 16; i++)
+		printdecl += fmt::format(", ?&in var{} = \"\"", i);
+	printdecl += ")";
+	// void print(string &in, ?&in var0 = "" ...)
+	AS_CALL(_pEngine->RegisterGlobalFunction, fmt::format(printdecl, "Log").c_str(), asFUNCTION(ASContext::Log_Generic), asCALL_GENERIC);
+	AS_CALL(_pEngine->RegisterGlobalFunction, fmt::format(printdecl, "Info").c_str(), asFUNCTION(ASContext::Info_Generic), asCALL_GENERIC);
+	AS_CALL(_pEngine->RegisterGlobalFunction, fmt::format(printdecl, "Warn").c_str(), asFUNCTION(ASContext::Warn_Generic), asCALL_GENERIC);
+	AS_CALL(_pEngine->RegisterGlobalFunction, fmt::format(printdecl, "Error").c_str(), asFUNCTION(ASContext::Error_Generic), asCALL_GENERIC);
+
+	//* --<Debug>-- */
+
+	SetNamespace("");
 }
 ScriptServerAS::~ScriptServerAS() {
 	if (_pContext != nullptr)
@@ -87,8 +109,13 @@ void ScriptServerAS::CallFunc(const char *moduleName, const char *funcDecl) {
 	int r = _pContext->Execute();
 	if (r != asEXECUTION_FINISHED) {
 		if (r == asEXECUTION_EXCEPTION) {
-			Debug::Error("AS Module {} call {}: {}", moduleName, funcDecl, _pContext->GetExceptionString());
+			Debug::Error("Exception on Module {} at line {} call {}: {}", moduleName, _pContext->GetLineNumber(), funcDecl, _pContext->GetExceptionString());
 		}
 	}
 }
+
+void ScriptServerAS::SetNamespace(const char *name) {
+	_pEngine->SetDefaultNamespace(name);
+}
+
 } // namespace Ease
