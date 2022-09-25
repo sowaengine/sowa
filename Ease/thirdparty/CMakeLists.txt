@@ -1,5 +1,12 @@
 set(EASE_SOURCES
    ${EASE_SOURCES}
+
+   # angelscript
+   ${CMAKE_CURRENT_SOURCE_DIR}/angelscript/scriptarray/scriptarray.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/angelscript/scriptbuilder/scriptbuilder.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/angelscript/scriptstdstring/scriptstdstring.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/angelscript/scriptstdstring/scriptstdstring_utils.cpp
+
    # imgui-docking
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/imgui_demo.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/imgui_draw.cpp
