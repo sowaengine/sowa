@@ -33,6 +33,8 @@
 #include "nmGfx/src/Core/Renderer.hpp"
 #include "nmGfx/src/Core/Window.hpp"
 
+#include "Servers/ScriptServer/ScriptServerAS.hpp"
+
 namespace Ease {
 Application::Application()
 	: m_pCurrentScene(&m_GameScene) {
@@ -46,6 +48,9 @@ void Application::Run(int argc, char const *argv[]) {
 
 	Ease::EngineContext *ctx = EngineContext::CreateContext();
 	auto __ = Debug::ScopeTimer("Application");
+
+	ScriptServerAS *scriptServerAS = ScriptServerAS::CreateServer();
+	ctx->RegisterSingleton<ScriptServerAS>(Ease::Server::SCRIPTSERVER_AS, *scriptServerAS);
 
 	ProjectSettings &projectSettings = ProjectSettings::get_singleton();
 	Ease::File::InsertFilepathEndpoint("abs", "./");
@@ -87,6 +92,12 @@ void Application::Run(int argc, char const *argv[]) {
 		std::vector<unsigned char> shader = File::GetFileContent("abs://templates/skybox.glsl");
 		_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(shader.data()), shader.size()));
 	}
+
+	scriptServerAS->BeginContext();
+	scriptServerAS->CreateModule("MyModule");
+	auto script = File::GetFileContent("abs://test.as");
+	scriptServerAS->LoadScript("MyModule", "test.as", script);
+	scriptServerAS->CallFunc("MyModule", "void init()");
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
