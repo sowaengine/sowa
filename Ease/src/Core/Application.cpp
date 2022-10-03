@@ -97,7 +97,7 @@ void Application::Run(int argc, char const *argv[]) {
 	scriptServerAS->CreateModule("MyModule");
 	auto script = File::GetFileContent("abs://test.as");
 	scriptServerAS->LoadScript("MyModule", "test.as", script);
-	scriptServerAS->CallFunc("MyModule", "void init()");
+	// scriptServerAS->CallFunc("MyModule", "void init()");
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -119,6 +119,7 @@ void Application::Run(int argc, char const *argv[]) {
 #endif
 
 	InitModules();
+	scriptServerAS->InitModules();
 	if (projectSettings._application.MainScene != "")
 		m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
 
@@ -140,12 +141,14 @@ void Application::Run(int argc, char const *argv[]) {
 			Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Logic);
 		}
 		UpdateModules();
+		scriptServerAS->UpdateModules();
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
 		Modules_OnImGuiRender();
+		scriptServerAS->GuiUpdateModules();
 		ImGui::Render();
 
 		_renderer->ClearLayers();

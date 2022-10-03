@@ -135,6 +135,52 @@ void ScriptServerAS::SetNamespace(const char *name) {
 	_pEngine->SetDefaultNamespace(name);
 }
 
+// unnecessary duplication, add internal method that calls given asIScriptFunction*
+void ScriptServerAS::InitModules() {
+	for (size_t i = 0; i < _pEngine->GetModuleCount(); i++) {
+		asIScriptModule *_module = _pEngine->GetModuleByIndex(i);
+		if (asIScriptFunction *func = _module->GetFunctionByDecl("void init()"); func != nullptr) {
+			AS_CALL(_pContext->Prepare, func);
+			int r = _pContext->Execute();
+			if (r != asEXECUTION_FINISHED) {
+				if (r == asEXECUTION_EXCEPTION) {
+					Debug::Error("Exception on Module {} at line {} call {}: {}", _module->GetName(), _pContext->GetLineNumber(), "void init()", _pContext->GetExceptionString());
+				}
+			}
+		}
+	}
+}
+
+void ScriptServerAS::UpdateModules() {
+	for (size_t i = 0; i < _pEngine->GetModuleCount(); i++) {
+		asIScriptModule *_module = _pEngine->GetModuleByIndex(i);
+		if (asIScriptFunction *func = _module->GetFunctionByDecl("void update()"); func != nullptr) {
+			AS_CALL(_pContext->Prepare, func);
+			int r = _pContext->Execute();
+			if (r != asEXECUTION_FINISHED) {
+				if (r == asEXECUTION_EXCEPTION) {
+					Debug::Error("Exception on Module {} at line {} call {}: {}", _module->GetName(), _pContext->GetLineNumber(), "void update()", _pContext->GetExceptionString());
+				}
+			}
+		}
+	}
+}
+
+void ScriptServerAS::GuiUpdateModules() {
+	for (size_t i = 0; i < _pEngine->GetModuleCount(); i++) {
+		asIScriptModule *_module = _pEngine->GetModuleByIndex(i);
+		if (asIScriptFunction *func = _module->GetFunctionByDecl("void gui_update()"); func != nullptr) {
+			AS_CALL(_pContext->Prepare, func);
+			int r = _pContext->Execute();
+			if (r != asEXECUTION_FINISHED) {
+				if (r == asEXECUTION_EXCEPTION) {
+					Debug::Error("Exception on Module {} at line {} call {}: {}", _module->GetName(), _pContext->GetLineNumber(), "void gui_update()", _pContext->GetExceptionString());
+				}
+			}
+		}
+	}
+}
+
 ScriptServerAS::TypeRegistrar::TypeRegistrar(asIScriptEngine *engine, const std::string &_typename) {
 	_pEngine = engine;
 	_TypeName = _typename;

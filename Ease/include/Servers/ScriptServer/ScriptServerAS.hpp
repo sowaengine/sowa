@@ -22,6 +22,10 @@ class ScriptServerAS : public ScriptServer {
 
 	virtual void SetNamespace(const char *name) override;
 
+	void InitModules();
+	void UpdateModules();
+	void GuiUpdateModules();
+
 	class TypeRegistrar {
 	  public:
 		TypeRegistrar(asIScriptEngine *engine, const std::string &_typename);
