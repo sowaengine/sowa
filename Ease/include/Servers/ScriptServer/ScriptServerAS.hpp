@@ -22,6 +22,24 @@ class ScriptServerAS : public ScriptServer {
 
 	virtual void SetNamespace(const char *name) override;
 
+	class TypeRegistrar {
+	  public:
+		TypeRegistrar(asIScriptEngine *engine, const std::string &_typename);
+		~TypeRegistrar();
+
+		TypeRegistrar &Factory(const char *decl, const asSFuncPtr &funcPointer);
+		TypeRegistrar &RefFunc(const char *decl, const asSFuncPtr &funcPointer);
+		TypeRegistrar &ReleaseFunc(const char *decl, const asSFuncPtr &funcPointer);
+		TypeRegistrar &Method(const char *decl, const asSFuncPtr &funcPointer);
+		TypeRegistrar &Property(const char *decl, int byteOffset);
+
+	  private:
+		asIScriptEngine *_pEngine{nullptr};
+		std::string _TypeName{""};
+	};
+	TypeRegistrar RegisterRefType(const std::string &_typename);
+	TypeRegistrar RegisterValueType(const std::string &_typename);
+
   private:
 	friend class Application;
 	ScriptServerAS();

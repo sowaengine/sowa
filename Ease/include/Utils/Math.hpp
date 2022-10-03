@@ -19,7 +19,7 @@ struct Vec2 {
 	float Length();
 
 	/// @brief returns a vector with same direction with magnitude @param length
-	Vec2 Clamp(float length);
+	Vec2 Clamp(float length = 1.0f);
 
 	/// @brief returns angle of vector in radians starting from right and rotates clockwise. (1, 0) -> 0 and (0, 1) -> PI / 2
 	float Angle();

@@ -11,6 +11,57 @@ static void Print_Generic(asIScriptGeneric *gen, const std::string &levelText);
 
 namespace Ease::ASContext {
 
+//* ASRefCounted */
+ASRefCounted::ASRefCounted()
+	: _RefCount(1) {}
+ASRefCounted::~ASRefCounted() {}
+
+void ASRefCounted::_AddRef() {
+	_RefCount++;
+}
+void ASRefCounted::_Release() {
+	if (--_RefCount == 0) {
+		delete this;
+	}
+}
+
+//* ASVector2 */
+ASVector2::ASVector2()
+	: vec(0.f, 0.f) {}
+ASVector2::ASVector2(float s)
+	: vec(s, s) {}
+ASVector2::ASVector2(float x, float y)
+	: vec(x, y) {}
+ASVector2::ASVector2(const ASVector2 &rhs)
+	: vec(rhs.x, rhs.y) {}
+ASVector2::ASVector2(const Ease::Vec2 &rhs)
+	: vec(rhs.x, rhs.y) {}
+
+ASVector2::~ASVector2() {}
+
+ASVector2 &ASVector2::operator=(const ASVector2 &rhs) {
+	x = rhs.x;
+	y = rhs.y;
+	return *this;
+}
+
+float ASVector2::Length() {
+	return vec.Length();
+}
+ASVector2 *ASVector2::Clamp(float length /* = 1.0f*/) {
+	return ASContext::ASRefCounted::_Create<ASVector2>(vec.Clamp(length));
+}
+float ASVector2::Angle() {
+	return vec.Angle();
+}
+
+// static
+std::string ASVector2::_Repr(void *obj) {
+	ASVector2 *v = static_cast<ASVector2 *>(obj);
+
+	return fmt::format("Vector2({}, {})", v->x, v->y);
+}
+
 static std::unordered_map<std::string, std::function<std::string(void *)>> s_ReprFuncs;
 void RegisterReprFunc(const std::string &_type, std::function<std::string(void *)> func) {
 	s_ReprFuncs[_type] = func;
