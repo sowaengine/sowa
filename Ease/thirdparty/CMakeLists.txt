@@ -1,11 +1,13 @@
+set(ANGELSCRIPT_ADDON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.0/sdk/add_on/)
+
 set(EASE_SOURCES
    ${EASE_SOURCES}
 
    # angelscript
-   ${CMAKE_CURRENT_SOURCE_DIR}/angelscript/scriptarray/scriptarray.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/angelscript/scriptbuilder/scriptbuilder.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/angelscript/scriptstdstring/scriptstdstring.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/angelscript/scriptstdstring/scriptstdstring_utils.cpp
+   ${ANGELSCRIPT_ADDON_DIR}/scriptarray/scriptarray.cpp
+   ${ANGELSCRIPT_ADDON_DIR}/scriptbuilder/scriptbuilder.cpp
+   ${ANGELSCRIPT_ADDON_DIR}/scriptstdstring/scriptstdstring.cpp
+   ${ANGELSCRIPT_ADDON_DIR}/scriptstdstring/scriptstdstring_utils.cpp
 
    # imgui-docking
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/imgui_demo.cpp
@@ -22,3 +24,5 @@ set(EASE_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs/tinyfiledialogs.c
    PARENT_SCOPE
 )
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.0/sdk/angelscript/projects/cmake/)
