@@ -9,47 +9,46 @@ enable_testing()
 file(GLOB_RECURSE EASE_SOURCES
    ${CMAKE_SOURCE_DIR}/Ease/src/*.cpp
 )
+message("Excluding " ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp)
+list(REMOVE_ITEM EASE_SOURCES ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
-link_directories(Ease/thirdparty/)
-link_libraries(box2d)
 
 if(Editor)
    add_compile_definitions(EASE_EDITOR)
 endif()
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/Modules)
+# thirdparty
 add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty)
-
-# Project Manager
-add_subdirectory(${CMAKE_SOURCE_DIR}/ProjectManager)
 
 # nmGfx
 add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx)
 
-add_executable(Ease ${EASE_SOURCES})
 
-target_link_directories(Ease PRIVATE Ease/thirdparty/)
-target_link_libraries(Ease PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d openal sndfile nmGfx)
+add_executable(Sowa
+   ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp
+   ${EASE_SOURCES})
+target_link_libraries(Sowa PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ fmt angelscript)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/include/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/tinyfiledialogs/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript_2.36.0/sdk/angelscript/include/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript_2.36.0/sdk/)
 
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/src/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/glm/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/tinyfiledialogs/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src)
-target_include_directories(Ease PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/)
 
 if(Editor)
    add_compile_definitions(EASE_EDITOR)
-   set_target_properties(Ease PROPERTIES OUTPUT_NAME "Ease_Editor")
+   set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa Editor")
 else()
-   set_target_properties(Ease PROPERTIES OUTPUT_NAME "Easengine")
+   set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa Engine")
 endif()
 
 
