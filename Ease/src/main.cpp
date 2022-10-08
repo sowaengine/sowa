@@ -18,3 +18,9 @@ int main(int argc, char const *argv[]) {
 	Debug::Info("---> Sowa Engine v{} Exit <---\n\n", EASE_VERSION_STRING);
 	return 0;
 }
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
