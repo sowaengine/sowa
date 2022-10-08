@@ -3,7 +3,6 @@
 #include "Ease.hpp"
 #include <iostream>
 
-#include "Resource/NativeModule/NativeModule.hpp"
 #include "Resource/ResourceLoader.hpp"
 #include "Resource/ResourceManager.hpp"
 #include "Resource/Texture/Texture.hpp"
@@ -33,6 +32,7 @@
 #include "nmGfx/src/Core/Renderer.hpp"
 #include "nmGfx/src/Core/Window.hpp"
 
+#include "Servers/GuiServer/GuiServer.hpp"
 #include "Servers/ScriptServer/ScriptServerAS.hpp"
 
 namespace Ease {
@@ -49,7 +49,12 @@ void Application::Run(int argc, char const *argv[]) {
 	Ease::EngineContext *ctx = EngineContext::CreateContext();
 	auto __ = Debug::ScopeTimer("Application");
 
-	ScriptServerAS *scriptServerAS = ScriptServerAS::CreateServer();
+	ctx->RegisterSingleton<Application>(Ease::Server::APPLICATION, *this);
+
+	GuiServer *guiServer = GuiServer::CreateServer(this, *ctx);
+	ctx->RegisterSingleton<GuiServer>(Ease::Server::GUISERVER, *guiServer);
+
+	ScriptServerAS *scriptServerAS = ScriptServerAS::CreateServer(*ctx);
 	ctx->RegisterSingleton<ScriptServerAS>(Ease::Server::SCRIPTSERVER_AS, *scriptServerAS);
 
 	ProjectSettings &projectSettings = ProjectSettings::get_singleton();
@@ -99,26 +104,8 @@ void Application::Run(int argc, char const *argv[]) {
 	scriptServerAS->LoadScript("MyModule", "test.as", script);
 	// scriptServerAS->CallFunc("MyModule", "void init()");
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	// ImGui::GetIO().WantSaveIniSettings = false;
-	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::roboto_medium_data.data(), Res::roboto_medium_data.size(), 14.f);
-	// ImGui::LoadIniSettingsFromMemory(Res::imgui_default_layout.data(), Res::imgui_default_layout.size());
-	ImGui_ImplGlfw_InitForOpenGL(_renderer->GetWindow().GetGLFWwindow(), true);
-	ImGui_ImplOpenGL3_Init("#version 150");
+	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 
-	Reference<Ease::EditorTheme> theme = Ease::ResourceLoader::get_singleton().LoadResource<Ease::EditorTheme>("abs://res/theme.escfg");
-	ImGui::GetStyle() = theme->GetStyle();
-
-	for (const std::string &path : projectSettings._modules.modules) {
-		LoadModule(path, 1);
-	}
-#ifdef EASE_EDITOR
-	LoadModule("abs://Modules/Ease.Editor", 1);
-#endif
-
-	InitModules();
 	scriptServerAS->InitModules();
 	if (projectSettings._application.MainScene != "")
 		m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
@@ -140,21 +127,17 @@ void Application::Run(int argc, char const *argv[]) {
 		if (m_AppRunning) {
 			Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Logic);
 		}
-		UpdateModules();
 		scriptServerAS->UpdateModules();
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		guiServer->BeginGui();
 
-		Modules_OnImGuiRender();
 		scriptServerAS->GuiUpdateModules();
 		ImGui::Render();
 
 		_renderer->ClearLayers();
 		_renderer->Draw2DLayer();
 
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		guiServer->EndGui();
 
 		_renderer->GetWindow().SwapBuffers();
 	}
@@ -197,62 +180,6 @@ void Application::StopGame() {
 
 void Application::ChangeScene(const char *path) {
 	m_pCurrentScene->LoadFromFile(path);
-}
-
-// Initialize loaded native modules
-void Application::InitModules() {
-	for (auto &pair : m_Modules)
-		pair.second->CallStart();
-}
-
-void Application::UpdateModules() {
-	for (auto &pair : m_Modules)
-		pair.second->CallUpdate();
-}
-void Application::Modules_OnImGuiRender() {
-	for (auto &pair : m_Modules)
-		pair.second->CallOnImGuiRender();
-}
-
-Application::ModuleLoadResult Application::LoadModule(const std::filesystem::path &modulePath, int minimumVersion) {
-	static ResourceLoader &moduleLoader = Ease::ResourceLoader::get_singleton();
-
-	Reference<NativeModule> myModule = moduleLoader.LoadResourceFromFile<NativeModule>(NativeModule::AddExtension(modulePath.string()).c_str());
-
-	if (myModule == nullptr)
-		return ModuleLoadResult::UNDEFINED_MODULE;
-	// if(author != myModule->m_pModule->metadata.authorName || moduleName != myModule->m_pModule->metadata.moduleName)
-	//    return ModuleLoadResult::UNDEFINED_MODULE;
-	if (myModule->m_pModule->metadata.version < minimumVersion)
-		return ModuleLoadResult::OUTDATED_VERSION;
-
-	for (auto &[name, behaviour] : myModule->m_pModule->nativeBehaviours) {
-		AddNativeBehaviour(modulePath.filename().concat(".").concat(name).string(), behaviour);
-	}
-
-	AddModule(modulePath.filename().string(), myModule);
-	return ModuleLoadResult::SUCCESS;
-}
-
-void Application::AddModule(const std::string &name, std::shared_ptr<NativeModule> _module) {
-	m_Modules[name] = _module;
-}
-
-void Application::AddNativeBehaviour(const std::string &name, NativeBehaviourFactory *behaviour) {
-	m_NativeBehaviours[name] = behaviour;
-}
-std::shared_ptr<NativeModule> Application::GetModule(const std::string &name) {
-	if (m_Modules.count(name) == 1)
-		return m_Modules[name];
-	else
-		return nullptr;
-}
-
-Ease::NativeBehaviourFactory *Application::GetFactory(const std::string &name) {
-	if (m_NativeBehaviours.count(name) == 1)
-		return m_NativeBehaviours[name];
-	else
-		return nullptr;
 }
 
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {

@@ -1,6 +1,7 @@
 #ifndef _E_ENGINECONTEXT_HPP__
 #define _E_ENGINECONTEXT_HPP__
 
+#include "Debug.hpp"
 #include "Ease.hpp"
 #include <iostream>
 #include <string>
@@ -17,7 +18,7 @@ class EngineContext {
 	template <typename T>
 	T *GetSingleton(Ease::Server id) {
 		if (_singletons.count(id) != 1) {
-			std::cout << "Singleton '" << (uint32_t)id << "' doesn't exists" << std::endl;
+			Debug::Error("Singleton '{}' doesn't exists", (uint32_t)id);
 			return nullptr;
 		}
 

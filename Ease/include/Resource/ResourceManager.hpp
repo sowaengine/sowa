@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include "Resource/AudioStream/AudioStream.hpp"
 #include "Resource/EditorTheme/EditorTheme.hpp"
-#include "Resource/NativeModule/NativeModule.hpp"
 #include "Resource/ResourceLoader.hpp"
 #include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 #include "Resource/Texture/Texture.hpp"
@@ -23,6 +21,8 @@ class ResourceManager {
 
 	Reference<T> LoadResource(const char *path, ResourceID _id = 0) {
 		Reference<T> resource = ResourceLoader::get_singleton().LoadResource<T>(path);
+		if (resource == nullptr)
+			return nullptr;
 
 		ResourceID id = NewResourceID(_id);
 		resource->SetResourceID(id);
@@ -31,6 +31,8 @@ class ResourceManager {
 	}
 	Reference<T> LoadResourceFromFile(const char *path, ResourceID _id = 0) {
 		Reference<T> resource = ResourceLoader::get_singleton().LoadResourceFromFile<T>(path);
+		if (resource == nullptr)
+			return nullptr;
 
 		ResourceID id = NewResourceID(_id);
 		resource->SetResourceID(id);

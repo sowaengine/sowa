@@ -29,8 +29,5 @@ void ProcessAll(Ease::Scene *pScene, SystemsFlags flags, bool pickable /* = fals
 
 	if (flags & SystemsFlags::Camera2DLogic)
 		Systems::System_Camera2DLogic(pScene);
-
-	if (flags & SystemsFlags::NativeBehaviourLogic)
-		Systems::System_NativeBehaviour(pScene);
 }
 } // namespace Ease::Systems

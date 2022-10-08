@@ -48,7 +48,7 @@ bool ExportGenerator::BeginExport(ExportPlatform platform) {
 	std::cout << "Begin exporting to " << _buildDir << std::endl;
 
 	// add export template to root directory
-	std::filesystem::path exportTemplatePath = "abs://build/Ease_Editor";
+	std::filesystem::path exportTemplatePath = "abs://build/Sowa Engine";
 	// exportTemplatePath /= GetPlatformString();
 	if (!AddFileTo(exportTemplatePath, ProjectSettings::get_singleton()._application.Name, false)) {
 		std::cout << "Can not include export template: " << exportTemplatePath << std::endl;

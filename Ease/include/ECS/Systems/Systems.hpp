@@ -16,13 +16,12 @@ enum SystemsFlags : uint32_t {
 	ButtonPicking = 1 << 6,
 	ButtonLogic = 1 << 7,
 	Camera2DLogic = 1 << 8,
-	NativeBehaviourLogic = 1 << 9,
 
 	// Components that needs to be updated every frame no matter what
 	Update_Draw = SpriteRenderer2D | AnimatedSprite2D | TextRenderer2D | Physics2DDebugDraw | ButtonDraw,
 
 	// Components that needs to be updated only when game is running
-	Update_Logic = PhysicsBody2D | ButtonLogic | Camera2DLogic | NativeBehaviourLogic,
+	Update_Logic = PhysicsBody2D | ButtonLogic | Camera2DLogic,
 
 	// Drawing of Components that use mouse picking
 	Update_PickingDraw = ButtonPicking,
@@ -43,7 +42,6 @@ void System_ButtonDraw(Ease::Scene *pScene, bool pickable = false);
 void System_ButtonPicking(Ease::Scene *pScene);
 void System_ButtonLogic(Ease::Scene *pScene);
 void System_Camera2DLogic(Ease::Scene *pScene);
-void System_NativeBehaviour(Ease::Scene *pScene);
 
 } // namespace Ease::Systems
 

@@ -2,7 +2,6 @@
 #define _E_COMPONENTS_HPP__
 
 #include "AnimatedSprite2D/AnimatedSprite2D.hpp"
-#include "AudioStreamPlayer/AudioStreamPlayer.hpp"
 #include "Button/Button.hpp"
 #include "Camera2D/Camera2D.hpp"
 #include "Common/Common.hpp"

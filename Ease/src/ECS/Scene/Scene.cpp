@@ -1,11 +1,13 @@
 #include "ECS/Scene/Scene.hpp"
 #include "Core/Application.hpp"
 #include "Core/ProjectSettings.hpp"
+#include "Debug.hpp"
 #include "ECS/Components/Components.hpp"
 #include "Resource/ResourceLoader.hpp"
 #include "Resource/ResourceManager.hpp"
 #include "Utils/File.hpp"
 #include "Utils/YAML.hpp"
+#include "box2d/box2d.h"
 #include "yaml-cpp/yaml.h"
 #include <filesystem>
 #include <fstream>
@@ -13,20 +15,18 @@
 #include <map>
 #include <unordered_map>
 
-#define CALL_FOR_ALL_COMPONENTS(func, ...)                        \
-	do {                                                          \
-		func<Ease::Component::AnimatedSprite2D>(__VA_ARGS__);     \
-		func<Ease::Component::AudioStreamPlayer>(__VA_ARGS__);    \
-		func<Ease::Component::Button>(__VA_ARGS__);               \
-		func<Ease::Component::Camera2D>(__VA_ARGS__);             \
-		func<Ease::Component::Group>(__VA_ARGS__);                \
-		func<Ease::Component::NativeBehaviourClass>(__VA_ARGS__); \
-		func<Ease::Component::NinePatchRect>(__VA_ARGS__);        \
-		func<Ease::Component::PhysicsBody2D>(__VA_ARGS__);        \
-		func<Ease::Component::SpriteRenderer2D>(__VA_ARGS__);     \
-		func<Ease::Component::TextRenderer2D>(__VA_ARGS__);       \
-		func<Ease::Component::Transform2D>(__VA_ARGS__);          \
-		func<Ease::Component::UITransform>(__VA_ARGS__);          \
+#define CALL_FOR_ALL_COMPONENTS(func, ...)                    \
+	do {                                                      \
+		func<Ease::Component::AnimatedSprite2D>(__VA_ARGS__); \
+		func<Ease::Component::Button>(__VA_ARGS__);           \
+		func<Ease::Component::Camera2D>(__VA_ARGS__);         \
+		func<Ease::Component::Group>(__VA_ARGS__);            \
+		func<Ease::Component::NinePatchRect>(__VA_ARGS__);    \
+		func<Ease::Component::PhysicsBody2D>(__VA_ARGS__);    \
+		func<Ease::Component::SpriteRenderer2D>(__VA_ARGS__); \
+		func<Ease::Component::TextRenderer2D>(__VA_ARGS__);   \
+		func<Ease::Component::Transform2D>(__VA_ARGS__);      \
+		func<Ease::Component::UITransform>(__VA_ARGS__);      \
 	} while (0)
 
 namespace Ease {
@@ -36,7 +36,7 @@ void Scene::StartScene() {
 	m_SceneCamera2D.transform2d = Ease::Component::Transform2D();
 	m_SceneCamera2D.camera2d = Ease::Component::Camera2D();
 
-	m_pPhysicsWorld2D = std::make_shared<b2World>(m_Gravity);
+	m_pPhysicsWorld2D = std::make_shared<b2World>(b2Vec2(m_Gravity.x, m_Gravity.y));
 
 	{
 		auto view = m_Registry.view<Component::Transform2D, Component::PhysicsBody2D>();
@@ -81,18 +81,6 @@ void Scene::StopScene() {
 	m_SceneCamera2D.transform2d = m_SceneOldCamera2D.transform2d;
 
 	m_pPhysicsWorld2D = nullptr;
-
-	auto view = m_Registry.view<Component::NativeBehaviourClass>();
-	for (auto &e : view) {
-		Entity entity(e, &m_Registry);
-
-		Component::NativeBehaviourClass &nbehaviour = entity.GetComponent<Component::NativeBehaviourClass>();
-
-		if (nbehaviour.Behaviour())
-			nbehaviour.Behaviour()->self = Entity(entt::null, nullptr);
-		if (nbehaviour.Factory())
-			nbehaviour.Factory()->Destroy(nbehaviour.Behaviour());
-	}
 }
 
 template <typename T>
@@ -132,7 +120,6 @@ void Scene::AddCopiedEntity(Ease::Entity entity) {
 
 	CopyComponent<Component::AnimatedSprite2D>(entity, copyEntity);
 	CopyComponent<Component::Group>(entity, copyEntity);
-	CopyComponent<Component::NativeBehaviourClass>(entity, copyEntity);
 	CopyComponent<Component::SpriteRenderer2D>(entity, copyEntity);
 	CopyComponent<Component::TextRenderer2D>(entity, copyEntity);
 	CopyComponent<Component::Transform2D>(entity, copyEntity);
@@ -152,7 +139,6 @@ Ease::Entity CreateEntityFromRegistry(entt::entity id, entt::registry &srcRegist
 	// Copy components
 	CopyComponent<Component::AnimatedSprite2D>(copyEntity, entity);
 	CopyComponent<Component::Group>(copyEntity, entity);
-	CopyComponent<Component::NativeBehaviourClass>(copyEntity, entity);
 	CopyComponent<Component::SpriteRenderer2D>(copyEntity, entity);
 	CopyComponent<Component::TextRenderer2D>(copyEntity, entity);
 	CopyComponent<Component::Transform2D>(copyEntity, entity);
@@ -228,15 +214,6 @@ static void YAMLSerializeEntity(Ease::Entity entity, YAML::Emitter &yaml) {
 		yaml << YAML::EndMap;
 	}
 	// </AnimatedSprite2D>
-	// <AudioStreamPlayer>
-	if (entity.HasComponent<Component::AudioStreamPlayer>()) {
-		Component::AudioStreamPlayer &component = entity.GetComponent<Component::AudioStreamPlayer>();
-
-		yaml << YAML::Key << "AudioStreamPlayer" << YAML::BeginMap;
-		yaml << YAML::Key << "AudioStream" << YAML::Value << component.Stream();
-		yaml << YAML::EndMap;
-	}
-	// </AudioStreamPlayer>
 	// <Button>
 	if (entity.HasComponent<Component::Button>()) {
 		Component::Button &component = entity.GetComponent<Component::Button>();
@@ -267,15 +244,6 @@ static void YAMLSerializeEntity(Ease::Entity entity, YAML::Emitter &yaml) {
 		yaml << YAML::EndMap;
 	}
 	// </Group>
-	// <NativeBehaviourClass>
-	if (entity.HasComponent<Component::NativeBehaviourClass>()) {
-		Component::NativeBehaviourClass &component = entity.GetComponent<Component::NativeBehaviourClass>();
-
-		yaml << YAML::Key << "NativeBehaviourClass" << YAML::BeginMap;
-		yaml << YAML::Key << "ClassName" << YAML::Value << component.ClassName();
-		yaml << YAML::EndMap;
-	}
-	// </NativeBehaviourClass>
 	// <PhysicsBody2D>
 	if (entity.HasComponent<Component::PhysicsBody2D>()) {
 		Component::PhysicsBody2D &component = entity.GetComponent<Component::PhysicsBody2D>();
@@ -363,7 +331,7 @@ static void YAMLSerializeEntity(Ease::Entity entity, YAML::Emitter &yaml) {
 }
 
 bool Scene::Save() {
-	return SaveToFile(path.c_str());
+	return SaveToFile(path.string().c_str());
 }
 bool Scene::SaveToFile(const char *file) {
 	std::filesystem::path savepath = Ease::File::Path(file);
@@ -378,8 +346,8 @@ bool Scene::SaveToFile(const char *file) {
 	yaml << YAML::BeginMap;
 	{ // <Ease::Texture>
 		yaml << YAML::Key << "Texture" << YAML::Value << YAML::BeginMap;
-		ResourceManager<Ease::Texture> loader_texture = GetResourceManager<Ease::Texture>();
-		std::map<ResourceID, std::shared_ptr<Ease::Texture>> textures = loader_texture.GetResources();
+		ResourceManager<Ease::ImageTexture> loader_texture = GetResourceManager<Ease::ImageTexture>();
+		std::map<ResourceID, std::shared_ptr<Ease::ImageTexture>> textures = loader_texture.GetResources();
 
 		for (auto [id, texture] : textures) {
 			yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
@@ -411,20 +379,6 @@ bool Scene::SaveToFile(const char *file) {
 
 		yaml << YAML::EndMap;
 	} // </Ease::SpriteSheetAnimation>
-	{ // <Ease::AudioStream>
-		yaml << YAML::Key << "AudioStream" << YAML::Value << YAML::BeginMap;
-		ResourceManager<Ease::AudioStream> loader_AudioStream = GetResourceManager<Ease::AudioStream>();
-		std::map<ResourceID, std::shared_ptr<Ease::AudioStream>> streams = loader_AudioStream.GetResources();
-
-		for (auto [id, stream] : streams) {
-			yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-			yaml << YAML::Key << "Path" << YAML::Value << stream->GetFilepath();
-			yaml << YAML::Newline;
-			yaml << YAML::EndMap;
-		}
-
-		yaml << YAML::EndMap;
-	} // </Ease::AudioStream>
 	yaml << YAML::Newline << YAML::EndMap;
 	// </Resources>
 
@@ -444,29 +398,32 @@ bool Scene::SaveToFile(const char *file) {
 bool Scene::LoadFromFile(const char *file) {
 	m_Registry.clear();
 
-	ClearResourceManager<Ease::Texture>();
+	ClearResourceManager<Ease::ImageTexture>();
 	ClearResourceManager<Ease::SpriteSheetAnimation>();
-	ClearResourceManager<Ease::AudioStream>();
 
 	std::filesystem::path inpath = Ease::File::Path(file);
 	path = file;
-	Application::get_singleton().Log(std::string("Loading scene from ") + inpath.string());
+	Debug::Log("Loading scene from {}", inpath.string());
 
-	YAML::Node node = YAML::LoadFile(inpath);
+	YAML::Node node = YAML::LoadFile(inpath.string());
 	if (node["Type"].as<std::string>("") != "Scene") {
 		Application::get_singleton().Log(std::string("Wrong file type ") + node["Type"].as<std::string>("") + ", expected 'Scene'");
 		return false;
 	}
-
 	YAML::Node resources = node["ResourceList"];
 	if (resources) {
 		{ // <Ease::Texture>
 			if (YAML::Node resource_node = resources["Texture"]; resource_node) {
-				ResourceManager<Ease::Texture> &resource_loader = GetResourceManager<Ease::Texture>();
+				ResourceManager<Ease::ImageTexture> &resource_loader = GetResourceManager<Ease::ImageTexture>();
 				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
 					uint32_t id = it->first.as<uint32_t>(0);
 					YAML::Node tex_node = it->second;
-					resource_loader.LoadResource(tex_node["Path"].as<std::string>("").c_str(), id);
+					std::string path = tex_node["Path"].as<std::string>("");
+					if (path.size() > 0) {
+						Reference<ImageTexture> tex = resource_loader.LoadResource(path.c_str(), id);
+						if (tex != nullptr)
+							tex->SetFilepath(path);
+					}
 				}
 			}
 		} // </Ease::Texture>
@@ -489,17 +446,6 @@ bool Scene::LoadFromFile(const char *file) {
 				}
 			}
 		} // </Ease::SpriteSheetAnimation>
-		{ // <Ease::AudioStream>
-			if (YAML::Node resource_node = resources["AudioStream"]; resource_node) {
-				ResourceManager<Ease::AudioStream> &resource_loader = GetResourceManager<Ease::AudioStream>();
-				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
-					uint32_t id = it->first.as<uint32_t>(0);
-					YAML::Node tex_node = it->second;
-
-					resource_loader.LoadResourceFromFile(tex_node["Path"].as<std::string>("").c_str(), id);
-				}
-			}
-		} // </Ease::AudioStream>
 	}
 
 	YAML::Node entities = node["EntityList"];
@@ -519,10 +465,6 @@ bool Scene::LoadFromFile(const char *file) {
 					if (std::string anim_name = component_node["SelectedAnimation"].as<std::string>(""); anim_name != "")
 						component.SelectAnimation(anim_name);
 				}
-				if (YAML::Node component_node = components["AudioStreamPlayer"]; component_node) {
-					Component::AudioStreamPlayer &component = entity.AddComponent<Component::AudioStreamPlayer>();
-					component.Stream() = component_node["AudioStream"].as<ResourceID>(0);
-				}
 				if (YAML::Node component_node = components["Button"]; component_node) {
 					Component::Button &component = entity.AddComponent<Component::Button>();
 					component.Text() = component_node["Text"].as<std::string>(std::string{""});
@@ -537,10 +479,6 @@ bool Scene::LoadFromFile(const char *file) {
 				if (YAML::Node component_node = components["Group"]; component_node) {
 					Component::Group &component = entity.AddComponent<Component::Group>();
 					component.Groups() = component_node["Groups"].as<std::vector<std::string>>(std::vector<std::string>{});
-				}
-				if (YAML::Node component_node = components["NativeBehaviourClass"]; component_node) {
-					Component::NativeBehaviourClass &component = entity.AddComponent<Component::NativeBehaviourClass>();
-					component.ClassName() = component_node["ClassName"].as<std::string>(std::string{});
 				}
 				if (YAML::Node component_node = components["PhysicsBody2D"]; component_node) {
 					Component::PhysicsBody2D &component = entity.AddComponent<Component::PhysicsBody2D>();
