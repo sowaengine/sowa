@@ -2,9 +2,9 @@
 #define _E_SCRIPTSERVERAS_HPP__
 #pragma once
 
+#include "Core/EngineContext.hpp"
 #include "Servers/ScriptServer/ScriptServer.hpp"
-
-#include "angelscript/angelscript.h"
+#include "angelscript.h"
 
 class asIScriptEngine;
 class asIScriptContext;
@@ -46,12 +46,14 @@ class ScriptServerAS : public ScriptServer {
 
   private:
 	friend class Application;
-	ScriptServerAS();
+	ScriptServerAS(EngineContext &ctx);
 	~ScriptServerAS();
 
-	static ScriptServerAS *CreateServer() {
-		return new ScriptServerAS;
+	static ScriptServerAS *CreateServer(EngineContext &ctx) {
+		return new ScriptServerAS(ctx);
 	}
+
+	EngineContext &_Context;
 
   private:
 	asIScriptEngine *_pEngine{nullptr};

@@ -1,4 +1,5 @@
 #include "Servers/ScriptServer/ASContext.hpp"
+#include "Core/Window.hpp"
 #include "Debug.hpp"
 #include <functional>
 #include <string>
@@ -88,6 +89,14 @@ void Warn_Generic(asIScriptGeneric *gen) {
 }
 void Error_Generic(asIScriptGeneric *gen) {
 	Print_Generic(gen, "ERROR");
+}
+
+// Window
+WindowCaller::WindowCaller(Ease::Window *window) : _pWindow{window} {}
+WindowCaller::~WindowCaller() {}
+
+ASVector2 *WindowCaller::GetWindowSize() {
+	return ASRefCounted::_Create<ASVector2>((float)_pWindow->GetWindowWidth(), (float)_pWindow->GetWindowHeight());
 }
 
 } // namespace Ease::ASContext

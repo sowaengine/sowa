@@ -2,10 +2,13 @@
 #include "Debug.hpp"
 #include "Servers/ScriptServer/ASContext.hpp"
 
-#include "angelscript/angelscript.h"
-#include "angelscript/scriptarray/scriptarray.h"
-#include "angelscript/scriptbuilder/scriptbuilder.h"
-#include "angelscript/scriptstdstring/scriptstdstring.h"
+#include "Core/Application.hpp"
+#include "Servers/GuiServer/GuiServer.hpp"
+
+#include "add_on/scriptarray/scriptarray.h"
+#include "add_on/scriptbuilder/scriptbuilder.h"
+#include "add_on/scriptstdstring/scriptstdstring.h"
+#include "angelscript.h"
 
 static void ASMessageCallback(const asSMessageInfo *msg, void *param) {
 	const char *type = "ERR ";
@@ -31,7 +34,7 @@ static void ASMessageCallback(const asSMessageInfo *msg, void *param) {
 	} while (false)
 
 namespace Ease {
-ScriptServerAS::ScriptServerAS() {
+ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	_pEngine = asCreateScriptEngine();
 	AS_CALL(_pEngine->SetMessageCallback, asFUNCTION(ASMessageCallback), 0, asCALL_CDECL);
 	RegisterScriptArray(_pEngine, false);
@@ -74,6 +77,38 @@ ScriptServerAS::ScriptServerAS() {
 		.Method("float Angle()", asMETHOD(ASContext::ASVector2, Angle));
 
 	//* --<Math>-- */
+
+	//* vv<Gui>vv */
+	SetNamespace("Gui");
+	GuiServer *guiServer = _Context.GetSingleton<GuiServer>(Server::GUISERVER);
+
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void BeginWindow(string, uint = 0)", asMETHOD(GuiServer, BeginWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndWindow()", asMETHOD(GuiServer, EndWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void Text(string)", asMETHOD(GuiServer, Text), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool Button(string, int = 0, int = 0)", asMETHOD(GuiServer, Button), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool DragFloat(string, float &out)", asMETHOD(GuiServer, DragFloat), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowPos(int, int)", asMETHOD(GuiServer, SetNextWindowPos), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowSize(int, int)", asMETHOD(GuiServer, SetNextWindowSize), asCALL_THISCALL_ASGLOBAL, guiServer);
+
+	AS_CALL(_pEngine->RegisterEnum, "WindowFlags");
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "None", WindowFlags_None);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoResize", WindowFlags_NoResize);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoMove", WindowFlags_NoMove);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoBringToFrontOnFocus", WindowFlags_NoBringToFrontOnFocus);
+
+	//* --<Gui>-- */
+	SetNamespace("");
+
+	//* vv<Window>vv */
+	SetNamespace("Window");
+	auto *app = _Context.GetSingleton<Application>(Server::APPLICATION);
+	auto &window = app->GetWindow();
+	static ASContext::WindowCaller windowCaller(&window);
+
+	AS_CALL(_pEngine->RegisterGlobalFunction, "Vector2@ GetWindowSize()", asMETHOD(ASContext::WindowCaller, GetWindowSize), asCALL_THISCALL_ASGLOBAL, &windowCaller);
+
+	//* --<Window>-- */
+	SetNamespace("");
 }
 ScriptServerAS::~ScriptServerAS() {
 	if (_pContext != nullptr)

@@ -2,7 +2,7 @@
 #define _E_ASCONTEXT_HPP__
 #pragma once
 
-#include "angelscript/angelscript.h"
+#include "angelscript.h"
 #include <functional>
 #include <string>
 
@@ -10,7 +10,8 @@
 
 namespace Ease {
 class ScriptServerAS;
-}
+class Window;
+} // namespace Ease
 namespace Ease::ASContext {
 
 class ASRefCounted {
@@ -76,6 +77,18 @@ void Log_Generic(asIScriptGeneric *gen);
 void Info_Generic(asIScriptGeneric *gen);
 void Warn_Generic(asIScriptGeneric *gen);
 void Error_Generic(asIScriptGeneric *gen);
+
+// Bridge class to communicate with Ease::Window class
+class WindowCaller {
+  public:
+	WindowCaller(Ease::Window *window);
+	~WindowCaller();
+
+	ASVector2 *GetWindowSize();
+
+  private:
+	Ease::Window *_pWindow{nullptr};
+};
 
 } // namespace Ease::ASContext
 
