@@ -26,3 +26,4 @@ set(EASE_SOURCES
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.0/sdk/angelscript/projects/cmake/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/fmt-9.1.0/)
