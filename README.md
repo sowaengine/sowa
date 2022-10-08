@@ -6,20 +6,19 @@
 **Sowa Engine** is a 2D Game/Rendering Engine
 
 
-### Notes
+## Notes
    This software is not in usable state yet.
+   
+## Building
+- Following libraries should be installed in system
+     - glfw
 
+- Run [nmres](https://github.com/Lexographics/nmResource) in engine root directory   
+```nmres --recursive --cwd Ease/ --namespace Ease::Res --suffix .hpp --rules res_rules.txt```
 
-### Features
-   - Animated Sprite <br>
-   <!-- ![Animated Sprite 2D](https://raw.githubusercontent.com/Lexographics/Easengine/main/.gh_resources/anim.gif) -->
-   <img alt="Animated Sprite" src="https://raw.githubusercontent.com/Lexographics/Easengine/main/.gh_resources/anim.gif" width="25%"><br><br><br>
-
-
-
-
-### Dependencies
-   - yaml-cpp
-   - box2d
-   - OpenAL
-   - sndfile
+- Run following cmake commands
+```
+    mkdir build/
+    cmake -S . -B build/ -DCMAKE_BUILD_TYPE=Release
+    cmake --build build/   # --parallel (count) argument can be passed to run multiple instances of compilers
+```
