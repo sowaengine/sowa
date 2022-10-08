@@ -6,7 +6,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "res/Roboto-Medium.ttf.hpp"
+#include "res/Roboto-Medium.ttf.res.hpp"
 
 #include "Core/Application.hpp"
 #include "Resource/EditorTheme/EditorTheme.hpp"

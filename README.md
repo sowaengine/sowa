@@ -14,7 +14,7 @@
      - glfw
 
 - Run [nmres](https://github.com/Lexographics/nmResource) in engine root directory   
-```nmres --recursive --cwd Ease/ --namespace Ease::Res --suffix .hpp --rules res_rules.txt```
+```nmres --recursive --cwd Ease/ --namespace Ease::Res --suffix .res.hpp --rules res_rules.txt```
 
 - Run following cmake commands
 ```
