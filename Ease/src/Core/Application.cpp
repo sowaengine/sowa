@@ -25,7 +25,6 @@
 #include "Core/Input.hpp"
 #include "Utils/Dialog.hpp"
 #include "Utils/File.hpp"
-#include "res/Roboto-Medium.ttf.h"
 #include "res/imgui.ini.h"
 
 #include "nmGfx/src/Core/Matrix.hpp"

@@ -6,7 +6,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "res/Roboto-Medium.ttf.h"
+#include "res/Roboto-Medium.ttf.hpp"
 
 #include "Core/Application.hpp"
 #include "Resource/EditorTheme/EditorTheme.hpp"
@@ -22,7 +22,7 @@ void GuiServer::InitGui(GLFWwindow *window) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::roboto_medium_data.data(), Res::roboto_medium_data.size(), 14.f);
+	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::Ease_include_res_Roboto_Medium_ttf_data.data(), Res::Ease_include_res_Roboto_Medium_ttf_data.size(), 14.f);
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 150");
 
