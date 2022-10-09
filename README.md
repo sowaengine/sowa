@@ -12,11 +12,13 @@
 ## Building
 - Following libraries should be installed in system
      - glfw
+- After cloning the repository, update submodules <br>
+```git submodule update --init --recursive --remote```
 
 - Run [nmres](https://github.com/Lexographics/nmResource) in engine root directory   
 ```nmres --recursive --cwd Ease/ --namespace Ease::Res --suffix .res.hpp --rules res_rules.txt```
 
-- Run following cmake commands
+- Run following commands to initialize and build cmake project
 ```
     mkdir build/
     cmake -S . -B build/ -DCMAKE_BUILD_TYPE=Release
