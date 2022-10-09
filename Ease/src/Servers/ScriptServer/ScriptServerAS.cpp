@@ -103,6 +103,12 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoResize", WindowFlags_NoResize);
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoMove", WindowFlags_NoMove);
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoBringToFrontOnFocus", WindowFlags_NoBringToFrontOnFocus);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoNavFocus", WindowFlags_NoNavFocus);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoDocking", WindowFlags_NoDocking);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoTitleBar", WindowFlags_NoTitleBar);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoCollapse", WindowFlags_NoCollapse);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "MenuBar", WindowFlags_MenuBar);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoBackground", WindowFlags_NoBackground);
 
 	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "None", (int)StyleVar::None);
 	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "WindowPadding", (int)StyleVar::WindowPadding);

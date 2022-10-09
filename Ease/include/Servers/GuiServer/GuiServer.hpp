@@ -17,6 +17,12 @@ enum WindowFlags {
 	WindowFlags_NoResize = 1 << 0,
 	WindowFlags_NoMove = 1 << 1,
 	WindowFlags_NoBringToFrontOnFocus = 1 << 2,
+	WindowFlags_NoNavFocus = 1 << 3,
+	WindowFlags_NoDocking = 1 << 4,
+	WindowFlags_NoTitleBar = 1 << 5,
+	WindowFlags_NoCollapse = 1 << 6,
+	WindowFlags_MenuBar = 1 << 7,
+	WindowFlags_NoBackground = 1 << 8,
 };
 enum class StyleVar {
 	None = 0,

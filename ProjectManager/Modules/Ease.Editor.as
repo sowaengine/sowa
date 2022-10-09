@@ -46,7 +46,16 @@ void gui_update()
     
     Gui::PushStyleVar(Gui::StyleVar::WindowPadding, Vector2(0.0, 0.0));
     Gui::PushStyleVar(Gui::StyleVar::WindowRounding, 0.0);
-    Gui::BeginWindow("Editor", Gui::WindowFlags::NoResize | Gui::WindowFlags::NoMove | Gui::WindowFlags::NoBringToFrontOnFocus);
+    Gui::BeginWindow("Editor",
+        Gui::WindowFlags::NoResize              |
+        Gui::WindowFlags::NoMove                |
+        Gui::WindowFlags::NoBringToFrontOnFocus |
+        Gui::WindowFlags::NoNavFocus            |
+        Gui::WindowFlags::NoDocking             |
+        Gui::WindowFlags::NoTitleBar            |
+        Gui::WindowFlags::NoCollapse            |
+        Gui::WindowFlags::MenuBar               |
+        Gui::WindowFlags::NoBackground);
     Gui::PopStyleVar(2);
 
     Gui::Text("Window1 text");

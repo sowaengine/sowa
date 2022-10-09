@@ -48,6 +48,18 @@ void GuiServer::BeginWindow(const std::string &title, uint32_t flags /*= 0*/) {
 		guiflags |= ImGuiWindowFlags_NoMove;
 	if (flags & WindowFlags_NoBringToFrontOnFocus)
 		guiflags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (flags & WindowFlags_NoNavFocus)
+		guiflags |= ImGuiWindowFlags_NoNavFocus;
+	if (flags & WindowFlags_NoDocking)
+		guiflags |= ImGuiWindowFlags_NoDocking;
+	if (flags & WindowFlags_NoTitleBar)
+		guiflags |= ImGuiWindowFlags_NoTitleBar;
+	if (flags & WindowFlags_NoCollapse)
+		guiflags |= ImGuiWindowFlags_NoCollapse;
+	if (flags & WindowFlags_MenuBar)
+		guiflags |= ImGuiWindowFlags_MenuBar;
+	if (flags & WindowFlags_NoBackground)
+		guiflags |= ImGuiWindowFlags_NoBackground;
 
 	ImGui::Begin(title.c_str(), nullptr, guiflags);
 }
