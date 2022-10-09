@@ -34,6 +34,11 @@
 #include "Servers/GuiServer/GuiServer.hpp"
 #include "Servers/ScriptServer/ScriptServerAS.hpp"
 
+#include "res/shaders/default2d.glsl.res.hpp"
+#include "res/shaders/default3d.glsl.res.hpp"
+#include "res/shaders/fullscreen.glsl.res.hpp"
+#include "res/shaders/skybox.glsl.res.hpp"
+
 namespace Ease {
 Application::Application()
 	: m_pCurrentScene(&m_GameScene) {
@@ -80,28 +85,16 @@ void Application::Run(int argc, char const *argv[]) {
 		projectSettings._application.Name.c_str(),
 		nmGfx::WindowFlags::NONE);
 	_window._windowHandle = &_renderer->GetWindow();
-	{
-		std::vector<unsigned char> shader = File::GetFileContent("abs://templates/default2d.glsl");
-		_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(shader.data()), shader.size()));
-	}
-	{
-		std::vector<unsigned char> shader = File::GetFileContent("abs://templates/default3d.glsl");
-		_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(shader.data()), shader.size()));
-	}
-	{
-		std::vector<unsigned char> shader = File::GetFileContent("abs://templates/fullscreen.glsl");
-		_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(shader.data()), shader.size()));
-	}
-	{
-		std::vector<unsigned char> shader = File::GetFileContent("abs://templates/skybox.glsl");
-		_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(shader.data()), shader.size()));
-	}
+
+	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_default2d_glsl_data.data()), Res::Ease_include_res_shaders_default2d_glsl_data.size()));
+	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_default3d_glsl_data.data()), Res::Ease_include_res_shaders_default3d_glsl_data.size()));
+	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_fullscreen_glsl_data.data()), Res::Ease_include_res_shaders_fullscreen_glsl_data.size()));
+	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_skybox_glsl_data.data()), Res::Ease_include_res_shaders_skybox_glsl_data.size()));
 
 	scriptServerAS->BeginContext();
 	scriptServerAS->CreateModule("MyModule");
 	auto script = File::GetFileContent("abs://test.as");
 	scriptServerAS->LoadScript("MyModule", "test.as", script);
-	// scriptServerAS->CallFunc("MyModule", "void init()");
 
 	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 
