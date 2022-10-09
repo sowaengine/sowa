@@ -3,6 +3,7 @@
 #include "Servers/ScriptServer/ASContext.hpp"
 
 #include "Core/Application.hpp"
+#include "Core/ProjectSettings.hpp"
 #include "Servers/GuiServer/GuiServer.hpp"
 
 #include "add_on/scriptarray/scriptarray.h"
@@ -172,6 +173,17 @@ void ScriptServerAS::SetNamespace(const char *name) {
 
 // unnecessary duplication, add internal method that calls given asIScriptFunction*
 void ScriptServerAS::InitModules() {
+	BeginContext();
+	for (const std::string &path : _Context.GetSingleton<Ease::ProjectSettings>(Ease::Server::PROJECTSETTINGS)->_modules.as) {
+		std::filesystem::path fullpath = Ease::File::Path(path);
+		std::string moduleName = fullpath.filename().replace_extension("").string();
+
+		std::vector<unsigned char> code = Ease::File::GetFileContent(path.c_str());
+		CreateModule(moduleName.c_str());
+		LoadScript(moduleName.c_str(), fullpath.filename().string().c_str(), code);
+
+		Debug::Info("Load module '{}' at '{}'", moduleName, fullpath.string());
+	}
 	for (size_t i = 0; i < _pEngine->GetModuleCount(); i++) {
 		asIScriptModule *_module = _pEngine->GetModuleByIndex(i);
 		if (asIScriptFunction *func = _module->GetFunctionByDecl("void init()"); func != nullptr) {

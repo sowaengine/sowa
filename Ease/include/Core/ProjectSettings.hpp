@@ -12,6 +12,11 @@ namespace Ease {
 class ProjectSettings {
   public:
 	struct {
+		std::string Name = "Sowa Engine";
+		std::string Description = "";
+		std::string MainScene = "";
+	} _application;
+	struct {
 		int WindowWidth = 1280;
 		int WindowHeight = 720;
 
@@ -21,12 +26,7 @@ class ProjectSettings {
 		bool Fullscreen = false;
 	} _window;
 	struct {
-		std::string Name = "Ease Engine";
-		std::string Description = "";
-		std::string MainScene = "";
-	} _application;
-	struct {
-		std::vector<std::string> modules;
+		std::vector<std::string> as; // angelscript modules
 	} _modules;
 
 	bool LoadProject(const char *path);

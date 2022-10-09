@@ -93,11 +93,6 @@ void Application::Run(int argc, char const *argv[]) {
 	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_fullscreen_glsl_data.data()), Res::Ease_include_res_shaders_fullscreen_glsl_data.size()));
 	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_skybox_glsl_data.data()), Res::Ease_include_res_shaders_skybox_glsl_data.size()));
 
-	scriptServerAS->BeginContext();
-	scriptServerAS->CreateModule("MyModule");
-	auto script = File::GetFileContent("abs://test.as");
-	scriptServerAS->LoadScript("MyModule", "test.as", script);
-
 	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 
 	scriptServerAS->InitModules();
