@@ -4,8 +4,8 @@
 v: 1
 
 Application:
-  Name: Easengine - Project Manager
-  Description: Project manager for easengine
+  Name: Sowa Engine - Project Manager
+  Description: Project manager for sowa engine
   MainScene: res://Main.escn
 
 Window:
@@ -15,6 +15,3 @@ Window:
   VideoHeight: 1080
   Fullscreen: false
 
-Modules:
-  Modules:
-    - res://Modules/Ease.ProjectManager
