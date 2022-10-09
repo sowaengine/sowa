@@ -82,6 +82,10 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	//* vv<Gui>vv */
 	SetNamespace("Gui");
 	GuiServer *guiServer = _Context.GetSingleton<GuiServer>(Server::GUISERVER);
+	static ASContext::GuiCaller guiCaller(guiServer);
+
+	AS_CALL(_pEngine->RegisterEnum, "StyleVar");
+	AS_CALL(_pEngine->RegisterEnum, "WindowFlags");
 
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void BeginWindow(string, uint = 0)", asMETHOD(GuiServer, BeginWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndWindow()", asMETHOD(GuiServer, EndWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
@@ -90,13 +94,19 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	AS_CALL(_pEngine->RegisterGlobalFunction, "bool DragFloat(string, float &out)", asMETHOD(GuiServer, DragFloat), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowPos(int, int)", asMETHOD(GuiServer, SetNextWindowPos), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowSize(int, int)", asMETHOD(GuiServer, SetNextWindowSize), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, float)", asMETHODPR(GuiServer, PushStyleVar, (StyleVar, float), void), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, Vector2@)", asMETHODPR(ASContext::GuiCaller, PushStyleVar, (StyleVar, ASContext::ASVector2 *), void), asCALL_THISCALL_ASGLOBAL, &guiCaller);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void PopStyleVar(int = 1)", asMETHOD(GuiServer, PopStyleVar), asCALL_THISCALL_ASGLOBAL, guiServer);
 
-	AS_CALL(_pEngine->RegisterEnum, "WindowFlags");
+	//
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "None", WindowFlags_None);
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoResize", WindowFlags_NoResize);
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoMove", WindowFlags_NoMove);
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoBringToFrontOnFocus", WindowFlags_NoBringToFrontOnFocus);
 
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "None", (int)StyleVar::None);
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "WindowPadding", (int)StyleVar::WindowPadding);
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "WindowRounding", (int)StyleVar::WindowRounding);
 	//* --<Gui>-- */
 	SetNamespace("");
 

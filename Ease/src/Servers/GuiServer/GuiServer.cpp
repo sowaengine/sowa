@@ -75,4 +75,28 @@ void GuiServer::SetNextWindowSize(int width, int height) {
 	ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
 }
 
+void GuiServer::PushStyleVar(StyleVar var, float value) {
+	ImGuiStyleVar styleVar = 0;
+	if (var == StyleVar::WindowRounding) {
+		styleVar = ImGuiStyleVar_WindowRounding;
+	} else {
+		Debug::Error("GuiServer: Invalid style var '{}' with type 'float'", (int)var);
+	}
+
+	ImGui::PushStyleVar(styleVar, value);
+}
+void GuiServer::PushStyleVar(StyleVar var, Vec2 value) {
+	ImGuiStyleVar styleVar = 0;
+	if (var == StyleVar::WindowPadding) {
+		styleVar = ImGuiStyleVar_WindowPadding;
+	} else {
+		Debug::Error("GuiServer: Invalid style var '{}' with type 'Vec2'", (int)var);
+	}
+
+	ImGui::PushStyleVar(styleVar, ImVec2(value.x, value.y));
+}
+void GuiServer::PopStyleVar(int count) {
+	ImGui::PopStyleVar(count);
+}
+
 } // namespace Ease

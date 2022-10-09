@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Core/EngineContext.hpp"
+#include "Utils/Math.hpp"
 
 class GLFWwindow;
 
@@ -16,6 +17,11 @@ enum WindowFlags {
 	WindowFlags_NoResize = 1 << 0,
 	WindowFlags_NoMove = 1 << 1,
 	WindowFlags_NoBringToFrontOnFocus = 1 << 2,
+};
+enum class StyleVar {
+	None = 0,
+	WindowPadding,
+	WindowRounding,
 };
 
 class GuiServer {
@@ -34,6 +40,10 @@ class GuiServer {
 
 	void SetNextWindowPos(int x, int y);
 	void SetNextWindowSize(int width, int height);
+
+	void PushStyleVar(StyleVar var, float value);
+	void PushStyleVar(StyleVar var, Vec2 value);
+	void PopStyleVar(int count = 1);
 
 	GuiServer(const GuiServer &) = delete;
 	GuiServer(const GuiServer &&) = delete;
