@@ -50,7 +50,7 @@ Application::~Application() {
 void Application::Run(int argc, char const *argv[]) {
 	SW_ENTRY()
 
-	Ease::EngineContext *ctx = EngineContext::CreateContext();
+	ctx = EngineContext::CreateContext();
 	auto __ = Debug::ScopeTimer("Application");
 
 	ctx->RegisterSingleton<Application>(Ease::Server::APPLICATION, *this);
@@ -61,28 +61,30 @@ void Application::Run(int argc, char const *argv[]) {
 	ScriptServerAS *scriptServerAS = ScriptServerAS::CreateServer(*ctx);
 	ctx->RegisterSingleton<ScriptServerAS>(Ease::Server::SCRIPTSERVER_AS, *scriptServerAS);
 
-	ProjectSettings &projectSettings = ProjectSettings::get_singleton();
+	ProjectSettings *projectSettings = ProjectSettings::CreateServer(*ctx);
+	ctx->RegisterSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS, *projectSettings);
+
 	Ease::File::InsertFilepathEndpoint("abs", "./");
 	bool project_loaded = false;
 	std::string lastArg = argv[0];
 	for (int i = 1; i < argc; i++) {
 		if (lastArg == "--project") {
-			projectSettings.LoadProject(argv[i]);
+			projectSettings->LoadProject(argv[i]);
 			project_loaded = true;
 		}
 		lastArg = argv[i];
 	}
 	if (!project_loaded)
-		projectSettings.LoadProject("./");
+		projectSettings->LoadProject("./");
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
 	_renderer->Init(
-		projectSettings._window.WindowWidth,
-		projectSettings._window.WindowHeight,
-		projectSettings._window.VideoWidth,
-		projectSettings._window.VideoHeight,
+		projectSettings->_window.WindowWidth,
+		projectSettings->_window.WindowHeight,
+		projectSettings->_window.VideoWidth,
+		projectSettings->_window.VideoHeight,
 
-		projectSettings._application.Name.c_str(),
+		projectSettings->_application.Name.c_str(),
 		nmGfx::WindowFlags::NONE);
 	_window._windowHandle = &_renderer->GetWindow();
 
@@ -99,8 +101,8 @@ void Application::Run(int argc, char const *argv[]) {
 	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 
 	scriptServerAS->InitModules();
-	if (projectSettings._application.MainScene != "")
-		m_pCurrentScene->LoadFromFile(projectSettings._application.MainScene.c_str());
+	if (projectSettings->_application.MainScene != "")
+		m_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
 #ifndef EASE_EDITOR
 	StartGame();
@@ -150,7 +152,7 @@ void Application::StartGame() {
 		return;
 	m_AppRunning = true;
 
-	Ease::ProjectSettings::get_singleton().debug_draw = false;
+	ctx->GetSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS)->debug_draw = false;
 	Scene::CopyScene(m_GameScene, m_CopyScene);
 
 	m_pCurrentScene->StartScene();
@@ -164,7 +166,7 @@ void Application::StopGame() {
 		return;
 	m_AppRunning = false;
 
-	Ease::ProjectSettings::get_singleton().debug_draw = true;
+	ctx->GetSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS)->debug_draw = true;
 	Scene::CopyScene(m_CopyScene, m_GameScene);
 
 	m_pCurrentScene->StopScene();

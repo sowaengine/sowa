@@ -9,7 +9,7 @@
 #include <sstream>
 
 namespace Ease {
-ProjectSettings::ProjectSettings() {
+ProjectSettings::ProjectSettings(EngineContext &ctx) : _Context(ctx) {
 }
 
 ProjectSettings::~ProjectSettings() {

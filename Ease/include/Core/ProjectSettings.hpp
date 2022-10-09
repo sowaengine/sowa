@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Core/EngineContext.hpp"
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -10,11 +11,6 @@
 namespace Ease {
 class ProjectSettings {
   public:
-	static ProjectSettings &get_singleton() {
-		static ProjectSettings settings;
-		return settings;
-	}
-
 	struct {
 		int WindowWidth = 1280;
 		int WindowHeight = 720;
@@ -44,9 +40,21 @@ class ProjectSettings {
 	bool debug_draw = false;
 #endif
 
+	ProjectSettings(const ProjectSettings &) = delete;
+	ProjectSettings(const ProjectSettings &&) = delete;
+	ProjectSettings &operator=(const ProjectSettings &) = delete;
+	ProjectSettings &operator=(const ProjectSettings &&) = delete;
+
   private:
-	ProjectSettings();
+	friend class Application;
+	ProjectSettings(EngineContext &ctx);
 	~ProjectSettings();
+
+	static ProjectSettings *CreateServer(EngineContext &ctx) {
+		return new ProjectSettings(ctx);
+	}
+
+	EngineContext &_Context;
 };
 } // namespace Ease
 

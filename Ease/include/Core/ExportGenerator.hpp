@@ -1,6 +1,7 @@
 #ifndef _E_EXPORTGENERATOR_HPP__
 #define _E_EXPORTGENERATOR_HPP__
 
+#include "Core/EngineContext.hpp"
 #include <filesystem>
 #include <string>
 
@@ -12,7 +13,8 @@ enum class ExportPlatform {
 
 class ExportGenerator {
   public:
-	ExportGenerator() = default;
+	ExportGenerator(EngineContext &ctx);
+	~ExportGenerator();
 
 	bool BeginExport(ExportPlatform _platform);
 	bool EndExport();
@@ -35,6 +37,8 @@ class ExportGenerator {
 	bool AddFileTo(const std::filesystem::path &srcPath, const std::filesystem::path &dstPath, bool useGamePack = true);
 
   private:
+	EngineContext &_Ctx;
+
 	ExportPlatform _platform{ExportPlatform::NONE};
 	std::filesystem::path _buildDir{""};
 
