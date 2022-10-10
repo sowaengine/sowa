@@ -20,6 +20,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - name: Install dependencies
+      run: sudo apt-get install libglfw3-dev
+    
     - name: Initialize and update submodules
       run: git submodule update --init --recursive --remote
       
