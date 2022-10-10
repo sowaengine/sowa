@@ -24,6 +24,7 @@ jobs:
         repository: Lexographics/nmResource
         ref: refs/heads/main
         path: ./nmResource
+        clean: false
     
     - name: Build nmResource
       run: |
