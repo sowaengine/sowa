@@ -15,3 +15,7 @@ Window:
   VideoHeight: 1080
   Fullscreen: false
 
+
+Modules:
+  AS:
+    - res://Modules/Ease.Editor.as

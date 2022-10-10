@@ -9,7 +9,7 @@
 #include <sstream>
 
 namespace Ease {
-ProjectSettings::ProjectSettings() {
+ProjectSettings::ProjectSettings(EngineContext &ctx) : _Context(ctx) {
 }
 
 ProjectSettings::~ProjectSettings() {
@@ -25,6 +25,13 @@ bool ProjectSettings::LoadProject(const char *path) {
 	int version = project["v"].as<int>(0);
 
 	if (version == 1) {
+		if (project["Application"]) {
+			YAML::Node __application = project["Application"];
+
+			_application.Name = __application["Name"].as<std::string>(_application.Name);
+			_application.Description = __application["Description"].as<std::string>(_application.Description);
+			_application.MainScene = __application["MainScene"].as<std::string>(_application.MainScene);
+		}
 		if (project["Window"]) {
 			YAML::Node __window = project["Window"];
 
@@ -34,13 +41,10 @@ bool ProjectSettings::LoadProject(const char *path) {
 			_window.VideoHeight = __window["VideoHeight"].as<int>(_window.VideoHeight);
 			_window.Fullscreen = __window["Fullscreen"].as<bool>(_window.Fullscreen);
 		}
+		if (project["Modules"]) {
+			YAML::Node __modules = project["Modules"];
 
-		if (project["Application"]) {
-			YAML::Node __application = project["Application"];
-
-			_application.Name = __application["Name"].as<std::string>(_application.Name);
-			_application.Description = __application["Description"].as<std::string>(_application.Description);
-			_application.MainScene = __application["MainScene"].as<std::string>(_application.MainScene);
+			_modules.as = __modules["AS"].as<std::vector<std::string>>(_modules.as);
 		}
 	}
 	return true;
@@ -51,7 +55,7 @@ bool ProjectSettings::SaveProject() {
 
 	YAML::Emitter yaml;
 
-	yaml << YAML::Comment("Ease Engine project file");
+	yaml << YAML::Comment("Sowa Engine project file");
 	yaml << YAML::Newline;
 	yaml << YAML::Comment("Do not modify");
 	yaml << YAML::Newline;
@@ -81,6 +85,14 @@ bool ProjectSettings::SaveProject() {
 	yaml << YAML::Newline;
 	yaml << YAML::EndMap;
 	/** </Window> */
+
+	/**  <Modules> */
+	yaml << YAML::Key << "Modules";
+	yaml << YAML::Value << YAML::BeginMap;
+	yaml << YAML::Key << "AS" << YAML::Value << _modules.as;
+	yaml << YAML::Newline;
+	yaml << YAML::EndMap;
+	/** </Modules> */
 	yaml << YAML::EndMap;
 
 	std::ofstream ofstream(projectpath / "project.ease");

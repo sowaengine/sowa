@@ -2,6 +2,7 @@
 #define _E_ASCONTEXT_HPP__
 #pragma once
 
+#include "Servers/GuiServer/GuiServer.hpp"
 #include "angelscript.h"
 #include <functional>
 #include <string>
@@ -11,6 +12,7 @@
 namespace Ease {
 class ScriptServerAS;
 class Window;
+class GuiServer;
 } // namespace Ease
 namespace Ease::ASContext {
 
@@ -88,6 +90,18 @@ class WindowCaller {
 
   private:
 	Ease::Window *_pWindow{nullptr};
+};
+
+// Bridge class to communicate with Ease::Window class
+class GuiCaller {
+  public:
+	GuiCaller(Ease::GuiServer *gui);
+	~GuiCaller();
+
+	void PushStyleVar(StyleVar var, ASVector2 *vec);
+
+  private:
+	Ease::GuiServer *_Gui{nullptr};
 };
 
 } // namespace Ease::ASContext

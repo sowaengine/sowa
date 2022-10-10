@@ -48,6 +48,18 @@ void GuiServer::BeginWindow(const std::string &title, uint32_t flags /*= 0*/) {
 		guiflags |= ImGuiWindowFlags_NoMove;
 	if (flags & WindowFlags_NoBringToFrontOnFocus)
 		guiflags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	if (flags & WindowFlags_NoNavFocus)
+		guiflags |= ImGuiWindowFlags_NoNavFocus;
+	if (flags & WindowFlags_NoDocking)
+		guiflags |= ImGuiWindowFlags_NoDocking;
+	if (flags & WindowFlags_NoTitleBar)
+		guiflags |= ImGuiWindowFlags_NoTitleBar;
+	if (flags & WindowFlags_NoCollapse)
+		guiflags |= ImGuiWindowFlags_NoCollapse;
+	if (flags & WindowFlags_MenuBar)
+		guiflags |= ImGuiWindowFlags_MenuBar;
+	if (flags & WindowFlags_NoBackground)
+		guiflags |= ImGuiWindowFlags_NoBackground;
 
 	ImGui::Begin(title.c_str(), nullptr, guiflags);
 }
@@ -73,6 +85,30 @@ void GuiServer::SetNextWindowPos(int x, int y) {
 
 void GuiServer::SetNextWindowSize(int width, int height) {
 	ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_Always);
+}
+
+void GuiServer::PushStyleVar(StyleVar var, float value) {
+	ImGuiStyleVar styleVar = 0;
+	if (var == StyleVar::WindowRounding) {
+		styleVar = ImGuiStyleVar_WindowRounding;
+	} else {
+		Debug::Error("GuiServer: Invalid style var '{}' with type 'float'", (int)var);
+	}
+
+	ImGui::PushStyleVar(styleVar, value);
+}
+void GuiServer::PushStyleVar(StyleVar var, Vec2 value) {
+	ImGuiStyleVar styleVar = 0;
+	if (var == StyleVar::WindowPadding) {
+		styleVar = ImGuiStyleVar_WindowPadding;
+	} else {
+		Debug::Error("GuiServer: Invalid style var '{}' with type 'Vec2'", (int)var);
+	}
+
+	ImGui::PushStyleVar(styleVar, ImVec2(value.x, value.y));
+}
+void GuiServer::PopStyleVar(int count) {
+	ImGui::PopStyleVar(count);
 }
 
 } // namespace Ease

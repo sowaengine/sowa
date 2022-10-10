@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "Core/EngineContext.hpp"
 #include "Core/Window.hpp"
 #include "ECS/Scene/Scene.hpp"
 #include "Ease.hpp"
@@ -44,6 +45,8 @@ class Application {
   private:
 	friend class Window;
 	friend class Renderer;
+
+	Ease::EngineContext *ctx{nullptr};
 
 	Application();
 	~Application();

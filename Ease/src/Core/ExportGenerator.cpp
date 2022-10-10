@@ -4,6 +4,9 @@
 #include <iostream>
 
 namespace Ease {
+ExportGenerator::ExportGenerator(EngineContext &ctx) : _Ctx(ctx) {}
+ExportGenerator::~ExportGenerator() {}
+
 bool ExportGenerator::BeginExport(ExportPlatform platform) {
 	_canExport = true;
 	_warningCount = 0;
@@ -46,11 +49,12 @@ bool ExportGenerator::BeginExport(ExportPlatform platform) {
 	}
 
 	std::cout << "Begin exporting to " << _buildDir << std::endl;
+	Ease::ProjectSettings &projectSettings = *_Ctx.GetSingleton<Ease::ProjectSettings>(Ease::Server::PROJECTSETTINGS);
 
 	// add export template to root directory
 	std::filesystem::path exportTemplatePath = "abs://build/Sowa Engine";
 	// exportTemplatePath /= GetPlatformString();
-	if (!AddFileTo(exportTemplatePath, ProjectSettings::get_singleton()._application.Name, false)) {
+	if (!AddFileTo(exportTemplatePath, projectSettings._application.Name, false)) {
 		std::cout << "Can not include export template: " << exportTemplatePath << std::endl;
 		_canExport = false;
 		return false;

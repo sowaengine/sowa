@@ -3,6 +3,7 @@
 #include "Servers/ScriptServer/ASContext.hpp"
 
 #include "Core/Application.hpp"
+#include "Core/ProjectSettings.hpp"
 #include "Servers/GuiServer/GuiServer.hpp"
 
 #include "add_on/scriptarray/scriptarray.h"
@@ -81,6 +82,10 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	//* vv<Gui>vv */
 	SetNamespace("Gui");
 	GuiServer *guiServer = _Context.GetSingleton<GuiServer>(Server::GUISERVER);
+	static ASContext::GuiCaller guiCaller(guiServer);
+
+	AS_CALL(_pEngine->RegisterEnum, "StyleVar");
+	AS_CALL(_pEngine->RegisterEnum, "WindowFlags");
 
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void BeginWindow(string, uint = 0)", asMETHOD(GuiServer, BeginWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndWindow()", asMETHOD(GuiServer, EndWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
@@ -89,13 +94,25 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	AS_CALL(_pEngine->RegisterGlobalFunction, "bool DragFloat(string, float &out)", asMETHOD(GuiServer, DragFloat), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowPos(int, int)", asMETHOD(GuiServer, SetNextWindowPos), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowSize(int, int)", asMETHOD(GuiServer, SetNextWindowSize), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, float)", asMETHODPR(GuiServer, PushStyleVar, (StyleVar, float), void), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, Vector2@)", asMETHODPR(ASContext::GuiCaller, PushStyleVar, (StyleVar, ASContext::ASVector2 *), void), asCALL_THISCALL_ASGLOBAL, &guiCaller);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void PopStyleVar(int = 1)", asMETHOD(GuiServer, PopStyleVar), asCALL_THISCALL_ASGLOBAL, guiServer);
 
-	AS_CALL(_pEngine->RegisterEnum, "WindowFlags");
+	//
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "None", WindowFlags_None);
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoResize", WindowFlags_NoResize);
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoMove", WindowFlags_NoMove);
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoBringToFrontOnFocus", WindowFlags_NoBringToFrontOnFocus);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoNavFocus", WindowFlags_NoNavFocus);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoDocking", WindowFlags_NoDocking);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoTitleBar", WindowFlags_NoTitleBar);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoCollapse", WindowFlags_NoCollapse);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "MenuBar", WindowFlags_MenuBar);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoBackground", WindowFlags_NoBackground);
 
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "None", (int)StyleVar::None);
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "WindowPadding", (int)StyleVar::WindowPadding);
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "WindowRounding", (int)StyleVar::WindowRounding);
 	//* --<Gui>-- */
 	SetNamespace("");
 
@@ -172,6 +189,17 @@ void ScriptServerAS::SetNamespace(const char *name) {
 
 // unnecessary duplication, add internal method that calls given asIScriptFunction*
 void ScriptServerAS::InitModules() {
+	BeginContext();
+	for (const std::string &path : _Context.GetSingleton<Ease::ProjectSettings>(Ease::Server::PROJECTSETTINGS)->_modules.as) {
+		std::filesystem::path fullpath = Ease::File::Path(path);
+		std::string moduleName = fullpath.filename().replace_extension("").string();
+
+		std::vector<unsigned char> code = Ease::File::GetFileContent(path.c_str());
+		CreateModule(moduleName.c_str());
+		LoadScript(moduleName.c_str(), fullpath.filename().string().c_str(), code);
+
+		Debug::Info("Load module '{}' at '{}'", moduleName, fullpath.string());
+	}
 	for (size_t i = 0; i < _pEngine->GetModuleCount(); i++) {
 		asIScriptModule *_module = _pEngine->GetModuleByIndex(i);
 		if (asIScriptFunction *func = _module->GetFunctionByDecl("void init()"); func != nullptr) {

@@ -149,6 +149,7 @@ enum class Server : uint32_t {
 	SCRIPTSERVER_AS, // AngelScript Language Server
 	GUISERVER,		 // Editor Gui Server
 	APPLICATION,
+	PROJECTSETTINGS,
 };
 
 } // namespace Ease

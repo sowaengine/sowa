@@ -1,6 +1,7 @@
 #include "Servers/ScriptServer/ASContext.hpp"
 #include "Core/Window.hpp"
 #include "Debug.hpp"
+#include "Servers/GuiServer/GuiServer.hpp"
 #include <functional>
 #include <string>
 #include <unordered_map>
@@ -97,6 +98,17 @@ WindowCaller::~WindowCaller() {}
 
 ASVector2 *WindowCaller::GetWindowSize() {
 	return ASRefCounted::_Create<ASVector2>((float)_pWindow->GetWindowWidth(), (float)_pWindow->GetWindowHeight());
+}
+
+// void PushStyleVar(ASVector2 *vec);
+GuiCaller::GuiCaller(Ease::GuiServer *gui) : _Gui{gui} {}
+GuiCaller::~GuiCaller() {}
+
+void GuiCaller::PushStyleVar(StyleVar var, ASVector2 *vec) {
+	if (vec == nullptr)
+		return;
+
+	_Gui->PushStyleVar(var, Vec2(vec->x, vec->y));
 }
 
 } // namespace Ease::ASContext
