@@ -18,6 +18,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Install and run nmResource
+      uses: actions/checkout@v3
+      with:
+        repository: Lexographics/nmResource
+        ref: refs/heads/main
+    
+    - name: Build nmResource
+      run: |
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+    
+    
     - uses: actions/checkout@v3
     
     - name: Install dependencies
