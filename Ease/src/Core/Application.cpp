@@ -87,10 +87,10 @@ void Application::Run(int argc, char const *argv[]) {
 		nmGfx::WindowFlags::NONE);
 	_window._windowHandle = &_renderer->GetWindow();
 
-	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_default2d_glsl_data.data()), Res::Ease_include_res_shaders_default2d_glsl_data.size()));
-	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_default3d_glsl_data.data()), Res::Ease_include_res_shaders_default3d_glsl_data.size()));
-	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_fullscreen_glsl_data.data()), Res::Ease_include_res_shaders_fullscreen_glsl_data.size()));
-	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::Ease_include_res_shaders_skybox_glsl_data.data()), Res::Ease_include_res_shaders_skybox_glsl_data.size()));
+	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default2d_glsl_data.data()), Res::include_res_shaders_default2d_glsl_data.size()));
+	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default3d_glsl_data.data()), Res::include_res_shaders_default3d_glsl_data.size()));
+	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_fullscreen_glsl_data.data()), Res::include_res_shaders_fullscreen_glsl_data.size()));
+	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_skybox_glsl_data.data()), Res::include_res_shaders_skybox_glsl_data.size()));
 
 	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 

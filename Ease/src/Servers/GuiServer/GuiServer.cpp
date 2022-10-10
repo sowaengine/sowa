@@ -22,7 +22,7 @@ void GuiServer::InitGui(GLFWwindow *window) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::Ease_include_res_Roboto_Medium_ttf_data.data(), Res::Ease_include_res_Roboto_Medium_ttf_data.size(), 14.f);
+	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::include_res_Roboto_Medium_ttf_data.data(), Res::include_res_Roboto_Medium_ttf_data.size(), 14.f);
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 150");
 
