@@ -27,7 +27,7 @@ jobs:
     
     - name: Build nmResource
       run: |
-        cmake -B ./nmResource/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake -B ./nmResource/build -S ./nmResource/ -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
         cmake --build ./nmResource/build --config ${{env.BUILD_TYPE}}
     
     
