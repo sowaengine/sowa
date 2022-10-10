@@ -31,6 +31,9 @@ jobs:
         cmake --build ${{github.workspace}}/nmResource/build --config ${{env.BUILD_TYPE}}
         chmod +x ${{github.workspace}}/nmResource/build/nmres
     
+    
+    - uses: actions/checkout@v3
+    
     - name: Install dependencies
       run: sudo apt-get install libglfw3-dev
     
