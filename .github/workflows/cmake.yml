@@ -18,8 +18,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clone nmResource
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+      with:
+        clean: false
+
+    - uses: actions/checkout@v3
       with:
         repository: Lexographics/nmResource
         ref: refs/heads/main
@@ -32,10 +35,6 @@ jobs:
         cmake --build ${{github.workspace}}/nmResource/build --config ${{env.BUILD_TYPE}}
         chmod +x ${{github.workspace}}/nmResource/build/nmres
     
-    
-    - uses: actions/checkout@v3
-      with:
-        clean: false
     
     - name: Install dependencies
       run: sudo apt-get install libglfw3-dev
