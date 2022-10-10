@@ -1,2 +1,2 @@
->Ease/include/res/*.ttf
->Ease/include/res/shaders/*.glsl
+>include/res/*.ttf
+>include/res/shaders/*.glsl
