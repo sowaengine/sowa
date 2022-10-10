@@ -23,11 +23,12 @@ jobs:
       with:
         repository: Lexographics/nmResource
         ref: refs/heads/main
+        path: ./nmResource
     
     - name: Build nmResource
       run: |
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        cmake -B ./nmResource/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        cmake --build ./nmResource/build --config ${{env.BUILD_TYPE}}
     
     
     - uses: actions/checkout@v3
@@ -39,7 +40,7 @@ jobs:
       run: git submodule update --init --recursive --remote
     
     - name: Run nmResource
-      run: ${{github.workspace}}/build/nmres --recursive --cwd ${{github.workspace}}/Ease/ --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}/res_rules.txt
+      run: ./nmResource/build/nmres --recursive --cwd ${{github.workspace}}/Ease/ --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}/res_rules.txt
       
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
