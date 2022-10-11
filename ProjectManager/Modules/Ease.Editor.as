@@ -1,8 +1,32 @@
 
 
+funcdef void DrawPanelFunc();
+class Panel {
+    string panelName;
+    DrawPanelFunc@ func;
+
+    Panel(string _panelName, DrawPanelFunc@ _func) {
+        panelName = _panelName;
+        @func = _func;
+    }
+}
+
+array<Panel@> panels;
+
+void PanelFunc() {
+
+}
+
+
 void init()
 {
     Debug::Log("Init");
+
+    panels.insertLast(Panel("Scene", @PanelFunc));
+    panels.insertLast(Panel("Inspector", @PanelFunc));
+    panels.insertLast(Panel("Console", @PanelFunc));
+    panels.insertLast(Panel("Filesystem", @PanelFunc));
+    panels.insertLast(Panel("Game", @PanelFunc));
 
     // Debug
     if(false)
@@ -44,31 +68,46 @@ void gui_update()
     Gui::SetNextWindowSize(windowSize.x, windowSize.y);
     Gui::SetNextWindowPos(0, 0);
     
-    Gui::PushStyleVar(Gui::StyleVar::WindowPadding, Vector2(0.0, 0.0));
-    Gui::PushStyleVar(Gui::StyleVar::WindowRounding, 0.0);
+    Gui::PushStyleVar(Gui::StyleVar_WindowPadding, Vector2(0.0, 0.0));
+    Gui::PushStyleVar(Gui::StyleVar_WindowRounding, 0.0);
     Gui::BeginWindow("Editor",
-        Gui::WindowFlags::NoResize              |
-        Gui::WindowFlags::NoMove                |
-        Gui::WindowFlags::NoBringToFrontOnFocus |
-        Gui::WindowFlags::NoNavFocus            |
-        Gui::WindowFlags::NoDocking             |
-        Gui::WindowFlags::NoTitleBar            |
-        Gui::WindowFlags::NoCollapse            |
-        Gui::WindowFlags::MenuBar               |
-        Gui::WindowFlags::NoBackground);
+        Gui::WindowFlags_NoResize              |
+        Gui::WindowFlags_NoMove                |
+        Gui::WindowFlags_NoBringToFrontOnFocus |
+        Gui::WindowFlags_NoNavFocus            |
+        Gui::WindowFlags_NoDocking             |
+        Gui::WindowFlags_NoTitleBar            |
+        Gui::WindowFlags_NoCollapse            |
+        Gui::WindowFlags_MenuBar               |
+        Gui::WindowFlags_NoBackground);
     Gui::PopStyleVar(2);
 
-    Gui::Text("Window1 text");
-    Gui::EndWindow();
+    if(Gui::BeginMainMenuBar()) {
+        if(Gui::BeginMenu("View")) {
+            for(uint i=0; i<4; i++) {
+                if(Gui::MenuItem("MenuItem " + i))
+                    Debug::Log("Pressed MenuItem " + i);
+            }
 
-    Gui::BeginWindow("Window2");
-    Gui::Text("Window2 text");
-    if(Gui::Button("Press")) {
-        Debug::Log("Pressed");
+            Gui::EndMenu();
+        }
+
+        Gui::EndMainMenuBar();
     }
-    
-    if(Gui::DragFloat("Value", x)) {
-        Debug::Log("Dragging");
+
+
+    Gui::SetupDockspace();
+
+    if(Gui::BeginFooter("##statusbar")) {
     }
+    Gui::EndFooter();
+
+    for(uint i=0; i<panels.length(); i++)
+    {
+        Gui::BeginWindow(panels[i].panelName);
+        panels[i].func();
+        Gui::EndWindow();
+    }
+
     Gui::EndWindow();
 }

@@ -97,22 +97,30 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, float)", asMETHODPR(GuiServer, PushStyleVar, (StyleVar, float), void), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, Vector2@)", asMETHODPR(ASContext::GuiCaller, PushStyleVar, (StyleVar, ASContext::ASVector2 *), void), asCALL_THISCALL_ASGLOBAL, &guiCaller);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void PopStyleVar(int = 1)", asMETHOD(GuiServer, PopStyleVar), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetupDockspace()", asMETHOD(GuiServer, SetupDockspace), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginMainMenuBar()", asMETHOD(GuiServer, BeginMainMenuBar), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndMainMenuBar()", asMETHOD(GuiServer, EndMainMenuBar), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginMenu(string)", asMETHOD(GuiServer, BeginMenu), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndMenu()", asMETHOD(GuiServer, EndMenu), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool MenuItem(string, string = \"\")", asMETHOD(GuiServer, MenuItem), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginFooter(string)", asMETHOD(GuiServer, BeginFooter), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndFooter()", asMETHOD(GuiServer, EndFooter), asCALL_THISCALL_ASGLOBAL, guiServer);
 
 	//
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "None", WindowFlags_None);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoResize", WindowFlags_NoResize);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoMove", WindowFlags_NoMove);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoBringToFrontOnFocus", WindowFlags_NoBringToFrontOnFocus);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoNavFocus", WindowFlags_NoNavFocus);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoDocking", WindowFlags_NoDocking);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoTitleBar", WindowFlags_NoTitleBar);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoCollapse", WindowFlags_NoCollapse);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "MenuBar", WindowFlags_MenuBar);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "NoBackground", WindowFlags_NoBackground);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_None", WindowFlags_None);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoResize", WindowFlags_NoResize);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoMove", WindowFlags_NoMove);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoBringToFrontOnFocus", WindowFlags_NoBringToFrontOnFocus);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoNavFocus", WindowFlags_NoNavFocus);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoDocking", WindowFlags_NoDocking);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoTitleBar", WindowFlags_NoTitleBar);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoCollapse", WindowFlags_NoCollapse);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_MenuBar", WindowFlags_MenuBar);
+	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoBackground", WindowFlags_NoBackground);
 
-	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "None", (int)StyleVar::None);
-	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "WindowPadding", (int)StyleVar::WindowPadding);
-	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "WindowRounding", (int)StyleVar::WindowRounding);
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "StyleVar_None", (int)StyleVar::None);
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "StyleVar_WindowPadding", (int)StyleVar::WindowPadding);
+	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "StyleVar_WindowRounding", (int)StyleVar::WindowRounding);
 	//* --<Gui>-- */
 	SetNamespace("");
 
