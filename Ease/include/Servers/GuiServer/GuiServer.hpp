@@ -51,6 +51,17 @@ class GuiServer {
 	void PushStyleVar(StyleVar var, Vec2 value);
 	void PopStyleVar(int count = 1);
 
+	void SetupDockspace();
+
+	bool BeginMainMenuBar();
+	void EndMainMenuBar();
+	bool BeginMenu(const std::string &label);
+	void EndMenu();
+	bool MenuItem(const std::string &label, const std::string &shortcut = {""});
+
+	bool BeginFooter(const std::string &label);
+	void EndFooter();
+
 	GuiServer(const GuiServer &) = delete;
 	GuiServer(const GuiServer &&) = delete;
 	GuiServer &operator=(const GuiServer &) = delete;

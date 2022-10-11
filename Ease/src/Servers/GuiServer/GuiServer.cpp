@@ -111,4 +111,55 @@ void GuiServer::PopStyleVar(int count) {
 	ImGui::PopStyleVar(count);
 }
 
+void GuiServer::SetupDockspace() {
+	ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(0.f, 0.f), ImGuiDockNodeFlags_PassthruCentralNode);
+}
+
+bool GuiServer::BeginMainMenuBar() {
+	return ImGui::BeginMainMenuBar();
+}
+
+void GuiServer::EndMainMenuBar() {
+	ImGui::EndMainMenuBar();
+}
+
+bool GuiServer::BeginMenu(const std::string &label) {
+	return ImGui::BeginMenu(label.c_str());
+}
+
+void GuiServer::EndMenu() {
+	ImGui::EndMenu();
+}
+
+bool GuiServer::MenuItem(const std::string &label, const std::string &shortcut /*= {""}*/) {
+	return ImGui::MenuItem(label.c_str(), shortcut.c_str());
+}
+
+bool GuiServer::BeginFooter(const std::string &label) {
+	const ImGuiViewport *viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(
+		ImVec2(viewport->Pos.x,
+			   viewport->Pos.y + viewport->Size.y - ImGui::GetFrameHeight()));
+	ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, ImGui::GetFrameHeight()));
+	PushStyleVar(Ease::StyleVar::WindowRounding, 0.f);
+	// todo add Gui::PushStyleColor
+	ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.17f, 0.50f, 0.70f, 1.f));	 // (45, 128, 178)
+	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.20f, 0.55f, 0.75f, 1.f)); // (51, 140, 191)
+
+	bool opened = false;
+	opened = ImGui::Begin(label.c_str(), nullptr,
+						  ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+	ImGui::PopStyleVar();
+	if (!ImGui::BeginMenuBar()) {
+		return false;
+	}
+	return opened;
+}
+
+void GuiServer::EndFooter() {
+	ImGui::EndMenuBar();
+	ImGui::End();
+	ImGui::PopStyleColor(2);
+}
+
 } // namespace Ease
