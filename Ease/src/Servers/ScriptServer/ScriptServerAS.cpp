@@ -87,11 +87,13 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	AS_CALL(_pEngine->RegisterEnum, "StyleVar");
 	AS_CALL(_pEngine->RegisterEnum, "WindowFlags");
 
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void BeginWindow(string, uint = 0)", asMETHOD(GuiServer, BeginWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginWindow(string, uint = 0)", asMETHOD(GuiServer, BeginWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndWindow()", asMETHOD(GuiServer, EndWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void Text(string)", asMETHOD(GuiServer, Text), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "bool Button(string, int = 0, int = 0)", asMETHOD(GuiServer, Button), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "bool DragFloat(string, float &out)", asMETHOD(GuiServer, DragFloat), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool Checkbox(string, bool &out)", asMETHOD(GuiServer, Checkbox), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void Separator()", asMETHOD(GuiServer, Separator), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowPos(int, int)", asMETHOD(GuiServer, SetNextWindowPos), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowSize(int, int)", asMETHOD(GuiServer, SetNextWindowSize), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, float)", asMETHODPR(GuiServer, PushStyleVar, (StyleVar, float), void), asCALL_THISCALL_ASGLOBAL, guiServer);
@@ -105,6 +107,16 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	AS_CALL(_pEngine->RegisterGlobalFunction, "bool MenuItem(string, string = \"\")", asMETHOD(GuiServer, MenuItem), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginFooter(string)", asMETHOD(GuiServer, BeginFooter), asCALL_THISCALL_ASGLOBAL, guiServer);
 	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndFooter()", asMETHOD(GuiServer, EndFooter), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void RegisterPanel(string, string, bool = true)", asMETHOD(GuiServer, RegisterPanel), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void DrawViewbar()", asMETHOD(GuiServer, DrawViewbar), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginCheckerList(string)", asMETHOD(GuiServer, BeginCheckerList), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void CheckerListNextItem()", asMETHOD(GuiServer, CheckerListNextItem), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndCheckerList()", asMETHOD(GuiServer, EndCheckerList), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void ShowDemoWindow()", asMETHOD(GuiServer, ShowDemoWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginTree(string)", asMETHOD(GuiServer, BeginTree), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndTree()", asMETHOD(GuiServer, EndTree), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushID(string)", asMETHOD(GuiServer, PushID), asCALL_THISCALL_ASGLOBAL, guiServer);
+	AS_CALL(_pEngine->RegisterGlobalFunction, "void PopID()", asMETHOD(GuiServer, PopID), asCALL_THISCALL_ASGLOBAL, guiServer);
 
 	//
 	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_None", WindowFlags_None);

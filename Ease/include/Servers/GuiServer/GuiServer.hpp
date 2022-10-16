@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 #include "Core/EngineContext.hpp"
 #include "Utils/Math.hpp"
@@ -37,12 +38,14 @@ class GuiServer {
 	void BeginGui();
 	void EndGui();
 
-	void BeginWindow(const std::string &title, uint32_t flags = 0);
+	bool BeginWindow(const std::string &title, uint32_t flags = 0);
 	void EndWindow();
 
 	void Text(const std::string &text);
 	bool Button(const std::string &label, int width = 0, int height = 0);
 	bool DragFloat(const std::string &label, float &f);
+	bool Checkbox(const std::string &label, bool &value);
+	void Separator();
 
 	void SetNextWindowPos(int x, int y);
 	void SetNextWindowSize(int width, int height);
@@ -62,6 +65,24 @@ class GuiServer {
 	bool BeginFooter(const std::string &label);
 	void EndFooter();
 
+	void RegisterPanel(const std::string &windowTitle, const std::string &header, bool visibleByDefault = true);
+	void DrawViewbar();
+
+	bool BeginCheckerList(const std::string &id);
+	void CheckerListNextItem();
+	void EndCheckerList();
+
+	bool BeginTree(const std::string &label);
+	void EndTree();
+
+	void PushID(const std::string &id);
+	void PopID();
+
+	void AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA();
+
+	// shows dear imgui demo window
+	void ShowDemoWindow();
+
 	GuiServer(const GuiServer &) = delete;
 	GuiServer(const GuiServer &&) = delete;
 	GuiServer &operator=(const GuiServer &) = delete;
@@ -78,6 +99,14 @@ class GuiServer {
 
 	Application *_Application{nullptr};
 	EngineContext &_Context;
+
+	struct PanelData {
+		bool visible{false};
+		std::string header{""};
+	};
+	std::unordered_map<std::string, PanelData> _panelViews;
+
+	int _panelStack = 0;
 };
 } // namespace Ease
 

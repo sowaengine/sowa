@@ -22,7 +22,7 @@ void GuiServer::InitGui(GLFWwindow *window) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::include_res_Roboto_Medium_ttf_data.data(), Res::include_res_Roboto_Medium_ttf_data.size(), 14.f);
+	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::include_res_Roboto_Medium_ttf_data.data(), Res::include_res_Roboto_Medium_ttf_data.size(), 16.f);
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 150");
 
@@ -40,7 +40,7 @@ void GuiServer::EndGui() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void GuiServer::BeginWindow(const std::string &title, uint32_t flags /*= 0*/) {
+bool GuiServer::BeginWindow(const std::string &title, uint32_t flags /*= 0*/) {
 	int guiflags = 0;
 	if (flags & WindowFlags_NoResize)
 		guiflags |= ImGuiWindowFlags_NoResize;
@@ -61,10 +61,21 @@ void GuiServer::BeginWindow(const std::string &title, uint32_t flags /*= 0*/) {
 	if (flags & WindowFlags_NoBackground)
 		guiflags |= ImGuiWindowFlags_NoBackground;
 
-	ImGui::Begin(title.c_str(), nullptr, guiflags);
+	for (auto &[panelTitle, panel] : _panelViews) {
+		if (panelTitle == title) {
+			if (!panel.visible) {
+				return false;
+			}
+		}
+	}
+	_panelStack += 1;
+	return ImGui::Begin(title.c_str(), nullptr, guiflags);
 }
 void GuiServer::EndWindow() {
-	ImGui::End();
+	if (_panelStack >= 1) {
+		_panelStack--;
+		ImGui::End();
+	}
 }
 
 void GuiServer::Text(const std::string &text) {
@@ -77,6 +88,14 @@ bool GuiServer::Button(const std::string &label, int width /*= 0*/, int height /
 
 bool GuiServer::DragFloat(const std::string &label, float &f) {
 	return ImGui::DragFloat(label.c_str(), &f);
+}
+
+bool GuiServer::Checkbox(const std::string &label, bool &value) {
+	return ImGui::Checkbox(label.c_str(), &value);
+}
+
+void GuiServer::Separator() {
+	ImGui::Separator();
 }
 
 void GuiServer::SetNextWindowPos(int x, int y) {
@@ -162,4 +181,46 @@ void GuiServer::EndFooter() {
 	ImGui::PopStyleColor(2);
 }
 
+void GuiServer::RegisterPanel(const std::string &windowTitle, const std::string &header, bool visibleByDefault /*= true*/) {
+	_panelViews[windowTitle] = PanelData();
+	_panelViews[windowTitle].header = header;
+	_panelViews[windowTitle].visible = visibleByDefault;
+}
+
+void GuiServer::DrawViewbar() {
+	for (auto &[title, panel] : _panelViews) {
+		ImGui::Checkbox(title.c_str(), &panel.visible);
+	}
+}
+
+bool GuiServer::BeginCheckerList(const std::string &id) {
+	return ImGui::BeginTable(id.c_str(), 1, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody);
+}
+
+void GuiServer::CheckerListNextItem() {
+	ImGui::TableNextRow();
+	ImGui::TableNextColumn();
+}
+
+void GuiServer::EndCheckerList() {
+	ImGui::EndTable();
+}
+
+void GuiServer::ShowDemoWindow() {
+	ImGui::ShowDemoWindow();
+}
+
+bool GuiServer::BeginTree(const std::string &label) {
+	return ImGui::TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth);
+}
+void GuiServer::EndTree() {
+	ImGui::TreePop();
+}
+
+void GuiServer::PushID(const std::string &id) {
+	ImGui::PushID(id.c_str());
+}
+void GuiServer::PopID() {
+	ImGui::PopID();
+}
 } // namespace Ease
