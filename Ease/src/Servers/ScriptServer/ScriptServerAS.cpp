@@ -220,6 +220,12 @@ void ScriptServerAS::InitModules() {
 
 		Debug::Info("Load module '{}' at '{}'", moduleName, fullpath.string());
 	}
+
+	for (size_t i = 0; i < _pEngine->GetModuleCount(); i++) {
+		asIScriptModule *_module = _pEngine->GetModuleByIndex(i);
+		AS_CALL(_module->BindAllImportedFunctions);
+	}
+
 	for (size_t i = 0; i < _pEngine->GetModuleCount(); i++) {
 		asIScriptModule *_module = _pEngine->GetModuleByIndex(i);
 		if (asIScriptFunction *func = _module->GetFunctionByDecl("void init()"); func != nullptr) {
