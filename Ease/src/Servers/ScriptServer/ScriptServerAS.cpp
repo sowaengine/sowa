@@ -87,52 +87,86 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	AS_CALL(_pEngine->RegisterEnum, "StyleVar");
 	AS_CALL(_pEngine->RegisterEnum, "WindowFlags");
 
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginWindow(string, uint = 0)", asMETHOD(GuiServer, BeginWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndWindow()", asMETHOD(GuiServer, EndWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void Text(string)", asMETHOD(GuiServer, Text), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool Button(string, int = 0, int = 0)", asMETHOD(GuiServer, Button), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool DragFloat(string, float &out)", asMETHOD(GuiServer, DragFloat), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool Checkbox(string, bool &out)", asMETHOD(GuiServer, Checkbox), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void Separator()", asMETHOD(GuiServer, Separator), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowPos(int, int)", asMETHOD(GuiServer, SetNextWindowPos), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetNextWindowSize(int, int)", asMETHOD(GuiServer, SetNextWindowSize), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, float)", asMETHODPR(GuiServer, PushStyleVar, (StyleVar, float), void), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushStyleVar(StyleVar, Vector2@)", asMETHODPR(ASContext::GuiCaller, PushStyleVar, (StyleVar, ASContext::ASVector2 *), void), asCALL_THISCALL_ASGLOBAL, &guiCaller);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void PopStyleVar(int = 1)", asMETHOD(GuiServer, PopStyleVar), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void SetupDockspace()", asMETHOD(GuiServer, SetupDockspace), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginMainMenuBar()", asMETHOD(GuiServer, BeginMainMenuBar), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndMainMenuBar()", asMETHOD(GuiServer, EndMainMenuBar), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginMenu(string)", asMETHOD(GuiServer, BeginMenu), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndMenu()", asMETHOD(GuiServer, EndMenu), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool MenuItem(string, string = \"\")", asMETHOD(GuiServer, MenuItem), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginFooter(string)", asMETHOD(GuiServer, BeginFooter), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndFooter()", asMETHOD(GuiServer, EndFooter), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void RegisterPanel(string, string, bool = true)", asMETHOD(GuiServer, RegisterPanel), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void DrawViewbar()", asMETHOD(GuiServer, DrawViewbar), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginCheckerList(string)", asMETHOD(GuiServer, BeginCheckerList), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void CheckerListNextItem()", asMETHOD(GuiServer, CheckerListNextItem), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndCheckerList()", asMETHOD(GuiServer, EndCheckerList), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void ShowDemoWindow()", asMETHOD(GuiServer, ShowDemoWindow), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "bool BeginTree(string)", asMETHOD(GuiServer, BeginTree), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void EndTree()", asMETHOD(GuiServer, EndTree), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void PushID(string)", asMETHOD(GuiServer, PushID), asCALL_THISCALL_ASGLOBAL, guiServer);
-	AS_CALL(_pEngine->RegisterGlobalFunction, "void PopID()", asMETHOD(GuiServer, PopID), asCALL_THISCALL_ASGLOBAL, guiServer);
+	struct FuncDecl {
+		std::string decl;
+		asSFuncPtr func;
+		void *obj{nullptr};
+		FuncDecl(const std::string &_decl, asSFuncPtr _func, void *_obj) : decl(_decl), func(_func), obj(_obj) {}
+	};
+	std::vector<FuncDecl> gui_functions = {
+		{"bool BeginWindow(string, uint = 0)", asMETHOD(GuiServer, BeginWindow), guiServer},
+		{"void EndWindow()", asMETHOD(GuiServer, EndWindow), guiServer},
 
-	//
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_None", WindowFlags_None);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoResize", WindowFlags_NoResize);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoMove", WindowFlags_NoMove);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoBringToFrontOnFocus", WindowFlags_NoBringToFrontOnFocus);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoNavFocus", WindowFlags_NoNavFocus);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoDocking", WindowFlags_NoDocking);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoTitleBar", WindowFlags_NoTitleBar);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoCollapse", WindowFlags_NoCollapse);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_MenuBar", WindowFlags_MenuBar);
-	AS_CALL(_pEngine->RegisterEnumValue, "WindowFlags", "WindowFlags_NoBackground", WindowFlags_NoBackground);
+		{"void Text(string)", asMETHOD(GuiServer, Text), guiServer},
+		{"bool Button(string, int = 0, int = 0)", asMETHOD(GuiServer, Button), guiServer},
+		{"bool DragFloat(string, float &out)", asMETHOD(GuiServer, DragFloat), guiServer},
+		{"bool Checkbox(string, bool &out)", asMETHOD(GuiServer, Checkbox), guiServer},
+		{"void Separator()", asMETHOD(GuiServer, Separator), guiServer},
 
-	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "StyleVar_None", (int)StyleVar::None);
-	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "StyleVar_WindowPadding", (int)StyleVar::WindowPadding);
-	AS_CALL(_pEngine->RegisterEnumValue, "StyleVar", "StyleVar_WindowRounding", (int)StyleVar::WindowRounding);
+		{"void SetNextWindowPos(int, int)", asMETHOD(GuiServer, SetNextWindowPos), guiServer},
+		{"void SetNextWindowSize(int, int)", asMETHOD(GuiServer, SetNextWindowSize), guiServer},
+
+		{"void PushStyleVar(StyleVar, float)", asMETHODPR(GuiServer, PushStyleVar, (StyleVar, float), void), guiServer},
+		{"void PushStyleVar(StyleVar, Vector2@)", asMETHODPR(ASContext::GuiCaller, PushStyleVar, (StyleVar, ASContext::ASVector2 *), void), &guiCaller},
+		{"void PopStyleVar(int = 1)", asMETHOD(GuiServer, PopStyleVar), guiServer},
+
+		{"void SetupDockspace()", asMETHOD(GuiServer, SetupDockspace), guiServer},
+
+		{"bool BeginMainMenuBar()", asMETHOD(GuiServer, BeginMainMenuBar), guiServer},
+		{"void EndMainMenuBar()", asMETHOD(GuiServer, EndMainMenuBar), guiServer},
+		{"bool BeginMenu(string)", asMETHOD(GuiServer, BeginMenu), guiServer},
+		{"void EndMenu()", asMETHOD(GuiServer, EndMenu), guiServer},
+		{"bool MenuItem(string, string = \"\")", asMETHOD(GuiServer, MenuItem), guiServer},
+
+		{"bool BeginFooter(string)", asMETHOD(GuiServer, BeginFooter), guiServer},
+		{"void EndFooter()", asMETHOD(GuiServer, EndFooter), guiServer},
+
+		{"void RegisterPanel(string, string, bool = true)", asMETHOD(GuiServer, RegisterPanel), guiServer},
+		{"void DrawViewbar()", asMETHOD(GuiServer, DrawViewbar), guiServer},
+
+		{"bool BeginCheckerList(string)", asMETHOD(GuiServer, BeginCheckerList), guiServer},
+		{"void CheckerListNextItem()", asMETHOD(GuiServer, CheckerListNextItem), guiServer},
+		{"void EndCheckerList()", asMETHOD(GuiServer, EndCheckerList), guiServer},
+
+		{"bool BeginTree(string)", asMETHOD(GuiServer, BeginTree), guiServer},
+		{"void EndTree()", asMETHOD(GuiServer, EndTree), guiServer},
+
+		{"void PushID(string)", asMETHOD(GuiServer, PushID), guiServer},
+		{"void PopID()", asMETHOD(GuiServer, PopID), guiServer},
+
+		{"void ShowDemoWindow()", asMETHOD(GuiServer, ShowDemoWindow), guiServer},
+	};
+
+	for (auto &[decl, func, obj] : gui_functions) {
+		AS_CALL(_pEngine->RegisterGlobalFunction, decl.c_str(), func, asCALL_THISCALL_ASGLOBAL, obj);
+	}
+
+	struct EnumDecl {
+		std::string type;
+		std::string name;
+		int value;
+		EnumDecl(const std::string &_type, const std::string &_name, int _value) : type(_type), name(_name), value(_value) {}
+	};
+	std::vector<EnumDecl> enums = {
+		{"WindowFlags", "WindowFlags_None", WindowFlags_None},
+		{"WindowFlags", "WindowFlags_NoResize", WindowFlags_NoResize},
+		{"WindowFlags", "WindowFlags_NoMove", WindowFlags_NoMove},
+		{"WindowFlags", "WindowFlags_NoBringToFrontOnFocus", WindowFlags_NoBringToFrontOnFocus},
+		{"WindowFlags", "WindowFlags_NoNavFocus", WindowFlags_NoNavFocus},
+		{"WindowFlags", "WindowFlags_NoDocking", WindowFlags_NoDocking},
+		{"WindowFlags", "WindowFlags_NoTitleBar", WindowFlags_NoTitleBar},
+		{"WindowFlags", "WindowFlags_NoCollapse", WindowFlags_NoCollapse},
+		{"WindowFlags", "WindowFlags_MenuBar", WindowFlags_MenuBar},
+		{"WindowFlags", "WindowFlags_NoBackground", WindowFlags_NoBackground},
+
+		{"StyleVar", "StyleVar_None", (int)StyleVar::None},
+		{"StyleVar", "StyleVar_WindowPadding", (int)StyleVar::WindowPadding},
+		{"StyleVar", "StyleVar_WindowRounding", (int)StyleVar::WindowRounding},
+	};
+
+	for (auto &[type, name, value] : enums) {
+		AS_CALL(_pEngine->RegisterEnumValue, type.c_str(), name.c_str(), value);
+	}
 	//* --<Gui>-- */
 	SetNamespace("");
 
@@ -142,7 +176,13 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	auto &window = app->GetWindow();
 	static ASContext::WindowCaller windowCaller(&window);
 
-	AS_CALL(_pEngine->RegisterGlobalFunction, "Vector2@ GetWindowSize()", asMETHOD(ASContext::WindowCaller, GetWindowSize), asCALL_THISCALL_ASGLOBAL, &windowCaller);
+	std::vector<FuncDecl> window_functions = {
+		{"Vector2@ GetWindowSize()", asMETHOD(ASContext::WindowCaller, GetWindowSize), &windowCaller},
+	};
+
+	for (auto &[decl, func, obj] : window_functions) {
+		AS_CALL(_pEngine->RegisterGlobalFunction, decl.c_str(), func, asCALL_THISCALL_ASGLOBAL, obj);
+	}
 
 	//* --<Window>-- */
 	SetNamespace("");

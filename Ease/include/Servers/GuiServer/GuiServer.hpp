@@ -78,8 +78,6 @@ class GuiServer {
 	void PushID(const std::string &id);
 	void PopID();
 
-	void AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA();
-
 	// shows dear imgui demo window
 	void ShowDemoWindow();
 
