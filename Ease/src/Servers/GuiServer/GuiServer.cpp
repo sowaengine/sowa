@@ -9,6 +9,7 @@
 #include "res/Roboto-Medium.ttf.res.hpp"
 
 #include "Core/Application.hpp"
+#include "Core/ProjectSettings.hpp"
 #include "Resource/EditorTheme/EditorTheme.hpp"
 #include "Resource/ResourceLoader.hpp"
 
@@ -210,8 +211,16 @@ void GuiServer::ShowDemoWindow() {
 	ImGui::ShowDemoWindow();
 }
 
-bool GuiServer::BeginTree(const std::string &label) {
-	return ImGui::TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth);
+bool GuiServer::BeginTree(const std::string &label, uint32_t flags /*= 0*/) {
+	ImGuiTreeNodeFlags imflags = ImGuiTreeNodeFlags_None;
+	imflags |= ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_OpenOnArrow;
+
+	if (flags & TreeFlags_Leaf)
+		imflags |= ImGuiTreeNodeFlags_Leaf;
+	if (!(flags & TreeFlags_SpanMinWidth))
+		imflags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+
+	return ImGui::TreeNodeEx(label.c_str(), imflags);
 }
 void GuiServer::EndTree() {
 	ImGui::TreePop();
@@ -223,4 +232,132 @@ void GuiServer::PushID(const std::string &id) {
 void GuiServer::PopID() {
 	ImGui::PopID();
 }
+
+void GuiServer::DrawFrame() {
+	auto *app = _Context.GetSingleton<Application>(Ease::Server::APPLICATION);
+	ImGui::Image((ImTextureID)app->Renderer_GetAlbedoFramebufferID(), ImGui::GetContentRegionAvail());
+}
+
+void GuiServer::DrawFilesystem() {
+	static std::filesystem::path path = _Context.GetSingleton<Ease::ProjectSettings>(Ease::Server::PROJECTSETTINGS)->projectpath;
+	static std::filesystem::path rel_path = "";
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.2f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.05f, 0.05f, 0.05f, 0.2f));
+
+	float icon_width = 64;
+	float avail_width = ImGui::GetContentRegionAvail().x;
+	float padding_x = 8;
+
+	int col_count = std::floor(avail_width / (icon_width + padding_x));
+	col_count = std::max(1, col_count);
+
+	ImGui::Text("res://%s", rel_path.string().c_str());
+
+	ImGui::BeginTable("filesystem", col_count);
+	if (rel_path != "") {
+		ImGui::TableNextColumn();
+		ImGui::ImageButton((ImTextureID)_DirectoryTexture->TextureID(), ImVec2(icon_width, icon_width));
+
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			rel_path = rel_path.parent_path();
+		}
+		ImGui::Text("../");
+	}
+
+	for (auto &dir_entry : std::filesystem::directory_iterator(path / rel_path)) {
+		if (dir_entry.is_directory()) {
+			ImGui::TableNextColumn();
+
+			ImGui::ImageButton((ImTextureID)_DirectoryTexture->TextureID(), ImVec2(icon_width, icon_width));
+
+			if (ImGui::IsItemHovered()) {
+				if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+					rel_path /= dir_entry.path().filename();
+			}
+			ImGui::Text("%s", dir_entry.path().filename().string().c_str());
+		}
+	}
+
+	for (auto &dir_entry : std::filesystem::directory_iterator(path / rel_path)) {
+		if (!dir_entry.is_directory()) {
+			ImGui::TableNextColumn();
+
+			std::string extension = dir_entry.path().extension().string();
+			Reference<ImageTexture> fileTex = _FileTexture;
+			for (auto it = _FileTextures.begin(); it != _FileTextures.end(); ++it) {
+				if ((*it).first == extension) {
+					fileTex = (*it).second;
+					break;
+				}
+			}
+
+			ImGui::ImageButton((ImTextureID)fileTex->TextureID(), ImVec2(icon_width, icon_width));
+			ImGui::Text("%s", dir_entry.path().filename().string().c_str());
+		}
+	}
+	ImGui::EndTable();
+
+	ImGui::PopStyleColor(3);
+}
+
+void GuiServer::DrawPlayButton() {
+	auto *app = _Context.GetSingleton<Ease::Application>(Ease::Server::APPLICATION);
+	Reference<ImageTexture> tex = app->IsRunning() ? _StopTexture : _PlayTexture;
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.2f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.05f, 0.05f, 0.05f, 0.2f));
+
+	if (ImGui::ImageButton((ImTextureID)tex->TextureID(), ImVec2(32.f, 32.f))) {
+		if (app->IsRunning())
+			app->StopGame();
+		else
+			app->StartGame();
+	}
+
+	ImGui::PopStyleColor(3);
+}
+
+bool GuiServer::IsWindowHovered() {
+	return ImGui::IsWindowHovered() && !ImGui::IsItemHovered();
+}
+
+bool GuiServer::IsMouseClicked(GuiMouseButton button) {
+	ImGuiMouseButton btn = ImGuiMouseButton_Left;
+	if (button == GuiMouseButton::Left) {
+		btn = ImGuiMouseButton_Left;
+	} else if (button == GuiMouseButton::Right) {
+		btn = ImGuiMouseButton_Right;
+	} else if (button == GuiMouseButton::Middle) {
+		btn = ImGuiMouseButton_Middle;
+	}
+
+	return ImGui::IsMouseClicked(btn);
+}
+
+bool GuiServer::IsMouseDoubleClicked(GuiMouseButton button) {
+	ImGuiMouseButton btn = ImGuiMouseButton_Left;
+	if (button == GuiMouseButton::Left) {
+		btn = ImGuiMouseButton_Left;
+	} else if (button == GuiMouseButton::Right) {
+		btn = ImGuiMouseButton_Right;
+	} else if (button == GuiMouseButton::Middle) {
+		btn = ImGuiMouseButton_Middle;
+	}
+
+	return ImGui::IsMouseDoubleClicked(btn);
+}
+
+void GuiServer::OpenContextMenu(const std::string &id) {
+	ImGui::OpenPopup(id.c_str());
+}
+bool GuiServer::BeginContextMenu(const std::string &id) {
+	return ImGui::BeginPopup(id.c_str());
+}
+void GuiServer::EndContextMenu() {
+	ImGui::EndPopup();
+}
+
 } // namespace Ease

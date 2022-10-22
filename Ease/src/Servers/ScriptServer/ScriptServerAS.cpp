@@ -86,6 +86,8 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 
 	AS_CALL(_pEngine->RegisterEnum, "StyleVar");
 	AS_CALL(_pEngine->RegisterEnum, "WindowFlags");
+	AS_CALL(_pEngine->RegisterEnum, "TreeFlags");
+	AS_CALL(_pEngine->RegisterEnum, "GuiMouseButton");
 
 	struct FuncDecl {
 		std::string decl;
@@ -128,13 +130,25 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 		{"void CheckerListNextItem()", asMETHOD(GuiServer, CheckerListNextItem), guiServer},
 		{"void EndCheckerList()", asMETHOD(GuiServer, EndCheckerList), guiServer},
 
-		{"bool BeginTree(string)", asMETHOD(GuiServer, BeginTree), guiServer},
+		{"bool BeginTree(string, uint = 0)", asMETHOD(GuiServer, BeginTree), guiServer},
 		{"void EndTree()", asMETHOD(GuiServer, EndTree), guiServer},
 
 		{"void PushID(string)", asMETHOD(GuiServer, PushID), guiServer},
 		{"void PopID()", asMETHOD(GuiServer, PopID), guiServer},
 
 		{"void ShowDemoWindow()", asMETHOD(GuiServer, ShowDemoWindow), guiServer},
+
+		{"void DrawFrame()", asMETHOD(GuiServer, DrawFrame), guiServer},
+		{"void DrawFilesystem()", asMETHOD(GuiServer, DrawFilesystem), guiServer},
+		{"void DrawPlayButton()", asMETHOD(GuiServer, DrawPlayButton), guiServer},
+
+		{"bool IsWindowHovered()", asMETHOD(GuiServer, IsWindowHovered), guiServer},
+		{"bool IsMouseClicked(GuiMouseButton)", asMETHOD(GuiServer, IsMouseClicked), guiServer},
+		{"bool IsMouseDoubleClicked(GuiMouseButton)", asMETHOD(GuiServer, IsMouseDoubleClicked), guiServer},
+
+		{"void OpenContextMenu(string)", asMETHOD(GuiServer, OpenContextMenu), guiServer},
+		{"bool BeginContextMenu(string)", asMETHOD(GuiServer, BeginContextMenu), guiServer},
+		{"void EndContextMenu()", asMETHOD(GuiServer, EndContextMenu), guiServer},
 	};
 
 	for (auto &[decl, func, obj] : gui_functions) {
@@ -162,6 +176,15 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 		{"StyleVar", "StyleVar_None", (int)StyleVar::None},
 		{"StyleVar", "StyleVar_WindowPadding", (int)StyleVar::WindowPadding},
 		{"StyleVar", "StyleVar_WindowRounding", (int)StyleVar::WindowRounding},
+
+		{"TreeFlags", "TreeFlags_None", TreeFlags_None},
+		{"TreeFlags", "TreeFlags_Leaf", TreeFlags_Leaf},
+		{"TreeFlags", "TreeFlags_SpanMinWidth", TreeFlags_SpanMinWidth},
+
+		{"GuiMouseButton", "GuiMouseButton_None", (int)GuiMouseButton::None},
+		{"GuiMouseButton", "GuiMouseButton_Left", (int)GuiMouseButton::Left},
+		{"GuiMouseButton", "GuiMouseButton_Right", (int)GuiMouseButton::Right},
+		{"GuiMouseButton", "GuiMouseButton_Middle", (int)GuiMouseButton::Middle},
 	};
 
 	for (auto &[type, name, value] : enums) {

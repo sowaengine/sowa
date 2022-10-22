@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "Core/EngineContext.hpp"
+#include "Resource/Texture/Texture.hpp"
 #include "Utils/Math.hpp"
 
 class GLFWwindow;
@@ -25,10 +26,23 @@ enum WindowFlags {
 	WindowFlags_MenuBar = 1 << 7,
 	WindowFlags_NoBackground = 1 << 8,
 };
+enum TreeFlags {
+	TreeFlags_None = 0,
+	TreeFlags_Leaf = 1 << 0,
+	TreeFlags_SpanMinWidth = 1 << 1, // if not given, spans full width
+};
+
 enum class StyleVar {
 	None = 0,
 	WindowPadding,
 	WindowRounding,
+};
+
+enum class GuiMouseButton {
+	None = 0,
+	Left,
+	Right,
+	Middle,
 };
 
 class GuiServer {
@@ -72,11 +86,24 @@ class GuiServer {
 	void CheckerListNextItem();
 	void EndCheckerList();
 
-	bool BeginTree(const std::string &label);
+	bool BeginTree(const std::string &label, uint32_t flags = 0);
 	void EndTree();
 
 	void PushID(const std::string &id);
 	void PopID();
+
+	void DrawFrame();
+	void DrawFilesystem();
+	void DrawPlayButton();
+
+	// input
+	bool IsWindowHovered();
+	bool IsMouseClicked(GuiMouseButton button);
+	bool IsMouseDoubleClicked(GuiMouseButton button);
+
+	void OpenContextMenu(const std::string &id);
+	bool BeginContextMenu(const std::string &id);
+	void EndContextMenu();
 
 	// shows dear imgui demo window
 	void ShowDemoWindow();
@@ -105,6 +132,14 @@ class GuiServer {
 	std::unordered_map<std::string, PanelData> _panelViews;
 
 	int _panelStack = 0;
+
+	//
+	Reference<Ease::ImageTexture> _PlayTexture{nullptr};
+	Reference<Ease::ImageTexture> _StopTexture{nullptr};
+
+	Reference<Ease::ImageTexture> _DirectoryTexture{nullptr};
+	Reference<Ease::ImageTexture> _FileTexture{nullptr};
+	std::unordered_map<std::string, Reference<Ease::ImageTexture>> _FileTextures;
 };
 } // namespace Ease
 
