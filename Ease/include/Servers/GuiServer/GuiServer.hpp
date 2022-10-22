@@ -95,6 +95,7 @@ class GuiServer {
 	void DrawFrame();
 	void DrawFilesystem();
 	void DrawPlayButton();
+	void DrawScene();
 
 	// input
 	bool IsWindowHovered();

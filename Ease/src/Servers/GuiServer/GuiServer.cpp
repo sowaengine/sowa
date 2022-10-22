@@ -10,6 +10,7 @@
 
 #include "Core/Application.hpp"
 #include "Core/ProjectSettings.hpp"
+#include "ECS/Components/Components.hpp"
 #include "Resource/EditorTheme/EditorTheme.hpp"
 #include "Resource/ResourceLoader.hpp"
 
@@ -318,6 +319,31 @@ void GuiServer::DrawPlayButton() {
 	}
 
 	ImGui::PopStyleColor(3);
+}
+
+// todo: (scripting) add entity iterator
+// entity_iterator child = Scene::GetRoot().GetChildren();
+// while child != null
+// Log child.get().name
+// child.next()
+void GuiServer::DrawScene() {
+	BeginCheckerList("##sceneview");
+
+	auto *app = _Context.GetSingleton<Ease::Application>(Ease::Server::APPLICATION);
+	Reference<Ease::Scene> scene = app->GetCurrentScene();
+
+	auto view = scene->m_Registry.view<Component::Common>();
+	for (auto it = view.rbegin(); it != view.rend(); ++it) {
+		Ease::Entity entity(*it, &scene->m_Registry);
+
+		CheckerListNextItem();
+		PushID(std::to_string(entity.ID()));
+		if (BeginTree(entity.GetComponent<Component::Common>().Name(), TreeFlags_Leaf)) {
+			EndTree();
+		}
+		PopID();
+	}
+	EndCheckerList();
 }
 
 bool GuiServer::IsWindowHovered() {
