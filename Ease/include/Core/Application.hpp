@@ -35,7 +35,7 @@ class Application {
 	void UpdateGame();
 	void StopGame();
 	bool IsRunning() { return m_AppRunning; }
-	Ease::Scene *GetCurrentScene() { return m_pCurrentScene; }
+	Reference<Ease::Scene> GetCurrentScene() { return _pCurrentScene; }
 	Ease::Entity GetPickedEntity() { return m_MousePickedEntity; }
 
 	void ChangeScene(const char *path);
@@ -54,9 +54,9 @@ class Application {
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;
 
-	Scene m_GameScene;
-	Scene m_CopyScene;
-	Scene *m_pCurrentScene;
+	Reference<Ease::Scene> _GameScene;
+	Reference<Ease::Scene> _CopyScene;
+	Reference<Ease::Scene> _pCurrentScene;
 
 	bool m_AppRunning = false;
 
