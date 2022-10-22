@@ -2,11 +2,13 @@
 #define _E_ASCONTEXT_HPP__
 #pragma once
 
+#include "Core/Application.hpp"
 #include "Servers/GuiServer/GuiServer.hpp"
 #include "angelscript.h"
 #include <functional>
 #include <string>
 
+#include "ECS/Entity/Entity.hpp"
 #include "Utils/Math.hpp"
 
 namespace Ease {
@@ -102,6 +104,53 @@ class GuiCaller {
 
   private:
 	Ease::GuiServer *_Gui{nullptr};
+};
+
+// reference counted object with handle to Ease::Entity
+class ASEntity : public ASRefCounted {
+  public:
+	ASEntity();
+	~ASEntity();
+
+	ASEntity &operator=(const ASEntity &rhs);
+	void Echo();
+
+  private:
+	friend class ApplicationCaller;
+	friend class ASScene;
+	Ease::Entity _Handle;
+};
+
+// reference counted object with handle to Ease::Scene
+class ASScene : public ASRefCounted {
+  public:
+	ASScene();
+	ASScene(ASScene *scn);
+	~ASScene();
+
+	ASScene &operator=(const ASScene &rhs);
+
+	ASEntity *Create(const std::string &name, uint32_t id = 0);
+
+	// not exposed to script api
+	ASScene(Reference<Ease::Scene> _scene);
+
+	bool Valid();
+
+  private:
+	friend class ApplicationCaller;
+	Reference<Ease::Scene> _Handle;
+};
+
+class ApplicationCaller {
+  public:
+	ApplicationCaller(Ease::Application *app);
+	~ApplicationCaller();
+
+	ASScene *GetCurrentScene();
+
+  private:
+	Ease::Application *_App{nullptr};
 };
 
 } // namespace Ease::ASContext

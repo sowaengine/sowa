@@ -141,6 +141,7 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 		{"void DrawFrame()", asMETHOD(GuiServer, DrawFrame), guiServer},
 		{"void DrawFilesystem()", asMETHOD(GuiServer, DrawFilesystem), guiServer},
 		{"void DrawPlayButton()", asMETHOD(GuiServer, DrawPlayButton), guiServer},
+		{"void DrawScene()", asMETHOD(GuiServer, DrawScene), guiServer},
 
 		{"bool IsWindowHovered()", asMETHOD(GuiServer, IsWindowHovered), guiServer},
 		{"bool IsMouseClicked(GuiMouseButton)", asMETHOD(GuiServer, IsMouseClicked), guiServer},
@@ -191,11 +192,40 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 		AS_CALL(_pEngine->RegisterEnumValue, type.c_str(), name.c_str(), value);
 	}
 	//* --<Gui>-- */
+
+	//* vv<App>vv */
+	SetNamespace("App");
+	auto *app = _Context.GetSingleton<Application>(Server::APPLICATION);
+	static ASContext::ApplicationCaller appcaller{app};
+
+	RegisterRefType("Entity")
+		.RefFunc("void f()", asMETHOD(ASContext::ASEntity, _AddRef))
+		.ReleaseFunc("void f()", asMETHOD(ASContext::ASEntity, _Release))
+		.Method("Entity &opAssign(const Entity&in)", asMETHODPR(ASContext::ASEntity, operator=, (const ASContext::ASEntity &), ASContext::ASEntity &))
+		.Method("void Echo()", asMETHOD(ASContext::ASEntity, Echo));
+
+	RegisterRefType("Scene")
+		.RefFunc("void f()", asMETHOD(ASContext::ASScene, _AddRef))
+		.ReleaseFunc("void f()", asMETHOD(ASContext::ASScene, _Release))
+		.Factory("Scene@ f()", asFUNCTIONPR(ASContext::ASRefCounted::_Create, (), ASContext::ASScene *))
+		.Factory("Scene@ f(Scene@)", asFUNCTIONPR(ASContext::ASRefCounted::_Create, (const ASContext::ASScene &), ASContext::ASScene *))
+		.Method("Scene &opAssign(const Scene&in)", asMETHODPR(ASContext::ASScene, operator=, (const ASContext::ASScene &), ASContext::ASScene &))
+		.Method("bool Valid()", asMETHOD(ASContext::ASScene, Valid))
+		.Method("Entity@ Create(string name, uint id = 0)", asMETHOD(ASContext::ASScene, Create));
+
+	std::vector<FuncDecl> app_functions = {
+		{"Scene@ GetCurrentScene()", asMETHOD(ASContext::ApplicationCaller, GetCurrentScene), &appcaller},
+	};
+
+	for (auto &[decl, func, obj] : app_functions) {
+		AS_CALL(_pEngine->RegisterGlobalFunction, decl.c_str(), func, asCALL_THISCALL_ASGLOBAL, obj);
+	}
+
+	//* --<App>-- */
 	SetNamespace("");
 
 	//* vv<Window>vv */
 	SetNamespace("Window");
-	auto *app = _Context.GetSingleton<Application>(Server::APPLICATION);
 	auto &window = app->GetWindow();
 	static ASContext::WindowCaller windowCaller(&window);
 

@@ -1,6 +1,9 @@
 #include "Servers/ScriptServer/ASContext.hpp"
+#include "Core/Application.hpp"
 #include "Core/Window.hpp"
 #include "Debug.hpp"
+#include "ECS/Entity/Entity.hpp"
+#include "ECS/Scene/Scene.hpp"
 #include "Servers/GuiServer/GuiServer.hpp"
 #include <functional>
 #include <string>
@@ -109,6 +112,49 @@ void GuiCaller::PushStyleVar(StyleVar var, ASVector2 *vec) {
 		return;
 
 	_Gui->PushStyleVar(var, Vec2(vec->x, vec->y));
+}
+
+ApplicationCaller::ApplicationCaller(Ease::Application *app) : _App{app} {}
+ApplicationCaller::~ApplicationCaller() {}
+
+ASScene *ApplicationCaller::GetCurrentScene() {
+	return ASRefCounted::_Create<ASScene>(_App->GetCurrentScene());
+}
+
+ASEntity &ASEntity::operator=(const ASEntity &rhs) {
+	_Handle = rhs._Handle;
+	return *this;
+}
+void ASEntity::Echo() {
+	Debug::Log("Echo");
+}
+
+ASScene::ASScene() {
+	_Handle = std::make_shared<Ease::Scene>();
+}
+ASScene::ASScene(ASScene *scn) {
+	_Handle = scn->_Handle;
+}
+ASScene::~ASScene() {}
+
+ASEntity::ASEntity() {}
+ASEntity::~ASEntity() {}
+
+ASScene &ASScene::operator=(const ASScene &rhs) {
+	_Handle = rhs._Handle;
+	return *this;
+}
+
+ASEntity *ASScene::Create(const std::string &name, uint32_t id /*= 0*/) {
+	ASEntity *entity = ASRefCounted::_Create<ASEntity>();
+	entity->_Handle = _Handle->Create(name, id);
+	return entity;
+}
+
+ASScene::ASScene(Reference<Ease::Scene> _scene) : _Handle(_scene) {}
+
+bool ASScene::Valid() {
+	return _Handle != nullptr;
 }
 
 } // namespace Ease::ASContext
