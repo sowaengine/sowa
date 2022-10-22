@@ -10,6 +10,9 @@ class Panel {
     string panelName;
     DrawPanelFunc@ func;
 
+    bool has_custom_padding = false;
+    Vector2 custom_padding;
+
     Panel(string _panelName, DrawPanelFunc@ _func) {
         panelName = _panelName;
         @func = _func;
@@ -25,11 +28,20 @@ void PanelFunc() {
 
 void init()
 {
-    panels.insertLast(Panel("Scene", @Scene));
-    panels.insertLast(Panel("Properties", @Properties));
-    panels.insertLast(Panel("Console", @Console));
-    panels.insertLast(Panel("Filesystem", @Filesystem));
-    panels.insertLast(Panel("Game", @Game));
+    Panel@ scene = Panel("Scene", @Scene);
+    scene.has_custom_padding = true;
+    scene.custom_padding = Vector2(0, 0);
+
+    Panel@ properties = Panel("Properties", @Properties);
+    Panel@ console = Panel("Console", @Console);
+    Panel@ filesystem = Panel("Filesystem", @Filesystem);
+    Panel@ game = Panel("Game", @Game);
+
+    panels.insertLast(scene);
+    panels.insertLast(properties);
+    panels.insertLast(console);
+    panels.insertLast(filesystem);
+    panels.insertLast(game);
 
     for(uint i=0; i<panels.length(); i++) {
         Gui::RegisterPanel(panels[i].panelName, panels[i].panelName);
@@ -135,9 +147,21 @@ void gui_update()
 
         Gui::ShowDemoWindow();
         for(uint i=0; i<panels.length(); i++) {
-            if(Gui::BeginWindow(panels[i].panelName)) {
+            int stylevarCount = 0;
+            if(panels[i].has_custom_padding) {
+                Gui::PushStyleVar(Gui::StyleVar_WindowPadding, panels[i].custom_padding);
+                stylevarCount += 1;
+            }
+
+            bool beginWindow = Gui::BeginWindow(panels[i].panelName);
+            if(stylevarCount > 0) {
+                Gui::PopStyleVar(stylevarCount);
+            }
+            
+            if(beginWindow) {
                 panels[i].func();
             }
+
             Gui::EndWindow();
             
         }
