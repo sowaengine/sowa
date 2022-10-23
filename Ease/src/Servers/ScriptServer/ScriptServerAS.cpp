@@ -4,6 +4,7 @@
 
 #include "Core/Application.hpp"
 #include "Core/ProjectSettings.hpp"
+#include "ECS/Components/Components.hpp"
 #include "Servers/GuiServer/GuiServer.hpp"
 
 #include "add_on/scriptarray/scriptarray.h"
@@ -42,6 +43,30 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	RegisterStdString(_pEngine);
 	RegisterStdStringUtils(_pEngine);
 	ASContext::RegisterReprFunc("string", [](void *obj) { return *(std::string *)obj; });
+
+	struct FuncDecl {
+		std::string decl;
+		asSFuncPtr func;
+		void *obj{nullptr};
+		FuncDecl(const std::string &_decl, asSFuncPtr _func, void *_obj) : decl(_decl), func(_func), obj(_obj) {}
+	};
+	struct EnumDecl {
+		std::string type;
+		std::string name;
+		int value;
+		EnumDecl(const std::string &_type, const std::string &_name, int _value) : type(_type), name(_name), value(_value) {}
+	};
+
+	auto registerFuncs = [&](const std::vector<FuncDecl> &functions) {
+		for (auto &[decl, func, obj] : functions) {
+			AS_CALL(_pEngine->RegisterGlobalFunction, decl.c_str(), func, asCALL_THISCALL_ASGLOBAL, obj);
+		}
+	};
+	auto registerEnums = [&](const std::vector<EnumDecl> &enums) {
+		for (auto &[type, name, value] : enums) {
+			AS_CALL(_pEngine->RegisterEnumValue, type.c_str(), name.c_str(), value);
+		}
+	};
 
 	// Register generic functions, types
 
@@ -89,13 +114,7 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 	AS_CALL(_pEngine->RegisterEnum, "TreeFlags");
 	AS_CALL(_pEngine->RegisterEnum, "GuiMouseButton");
 
-	struct FuncDecl {
-		std::string decl;
-		asSFuncPtr func;
-		void *obj{nullptr};
-		FuncDecl(const std::string &_decl, asSFuncPtr _func, void *_obj) : decl(_decl), func(_func), obj(_obj) {}
-	};
-	std::vector<FuncDecl> gui_functions = {
+	registerFuncs({
 		{"bool BeginWindow(string, uint = 0)", asMETHOD(GuiServer, BeginWindow), guiServer},
 		{"void EndWindow()", asMETHOD(GuiServer, EndWindow), guiServer},
 
@@ -142,27 +161,19 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 		{"void DrawFilesystem()", asMETHOD(GuiServer, DrawFilesystem), guiServer},
 		{"void DrawPlayButton()", asMETHOD(GuiServer, DrawPlayButton), guiServer},
 		{"void DrawScene()", asMETHOD(GuiServer, DrawScene), guiServer},
+		{"void DrawProperties()", asMETHOD(GuiServer, DrawProperties), guiServer},
 
 		{"bool IsWindowHovered()", asMETHOD(GuiServer, IsWindowHovered), guiServer},
+		{"bool IsItemHovered()", asMETHOD(GuiServer, IsItemHovered), guiServer},
 		{"bool IsMouseClicked(GuiMouseButton)", asMETHOD(GuiServer, IsMouseClicked), guiServer},
 		{"bool IsMouseDoubleClicked(GuiMouseButton)", asMETHOD(GuiServer, IsMouseDoubleClicked), guiServer},
 
 		{"void OpenContextMenu(string)", asMETHOD(GuiServer, OpenContextMenu), guiServer},
 		{"bool BeginContextMenu(string)", asMETHOD(GuiServer, BeginContextMenu), guiServer},
 		{"void EndContextMenu()", asMETHOD(GuiServer, EndContextMenu), guiServer},
-	};
+	});
 
-	for (auto &[decl, func, obj] : gui_functions) {
-		AS_CALL(_pEngine->RegisterGlobalFunction, decl.c_str(), func, asCALL_THISCALL_ASGLOBAL, obj);
-	}
-
-	struct EnumDecl {
-		std::string type;
-		std::string name;
-		int value;
-		EnumDecl(const std::string &_type, const std::string &_name, int _value) : type(_type), name(_name), value(_value) {}
-	};
-	std::vector<EnumDecl> enums = {
+	registerEnums({
 		{"WindowFlags", "WindowFlags_None", WindowFlags_None},
 		{"WindowFlags", "WindowFlags_NoResize", WindowFlags_NoResize},
 		{"WindowFlags", "WindowFlags_NoMove", WindowFlags_NoMove},
@@ -186,11 +197,7 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 		{"GuiMouseButton", "GuiMouseButton_Left", (int)GuiMouseButton::Left},
 		{"GuiMouseButton", "GuiMouseButton_Right", (int)GuiMouseButton::Right},
 		{"GuiMouseButton", "GuiMouseButton_Middle", (int)GuiMouseButton::Middle},
-	};
-
-	for (auto &[type, name, value] : enums) {
-		AS_CALL(_pEngine->RegisterEnumValue, type.c_str(), name.c_str(), value);
-	}
+	});
 	//* --<Gui>-- */
 
 	//* vv<App>vv */
@@ -202,7 +209,8 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 		.RefFunc("void f()", asMETHOD(ASContext::ASEntity, _AddRef))
 		.ReleaseFunc("void f()", asMETHOD(ASContext::ASEntity, _Release))
 		.Method("Entity &opAssign(const Entity&in)", asMETHODPR(ASContext::ASEntity, operator=, (const ASContext::ASEntity &), ASContext::ASEntity &))
-		.Method("void Echo()", asMETHOD(ASContext::ASEntity, Echo));
+		.Method("void Echo()", asMETHOD(ASContext::ASEntity, Echo))
+		.Method("bool IsValid()", asMETHOD(ASContext::ASEntity, IsValid));
 
 	RegisterRefType("Scene")
 		.RefFunc("void f()", asMETHOD(ASContext::ASScene, _AddRef))
@@ -210,32 +218,31 @@ ScriptServerAS::ScriptServerAS(EngineContext &ctx) : _Context(ctx) {
 		.Factory("Scene@ f()", asFUNCTIONPR(ASContext::ASRefCounted::_Create, (), ASContext::ASScene *))
 		.Factory("Scene@ f(Scene@)", asFUNCTIONPR(ASContext::ASRefCounted::_Create, (const ASContext::ASScene &), ASContext::ASScene *))
 		.Method("Scene &opAssign(const Scene&in)", asMETHODPR(ASContext::ASScene, operator=, (const ASContext::ASScene &), ASContext::ASScene &))
-		.Method("bool Valid()", asMETHOD(ASContext::ASScene, Valid))
+		.Method("bool IsValid()", asMETHOD(ASContext::ASScene, IsValid))
 		.Method("Entity@ Create(string name, uint id = 0)", asMETHOD(ASContext::ASScene, Create));
 
-	std::vector<FuncDecl> app_functions = {
+	registerFuncs({
 		{"Scene@ GetCurrentScene()", asMETHOD(ASContext::ApplicationCaller, GetCurrentScene), &appcaller},
-	};
-
-	for (auto &[decl, func, obj] : app_functions) {
-		AS_CALL(_pEngine->RegisterGlobalFunction, decl.c_str(), func, asCALL_THISCALL_ASGLOBAL, obj);
-	}
+		{"Entity@ SelectedEntity()", asMETHOD(ASContext::ApplicationCaller, SelectedEntity), &appcaller},
+	});
 
 	//* --<App>-- */
 	SetNamespace("");
+	AS_CALL(_pEngine->RegisterEnum, "Component");
+	registerEnums({
+		{"Component", "Component_None", Component::Component_None},
+		{"Component", "Component_Common", Component::Component_Common},
+		{"Component", "Component_Transform2D", Component::Component_Transform2D},
+	});
 
 	//* vv<Window>vv */
 	SetNamespace("Window");
 	auto &window = app->GetWindow();
 	static ASContext::WindowCaller windowCaller(&window);
 
-	std::vector<FuncDecl> window_functions = {
+	registerFuncs({
 		{"Vector2@ GetWindowSize()", asMETHOD(ASContext::WindowCaller, GetWindowSize), &windowCaller},
-	};
-
-	for (auto &[decl, func, obj] : window_functions) {
-		AS_CALL(_pEngine->RegisterGlobalFunction, decl.c_str(), func, asCALL_THISCALL_ASGLOBAL, obj);
-	}
+	});
 
 	//* --<Window>-- */
 	SetNamespace("");
