@@ -12,7 +12,7 @@
 namespace Ease::Systems {
 void System_ButtonLogic(Ease::Scene *pScene) {
 	Ease::Application &app = Ease::Application::get_singleton();
-	Ease::Entity pickedEntity = app.GetPickedEntity();
+	Ease::Entity pickedEntity = app.SelectedEntity();
 
 	auto view = app.GetCurrentScene()->m_Registry.view<Component::Button>();
 	for (auto &e : view) {

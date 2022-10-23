@@ -115,6 +115,8 @@ class ASEntity : public ASRefCounted {
 	ASEntity &operator=(const ASEntity &rhs);
 	void Echo();
 
+	bool IsValid();
+
   private:
 	friend class ApplicationCaller;
 	friend class ASScene;
@@ -135,7 +137,7 @@ class ASScene : public ASRefCounted {
 	// not exposed to script api
 	ASScene(Reference<Ease::Scene> _scene);
 
-	bool Valid();
+	bool IsValid();
 
   private:
 	friend class ApplicationCaller;
@@ -148,6 +150,7 @@ class ApplicationCaller {
 	~ApplicationCaller();
 
 	ASScene *GetCurrentScene();
+	ASEntity *SelectedEntity();
 
   private:
 	Ease::Application *_App{nullptr};

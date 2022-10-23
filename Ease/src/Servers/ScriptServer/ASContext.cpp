@@ -120,6 +120,12 @@ ApplicationCaller::~ApplicationCaller() {}
 ASScene *ApplicationCaller::GetCurrentScene() {
 	return ASRefCounted::_Create<ASScene>(_App->GetCurrentScene());
 }
+ASEntity *ApplicationCaller::SelectedEntity() {
+	Ease::Entity &entity = _App->SelectedEntity();
+	ASEntity *asentity = ASRefCounted::_Create<ASEntity>();
+	asentity->_Handle = entity;
+	return asentity;
+}
 
 ASEntity &ASEntity::operator=(const ASEntity &rhs) {
 	_Handle = rhs._Handle;
@@ -127,6 +133,10 @@ ASEntity &ASEntity::operator=(const ASEntity &rhs) {
 }
 void ASEntity::Echo() {
 	Debug::Log("Echo");
+}
+
+bool ASEntity::IsValid() {
+	return _Handle.IsValid();
 }
 
 ASScene::ASScene() {
@@ -153,7 +163,7 @@ ASEntity *ASScene::Create(const std::string &name, uint32_t id /*= 0*/) {
 
 ASScene::ASScene(Reference<Ease::Scene> _scene) : _Handle(_scene) {}
 
-bool ASScene::Valid() {
+bool ASScene::IsValid() {
 	return _Handle != nullptr;
 }
 

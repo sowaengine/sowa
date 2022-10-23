@@ -36,7 +36,7 @@ class Application {
 	void StopGame();
 	bool IsRunning() { return m_AppRunning; }
 	Reference<Ease::Scene> GetCurrentScene() { return _pCurrentScene; }
-	Ease::Entity GetPickedEntity() { return m_MousePickedEntity; }
+	Ease::Entity &SelectedEntity() { return _SelectedEntity; }
 
 	void ChangeScene(const char *path);
 
@@ -60,7 +60,7 @@ class Application {
 
 	bool m_AppRunning = false;
 
-	Ease::Entity m_MousePickedEntity;
+	Ease::Entity _SelectedEntity;
 };
 } // namespace Ease
 

@@ -96,9 +96,11 @@ class GuiServer {
 	void DrawFilesystem();
 	void DrawPlayButton();
 	void DrawScene();
+	void DrawProperties();
 
 	// input
 	bool IsWindowHovered();
+	bool IsItemHovered();
 	bool IsMouseClicked(GuiMouseButton button);
 	bool IsMouseDoubleClicked(GuiMouseButton button);
 
