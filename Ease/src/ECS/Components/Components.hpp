@@ -6,7 +6,6 @@
 #include "Camera2D/Camera2D.hpp"
 #include "Common/Common.hpp"
 #include "Group/Group.hpp"
-#include "NativeBehaviourClass/NativeBehaviourClass.hpp"
 #include "NinePatchRect/NinePatchRect.hpp"
 #include "PhysicsBody2D/PhysicsBody2D.hpp"
 #include "Sprite2D/Sprite2D.hpp"

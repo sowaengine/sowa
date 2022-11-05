@@ -15,6 +15,24 @@ list(REMOVE_ITEM EASE_SOURCES ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
+set(CMAKE_CXX_FLAGS_DEBUG
+   ${CMAKE_CXX_FLAGS_DEBUG}
+   "-O0 -g ")
+
+set(CMAKE_CXX_FLAGS_RELEASE
+   ${CMAKE_CXX_FLAGS_RELEASE}
+   "-O2")
+
+
+set(CMAKE_C_FLAGS_DEBUG
+   ${CMAKE_C_FLAGS_DEBUG}
+   "-O0 -g")
+
+set(CMAKE_C_FLAGS_RELEASE
+   ${CMAKE_C_FLAGS_RELEASE}
+   "-O2")
+
+
 
 if(Editor)
    add_compile_definitions(EASE_EDITOR)
@@ -31,14 +49,15 @@ add_executable(Sowa
    ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp
    ${EASE_SOURCES})
 target_link_libraries(Sowa PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ fmt angelscript)
+# target_compile_options(Sowa PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
+
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/)
-target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/src/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
-target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/include/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/)
-target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/thirdparty/tinyfiledialogs/)
+target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/tinyfiledialogs/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript_2.36.0/sdk/angelscript/include/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript_2.36.0/sdk/)
@@ -52,11 +71,6 @@ else()
 endif()
 
 
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
