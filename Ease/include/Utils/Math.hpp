@@ -7,8 +7,8 @@ struct Vec2 {
 	float x;
 	float y;
 
-	Vec2(float x, float y)
-		: x(x), y(y) {
+	Vec2(float _x, float _y)
+		: x(_x), y(_y) {
 	}
 
 	Vec2()

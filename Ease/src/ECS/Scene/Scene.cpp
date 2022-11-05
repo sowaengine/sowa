@@ -54,7 +54,7 @@ void Scene::StartScene() {
 			for (Collider2D &collider : body.Colliders()) {
 				if (collider.shape == ColliderShape2D::BOX) {
 					collider.polyShape.SetAsBox(
-						SCREEN_TO_WORLD(collider.width / 2.f), SCREEN_TO_WORLD(collider.height / 2.f),
+						SCREEN_TO_WORLD(static_cast<float>(collider.width) / 2.f), SCREEN_TO_WORLD(static_cast<float>(collider.height) / 2.f),
 						b2Vec2(SCREEN_TO_WORLD(collider.offset.x), SCREEN_TO_WORLD(collider.offset.y)),
 						DEG2RAD * collider.rotation);
 
@@ -62,7 +62,7 @@ void Scene::StartScene() {
 				}
 				if (collider.shape == ColliderShape2D::CIRCLE) {
 					collider.circleShape.m_p = {SCREEN_TO_WORLD(collider.offset.x), SCREEN_TO_WORLD(collider.offset.y)};
-					collider.circleShape.m_radius = SCREEN_TO_WORLD(collider.radius);
+					collider.circleShape.m_radius = SCREEN_TO_WORLD(static_cast<float>(collider.radius));
 
 					collider.fixtureDef.shape = &collider.circleShape;
 				}
@@ -418,11 +418,11 @@ bool Scene::LoadFromFile(const char *file) {
 				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
 					uint32_t id = it->first.as<uint32_t>(0);
 					YAML::Node tex_node = it->second;
-					std::string path = tex_node["Path"].as<std::string>("");
-					if (path.size() > 0) {
-						Reference<ImageTexture> tex = resource_loader.LoadResource(path.c_str(), id);
+					std::string tex_path = tex_node["Path"].as<std::string>("");
+					if (tex_path.size() > 0) {
+						Reference<ImageTexture> tex = resource_loader.LoadResource(tex_path.c_str(), id);
 						if (tex != nullptr)
-							tex->SetFilepath(path);
+							tex->SetFilepath(tex_path);
 					}
 				}
 			}
@@ -485,15 +485,15 @@ bool Scene::LoadFromFile(const char *file) {
 					component.BodyType() = component_node["BodyType"].as<PhysicsBodyType>(component.BodyType());
 					std::vector<Collider2D> &colliders = component.Colliders();
 					if (component_node["Colliders"]) {
-						for (int i = 0; i < component_node["Colliders"].size(); i++) {
+						for (size_t i = 0; i < component_node["Colliders"].size(); i++) {
 							YAML::Node yaml_collider = component_node["Colliders"][i];
 							Collider2D collider;
 							collider.shape = yaml_collider["Shape"].as<ColliderShape2D>(collider.shape);
 							collider.offset = yaml_collider["Offset"].as<b2Vec2>(collider.offset);
 							collider.rotation = yaml_collider["Rotation"].as<float>(collider.rotation);
-							collider.width = yaml_collider["Width"].as<float>(collider.width);
-							collider.height = yaml_collider["Height"].as<float>(collider.height);
-							collider.radius = yaml_collider["Radius"].as<float>(collider.radius);
+							collider.width = yaml_collider["Width"].as<float>(static_cast<float>(collider.width));
+							collider.height = yaml_collider["Height"].as<float>(static_cast<float>(collider.height));
+							collider.radius = yaml_collider["Radius"].as<float>(static_cast<float>(collider.radius));
 							collider.density = yaml_collider["Density"].as<float>(collider.density);
 							collider.friction = yaml_collider["Friction"].as<float>(collider.friction);
 							collider.restitution = yaml_collider["Restitution"].as<float>(collider.restitution);

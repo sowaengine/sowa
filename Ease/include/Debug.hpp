@@ -99,7 +99,7 @@ class ScopeTimer {
 		auto now = std::chrono::high_resolution_clock::now();
 		auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(now - _Start).count();
 
-		Debug::Log("Scope Timer '{}': {}s", _Name.c_str(), std::round(deltaTime / 1000.f) / 1000.f);
+		Debug::Log("Scope Timer '{}': {}s", _Name.c_str(), std::round(static_cast<float>(deltaTime) / 1000.f) / 1000.f);
 	}
 
   private:
