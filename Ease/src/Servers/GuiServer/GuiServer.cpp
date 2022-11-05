@@ -3,6 +3,7 @@
 #include "imgui-docking/backends/imgui_impl_glfw.h"
 #include "imgui-docking/backends/imgui_impl_opengl3.h"
 #include "imgui-docking/imgui.h"
+#include "imgui-docking/misc/cpp/imgui_stdlib.h"
 
 #include <GLFW/glfw3.h>
 
@@ -90,6 +91,17 @@ bool GuiServer::Button(const std::string &label, int width /*= 0*/, int height /
 
 bool GuiServer::DragFloat(const std::string &label, float &f) {
 	return ImGui::DragFloat(label.c_str(), &f);
+}
+bool GuiServer::DragFloat2(const std::string &label, float &f1, float &f2) {
+	float v[2] = {f1, f2};
+	bool drag = ImGui::DragFloat2(label.c_str(), v);
+	Debug::Log("Hey {}, {}", f1, f2);
+	f1 = v[0];
+	f2 = v[1];
+	return drag;
+}
+bool GuiServer::SliderFloat(const std::string &label, float &f, float min, float max) {
+	return ImGui::SliderFloat(label.c_str(), &f, min, max);
 }
 
 bool GuiServer::Checkbox(const std::string &label, bool &value) {
@@ -339,6 +351,15 @@ void GuiServer::DrawScene() {
 		CheckerListNextItem();
 		PushID(std::to_string(entity.ID()));
 		if (BeginTree(entity.GetComponent<Component::Common>().Name(), TreeFlags_Leaf)) {
+			if (IsItemHovered() && IsMouseClicked(GuiMouseButton::Left)) {
+				app->SelectedEntity() = entity;
+			}
+			if (entity == app->SelectedEntity()) {
+				if (!IsItemHovered() && IsMouseClicked(GuiMouseButton::Left) && IsWindowHovered()) {
+					app->SelectedEntity().SetRegistry(nullptr);
+					app->SelectedEntity().SetEntityID({});
+				}
+			}
 			EndTree();
 		}
 		PopID();
@@ -348,6 +369,9 @@ void GuiServer::DrawScene() {
 
 bool GuiServer::IsWindowHovered() {
 	return ImGui::IsWindowHovered() && !ImGui::IsItemHovered();
+}
+bool GuiServer::IsItemHovered() {
+	return ImGui::IsItemHovered();
 }
 
 bool GuiServer::IsMouseClicked(GuiMouseButton button) {
@@ -384,6 +408,16 @@ bool GuiServer::BeginContextMenu(const std::string &id) {
 }
 void GuiServer::EndContextMenu() {
 	ImGui::EndPopup();
+}
+
+bool GuiServer::Header(const std::string &title) {
+	return ImGui::CollapsingHeader(title.c_str());
+}
+void GuiServer::Indent(float width /*= 0.f*/) {
+	ImGui::Indent(width);
+}
+void GuiServer::Unindent(float width /*= 0.f*/) {
+	ImGui::Unindent(width);
 }
 
 } // namespace Ease

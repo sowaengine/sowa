@@ -58,6 +58,8 @@ class GuiServer {
 	void Text(const std::string &text);
 	bool Button(const std::string &label, int width = 0, int height = 0);
 	bool DragFloat(const std::string &label, float &f);
+	bool DragFloat2(const std::string &label, float &f1, float &f2);
+	bool SliderFloat(const std::string &label, float &f, float min, float max);
 	bool Checkbox(const std::string &label, bool &value);
 	void Separator();
 
@@ -96,7 +98,6 @@ class GuiServer {
 	void DrawFilesystem();
 	void DrawPlayButton();
 	void DrawScene();
-	void DrawProperties();
 
 	// input
 	bool IsWindowHovered();
@@ -107,6 +108,10 @@ class GuiServer {
 	void OpenContextMenu(const std::string &id);
 	bool BeginContextMenu(const std::string &id);
 	void EndContextMenu();
+
+	bool Header(const std::string &label);
+	void Indent(float width = 0.f);
+	void Unindent(float width = 0.f);
 
 	// shows dear imgui demo window
 	void ShowDemoWindow();
