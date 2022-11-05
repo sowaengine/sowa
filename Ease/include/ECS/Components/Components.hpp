@@ -9,9 +9,17 @@
 #include "NativeBehaviourClass/NativeBehaviourClass.hpp"
 #include "NinePatchRect/NinePatchRect.hpp"
 #include "PhysicsBody2D/PhysicsBody2D.hpp"
-#include "SpriteRenderer2D/SpriteRenderer2D.hpp"
-#include "TextRenderer2D/TextRenderer2D.hpp"
+#include "Sprite2D/Sprite2D.hpp"
+#include "Text2D/Text2D.hpp"
 #include "Transform2D/Transform2D.hpp"
 #include "UITransform/UITransform.hpp"
+
+namespace Ease::Component {
+enum Component_ {
+	Component_None = 0,
+	Component_Common,
+	Component_Transform2D,
+};
+}
 
 #endif // _E_COMPONENTS_HPP__

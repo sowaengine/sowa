@@ -4,13 +4,13 @@
 namespace Ease::Systems {
 void ProcessAll(Ease::Scene *pScene, SystemsFlags flags, bool pickable /* = false*/) {
 	if (flags & SystemsFlags::SpriteRenderer2D)
-		Systems::System_SpriteRenderer2D(pScene, pickable);
+		Systems::System_Sprite2D(pScene, pickable);
 
 	if (flags & SystemsFlags::AnimatedSprite2D)
 		Systems::System_AnimatedSprite2D(pScene, pickable);
 
 	if (flags & SystemsFlags::TextRenderer2D)
-		Systems::System_TextRenderer2D(pScene, pickable);
+		Systems::System_Text2D(pScene, pickable);
 
 	if (flags & SystemsFlags::PhysicsBody2D)
 		Systems::System_PhysicsBody2D(pScene);

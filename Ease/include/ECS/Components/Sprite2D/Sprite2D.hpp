@@ -1,5 +1,5 @@
-#ifndef _E_SPRITERENDERER_HPP__
-#define _E_SPRITERENDERER_HPP__
+#ifndef _E_SPRITE2D_HPP__
+#define _E_SPRITE2D_HPP__
 
 #pragma once
 #include <memory>
@@ -10,10 +10,10 @@ class ImageTexture;
 }
 
 namespace Ease::Component {
-class SpriteRenderer2D {
+class Sprite2D {
   public:
-	SpriteRenderer2D();
-	~SpriteRenderer2D();
+	Sprite2D();
+	~Sprite2D();
 
 	std::shared_ptr<Ease::ImageTexture> &Texture() { return _texture; }
 	unsigned int &TextureID() { return _textureID; }

@@ -33,9 +33,9 @@ namespace Ease::Systems {
 void ProcessAll(Ease::Scene *pScene, SystemsFlags flags, bool pickable = false);
 
 // Specific Systems
-void System_SpriteRenderer2D(Ease::Scene *pScene, bool pickable = false);
+void System_Sprite2D(Ease::Scene *pScene, bool pickable = false);
 void System_AnimatedSprite2D(Ease::Scene *pScene, bool pickable = false);
-void System_TextRenderer2D(Ease::Scene *pScene, bool pickable = false);
+void System_Text2D(Ease::Scene *pScene, bool pickable = false);
 void System_PhysicsBody2D(Ease::Scene *pScene);
 void System_Physics2DDebugDraw(Ease::Scene *pScene, bool pickable = false);
 void System_ButtonDraw(Ease::Scene *pScene, bool pickable = false);

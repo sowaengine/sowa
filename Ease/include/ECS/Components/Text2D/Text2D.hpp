@@ -1,16 +1,16 @@
-#ifndef _E_TEXTRENDERER_HPP__
-#define _E_TEXTRENDERER_HPP__
+#ifndef _E_TEXT2D_HPP__
+#define _E_TEXT2D_HPP__
 
 #pragma once
 #include <glm/glm.hpp>
 #include <string>
 
 namespace Ease::Component {
-class TextRenderer2D {
+class Text2D {
   public:
-	TextRenderer2D();
-	TextRenderer2D(const std::string &text) : m_Text(text) {}
-	~TextRenderer2D();
+	Text2D();
+	Text2D(const std::string &text) : m_Text(text) {}
+	~Text2D();
 
 	std::string &Text() { return m_Text; }
 	glm::vec4 &Color() { return m_Color; }
