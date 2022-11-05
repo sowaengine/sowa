@@ -48,19 +48,16 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx)
 add_executable(Sowa
    ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp
    ${EASE_SOURCES})
-target_link_libraries(Sowa PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ fmt angelscript)
+target_link_libraries(Sowa PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ fmt)
 # target_compile_options(Sowa PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
 
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/src/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/)
-target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/include/tinyfiledialogs/)
 target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src/)
-target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript_2.36.0/sdk/angelscript/include/)
-target_include_directories(Sowa PRIVATE ${CMAKE_SOURCE_DIR}/Ease/thirdparty/angelscript_2.36.0/sdk/)
 
 
 if(Editor)
