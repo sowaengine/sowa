@@ -33,6 +33,7 @@ set(SOWA_INCLUDE_DIRS
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/lua-5.4.4/src/
+   ${CMAKE_SOURCE_DIR}/Ease/thirdparty/sol2-3.3.0/
    ${CMAKE_SOURCE_DIR}/Ease/include/tinyfiledialogs/
 
    PARENT_SCOPE
