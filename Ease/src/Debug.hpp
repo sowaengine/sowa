@@ -24,7 +24,11 @@
 
 #include "fmt/core.h"
 
+#include "Utils/Event.hpp"
+
 namespace Debug {
+
+Ease::Event<void(std::string)> &OnPrint();
 
 /**
  * @brief Internal print function used by Other logging functions
@@ -60,6 +64,7 @@ void Print(const std::string &levelText, bool toFile, const std::string &format,
 	std::string msg = fmt::format("[{}] [{}]: {}\n", time.str(), levelText, fmt::format(format, args...));
 
 	std::cout << msg << std::flush;
+	OnPrint().Invoke(msg);
 	if (toFile)
 		logStream << msg << std::flush;
 }
