@@ -1,3 +1,9 @@
+file(GLOB LUA_SOURCES
+   ${CMAKE_CURRENT_SOURCE_DIR}/lua-5.4.4/src/*.c)
+# Remove lua entry point
+list(REMOVE_ITEM LUA_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/lua-5.4.4/src/lua.c)
+list(REMOVE_ITEM LUA_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/lua-5.4.4/src/luac.c)
+
 set(SOWA_SOURCES
    ${SOWA_SOURCES}
 
@@ -11,6 +17,9 @@ set(SOWA_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/backends/imgui_impl_glfw.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/backends/imgui_impl_opengl3.cpp
 
+   # lua-5.4.4
+   ${LUA_SOURCES}
+
 
    #tinyfiledialogs
    ${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs/tinyfiledialogs.c
@@ -23,6 +32,7 @@ set(SOWA_INCLUDE_DIRS
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src/
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/
+   ${CMAKE_SOURCE_DIR}/Ease/thirdparty/lua-5.4.4/src/
    ${CMAKE_SOURCE_DIR}/Ease/include/tinyfiledialogs/
 
    PARENT_SCOPE
