@@ -10,10 +10,11 @@ namespace Ease {
 template <typename T>
 class Event {
   public:
-	void Invoke() {
+	template <typename... Args>
+	void Invoke(Args... args) {
 		for (size_t i = 0; i < m_Functions.size(); i++)
 			if (m_Functions[i])
-				m_Functions[i]();
+				m_Functions[i](args...);
 	}
 
 	uint32_t operator+=(const std::function<T> &func) {
