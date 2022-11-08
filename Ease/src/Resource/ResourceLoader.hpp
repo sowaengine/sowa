@@ -22,6 +22,15 @@ class ResourceLoader {
 	}
 
 	template <typename T>
+	Reference<T> LoadResourceFromMemory(const std::vector<unsigned char> &data) {
+		if (data.size() > 0) {
+			ResourceLoaderImpl<T> loader;
+			return loader.Load(data.data(), data.size());
+		}
+		return nullptr;
+	}
+
+	template <typename T>
 	Reference<T> LoadResource(const std::string &path) {
 		std::vector<unsigned char> data = Ease::File::GetFileContent(path.c_str());
 		if (data.size() > 0) {
