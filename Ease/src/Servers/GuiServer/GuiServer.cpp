@@ -15,6 +15,12 @@
 #include "Resource/EditorTheme/EditorTheme.hpp"
 #include "Resource/ResourceLoader.hpp"
 
+#include "res/textures/file.png.res.hpp"
+#include "res/textures/folder.png.res.hpp"
+#include "res/textures/image.png.res.hpp"
+#include "res/textures/play.png.res.hpp"
+#include "res/textures/stop.png.res.hpp"
+
 namespace Ease {
 GuiServer::GuiServer(Application *app, EngineContext &ctx) : _Application(app), _Context(ctx) {
 }
@@ -28,6 +34,23 @@ void GuiServer::InitGui(GLFWwindow *window) {
 	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::include_res_Roboto_Medium_ttf_data.data(), Res::include_res_Roboto_Medium_ttf_data.size(), 16.f);
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 150");
+
+#ifndef PASS_CONTAINER_AS_DATA
+#define PASS_CONTAINER_AS_DATA(container) (container.data()), (container.size())
+#endif
+
+	_PlayTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_play_png_data));
+	_StopTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_stop_png_data));
+
+	_DirectoryTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_folder_png_data));
+	_FileTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_file_png_data));
+
+	_FileTextures[".png"] = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_image_png_data));
+	_FileTextures[".jpg"] = _FileTextures[".png"];
+	_FileTextures[".jpeg"] = _FileTextures[".png"];
+	_FileTextures[".bmp"] = _FileTextures[".png"];
+
+#undef PASS_CONTAINER_AS_DATA
 
 	Reference<Ease::EditorTheme> theme = Ease::ResourceLoader::get_singleton().LoadResource<Ease::EditorTheme>("abs://res/theme.escfg");
 	ImGui::GetStyle() = theme->GetStyle();

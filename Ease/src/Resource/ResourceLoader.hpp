@@ -22,10 +22,10 @@ class ResourceLoader {
 	}
 
 	template <typename T>
-	Reference<T> LoadResourceFromMemory(const std::vector<unsigned char> &data) {
-		if (data.size() > 0) {
+	Reference<T> LoadResourceFromMemory(unsigned char *data, size_t size) {
+		if (size > 0) {
 			ResourceLoaderImpl<T> loader;
-			return loader.Load(data.data(), data.size());
+			return loader.Load(data, size);
 		}
 		return nullptr;
 	}
