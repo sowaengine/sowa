@@ -1,0 +1,77 @@
+#ifndef _E_LUASCRIPTSERVER_HPP__
+#define _E_LUASCRIPTSERVER_HPP__
+
+#include <memory>
+#include <unordered_map>
+
+#include "Core/Application.hpp"
+#include "Core/EngineContext.hpp"
+#include "Lua/LuaModule.hpp"
+#include "Servers/ScriptServer/ScriptServer.hpp"
+
+#include "ECS/Components/Base.hpp"
+
+namespace sol {
+class state;
+}
+
+namespace Ease {
+
+class LuaScriptServer : public ScriptServer, public ComponentAccessor {
+  protected:
+	friend class Application;
+	LuaScriptServer(EngineContext &ctx);
+	~LuaScriptServer();
+
+	static LuaScriptServer *CreateServer(EngineContext &ctx) {
+		return new LuaScriptServer(ctx);
+	}
+
+	void InitModules();
+	void UpdateModules();
+	void GuiUpdateModules();
+
+	EngineContext &_Context;
+
+  private:
+	/* implemented in Lua/Classes */
+
+	/**
+	 * @brief Register Classes related to ECS
+	 * @see Classes/LuaECS.cpp
+	 *
+	 * @implements Scene, Entity, Components
+	 */
+	void RegisterECS();
+
+	/**
+	 * @brief Register Classes related to Math
+	 * @see Classes/LuaMath.cpp
+	 *
+	 * @implements Vector2
+	 */
+	void RegisterMath();
+
+	/**
+	 * @brief Register Singleton Classes
+	 * @see Classes/LuaSingleton.cpp
+	 *
+	 * @implements Application, Wimdow, Debug
+	 */
+	void RegisterSingleton();
+
+	/**
+	 * @see Classes/LuaGui.cpp
+	 *
+	 * @implements GuiServer
+	 */
+	void RegisterGuiServer();
+
+	std::unique_ptr<sol::state> _pState{nullptr};
+
+	std::unordered_map<std::string, LuaModule> _Modules{};
+};
+
+} // namespace Ease
+
+#endif // _E_LUASCRIPTSERVER_HPP__

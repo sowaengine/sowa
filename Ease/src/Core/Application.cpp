@@ -31,6 +31,7 @@
 #include "nmGfx/src/Core/Window.hpp"
 
 #include "Servers/GuiServer/GuiServer.hpp"
+#include "Servers/ScriptServer/LuaScriptServer.hpp"
 
 #include "res/shaders/default2d.glsl.res.hpp"
 #include "res/shaders/default3d.glsl.res.hpp"
@@ -58,6 +59,9 @@ void Application::Run(int argc, char const *argv[]) {
 
 	GuiServer *guiServer = GuiServer::CreateServer(this, *ctx);
 	ctx->RegisterSingleton<GuiServer>(Ease::Server::GUISERVER, *guiServer);
+
+	LuaScriptServer *luaScriptServer = LuaScriptServer::CreateServer(*ctx);
+	ctx->RegisterSingleton<LuaScriptServer>(Ease::Server::SCRIPTSERVER_LUA, *luaScriptServer);
 
 	ProjectSettings *projectSettings = ProjectSettings::CreateServer(*ctx);
 	ctx->RegisterSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS, *projectSettings);
@@ -93,6 +97,7 @@ void Application::Run(int argc, char const *argv[]) {
 
 	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 
+	luaScriptServer->InitModules();
 	if (projectSettings->_application.MainScene != "")
 		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
@@ -108,8 +113,15 @@ void Application::Run(int argc, char const *argv[]) {
 
 	while (!_window.ShouldClose()) {
 		_renderer->GetWindow().PollEvents();
-		if (IsRunning())
+		if (IsRunning()) {
+			static float f = 0;
+
+			tc.m_Position.x = sin(f) * 200;
+			tc.m_Position.y = cos(f) * 200;
 			tc.Rotation() += 0.2f;
+
+			f += 0.02f;
+		}
 		// Clear window
 
 		Ease::Component::Transform2D &cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
@@ -121,9 +133,11 @@ void Application::Run(int argc, char const *argv[]) {
 		if (m_AppRunning) {
 			Ease::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic);
 		}
+		luaScriptServer->UpdateModules();
 
 		guiServer->BeginGui();
 
+		luaScriptServer->GuiUpdateModules();
 		ImGui::Render();
 
 		_renderer->ClearLayers();
