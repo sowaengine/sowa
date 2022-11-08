@@ -9,15 +9,13 @@
 #include "Lua/LuaModule.hpp"
 #include "Servers/ScriptServer/ScriptServer.hpp"
 
-#include "ECS/Components/Base.hpp"
-
 namespace sol {
 class state;
 }
 
 namespace Ease {
 
-class LuaScriptServer : public ScriptServer, public ComponentAccessor {
+class LuaScriptServer : public ScriptServer {
   protected:
 	friend class Application;
 	LuaScriptServer(EngineContext &ctx);

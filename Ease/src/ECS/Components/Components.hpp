@@ -14,7 +14,7 @@
 #include "UITransform/UITransform.hpp"
 
 namespace Ease::Component {
-enum Component_ {
+enum Component_ : uint32_t {
 	Component_None = 0,
 	Component_Common,
 	Component_Transform2D,
