@@ -4,6 +4,7 @@
 #pragma once
 
 #include "ECS/Components/PhysicsBody2D/PhysicsBody2D.hpp"
+#include "Utils/Math.hpp"
 #include "box2d/box2d.h"
 #include "glm/glm.hpp"
 #include "imgui-docking/imgui.h"
@@ -110,6 +111,24 @@ struct convert<glm::vec4> {
 };
 
 template <>
+struct convert<Ease::Vec2> {
+	static Node encode(const Ease::Vec2 &vec) {
+		Node node;
+		node.push_back(vec.x);
+		node.push_back(vec.y);
+		return node;
+	}
+	static bool decode(const Node &node, Ease::Vec2 &vec) {
+		if (!node.IsSequence() || node.size() != 2)
+			return false;
+
+		vec.x = node[0].as<float>();
+		vec.y = node[1].as<float>();
+		return true;
+	}
+};
+
+template <>
 struct convert<b2Vec2> {
 	static Node encode(const b2Vec2 &vec) {
 		Node node;
@@ -189,6 +208,8 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const ImVec4 &vec);
 YAML::Emitter &operator<<(YAML::Emitter &out, const glm::vec2 &vec);
 YAML::Emitter &operator<<(YAML::Emitter &out, const glm::vec3 &vec);
 YAML::Emitter &operator<<(YAML::Emitter &out, const glm::vec4 &vec);
+
+YAML::Emitter &operator<<(YAML::Emitter &out, const Ease::Vec2 &vec);
 
 YAML::Emitter &operator<<(YAML::Emitter &out, const b2Vec2 &vec);
 
