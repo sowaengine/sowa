@@ -81,8 +81,19 @@ void GuiServer::EndWindow() {
 	}
 }
 
+bool GuiServer::BeginChild(const std::string &id, int width /*= 0*/, int height /*= 0*/) {
+	return ImGui::BeginChild(id.c_str(), ImVec2(width, height));
+}
+void GuiServer::EndChild() {
+	ImGui::EndChild();
+}
+
 void GuiServer::Text(const std::string &text) {
 	ImGui::Text("%s", text.c_str());
+}
+
+void GuiServer::TextUnformatted(const std::string &text) {
+	ImGui::TextUnformatted(text.c_str());
 }
 
 bool GuiServer::Button(const std::string &label, int width /*= 0*/, int height /*= 0*/) {
@@ -95,7 +106,7 @@ bool GuiServer::DragFloat(const std::string &label, float &f) {
 bool GuiServer::DragFloat2(const std::string &label, float &f1, float &f2) {
 	float v[2] = {f1, f2};
 	bool drag = ImGui::DragFloat2(label.c_str(), v);
-	Debug::Log("Hey {}, {}", f1, f2);
+
 	f1 = v[0];
 	f2 = v[1];
 	return drag;
@@ -106,6 +117,10 @@ bool GuiServer::SliderFloat(const std::string &label, float &f, float min, float
 
 bool GuiServer::Checkbox(const std::string &label, bool &value) {
 	return ImGui::Checkbox(label.c_str(), &value);
+}
+
+bool GuiServer::InputText(const std::string &label, std::string &value) {
+	return ImGui::InputText(label.c_str(), &value, ImGuiInputTextFlags_EnterReturnsTrue);
 }
 
 void GuiServer::Separator() {
@@ -248,7 +263,7 @@ void GuiServer::PopID() {
 
 void GuiServer::DrawFrame() {
 	auto *app = _Context.GetSingleton<Application>(Ease::Server::APPLICATION);
-	ImGui::Image((ImTextureID)app->Renderer_GetAlbedoFramebufferID(), ImGui::GetContentRegionAvail());
+	ImGui::Image((ImTextureID) static_cast<size_t>(app->Renderer_GetAlbedoFramebufferID()), ImGui::GetContentRegionAvail());
 }
 
 void GuiServer::DrawFilesystem() {
@@ -387,6 +402,19 @@ bool GuiServer::IsMouseClicked(GuiMouseButton button) {
 	return ImGui::IsMouseClicked(btn);
 }
 
+bool GuiServer::IsMousePressed(GuiMouseButton button) {
+	ImGuiMouseButton btn = ImGuiMouseButton_Left;
+	if (button == GuiMouseButton::Left) {
+		btn = ImGuiMouseButton_Left;
+	} else if (button == GuiMouseButton::Right) {
+		btn = ImGuiMouseButton_Right;
+	} else if (button == GuiMouseButton::Middle) {
+		btn = ImGuiMouseButton_Middle;
+	}
+
+	return ImGui::IsMouseDown(btn);
+}
+
 bool GuiServer::IsMouseDoubleClicked(GuiMouseButton button) {
 	ImGuiMouseButton btn = ImGuiMouseButton_Left;
 	if (button == GuiMouseButton::Left) {
@@ -418,6 +446,30 @@ void GuiServer::Indent(float width /*= 0.f*/) {
 }
 void GuiServer::Unindent(float width /*= 0.f*/) {
 	ImGui::Unindent(width);
+}
+
+float GuiServer::GetAvailableWidth() {
+	return ImGui::GetContentRegionAvail().x;
+}
+float GuiServer::GetAvailableHeight() {
+	return ImGui::GetContentRegionAvail().y;
+}
+float GuiServer::GetTitleHeight() {
+	return ImGui::GetFrameHeight();
+}
+
+void GuiServer::SetScrollRatioY(float r) {
+	if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+		ImGui::SetScrollHereY(r);
+}
+
+void GuiServer::SameLine() {
+	ImGui::SameLine();
+}
+
+Vec2 GuiServer::GetMousePosition() {
+	ImVec2 pos = ImGui::GetMousePos();
+	return Vec2(pos.x, pos.y);
 }
 
 } // namespace Ease

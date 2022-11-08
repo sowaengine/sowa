@@ -55,12 +55,17 @@ class GuiServer {
 	bool BeginWindow(const std::string &title, uint32_t flags = 0);
 	void EndWindow();
 
+	bool BeginChild(const std::string &id, int width = 0, int height = 0);
+	void EndChild();
+
 	void Text(const std::string &text);
+	void TextUnformatted(const std::string &text);
 	bool Button(const std::string &label, int width = 0, int height = 0);
 	bool DragFloat(const std::string &label, float &f);
 	bool DragFloat2(const std::string &label, float &f1, float &f2);
 	bool SliderFloat(const std::string &label, float &f, float min, float max);
 	bool Checkbox(const std::string &label, bool &value);
+	bool InputText(const std::string &label, std::string &value);
 	void Separator();
 
 	void SetNextWindowPos(int x, int y);
@@ -103,6 +108,7 @@ class GuiServer {
 	bool IsWindowHovered();
 	bool IsItemHovered();
 	bool IsMouseClicked(GuiMouseButton button);
+	bool IsMousePressed(GuiMouseButton button);
 	bool IsMouseDoubleClicked(GuiMouseButton button);
 
 	void OpenContextMenu(const std::string &id);
@@ -112,6 +118,17 @@ class GuiServer {
 	bool Header(const std::string &label);
 	void Indent(float width = 0.f);
 	void Unindent(float width = 0.f);
+
+	float GetAvailableWidth();
+	float GetAvailableHeight();
+	float GetTitleHeight();
+
+	void SetScrollRatioY(float r); // 0.0 top, 1.0 bottom
+
+	void SameLine();
+
+	// returns mouse position relative to window position (0, 0) being top-left
+	Vec2 GetMousePosition();
 
 	// shows dear imgui demo window
 	void ShowDemoWindow();
