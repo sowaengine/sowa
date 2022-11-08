@@ -26,7 +26,7 @@ class ProjectSettings {
 		bool Fullscreen = false;
 	} _window;
 	struct {
-		std::vector<std::string> as; // angelscript modules
+		std::vector<std::string> lua;
 	} _modules;
 
 	bool LoadProject(const char *path);
