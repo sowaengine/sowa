@@ -97,9 +97,9 @@ void Application::Run(int argc, char const *argv[]) {
 
 	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 
-	luaScriptServer->InitModules();
 	if (projectSettings->_application.MainScene != "")
 		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
+	luaScriptServer->InitModules();
 
 #ifndef EASE_EDITOR
 	StartGame();
