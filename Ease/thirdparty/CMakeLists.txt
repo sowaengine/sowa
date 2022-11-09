@@ -31,6 +31,7 @@ set(SOWA_INCLUDE_DIRS
 
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src/
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/
+   # ${CMAKE_SOURCE_DIR}/Ease/thirdparty/glfw-3.3.8/include/ is included for all targets
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/lua-5.4.4/src/
    ${CMAKE_SOURCE_DIR}/Ease/thirdparty/sol2-3.3.0/
@@ -39,7 +40,13 @@ set(SOWA_INCLUDE_DIRS
    PARENT_SCOPE
 )
 
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+
+set(NMGFX_FIND_GLFW OFF)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1/)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/fmt-9.1.0/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glfw-3.3.8)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nmGfx/)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.7.0/)

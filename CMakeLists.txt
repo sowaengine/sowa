@@ -36,6 +36,9 @@ if(Editor)
    add_compile_definitions(EASE_EDITOR)
 endif()
 
+
+include_directories(${CMAKE_SOURCE_DIR}/Ease/thirdparty/glfw-3.3.8/include/)
+
 # thirdparty
 # Modifies ${SOWA_SOURCES} and ${SOWA_INCLUDE_DIRS}
 add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty)
