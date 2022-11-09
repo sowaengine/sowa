@@ -2,8 +2,8 @@
 #include "Resource/Texture/Texture.hpp"
 
 #include "Core/Application.hpp"
-#include "Core/Matrix.hpp"
-#include "nmGfx/src/Core/Renderer.hpp"
+#include "Core/nm_Matrix.hpp"
+#include "nmGfx/src/Core/nm_Renderer.hpp"
 #include <vector>
 
 namespace Ease {

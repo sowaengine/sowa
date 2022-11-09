@@ -6,7 +6,7 @@
 #include "Core/Input.hpp"
 #include "ECS/Components/Common/Common.hpp"
 #include "ECS/Entity/Entity.hpp"
-#include "nmGfx/src/Core/Window.hpp"
+#include "nmGfx/src/Core/nm_Window.hpp"
 
 namespace Ease {
 Window::Window() {}

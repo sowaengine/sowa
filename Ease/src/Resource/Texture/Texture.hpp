@@ -4,7 +4,7 @@
 #pragma once
 
 #include "../Resource.hpp"
-#include "Core/GL/Texture.hpp"
+#include "Core/GL/nm_Texture.hpp"
 #include <memory>
 #include <stdint.h>
 #include <string>

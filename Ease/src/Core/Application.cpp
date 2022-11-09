@@ -26,9 +26,9 @@
 #include "Utils/Dialog.hpp"
 #include "Utils/File.hpp"
 
-#include "nmGfx/src/Core/Matrix.hpp"
-#include "nmGfx/src/Core/Renderer.hpp"
-#include "nmGfx/src/Core/Window.hpp"
+#include "nmGfx/src/Core/nm_Matrix.hpp"
+#include "nmGfx/src/Core/nm_Renderer.hpp"
+#include "nmGfx/src/Core/nm_Window.hpp"
 
 #include "Servers/GuiServer/GuiServer.hpp"
 #include "Servers/ScriptServer/LuaScriptServer.hpp"
