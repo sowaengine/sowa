@@ -23,8 +23,8 @@
 		func<Ease::Component::Group>(__VA_ARGS__);            \
 		func<Ease::Component::NinePatchRect>(__VA_ARGS__);    \
 		func<Ease::Component::PhysicsBody2D>(__VA_ARGS__);    \
-		func<Ease::Component::SpriteRenderer2D>(__VA_ARGS__); \
-		func<Ease::Component::TextRenderer2D>(__VA_ARGS__);   \
+		func<Ease::Component::Sprite2D>(__VA_ARGS__);         \
+		func<Ease::Component::Text2D>(__VA_ARGS__);           \
 		func<Ease::Component::Transform2D>(__VA_ARGS__);      \
 		func<Ease::Component::UITransform>(__VA_ARGS__);      \
 	} while (0)
@@ -54,7 +54,7 @@ void Scene::StartScene() {
 			for (Collider2D &collider : body.Colliders()) {
 				if (collider.shape == ColliderShape2D::BOX) {
 					collider.polyShape.SetAsBox(
-						SCREEN_TO_WORLD(collider.width / 2.f), SCREEN_TO_WORLD(collider.height / 2.f),
+						SCREEN_TO_WORLD(static_cast<float>(collider.width) / 2.f), SCREEN_TO_WORLD(static_cast<float>(collider.height) / 2.f),
 						b2Vec2(SCREEN_TO_WORLD(collider.offset.x), SCREEN_TO_WORLD(collider.offset.y)),
 						DEG2RAD * collider.rotation);
 
@@ -62,7 +62,7 @@ void Scene::StartScene() {
 				}
 				if (collider.shape == ColliderShape2D::CIRCLE) {
 					collider.circleShape.m_p = {SCREEN_TO_WORLD(collider.offset.x), SCREEN_TO_WORLD(collider.offset.y)};
-					collider.circleShape.m_radius = SCREEN_TO_WORLD(collider.radius);
+					collider.circleShape.m_radius = SCREEN_TO_WORLD(static_cast<float>(collider.radius));
 
 					collider.fixtureDef.shape = &collider.circleShape;
 				}
@@ -120,8 +120,8 @@ void Scene::AddCopiedEntity(Ease::Entity entity) {
 
 	CopyComponent<Component::AnimatedSprite2D>(entity, copyEntity);
 	CopyComponent<Component::Group>(entity, copyEntity);
-	CopyComponent<Component::SpriteRenderer2D>(entity, copyEntity);
-	CopyComponent<Component::TextRenderer2D>(entity, copyEntity);
+	CopyComponent<Component::Sprite2D>(entity, copyEntity);
+	CopyComponent<Component::Text2D>(entity, copyEntity);
 	CopyComponent<Component::Transform2D>(entity, copyEntity);
 }
 
@@ -139,8 +139,8 @@ Ease::Entity CreateEntityFromRegistry(entt::entity id, entt::registry &srcRegist
 	// Copy components
 	CopyComponent<Component::AnimatedSprite2D>(copyEntity, entity);
 	CopyComponent<Component::Group>(copyEntity, entity);
-	CopyComponent<Component::SpriteRenderer2D>(copyEntity, entity);
-	CopyComponent<Component::TextRenderer2D>(copyEntity, entity);
+	CopyComponent<Component::Sprite2D>(copyEntity, entity);
+	CopyComponent<Component::Text2D>(copyEntity, entity);
 	CopyComponent<Component::Transform2D>(copyEntity, entity);
 
 	return entity;
@@ -275,28 +275,28 @@ static void YAMLSerializeEntity(Ease::Entity entity, YAML::Emitter &yaml) {
 		yaml << YAML::EndMap;
 	}
 	// </PhysicsBody2D>
-	// <SpriteRenderer2D>
-	if (entity.HasComponent<Component::SpriteRenderer2D>()) {
-		Component::SpriteRenderer2D &component = entity.GetComponent<Component::SpriteRenderer2D>();
+	// <Sprite2D>
+	if (entity.HasComponent<Component::Sprite2D>()) {
+		Component::Sprite2D &component = entity.GetComponent<Component::Sprite2D>();
 
-		yaml << YAML::Key << "SpriteRenderer2D" << YAML::BeginMap;
+		yaml << YAML::Key << "Sprite2D" << YAML::BeginMap;
 		yaml << YAML::Key << "Texture" << YAML::Value << component.TextureID();
 		yaml << YAML::Key << "Visible" << YAML::Value << component.Visible();
 		yaml << YAML::EndMap;
 	}
-	// </SpriteRenderer2D>
-	// <TextRenderer2D>
-	if (entity.HasComponent<Component::TextRenderer2D>()) {
-		Component::TextRenderer2D &component = entity.GetComponent<Component::TextRenderer2D>();
+	// </Sprite2D>
+	// <Text2D>
+	if (entity.HasComponent<Component::Text2D>()) {
+		Component::Text2D &component = entity.GetComponent<Component::Text2D>();
 
-		yaml << YAML::Key << "TextRenderer2D" << YAML::BeginMap;
+		yaml << YAML::Key << "Text2D" << YAML::BeginMap;
 		yaml << YAML::Key << "Text" << YAML::Value << component.Text();
 		yaml << YAML::Key << "Color" << YAML::Value << component.Color();
 		yaml << YAML::Key << "FontSize" << YAML::Value << component.FontSize();
 		yaml << YAML::Key << "Visible" << YAML::Value << component.Visible();
 		yaml << YAML::EndMap;
 	}
-	// </TextRenderer2D>
+	// </Text2D>
 	// <Transform2D>
 	if (entity.HasComponent<Component::Transform2D>()) {
 		Component::Transform2D &component = entity.GetComponent<Component::Transform2D>();
@@ -418,11 +418,11 @@ bool Scene::LoadFromFile(const char *file) {
 				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
 					uint32_t id = it->first.as<uint32_t>(0);
 					YAML::Node tex_node = it->second;
-					std::string path = tex_node["Path"].as<std::string>("");
-					if (path.size() > 0) {
-						Reference<ImageTexture> tex = resource_loader.LoadResource(path.c_str(), id);
+					std::string tex_path = tex_node["Path"].as<std::string>("");
+					if (tex_path.size() > 0) {
+						Reference<ImageTexture> tex = resource_loader.LoadResource(tex_path.c_str(), id);
 						if (tex != nullptr)
-							tex->SetFilepath(path);
+							tex->SetFilepath(tex_path);
 					}
 				}
 			}
@@ -485,15 +485,15 @@ bool Scene::LoadFromFile(const char *file) {
 					component.BodyType() = component_node["BodyType"].as<PhysicsBodyType>(component.BodyType());
 					std::vector<Collider2D> &colliders = component.Colliders();
 					if (component_node["Colliders"]) {
-						for (int i = 0; i < component_node["Colliders"].size(); i++) {
+						for (size_t i = 0; i < component_node["Colliders"].size(); i++) {
 							YAML::Node yaml_collider = component_node["Colliders"][i];
 							Collider2D collider;
 							collider.shape = yaml_collider["Shape"].as<ColliderShape2D>(collider.shape);
 							collider.offset = yaml_collider["Offset"].as<b2Vec2>(collider.offset);
 							collider.rotation = yaml_collider["Rotation"].as<float>(collider.rotation);
-							collider.width = yaml_collider["Width"].as<float>(collider.width);
-							collider.height = yaml_collider["Height"].as<float>(collider.height);
-							collider.radius = yaml_collider["Radius"].as<float>(collider.radius);
+							collider.width = yaml_collider["Width"].as<float>(static_cast<float>(collider.width));
+							collider.height = yaml_collider["Height"].as<float>(static_cast<float>(collider.height));
+							collider.radius = yaml_collider["Radius"].as<float>(static_cast<float>(collider.radius));
 							collider.density = yaml_collider["Density"].as<float>(collider.density);
 							collider.friction = yaml_collider["Friction"].as<float>(collider.friction);
 							collider.restitution = yaml_collider["Restitution"].as<float>(collider.restitution);
@@ -502,14 +502,14 @@ bool Scene::LoadFromFile(const char *file) {
 						}
 					}
 				}
-				if (YAML::Node component_node = components["SpriteRenderer2D"]; component_node) {
-					Component::SpriteRenderer2D &component = entity.AddComponent<Component::SpriteRenderer2D>();
+				if (YAML::Node component_node = components["Sprite2D"]; component_node) {
+					Component::Sprite2D &component = entity.AddComponent<Component::Sprite2D>();
 					component.Texture() = nullptr;
 					component.TextureID() = component_node["Texture"].as<ResourceID>(0);
 					component.Visible() = component_node["Visible"].as<bool>(true);
 				}
-				if (YAML::Node component_node = components["TextRenderer2D"]; component_node) {
-					Component::TextRenderer2D &component = entity.AddComponent<Component::TextRenderer2D>();
+				if (YAML::Node component_node = components["Text2D"]; component_node) {
+					Component::Text2D &component = entity.AddComponent<Component::Text2D>();
 					component.Text() = component_node["Text"].as<std::string>("");
 					component.Color() = component_node["Color"].as<glm::vec4>(glm::vec4{255.f, 255.f, 255.f, 255.f});
 					component.FontSize() = component_node["FontSize"].as<float>(64.f);

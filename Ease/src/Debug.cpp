@@ -2,6 +2,12 @@
 
 namespace Debug {
 
+Ease::Event<void(std::string)> &OnPrint() {
+	static Ease::Event<void(std::string)> _onPrint;
+
+	return _onPrint;
+}
+
 static CallStack s_StackTrace;
 
 FuncEntry::FuncEntry() : _FuncName("unnamed_func"), _File(""), _Line(0) {}

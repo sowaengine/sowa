@@ -44,7 +44,7 @@ bool ProjectSettings::LoadProject(const char *path) {
 		if (project["Modules"]) {
 			YAML::Node __modules = project["Modules"];
 
-			_modules.as = __modules["AS"].as<std::vector<std::string>>(_modules.as);
+			_modules.lua = __modules["Lua"].as<std::vector<std::string>>(_modules.lua);
 		}
 	}
 	return true;
@@ -89,7 +89,7 @@ bool ProjectSettings::SaveProject() {
 	/**  <Modules> */
 	yaml << YAML::Key << "Modules";
 	yaml << YAML::Value << YAML::BeginMap;
-	yaml << YAML::Key << "AS" << YAML::Value << _modules.as;
+	yaml << YAML::Key << "Lua" << YAML::Value << _modules.lua;
 	yaml << YAML::Newline;
 	yaml << YAML::EndMap;
 	/** </Modules> */

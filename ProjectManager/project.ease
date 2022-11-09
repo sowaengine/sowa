@@ -17,5 +17,5 @@ Window:
 
 
 Modules:
-  AS:
-    - res://Modules/Ease.Editor.as
+  Lua:
+    - res://Modules/Ease.Editor.lua

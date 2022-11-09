@@ -1,2 +1,3 @@
 >include/res/*.ttf
+>include/res/textures/*.png
 >include/res/shaders/*.glsl

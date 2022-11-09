@@ -26,12 +26,12 @@
 #include "Utils/Dialog.hpp"
 #include "Utils/File.hpp"
 
-#include "nmGfx/src/Core/Matrix.hpp"
-#include "nmGfx/src/Core/Renderer.hpp"
-#include "nmGfx/src/Core/Window.hpp"
+#include "nmGfx/src/Core/nm_Matrix.hpp"
+#include "nmGfx/src/Core/nm_Renderer.hpp"
+#include "nmGfx/src/Core/nm_Window.hpp"
 
 #include "Servers/GuiServer/GuiServer.hpp"
-#include "Servers/ScriptServer/ScriptServerAS.hpp"
+#include "Servers/ScriptServer/LuaScriptServer.hpp"
 
 #include "res/shaders/default2d.glsl.res.hpp"
 #include "res/shaders/default3d.glsl.res.hpp"
@@ -39,8 +39,11 @@
 #include "res/shaders/skybox.glsl.res.hpp"
 
 namespace Ease {
-Application::Application()
-	: m_pCurrentScene(&m_GameScene) {
+Application::Application() {
+	_GameScene = std::make_shared<Ease::Scene>();
+	_CopyScene = std::make_shared<Ease::Scene>();
+
+	_pCurrentScene = _GameScene;
 }
 
 Application::~Application() {
@@ -57,8 +60,8 @@ void Application::Run(int argc, char const *argv[]) {
 	GuiServer *guiServer = GuiServer::CreateServer(this, *ctx);
 	ctx->RegisterSingleton<GuiServer>(Ease::Server::GUISERVER, *guiServer);
 
-	ScriptServerAS *scriptServerAS = ScriptServerAS::CreateServer(*ctx);
-	ctx->RegisterSingleton<ScriptServerAS>(Ease::Server::SCRIPTSERVER_AS, *scriptServerAS);
+	LuaScriptServer *luaScriptServer = LuaScriptServer::CreateServer(*ctx);
+	ctx->RegisterSingleton<LuaScriptServer>(Ease::Server::SCRIPTSERVER_LUA, *luaScriptServer);
 
 	ProjectSettings *projectSettings = ProjectSettings::CreateServer(*ctx);
 	ctx->RegisterSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS, *projectSettings);
@@ -94,32 +97,47 @@ void Application::Run(int argc, char const *argv[]) {
 
 	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 
-	scriptServerAS->InitModules();
 	if (projectSettings->_application.MainScene != "")
-		m_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
+		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
+	luaScriptServer->InitModules();
 
 #ifndef EASE_EDITOR
 	StartGame();
 #endif
 
+	Ease::Entity entity = GetCurrentScene()->Create("Test");
+	auto &tc = entity.AddComponent<Component::Transform2D>();
+	tc.Scale() = {0.25f, 0.25f};
+	auto &spr = entity.AddComponent<Component::Sprite2D>();
+	spr.Texture() = ResourceLoader::get_singleton().LoadResource<Ease::ImageTexture>("abs://res/icon.png");
+
 	while (!_window.ShouldClose()) {
 		_renderer->GetWindow().PollEvents();
+		if (IsRunning()) {
+			static float f = 0;
+
+			tc.m_Position.x = sin(f) * 200;
+			tc.m_Position.y = cos(f) * 200;
+			tc.Rotation() += 0.2f;
+
+			f += 0.02f;
+		}
 		// Clear window
 
 		Ease::Component::Transform2D &cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
 		_renderer->Begin2D(
 			nmGfx::CalculateModelMatrix(glm::vec3{cam2dtc.Position().x, cam2dtc.Position().y, 0.f}, cam2dtc.Rotation(), glm::vec3{cam2dtc.Scale().x, cam2dtc.Scale().y, 1.f}));
-		Ease::Systems::System_SpriteRenderer2D(m_pCurrentScene);
+		Ease::Systems::System_Sprite2D(_pCurrentScene.get());
 		_renderer->End2D();
 
 		if (m_AppRunning) {
-			Ease::Systems::ProcessAll(m_pCurrentScene, SystemsFlags::Update_Logic);
+			Ease::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic);
 		}
-		scriptServerAS->UpdateModules();
+		luaScriptServer->UpdateModules();
 
 		guiServer->BeginGui();
 
-		scriptServerAS->GuiUpdateModules();
+		luaScriptServer->GuiUpdateModules();
 		ImGui::Render();
 
 		_renderer->ClearLayers();
@@ -147,9 +165,10 @@ void Application::StartGame() {
 	m_AppRunning = true;
 
 	ctx->GetSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS)->debug_draw = false;
-	Scene::CopyScene(m_GameScene, m_CopyScene);
+	Scene::CopyScene(*_GameScene.get(), *_CopyScene.get());
 
-	m_pCurrentScene->StartScene();
+	_pCurrentScene->StartScene();
+	_SelectedEntity.SetRegistry(&_pCurrentScene->m_Registry);
 }
 
 void Application::UpdateGame() {
@@ -161,13 +180,14 @@ void Application::StopGame() {
 	m_AppRunning = false;
 
 	ctx->GetSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS)->debug_draw = true;
-	Scene::CopyScene(m_CopyScene, m_GameScene);
+	Scene::CopyScene(*_CopyScene.get(), *_GameScene.get());
 
-	m_pCurrentScene->StopScene();
+	_pCurrentScene->StopScene();
+	_SelectedEntity.SetRegistry(&_pCurrentScene->m_Registry);
 }
 
 void Application::ChangeScene(const char *path) {
-	m_pCurrentScene->LoadFromFile(path);
+	_pCurrentScene->LoadFromFile(path);
 }
 
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
