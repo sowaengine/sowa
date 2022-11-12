@@ -43,5 +43,4 @@ todo.md
 Game/
 logs/
 *.log
-imgui.ini
 *.res.hpp
