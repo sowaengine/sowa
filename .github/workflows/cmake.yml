@@ -37,7 +37,7 @@ jobs:
     
     
     - name: Install dependencies
-      run: sudo apt-get install libglfw3-dev
+      run: sudo apt-get install libxinerama-dev libxrandr-dev libxcursor-dev libxi-dev libgl-dev
     
     - name: Initialize and update submodules
       run: git submodule update --init --recursive --remote
