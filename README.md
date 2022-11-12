@@ -10,8 +10,6 @@
    This software is not in usable state yet.
    
 ## Building
-- Following libraries should be installed in system
-     - glfw
 - After cloning the repository, update submodules <br>
 ```git submodule update --init --recursive --remote```
 
