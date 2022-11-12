@@ -21,6 +21,9 @@
 #include "res/textures/play.png.res.hpp"
 #include "res/textures/stop.png.res.hpp"
 
+#include "res/imgui.ini.res.hpp"
+#include "res/default_theme.yml.res.hpp"
+
 namespace Ease {
 GuiServer::GuiServer(Application *app, EngineContext &ctx) : _Application(app), _Context(ctx) {
 }
@@ -32,12 +35,18 @@ void GuiServer::InitGui(GLFWwindow *window) {
 	ImGui::CreateContext();
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::include_res_Roboto_Medium_ttf_data.data(), Res::include_res_Roboto_Medium_ttf_data.size(), 16.f);
+
+	ImGui::GetIO().IniFilename = NULL;
+	std::string layout = std::string{reinterpret_cast<char*>(Ease::Res::include_res_imgui_ini_data.data()), Ease::Res::include_res_imgui_ini_data.size()};
+	ImGui::LoadIniSettingsFromMemory(layout.c_str());
+
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 150");
 
-#ifndef PASS_CONTAINER_AS_DATA
-#define PASS_CONTAINER_AS_DATA(container) (container.data()), (container.size())
+#ifdef PASS_CONTAINER_AS_DATA
+#undef PASS_CONTAINER_AS_DATA
 #endif
+#define PASS_CONTAINER_AS_DATA(container) (container.data()), (container.size())
 
 	_PlayTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_play_png_data));
 	_StopTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_stop_png_data));
@@ -50,10 +59,10 @@ void GuiServer::InitGui(GLFWwindow *window) {
 	_FileTextures[".jpeg"] = _FileTextures[".png"];
 	_FileTextures[".bmp"] = _FileTextures[".png"];
 
-#undef PASS_CONTAINER_AS_DATA
-
-	Reference<Ease::EditorTheme> theme = Ease::ResourceLoader::get_singleton().LoadResource<Ease::EditorTheme>("abs://res/theme.escfg");
+	Reference<Ease::EditorTheme> theme = Ease::ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::EditorTheme>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_default_theme_yml_data));
 	ImGui::GetStyle() = theme->GetStyle();
+	
+#undef PASS_CONTAINER_AS_DATA
 }
 
 void GuiServer::BeginGui() {
