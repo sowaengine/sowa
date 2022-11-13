@@ -159,6 +159,20 @@ void GuiServer::Separator() {
 	ImGui::Separator();
 }
 
+void GuiServer::Image(Reference<ImageTexture> image, int width, int height) {
+	if (image != nullptr)
+		ImGui::Image((ImTextureID)image->TextureID(), ImVec2(width, height));
+}
+
+bool GuiServer::ImageButton(Reference<ImageTexture> image, int width, int height) {
+	if (image != nullptr)
+		return ImGui::ImageButton((ImTextureID)image->TextureID(), ImVec2(width, height));
+	else
+		return ImGui::Button("", ImVec2(width, height));
+
+	return false;
+}
+
 void GuiServer::SetNextWindowPos(int x, int y) {
 	ImGui::SetNextWindowPos(ImVec2(x, y), ImGuiCond_Always);
 }
@@ -295,7 +309,7 @@ void GuiServer::PopID() {
 
 void GuiServer::DrawFrame() {
 	auto *app = _Context.GetSingleton<Application>(Ease::Server::APPLICATION);
-	ImGui::Image((ImTextureID) static_cast<size_t>(app->Renderer_GetAlbedoFramebufferID()), ImGui::GetContentRegionAvail());
+	ImGui::Image((ImTextureID) static_cast<size_t>(app->Renderer_GetAlbedoFramebufferID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
 }
 
 void GuiServer::DrawFilesystem() {
