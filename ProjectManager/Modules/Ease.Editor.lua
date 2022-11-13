@@ -25,8 +25,17 @@ editor.start = function()
 
             if gui:begin_context_menu("__CTXMENU_scene_rclick") then
                 if gui:begin_menu("New") then
-                    if gui:menu_item("Entity", "") then
-                        Application.get():get_current_scene():create("New Entity")
+                    if gui:menu_item("Sprite2D") then
+                        local entity = Application.get():get_current_scene():create("Sprite2D")
+                        entity:add_component(Component.Transform2D)
+                        entity:add_component(Component.Sprite2D)
+
+                        Application.get().selected_entity = entity
+                    end
+                    if gui:menu_item("Empty Entity") then
+                        local entity = Application.get():get_current_scene():create("New Entity")
+
+                        Application.get().selected_entity = entity
                     end
                     gui:end_menu()
                 end
