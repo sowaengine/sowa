@@ -1,17 +1,17 @@
-module = {}
-module.author = "Sowa"
-module.name = "Editor"
-module.version = 1
+local editor = {}
+editor.author = "Sowa"
+editor.name = "Editor"
+editor.version = 1
 
-module.console_text = ""
-module.panels = {}
-module.game_rclick_start_pos = nil
+editor.console_text = ""
+editor.panels = {}
+editor.game_rclick_start_pos = nil
 
 
-module.start = function()
+editor.start = function()
     local gui = GuiServer.get()
 
-    module.panels.scene = {
+    editor.panels.scene = {
         name = "Scene",
         custom_padding = Vector2.new(0, 0),
         func = function()
@@ -34,7 +34,7 @@ module.start = function()
             end
         end
     }
-    module.panels.properties = {
+    editor.panels.properties = {
         name = "Properties",
         func = function()
             -- component: Component.Transform2D ...
@@ -115,16 +115,16 @@ module.start = function()
             end
         end
     }
-    module.panels.console = {
+    editor.panels.console = {
         name = "Console",
         func = function()
             if gui:button("Clear") then
-                module.console_text = ""
+                editor.console_text = ""
             end
             gui:same_line()
 
             if gui:begin_child("consoletext", 0, gui:get_available_height() - gui:get_title_height()) then
-                gui:text_unformatted(module.console_text)
+                gui:text_unformatted(editor.console_text)
 
                 gui:set_scroll_ratio_y(1.0)
                 gui:end_child()
@@ -132,29 +132,29 @@ module.start = function()
 
         end
     }
-    module.panels.filesystem = {
+    editor.panels.filesystem = {
         name = "Filesystem",
         func = function()
             gui:draw_filesystem()
         end
     }
-    module.panels.game = {
+    editor.panels.game = {
         name = "Game",
         func = function()
             if gui:is_window_hovered() then
                 if gui:is_mouse_pressed(gui_mouse_button.right) then
-                    if module.game_rclick_start_pos == nil then
-                        module.game_rclick_start_pos = gui:get_mouse_position()
+                    if editor.game_rclick_start_pos == nil then
+                        editor.game_rclick_start_pos = gui:get_mouse_position()
                     end
                 else
-                    module.game_rclick_start_pos = nil
+                    editor.game_rclick_start_pos = nil
                 end
 
 
                 if gui:is_mouse_pressed(gui_mouse_button.right) then
 
-                    local dt = Vector2.new(gui:get_mouse_position().x - module.game_rclick_start_pos.x,
-                        gui:get_mouse_position().y - module.game_rclick_start_pos.y)
+                    local dt = Vector2.new(gui:get_mouse_position().x - editor.game_rclick_start_pos.x,
+                        gui:get_mouse_position().y - editor.game_rclick_start_pos.y)
 
                     -- editor camera position should be module.game_rclick_start_pos + dt
                 end
@@ -166,7 +166,7 @@ module.start = function()
 
         end
     }
-    for key, value in pairs(module.panels) do
+    for key, value in pairs(editor.panels) do
         gui:register_panel(value.name, value.name, true)
     end
 
@@ -214,11 +214,11 @@ module.start = function()
     end
 end
 
-module.update = function()
+editor.update = function()
 
 end
 
-module.gui_update = function()
+editor.gui_update = function()
     local window = Window.get()
     local window_size = window:get_window_size()
 
@@ -289,7 +289,7 @@ module.gui_update = function()
         -- panels
         gui:show_demo_window()
 
-        for key, value in pairs(module.panels) do
+        for key, value in pairs(editor.panels) do
             local stylevar_count = 0
 
             -- custom_padding
@@ -319,8 +319,8 @@ module.gui_update = function()
     gui:end_window()
 end
 
-function module.on_print(message)
-    module.console_text = module.console_text .. message
+function editor.on_print(message)
+    editor.console_text = editor.console_text .. message
 end
 
-return module
+return editor
