@@ -37,6 +37,28 @@ module.start = function()
     module.panels.properties = {
         name = "Properties",
         func = function()
+            -- component: Component.Transform2D ...
+            -- name: "Transform2D"
+            local begin_component = function(entity, component, name)
+                local comp = entity:get_component(component)
+                if comp ~= nil then
+                    local header_value = gui:header(name)
+
+                    if header_value then
+                        gui:indent()
+                        return comp
+                    end
+                end
+
+                return nil
+            end
+            local end_component = function(entity, component, name)
+                if gui:button("Remove ") then
+                    gui:separator()
+                    entity:remove_component(component)
+                end
+                gui:unindent()
+            end
             local app = Application.get()
             if app.selected_entity:valid() then
                 local selected = app.selected_entity
@@ -44,16 +66,52 @@ module.start = function()
 
                 selected.name, changed = gui:input_text("Name", selected.name)
 
-                local tc = selected:get_component(Component.Transform2D)
+                local tc = begin_component(selected, Component.Transform2D, "Transform2D")
                 if (tc ~= nil) then
-                    if gui:header("Transform2D") then
-                        gui:indent()
-                        tc.position, changed = gui:drag_float2("Position", tc.position)
-                        tc.scale, changed = gui:drag_float2("Scale", tc.scale)
-                        tc.rotation, changed = gui:drag_float("Rotation", tc.rotation)
-                        gui:unindent()
-                    end
+                    tc.position, changed = gui:drag_float2("Position", tc.position)
+                    tc.scale, changed = gui:drag_float2("Scale", tc.scale)
+                    tc.rotation, changed = gui:drag_float("Rotation", tc.rotation)
+
+                    end_component(selected, Component.Transform2D, "Transform2D")
                 end
+
+                local spr = begin_component(selected, Component.Sprite2D, "Sprite2D")
+                if (spr ~= nil) then
+
+                    local tex = gui:resource_picker("Texture", Resource.ImageTexture, spr.texture)
+                    if tex ~= nil then
+                        spr.texture = tex
+                    end
+
+                    end_component(selected, Component.Sprite2D, "Sprite2D")
+                end
+            end
+
+
+            -- add component menu
+            local selected = app.selected_entity
+            if selected:valid() and gui:is_window_hovered() then
+                if gui:is_mouse_clicked(gui_mouse_button.right) then
+                    gui:open_context_menu("__CTXMENU_props_rclick")
+                end
+            end
+
+            if selected:valid() and gui:begin_context_menu("__CTXMENU_props_rclick") then
+                if gui:begin_menu("Add Component") then
+                    if not selected:has_component(Component.Transform2D) then
+                        if gui:menu_item("Transform2D", "") then
+                            selected:add_component(Component.Transform2D)
+                        end
+                    end
+
+                    if not selected:has_component(Component.Sprite2D) then
+                        if gui:menu_item("Sprite2D", "") then
+                            selected:add_component(Component.Sprite2D)
+                        end
+                    end
+                    gui:end_menu()
+                end
+                gui:end_context_menu()
             end
         end
     }

@@ -19,7 +19,7 @@ class Sprite2D {
 	unsigned int &TextureID() { return _textureID; }
 	bool &Visible() { return m_Visible; }
 
-  private:
+  public:
 	std::shared_ptr<Ease::ImageTexture> _texture{nullptr};
 	unsigned int _textureID{0};
 	bool m_Visible = true;
