@@ -10,17 +10,19 @@ namespace Ease::Dialog {
  * @brief Displays 'OpenFileDialog' popup
  *
  * @param title
- * @param defaultPath
+ * @param defaultPath returns relative path to directory if not ""
  * @param filterCount
  * @param filterPatterns std::vector{"*.png", "file.png"}
  * @param multipleSelection
+ * @param isInDirectory set to true if selected file is inside of defaultPath (can be in nested folders)
  * @return std::string path of selected file ("" if exited without selecting a file)
  */
 std::string OpenFileDialog(const std::string &title,
 						   const std::string &defaultPath,
 						   int filterCount,
 						   const std::vector<std::string> &filterPatterns,
-						   bool multipleSelection);
+						   bool multipleSelection,
+						   bool *isInDirectory = nullptr);
 
 } // namespace Ease::Dialog
 
