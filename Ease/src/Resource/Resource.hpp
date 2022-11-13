@@ -21,6 +21,11 @@ class BaseResource {
 	ResourceID m_ResourceID;
 };
 
+enum Resource_ : uint32_t {
+	Resource_None = 0,
+	Resource_ImageTexture
+};
+
 } // namespace Ease
 
 #endif

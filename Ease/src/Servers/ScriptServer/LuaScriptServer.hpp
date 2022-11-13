@@ -49,6 +49,14 @@ class LuaScriptServer : public ScriptServer {
 	 * @implements Vector2
 	 */
 	void RegisterMath();
+	
+	/**
+	 * @brief Register Resoure classes
+	 * @see Classes/LuaResources.cpp
+	 *
+	 * @implements ImageTexture
+	 */
+	void RegisterResources();
 
 	/**
 	 * @brief Register Singleton Classes
