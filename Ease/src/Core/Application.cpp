@@ -38,6 +38,8 @@
 #include "res/shaders/fullscreen.glsl.res.hpp"
 #include "res/shaders/skybox.glsl.res.hpp"
 
+#include "res/textures/icon.png.res.hpp"
+
 namespace Ease {
 Application::Application() {
 	_GameScene = std::make_shared<Ease::Scene>();
@@ -89,6 +91,22 @@ void Application::Run(int argc, char const *argv[]) {
 		projectSettings->_application.Name.c_str(),
 		nmGfx::WindowFlags::NONE);
 	_window._windowHandle = &_renderer->GetWindow();
+
+	{
+		Reference<ImageTexture> icon = nullptr;
+
+		if (projectSettings->_application.Icon != "") {
+			icon = ResourceLoader::get_singleton().LoadResource<ImageTexture>(projectSettings->_application.Icon);
+
+			if (!_window.SetWindowIcon(icon))
+				icon = nullptr;
+		}
+
+		if (icon == nullptr) {
+			icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(Res::include_res_textures_icon_png_data.data(), Res::include_res_textures_icon_png_data.size());
+			_window.SetWindowIcon(icon);
+		}
+	}
 
 	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default2d_glsl_data.data()), Res::include_res_shaders_default2d_glsl_data.size()));
 	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default3d_glsl_data.data()), Res::include_res_shaders_default3d_glsl_data.size()));

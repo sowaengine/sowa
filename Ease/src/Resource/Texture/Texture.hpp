@@ -23,6 +23,7 @@ class ImageTexture : public BaseResource {
 	inline int Width() { return _texture.GetWidth(); }
 	inline int Height() { return _texture.GetHeight(); }
 	inline int Channels() { return _texture.GetChannels(); }
+	inline unsigned char *Pixels() { return _texture.GetPixels(); }
 
 	size_t TextureID() { return _texture.ID(); }
 

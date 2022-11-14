@@ -7,6 +7,7 @@ Application:
   Name: Sowa Engine - Project Manager
   Description: Project manager for sowa engine
   MainScene: res://Main.escn
+  Icon: ""
 
 Window:
   WindowWidth: 1280
