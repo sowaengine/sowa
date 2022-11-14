@@ -1,6 +1,10 @@
 #include "Core/Window.hpp"
 #include "Ease.hpp"
+
+#include "GLFW/glfw3.h"
 #include <iostream>
+
+#include "Resource/Texture/Texture.hpp"
 
 #include "Core/Application.hpp"
 #include "Core/Input.hpp"
@@ -21,6 +25,31 @@ int Window::GetWindowHeight() { return _windowHandle->GetWindowHeight(); }
 
 bool Window::ShouldClose() {
 	return _windowHandle->ShouldClose();
+}
+
+bool Window::SetWindowIcon(Reference<ImageTexture> icon) {
+	if (icon == nullptr) {
+		Debug::Error("Invalid icon on Window::SetWindowIcon");
+		return false;
+	}
+
+	if (icon->Channels() != 4) {
+		Debug::Error("Window::SetWindowIcon : invalid format, texture must have 4 channels. (given texture has {})", icon->Channels());
+		return false;
+	}
+
+	GLFWimage image[1];
+	image[0].width = icon->Width();
+	image[0].height = icon->Height();
+	image[0].pixels = icon->Pixels();
+
+	if (image[0].pixels != nullptr) {
+		glfwSetWindowIcon(_windowHandle->GetGLFWwindow(), 1, image);
+		return true;
+	} else {
+		Debug::Error("Invalid icon on Window::SetWindowIcon");
+		return false;
+	}
 }
 
 #ifndef EASE_EDITOR

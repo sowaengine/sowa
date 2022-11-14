@@ -1,6 +1,13 @@
 #include "Servers/ScriptServer/LuaScriptServer.hpp"
 
+#include "Resource/Resource.hpp"
+#include "Resource/Texture/Texture.hpp"
 #include "Servers/GuiServer/GuiServer.hpp"
+
+#include "Resource/ResourceLoader.hpp"
+
+#include "Utils/Dialog.hpp"
+#include "Utils/String.hpp"
 
 namespace Ease {
 
@@ -150,6 +157,48 @@ void LuaScriptServer::RegisterGuiServer() {
 					  [](GuiServer &self) { self.Unindent(0.f); }),
 
 		"get_mouse_position", &GuiServer::GetMousePosition,
+
+		"resource_picker", [](GuiServer &self, const std::string &label, uint32_t resourceType, sol::variadic_args resource, sol::this_state L) -> sol::variadic_results {
+			sol::variadic_results res;
+
+
+			if(resourceType == Resource_ImageTexture) {
+				Reference<ImageTexture> tex = nullptr;
+				
+				auto tex_res = resource[0];
+				if(tex_res.is<Reference<ImageTexture>>())
+					tex = tex_res.as<Reference<ImageTexture>>();
+
+
+				self.PushID(label);
+
+				self.Text(label);
+				self.SameLine();
+				if(self.ImageButton(tex, 64, 64)) {
+					bool isRelative = false;
+					std::string path = Dialog::OpenFileDialog("Pick new texture", File::Path("res://").string(), 0, {}, false, &isRelative);
+					
+					if(!isRelative) {
+						Debug::Error("Loaded resource must be in project directory");
+					} else {
+						Reference<ImageTexture> loadedTex = ResourceLoader::get_singleton().LoadResource<ImageTexture>(Format("res://{}", path));
+						res.push_back( { L, sol::in_place_type<Reference<ImageTexture>>, loadedTex } );
+					}
+				}
+				if(self.Button("Remove")) {
+					res.clear(); // remove if there any Resource pushed
+					res.push_back( { L, sol::in_place_type<Reference<ImageTexture>>, nullptr} );
+				}
+
+				self.PopID();
+			}
+
+			
+			if(res.size() == 0) {
+				res.push_back( sol::nil );
+			}
+
+			return res; },
 
 		"button", [](GuiServer &self, const std::string &label) -> bool { return self.Button(label); });
 }

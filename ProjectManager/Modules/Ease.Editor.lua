@@ -1,17 +1,17 @@
-module = {}
-module.author = "Sowa"
-module.name = "Editor"
-module.version = 1
+local editor = {}
+editor.author = "Sowa"
+editor.name = "Editor"
+editor.version = 1
 
-module.console_text = ""
-module.panels = {}
-module.game_rclick_start_pos = nil
+editor.console_text = ""
+editor.panels = {}
+editor.game_rclick_start_pos = nil
 
 
-module.start = function()
+editor.start = function()
     local gui = GuiServer.get()
 
-    module.panels.scene = {
+    editor.panels.scene = {
         name = "Scene",
         custom_padding = Vector2.new(0, 0),
         func = function()
@@ -25,8 +25,17 @@ module.start = function()
 
             if gui:begin_context_menu("__CTXMENU_scene_rclick") then
                 if gui:begin_menu("New") then
-                    if gui:menu_item("Entity", "") then
-                        Application.get():get_current_scene():create("New Entity")
+                    if gui:menu_item("Sprite2D") then
+                        local entity = Application.get():get_current_scene():create("Sprite2D")
+                        entity:add_component(Component.Transform2D)
+                        entity:add_component(Component.Sprite2D)
+
+                        Application.get().selected_entity = entity
+                    end
+                    if gui:menu_item("Empty Entity") then
+                        local entity = Application.get():get_current_scene():create("New Entity")
+
+                        Application.get().selected_entity = entity
                     end
                     gui:end_menu()
                 end
@@ -34,9 +43,31 @@ module.start = function()
             end
         end
     }
-    module.panels.properties = {
+    editor.panels.properties = {
         name = "Properties",
         func = function()
+            -- component: Component.Transform2D ...
+            -- name: "Transform2D"
+            local begin_component = function(entity, component, name)
+                local comp = entity:get_component(component)
+                if comp ~= nil then
+                    local header_value = gui:header(name)
+
+                    if header_value then
+                        gui:indent()
+                        return comp
+                    end
+                end
+
+                return nil
+            end
+            local end_component = function(entity, component, name)
+                if gui:button("Remove ") then
+                    gui:separator()
+                    entity:remove_component(component)
+                end
+                gui:unindent()
+            end
             local app = Application.get()
             if app.selected_entity:valid() then
                 local selected = app.selected_entity
@@ -44,29 +75,65 @@ module.start = function()
 
                 selected.name, changed = gui:input_text("Name", selected.name)
 
-                local tc = selected:get_component(Component.Transform2D)
+                local tc = begin_component(selected, Component.Transform2D, "Transform2D")
                 if (tc ~= nil) then
-                    if gui:header("Transform2D") then
-                        gui:indent()
-                        tc.position, changed = gui:drag_float2("Position", tc.position)
-                        tc.scale, changed = gui:drag_float2("Scale", tc.scale)
-                        tc.rotation, changed = gui:drag_float("Rotation", tc.rotation)
-                        gui:unindent()
-                    end
+                    tc.position, changed = gui:drag_float2("Position", tc.position)
+                    tc.scale, changed = gui:drag_float2("Scale", tc.scale)
+                    tc.rotation, changed = gui:drag_float("Rotation", tc.rotation)
+
+                    end_component(selected, Component.Transform2D, "Transform2D")
                 end
+
+                local spr = begin_component(selected, Component.Sprite2D, "Sprite2D")
+                if (spr ~= nil) then
+
+                    local tex = gui:resource_picker("Texture", Resource.ImageTexture, spr.texture)
+                    if tex ~= nil then
+                        spr.texture = tex
+                    end
+
+                    end_component(selected, Component.Sprite2D, "Sprite2D")
+                end
+            end
+
+
+            -- add component menu
+            local selected = app.selected_entity
+            if selected:valid() and gui:is_window_hovered() then
+                if gui:is_mouse_clicked(gui_mouse_button.right) then
+                    gui:open_context_menu("__CTXMENU_props_rclick")
+                end
+            end
+
+            if selected:valid() and gui:begin_context_menu("__CTXMENU_props_rclick") then
+                if gui:begin_menu("Add Component") then
+                    if not selected:has_component(Component.Transform2D) then
+                        if gui:menu_item("Transform2D", "") then
+                            selected:add_component(Component.Transform2D)
+                        end
+                    end
+
+                    if not selected:has_component(Component.Sprite2D) then
+                        if gui:menu_item("Sprite2D", "") then
+                            selected:add_component(Component.Sprite2D)
+                        end
+                    end
+                    gui:end_menu()
+                end
+                gui:end_context_menu()
             end
         end
     }
-    module.panels.console = {
+    editor.panels.console = {
         name = "Console",
         func = function()
             if gui:button("Clear") then
-                module.console_text = ""
+                editor.console_text = ""
             end
             gui:same_line()
 
             if gui:begin_child("consoletext", 0, gui:get_available_height() - gui:get_title_height()) then
-                gui:text_unformatted(module.console_text)
+                gui:text_unformatted(editor.console_text)
 
                 gui:set_scroll_ratio_y(1.0)
                 gui:end_child()
@@ -74,29 +141,29 @@ module.start = function()
 
         end
     }
-    module.panels.filesystem = {
+    editor.panels.filesystem = {
         name = "Filesystem",
         func = function()
             gui:draw_filesystem()
         end
     }
-    module.panels.game = {
+    editor.panels.game = {
         name = "Game",
         func = function()
             if gui:is_window_hovered() then
                 if gui:is_mouse_pressed(gui_mouse_button.right) then
-                    if module.game_rclick_start_pos == nil then
-                        module.game_rclick_start_pos = gui:get_mouse_position()
+                    if editor.game_rclick_start_pos == nil then
+                        editor.game_rclick_start_pos = gui:get_mouse_position()
                     end
                 else
-                    module.game_rclick_start_pos = nil
+                    editor.game_rclick_start_pos = nil
                 end
 
 
                 if gui:is_mouse_pressed(gui_mouse_button.right) then
 
-                    local dt = Vector2.new(gui:get_mouse_position().x - module.game_rclick_start_pos.x,
-                        gui:get_mouse_position().y - module.game_rclick_start_pos.y)
+                    local dt = Vector2.new(gui:get_mouse_position().x - editor.game_rclick_start_pos.x,
+                        gui:get_mouse_position().y - editor.game_rclick_start_pos.y)
 
                     -- editor camera position should be module.game_rclick_start_pos + dt
                 end
@@ -108,7 +175,7 @@ module.start = function()
 
         end
     }
-    for key, value in pairs(module.panels) do
+    for key, value in pairs(editor.panels) do
         gui:register_panel(value.name, value.name, true)
     end
 
@@ -156,11 +223,11 @@ module.start = function()
     end
 end
 
-module.update = function()
+editor.update = function()
 
 end
 
-module.gui_update = function()
+editor.gui_update = function()
     local window = Window.get()
     local window_size = window:get_window_size()
 
@@ -231,7 +298,7 @@ module.gui_update = function()
         -- panels
         gui:show_demo_window()
 
-        for key, value in pairs(module.panels) do
+        for key, value in pairs(editor.panels) do
             local stylevar_count = 0
 
             -- custom_padding
@@ -261,8 +328,8 @@ module.gui_update = function()
     gui:end_window()
 end
 
-function module.on_print(message)
-    module.console_text = module.console_text .. message
+function editor.on_print(message)
+    editor.console_text = editor.console_text .. message
 end
 
-return module
+return editor

@@ -2,6 +2,8 @@
 #define _E_WINDOW_HPP__
 #pragma once
 
+#include "Ease.hpp"
+#include "Resource/Texture/Texture.hpp"
 #include <string>
 
 namespace nmGfx {
@@ -31,6 +33,8 @@ class Window {
 	int GetWindowHeight();
 
 	bool ShouldClose();
+
+	bool SetWindowIcon(Reference<ImageTexture> icon);
 
 	int GetBlackbarWidth();
 	int GetBlackbarHeight();

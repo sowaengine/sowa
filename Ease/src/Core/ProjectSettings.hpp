@@ -15,6 +15,7 @@ class ProjectSettings {
 		std::string Name = "Sowa Engine";
 		std::string Description = "";
 		std::string MainScene = "";
+		std::string Icon = "";
 	} _application;
 	struct {
 		int WindowWidth = 1280;

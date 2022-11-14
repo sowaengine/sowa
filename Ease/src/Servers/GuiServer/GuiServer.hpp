@@ -67,6 +67,8 @@ class GuiServer {
 	bool Checkbox(const std::string &label, bool &value);
 	bool InputText(const std::string &label, std::string &value);
 	void Separator();
+	void Image(Reference<ImageTexture> image, int width, int height);
+	bool ImageButton(Reference<ImageTexture> image, int width, int height);
 
 	void SetNextWindowPos(int x, int y);
 	void SetNextWindowSize(int width, int height);

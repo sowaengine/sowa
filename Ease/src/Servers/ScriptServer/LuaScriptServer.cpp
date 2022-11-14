@@ -16,12 +16,11 @@ LuaScriptServer::LuaScriptServer(EngineContext &ctx) : _Context(ctx) {
 	_pState = std::make_unique<sol::state>();
 	_pState->open_libraries(sol::lib::base);
 
-	RegisterMath();
-
-	RegisterSingleton();
-	RegisterGuiServer();
-
 	RegisterECS();
+	RegisterGuiServer();
+	RegisterMath();
+	RegisterResources();
+	RegisterSingleton();
 }
 LuaScriptServer::~LuaScriptServer() {
 	_pState = nullptr;
