@@ -2,12 +2,14 @@
 #define _E_EASE_HPP__
 #pragma once
 
-#include "ECS/Entity/Entity.hpp"
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <stdlib.h>
 #include <string>
 #include <unordered_map>
+
+#include "ECS/Entity/Entity.hpp"
 
 #define EASE_VERSION_MAJOR 0
 #define EASE_VERSION_MINOR 1
@@ -33,6 +35,8 @@
 
 template <typename T>
 using Reference = std::shared_ptr<T>;
+
+typedef size_t ResourceID;
 
 namespace Ease {
 

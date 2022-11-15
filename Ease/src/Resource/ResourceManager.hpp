@@ -3,19 +3,25 @@
 
 #pragma once
 
+#include <map>
+#include <memory>
+
+#include "Debug.hpp"
+#include "Ease.hpp"
+
 #include "Resource/EditorTheme/EditorTheme.hpp"
 #include "Resource/ResourceLoader.hpp"
 #include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 #include "Resource/Texture/Texture.hpp"
-#include <map>
-#include <memory>
 
-typedef uint32_t ResourceID;
+#include "Utils/Random.hpp"
 
 namespace Ease {
 template <typename T>
 class ResourceManager {
   public:
+	static_assert(std::is_base_of<BaseResource, T>::value, "T must inherit from BaseResource");
+
 	ResourceManager() {}
 	~ResourceManager() {}
 
@@ -25,7 +31,9 @@ class ResourceManager {
 			return nullptr;
 
 		ResourceID id = NewResourceID(_id);
+		Debug::Log("Load resource at {} id {}", path, id);
 		resource->SetResourceID(id);
+		resource->SetFilepath(path);
 		m_Resources[id] = resource;
 		return resource;
 	}
@@ -56,8 +64,11 @@ class ResourceManager {
 
 	// Generats new resource id (incrementing on each call). if baseID is non-zero, returns baseID
 	ResourceID NewResourceID(ResourceID baseID) {
-		static int c = 1;
-		return baseID != 0 ? baseID : c++; // (funny)
+		ResourceID id = (baseID != 0 && !HasResource(baseID)) ? baseID : Random::GenerateID();
+		if (HasResource(id))
+			return NewResourceID(id);
+
+		return id;
 	}
 };
 

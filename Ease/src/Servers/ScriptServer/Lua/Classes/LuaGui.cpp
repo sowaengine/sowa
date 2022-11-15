@@ -158,7 +158,7 @@ void LuaScriptServer::RegisterGuiServer() {
 
 		"get_mouse_position", &GuiServer::GetMousePosition,
 
-		"resource_picker", [](GuiServer &self, const std::string &label, uint32_t resourceType, sol::variadic_args resource, sol::this_state L) -> sol::variadic_results {
+		"resource_picker", [this](GuiServer &self, const std::string &label, uint32_t resourceType, sol::variadic_args resource, sol::this_state L) -> sol::variadic_results {
 			sol::variadic_results res;
 
 
@@ -181,7 +181,8 @@ void LuaScriptServer::RegisterGuiServer() {
 					if(!isRelative) {
 						Debug::Error("Loaded resource must be in project directory");
 					} else {
-						Reference<ImageTexture> loadedTex = ResourceLoader::get_singleton().LoadResource<ImageTexture>(Format("res://{}", path));
+						Reference<Scene> scene = this->_Context.GetSingleton<Ease::Application>(Ease::Server::APPLICATION)->GetCurrentScene();
+						Reference<ImageTexture> loadedTex = scene->GetResourceManager<ImageTexture>().LoadResource(Format("res://{}", path).c_str());
 						res.push_back( { L, sol::in_place_type<Reference<ImageTexture>>, loadedTex } );
 					}
 				}

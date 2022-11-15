@@ -3,13 +3,14 @@
 
 #pragma once
 
-#include "../Resource.hpp"
-#include "Core/GL/nm_Texture.hpp"
 #include <memory>
 #include <stdint.h>
 #include <string>
 
-typedef uint32_t ResourceID;
+#include "Core/GL/nm_Texture.hpp"
+
+#include "../Resource.hpp"
+#include "Ease.hpp"
 
 namespace Ease {
 
@@ -18,8 +19,6 @@ class ImageTexture : public BaseResource {
 	ImageTexture();
 	~ImageTexture();
 
-	const std::string &GetFilepath() { return m_Filepath; }
-	void SetFilepath(const std::string &path) { m_Filepath = path; }
 	inline int Width() { return _texture.GetWidth(); }
 	inline int Height() { return _texture.GetHeight(); }
 	inline int Channels() { return _texture.GetChannels(); }
@@ -35,7 +34,6 @@ class ImageTexture : public BaseResource {
 	friend class Renderer;
 
 	nmGfx::Texture _texture{};
-	std::string m_Filepath{""};
 };
 
 } // namespace Ease

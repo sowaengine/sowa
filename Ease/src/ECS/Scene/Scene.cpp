@@ -280,7 +280,8 @@ static void YAMLSerializeEntity(Ease::Entity entity, YAML::Emitter &yaml) {
 		Component::Sprite2D &component = entity.GetComponent<Component::Sprite2D>();
 
 		yaml << YAML::Key << "Sprite2D" << YAML::BeginMap;
-		yaml << YAML::Key << "Texture" << YAML::Value << component.TextureID();
+		if (component.Texture() != nullptr)
+			yaml << YAML::Key << "Texture" << YAML::Value << component.Texture()->GetResourceID();
 		yaml << YAML::Key << "Visible" << YAML::Value << component.Visible();
 		yaml << YAML::EndMap;
 	}
@@ -345,8 +346,8 @@ bool Scene::SaveToFile(const char *file) {
 	yaml << YAML::BeginMap;
 	{ // <Ease::Texture>
 		yaml << YAML::Key << "Texture" << YAML::Value << YAML::BeginMap;
-		ResourceManager<Ease::ImageTexture> loader_texture = GetResourceManager<Ease::ImageTexture>();
-		std::map<ResourceID, std::shared_ptr<Ease::ImageTexture>> textures = loader_texture.GetResources();
+		ResourceManager<Ease::ImageTexture> &loader_texture = GetResourceManager<Ease::ImageTexture>();
+		std::map<ResourceID, std::shared_ptr<Ease::ImageTexture>> &textures = loader_texture.GetResources();
 
 		for (auto [id, texture] : textures) {
 			yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
@@ -359,8 +360,8 @@ bool Scene::SaveToFile(const char *file) {
 	} // </Ease::Texture>
 	{ // <Ease::SpriteSheetAnimation>
 		yaml << YAML::Key << "SpriteSheetAnimation" << YAML::Value << YAML::BeginMap;
-		ResourceManager<Ease::SpriteSheetAnimation> loader_anims = GetResourceManager<Ease::SpriteSheetAnimation>();
-		std::map<ResourceID, std::shared_ptr<Ease::SpriteSheetAnimation>> anims = loader_anims.GetResources();
+		ResourceManager<Ease::SpriteSheetAnimation> &loader_anims = GetResourceManager<Ease::SpriteSheetAnimation>();
+		std::map<ResourceID, std::shared_ptr<Ease::SpriteSheetAnimation>> &anims = loader_anims.GetResources();
 
 		for (auto [id, anim] : anims) {
 			yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
@@ -417,13 +418,11 @@ bool Scene::LoadFromFile(const char *file) {
 			if (YAML::Node resource_node = resources["Texture"]; resource_node) {
 				ResourceManager<Ease::ImageTexture> &resource_loader = GetResourceManager<Ease::ImageTexture>();
 				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
-					uint32_t id = it->first.as<uint32_t>(0);
+					ResourceID id = it->first.as<ResourceID>(0);
 					YAML::Node tex_node = it->second;
 					std::string tex_path = tex_node["Path"].as<std::string>("");
 					if (tex_path.size() > 0) {
 						Reference<ImageTexture> tex = resource_loader.LoadResource(tex_path.c_str(), id);
-						if (tex != nullptr)
-							tex->SetFilepath(tex_path);
 					}
 				}
 			}
@@ -432,7 +431,7 @@ bool Scene::LoadFromFile(const char *file) {
 			if (YAML::Node resource_node = resources["SpriteSheetAnimation"]; resource_node) {
 				ResourceManager<Ease::SpriteSheetAnimation> &resource_loader = GetResourceManager<Ease::SpriteSheetAnimation>();
 				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
-					uint32_t id = it->first.as<uint32_t>(0);
+					ResourceID id = it->first.as<ResourceID>(0);
 					YAML::Node tex_node = it->second;
 
 					Reference<Ease::SpriteSheetAnimation> anim = resource_loader.LoadResource("", id);
@@ -505,8 +504,9 @@ bool Scene::LoadFromFile(const char *file) {
 				}
 				if (YAML::Node component_node = components["Sprite2D"]; component_node) {
 					Component::Sprite2D &component = entity.AddComponent<Component::Sprite2D>();
-					component.Texture() = nullptr;
-					component.TextureID() = component_node["Texture"].as<ResourceID>(0);
+					ResourceID id = component_node["Texture"].as<ResourceID>(0);
+					if (id != 0)
+						component.Texture() = GetResourceManager<Ease::ImageTexture>().GetResource(id);
 					component.Visible() = component_node["Visible"].as<bool>(true);
 				}
 				if (YAML::Node component_node = components["Text2D"]; component_node) {
