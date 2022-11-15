@@ -406,6 +406,8 @@ void GuiServer::DrawScene() {
 	Reference<Ease::Scene> scene = app->GetCurrentScene();
 
 	auto view = scene->m_Registry.view<Component::Common>();
+	static Ease::Entity rclickedEntity{};
+	bool openEntityRClickMenu = false;
 	for (auto it = view.rbegin(); it != view.rend(); ++it) {
 		Ease::Entity entity(*it, &scene->m_Registry);
 
@@ -414,6 +416,10 @@ void GuiServer::DrawScene() {
 		if (BeginTree(entity.GetComponent<Component::Common>().Name(), TreeFlags_Leaf)) {
 			if (IsItemHovered() && IsMouseClicked(GuiMouseButton::Left)) {
 				app->SelectedEntity() = entity;
+			}
+			if (IsItemHovered() && IsMouseClicked(GuiMouseButton::Right)) {
+				rclickedEntity = entity;
+				openEntityRClickMenu = true;
 			}
 			if (entity == app->SelectedEntity()) {
 				if (!IsItemHovered() && IsMouseClicked(GuiMouseButton::Left) && IsWindowHovered()) {
@@ -426,13 +432,31 @@ void GuiServer::DrawScene() {
 		PopID();
 	}
 	EndCheckerList();
+
+	if (openEntityRClickMenu)
+		OpenContextMenu("__CTXMENU_scene_entity_rclick");
+
+	if (BeginContextMenu("__CTXMENU_scene_entity_rclick")) {
+		if (rclickedEntity.IsValid()) {
+			if (MenuItem("Remove entity"))
+				scene->Destroy(rclickedEntity);
+		}
+		EndContextMenu();
+	} else {
+		rclickedEntity.SetRegistry(nullptr);
+		rclickedEntity.SetEntityID(entt::null);
+	}
 }
 
 bool GuiServer::IsWindowHovered() {
-	return ImGui::IsWindowHovered() && !ImGui::IsItemHovered();
+	return ImGui::IsWindowHovered() && !IsAnyItemHovered();
 }
 bool GuiServer::IsItemHovered() {
 	return ImGui::IsItemHovered();
+}
+
+bool GuiServer::IsAnyItemHovered() {
+	return ImGui::IsWindowHovered() && ImGui::IsAnyItemHovered();
 }
 
 bool GuiServer::IsMouseClicked(GuiMouseButton button) {

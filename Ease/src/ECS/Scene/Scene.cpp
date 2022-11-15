@@ -177,12 +177,15 @@ Scene::Scene() {
 Scene::~Scene() {
 }
 
-Entity Scene::Create(const std::string &name, uint32_t id /* = 0*/) {
+Entity Scene::Create(const std::string &name, EntityID _id /* = 0*/) {
 	Entity entity;
-	if (id == 0)
-		entity.SetEntityID(m_Registry.create());
-	else
-		entity.SetEntityID(m_Registry.create((entt::entity)id));
+	EntityID id = _id;
+
+	// if id == 0 or there is an entity with given id, create entity with generated id
+	if (id == 0 || m_Registry.valid((entt::entity)id))
+		return Create(name, Random::GenerateID32());
+
+	entity.SetEntityID(m_Registry.create((entt::entity)id));
 	entity.SetRegistry(&m_Registry);
 
 	auto &common = entity.AddComponent<Component::Common>();

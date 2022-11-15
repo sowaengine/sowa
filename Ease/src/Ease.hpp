@@ -37,6 +37,7 @@ template <typename T>
 using Reference = std::shared_ptr<T>;
 
 typedef size_t ResourceID;
+typedef uint32_t EntityID;
 
 namespace Ease {
 

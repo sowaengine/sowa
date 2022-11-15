@@ -109,6 +109,7 @@ class GuiServer {
 	// input
 	bool IsWindowHovered();
 	bool IsItemHovered();
+	bool IsAnyItemHovered(); // any item hovered in current window
 	bool IsMouseClicked(GuiMouseButton button);
 	bool IsMousePressed(GuiMouseButton button);
 	bool IsMouseDoubleClicked(GuiMouseButton button);

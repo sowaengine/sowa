@@ -9,7 +9,7 @@ ResourceList:
     {}
 
 EntityList:
-  1048576:
+  3031357295:
     Name: my_entity
     Components:
       Sprite2D:
@@ -20,7 +20,7 @@ EntityList:
         Scale: [0.400000006, 0.400000006]
         Rotation: 0
 
-  1:
+  3721498726:
     Name: Test
     Components:
       Sprite2D:

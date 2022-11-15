@@ -19,7 +19,7 @@ class Scene {
 	Scene();
 	~Scene();
 
-	Entity Create(const std::string &name, uint32_t id = 0);
+	Entity Create(const std::string &name, EntityID id = 0);
 	void Destroy(Ease::Entity &entity);
 
 	entt::registry m_Registry;
