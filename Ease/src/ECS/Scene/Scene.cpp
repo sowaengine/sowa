@@ -347,9 +347,24 @@ bool Scene::SaveToFile(const char *file) {
 	{ // <Ease::Texture>
 		yaml << YAML::Key << "Texture" << YAML::Value << YAML::BeginMap;
 		ResourceManager<Ease::ImageTexture> &loader_texture = GetResourceManager<Ease::ImageTexture>();
-		std::map<ResourceID, std::shared_ptr<Ease::ImageTexture>> &textures = loader_texture.GetResources();
+		std::map<ResourceID, Reference<Ease::ImageTexture>> &textures = loader_texture.GetResources();
+
+		// remove unused resources
+		for (auto it = textures.cbegin(), next_it = it; it != textures.cend(); it = next_it) {
+			++next_it;
+			if ((*it).second.use_count() == 1) {
+				Reference<ImageTexture> res = (*it).second;
+				Debug::Log("Removed unused resource from scene[type:'{}', id:'{}', path:'{}']", "Texture", res->GetResourceID(), res->GetFilepath());
+				textures.erase(it);
+			}
+		}
 
 		for (auto [id, texture] : textures) {
+			if (texture == nullptr) {
+				Debug::Error("Unknown texture with id {}", id);
+				continue;
+			}
+
 			yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
 			yaml << YAML::Key << "Path" << YAML::Value << texture->GetFilepath();
 			yaml << YAML::Newline;
