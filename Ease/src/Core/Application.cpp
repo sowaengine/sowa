@@ -123,23 +123,8 @@ void Application::Run(int argc, char const *argv[]) {
 	StartGame();
 #endif
 
-	Ease::Entity entity = GetCurrentScene()->Create("Test");
-	auto &tc = entity.AddComponent<Component::Transform2D>();
-	tc.Scale() = {0.25f, 0.25f};
-	auto &spr = entity.AddComponent<Component::Sprite2D>();
-	spr.Texture() = ResourceLoader::get_singleton().LoadResource<Ease::ImageTexture>("abs://res/icon.png");
-
 	while (!_window.ShouldClose()) {
 		_renderer->GetWindow().PollEvents();
-		if (IsRunning()) {
-			static float f = 0;
-
-			tc.m_Position.x = sin(f) * 200;
-			tc.m_Position.y = cos(f) * 200;
-			tc.Rotation() += 0.2f;
-
-			f += 0.02f;
-		}
 		// Clear window
 
 		Ease::Component::Transform2D &cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
@@ -165,16 +150,6 @@ void Application::Run(int argc, char const *argv[]) {
 
 		_renderer->GetWindow().SwapBuffers();
 	}
-}
-
-void Application::Log(const std::string &message) {
-	std::cout << "[APP] " << message << std::endl;
-
-	// static std::shared_ptr<NativeModule> editor = GetModule("Ease.Editor");
-	// if (editor != nullptr) {
-	// 	editor->GetModule()->userValues["PrintMsg"].str_value = message;
-	// 	editor->GetModule()->userFuncs["Print"]();
-	// }
 }
 
 void Application::StartGame() {

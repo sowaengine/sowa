@@ -29,8 +29,6 @@ class Application {
 
 	Window &GetWindow() { return _window; }
 
-	void Log(const std::string &message); // Logs given string to console (And Editor Console on editor builds)
-
 	void StartGame();
 	void UpdateGame();
 	void StopGame();

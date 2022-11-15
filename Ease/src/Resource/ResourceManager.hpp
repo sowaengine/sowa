@@ -29,16 +29,6 @@ class ResourceManager {
 		m_Resources[id] = resource;
 		return resource;
 	}
-	Reference<T> LoadResourceFromFile(const char *path, ResourceID _id = 0) {
-		Reference<T> resource = ResourceLoader::get_singleton().LoadResourceFromFile<T>(path);
-		if (resource == nullptr)
-			return nullptr;
-
-		ResourceID id = NewResourceID(_id);
-		resource->SetResourceID(id);
-		m_Resources[id] = resource;
-		return resource;
-	}
 	bool SaveResource(const char *path, Reference<T> resource);
 	bool DeleteResource(ResourceID id) {
 		Reference<T> res = m_Resources[id];

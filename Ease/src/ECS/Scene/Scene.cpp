@@ -335,7 +335,6 @@ bool Scene::Save() {
 }
 bool Scene::SaveToFile(const char *file) {
 	std::filesystem::path savepath = Ease::File::Path(file);
-	Application::get_singleton().Log(std::string("Saving scene to ") + savepath.string());
 	YAML::Emitter yaml;
 	yaml << YAML::BeginMap;
 	yaml << YAML::Key << "Type" << YAML::Value << "Scene";
@@ -392,6 +391,8 @@ bool Scene::SaveToFile(const char *file) {
 
 	std::ofstream ofstream(savepath);
 	ofstream << yaml.c_str();
+
+	Debug::Log("Saved scene to {}", savepath.string());
 	return true;
 }
 
@@ -407,7 +408,7 @@ bool Scene::LoadFromFile(const char *file) {
 
 	YAML::Node node = YAML::LoadFile(inpath.string());
 	if (node["Type"].as<std::string>("") != "Scene") {
-		Application::get_singleton().Log(std::string("Wrong file type ") + node["Type"].as<std::string>("") + ", expected 'Scene'");
+		Debug::Error("Wrong file type: '{}', expected 'Scene'", node["Type"].as<std::string>(""));
 		return false;
 	}
 	YAML::Node resources = node["ResourceList"];
