@@ -124,6 +124,18 @@ void GuiServer::Text(const std::string &text) {
 	ImGui::Text("%s", text.c_str());
 }
 
+void GuiServer::TextCentered(const std::string &text) {
+	float availWidth = ImGui::GetContentRegionAvail().x;
+	float textWidth = ImGui::CalcTextSize(text.c_str()).x;
+
+	float offset = (availWidth - textWidth) * 0.5f;
+	if (offset > 0) {
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+	}
+
+	Text(text);
+}
+
 void GuiServer::TextUnformatted(const std::string &text) {
 	ImGui::TextUnformatted(text.c_str());
 }
@@ -340,15 +352,20 @@ void GuiServer::DrawFilesystem() {
 		ImGui::Text("../");
 	}
 
+	static std::filesystem::path selectedDirEntry = path;
 	for (auto &dir_entry : std::filesystem::directory_iterator(path / rel_path)) {
 		if (dir_entry.is_directory()) {
 			ImGui::TableNextColumn();
 
 			ImGui::ImageButton((ImTextureID)_DirectoryTexture->TextureID(), ImVec2(icon_width, icon_width));
 
-			if (ImGui::IsItemHovered()) {
+			if (IsItemHovered()) {
 				if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 					rel_path /= dir_entry.path().filename();
+				if (IsMouseClicked(GuiMouseButton::Right)) {
+					selectedDirEntry = dir_entry.path();
+					OpenContextMenu("__CTXMENU_filesystem_direntry_rclick");
+				}
 			}
 			ImGui::Text("%s", dir_entry.path().filename().string().c_str());
 		}
@@ -367,13 +384,131 @@ void GuiServer::DrawFilesystem() {
 				}
 			}
 
-			ImGui::ImageButton((ImTextureID)fileTex->TextureID(), ImVec2(icon_width, icon_width));
-			ImGui::Text("%s", dir_entry.path().filename().string().c_str());
+			ImageButton(fileTex, icon_width, icon_width);
+			if (IsItemHovered()) {
+				if (IsMouseClicked(GuiMouseButton::Right)) {
+					selectedDirEntry = dir_entry.path();
+					OpenContextMenu("__CTXMENU_filesystem_direntry_rclick");
+				}
+			}
+			TextCentered(dir_entry.path().filename().string());
 		}
+	}
+
+	bool showRenameItem = false;
+	if (BeginContextMenu("__CTXMENU_filesystem_direntry_rclick")) {
+		Text(selectedDirEntry.filename().string());
+
+		if (std::filesystem::is_directory(selectedDirEntry)) {
+			if (MenuItem("Delete Folder")) {
+				uintmax_t deleteCount = std::filesystem::remove_all(selectedDirEntry);
+				Debug::Log("Deleted {} files/folders", deleteCount);
+
+				CloseCurrentContextMenu();
+			}
+		} else {
+			if (MenuItem("Delete File")) {
+				bool success = std::filesystem::remove(selectedDirEntry);
+				Debug::Log("Deleted {}", selectedDirEntry.string());
+
+				CloseCurrentContextMenu();
+			}
+		}
+
+		if (MenuItem("Rename Item")) {
+			showRenameItem = true;
+		}
+
+		EndContextMenu();
+	}
+
+	static std::string selectedEntryTargetName = "";
+	if (showRenameItem) {
+		OpenContextMenu("__CTXMENU_filesystem_rename_item");
+		selectedEntryTargetName = selectedDirEntry.filename().string();
+	}
+
+	if (BeginContextMenu("__CTXMENU_filesystem_rename_item")) {
+		SetFocusToNextItem();
+		if (InputText("New Name", selectedEntryTargetName)) {
+			std::filesystem::rename(selectedDirEntry, selectedDirEntry.parent_path() / selectedEntryTargetName);
+
+			CloseCurrentContextMenu();
+		}
+		EndContextMenu();
 	}
 	ImGui::EndTable();
 
 	ImGui::PopStyleColor(3);
+
+	if (IsWindowHovered() && IsMouseClicked(GuiMouseButton::Right)) {
+		OpenContextMenu("__CTXMENU_filesystem_rclick");
+	}
+
+	bool openNewFolderMenu = false;
+	bool openNewFileMenu = false;
+
+	static std::string fileName = "New File";
+	if (BeginContextMenu("__CTXMENU_filesystem_rclick")) {
+		if (MenuItem("New Folder")) {
+			openNewFolderMenu = true;
+		}
+		if (BeginMenu("New File")) {
+			if (MenuItem("Empty File")) {
+				openNewFolderMenu = true;
+			}
+			if (MenuItem("Text File")) {
+				openNewFolderMenu = true;
+				fileName = "File.txt";
+			}
+			if (MenuItem("Script File")) {
+				openNewFolderMenu = true;
+				fileName = "script.lua";
+			}
+			if (MenuItem("Scene File")) {
+				openNewFolderMenu = true;
+				fileName = "scene.escn";
+			}
+
+			EndMenu();
+		}
+
+		EndContextMenu();
+	}
+
+	if (openNewFolderMenu) {
+		OpenContextMenu("__CTXMENU_filesystem_create_folder");
+	}
+
+	if (BeginContextMenu("__CTXMENU_filesystem_create_folder")) {
+		static std::string folderName = "New Folder";
+		SetFocusToNextItem();
+		if (InputText("Folder Name", folderName)) {
+			if (!std::filesystem::create_directories(path / rel_path / folderName))
+				Debug::Error("Error creating directory with name '{}'", (path / rel_path / folderName).string());
+
+			folderName = "New Folder";
+			CloseCurrentContextMenu();
+		}
+
+		EndContextMenu();
+	}
+
+	if (openNewFolderMenu) {
+		OpenContextMenu("__CTXMENU_filesystem_create_file");
+	}
+
+	if (BeginContextMenu("__CTXMENU_filesystem_create_file")) {
+		SetFocusToNextItem();
+		if (InputText("Filename", fileName)) {
+			std::ofstream ofstream((path / rel_path / fileName).string());
+			ofstream.close();
+
+			fileName = "New File";
+			CloseCurrentContextMenu();
+		}
+		EndContextMenu();
+	}
 }
 
 void GuiServer::DrawPlayButton() {
@@ -501,6 +636,9 @@ bool GuiServer::IsMouseDoubleClicked(GuiMouseButton button) {
 void GuiServer::OpenContextMenu(const std::string &id) {
 	ImGui::OpenPopup(id.c_str());
 }
+void GuiServer::CloseCurrentContextMenu() {
+	ImGui::CloseCurrentPopup();
+}
 bool GuiServer::BeginContextMenu(const std::string &id) {
 	return ImGui::BeginPopup(id.c_str());
 }
@@ -531,6 +669,10 @@ float GuiServer::GetTitleHeight() {
 void GuiServer::SetScrollRatioY(float r) {
 	if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
 		ImGui::SetScrollHereY(r);
+}
+
+void GuiServer::SetFocusToNextItem() {
+	ImGui::SetKeyboardFocusHere();
 }
 
 void GuiServer::SameLine() {
