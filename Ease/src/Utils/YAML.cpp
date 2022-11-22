@@ -63,7 +63,3 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const Ease::ColliderShape2D &type)
 	return out;
 }
 } // namespace YAML
-
-namespace Ease::Utils {
-
-} // namespace Ease::Utils

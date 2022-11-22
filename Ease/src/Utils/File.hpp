@@ -6,7 +6,9 @@
 #include <string>
 #include <vector>
 
-namespace Ease::File {
+namespace Ease {
+namespace File {
+
 struct FilePathData {
 	std::filesystem::path relativePath;
 	std::filesystem::path endpoint;
@@ -46,6 +48,6 @@ std::vector<unsigned char> GetFileContent(const char *path);
  * @return std::filesystem::path of the file
  */
 std::filesystem::path CreateTempFile(unsigned char *data, size_t size);
-} // namespace Ease::File
-
+} // namespace File
+} // namespace Ease
 #endif // _E_FILE_HPP__

@@ -7,7 +7,9 @@
 #include <vector>
 
 namespace Ease {
-std::string Dialog::OpenFileDialog(
+namespace Dialog {
+
+std::string OpenFileDialog(
 	const std::string &title,
 	const std::string &_defaultPath,
 	int filterCount,
@@ -34,5 +36,5 @@ std::string Dialog::OpenFileDialog(
 	}
 	return relativePath;
 }
-
+} // namespace Dialog
 } // namespace Ease
