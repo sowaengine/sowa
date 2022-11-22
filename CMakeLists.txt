@@ -59,12 +59,46 @@ endif()
 
 if(Editor)
    target_compile_definitions(Sowa PRIVATE EASE_EDITOR)
-   set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa Editor")
+   set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa-Editor")
 else()
-   set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa Engine")
+   set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa-Engine")
 endif()
 
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+
+install(TARGETS Sowa RUNTIME DESTINATION .)
+if(Editor)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/Editor/ DESTINATION Editor/)
+   install(DIRECTORY ${CMAKE_SOURCE_DIR}/ProjectManager/ DESTINATION .)
+endif()
+
+
+
+if(Editor)
+   set(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/package)
+   set(CPACK_PACKAGE_NAME sowaengine)
+else()
+   set(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/package/templates)
+   set(CPACK_PACKAGE_NAME sowaengine-template)
+endif()
+
+set(CPACK_PACKAGE_VENDOR Lexographics)
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(CPACK_PACKAGE_DESCRIPTION "Multiplatform 2D Game/Rendering Engine")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Sowa Game Engine")
+set(CPACK_PACKAGE_ICON ${CMAKE_SOURCE_DIR}/res/icon.png)
+set(CPACK_STRIP_FILES TRUE)
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "Sowa Engine")
+
+if(UNIX)
+   set(CPACK_GENERATOR TGZ)
+elseif(WIN32 AND Editor)
+   set(CPACK_GENERATOR NSIS ZIP)
+elseif(WIN32 AND NOT Editor)   
+   set(CPACK_GENERATOR ZIP)
+endif()
+
 include(CPack)

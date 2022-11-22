@@ -45,8 +45,8 @@ set(GLFW_BUILD_TESTS OFF)
 
 set(NMGFX_FIND_GLFW OFF)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1/)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/fmt-9.1.0/)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glfw-3.3.8)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nmGfx/)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.7.0/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1/ EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/fmt-9.1.0/ EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/glfw-3.3.8 EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/nmGfx/ EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.7.0/ EXCLUDE_FROM_ALL)
