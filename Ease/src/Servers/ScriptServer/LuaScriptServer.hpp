@@ -32,6 +32,8 @@ class LuaScriptServer : public ScriptServer {
 	EngineContext &_Context;
 
   private:
+	void LoadModule(const char* path);
+
 	/* implemented in Lua/Classes */
 
 	/**
