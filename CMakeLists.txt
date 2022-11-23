@@ -11,7 +11,7 @@ file(GLOB_RECURSE SOWA_SOURCES
 )
 list(REMOVE_ITEM SOWA_SOURCES ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp)
 
-if(CMAKE_BUILD_TYPE MATCHES "")
+if(CMAKE_BUILD_TYPE STREQUAL "")
    set(CMAKE_BUILD_TYPE Debug)
    message("No CMAKE_BUILD_TYPE specified. Selected 'Debug'")
    message("Possible values: Release | Debug")
