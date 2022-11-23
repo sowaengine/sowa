@@ -92,7 +92,7 @@ jobs:
             -S .    \
             -B build \
             -D CMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -G "${{ matrix.config.generator }}"
+            -G "${{ matrix.config.generator }}" \
             -D Editor=On
         
       - name: Build
