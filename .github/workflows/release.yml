@@ -16,7 +16,7 @@ jobs:
     - name: Create release
       shell: bash
       run: |
-        hub release create -p ${GITHUB_REF##*/}
+        hub release create -p -m "" ${GITHUB_REF##*/}
 
   build:
     name: ${{ matrix.config.name }}
