@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "../Resource.hpp"
 #include "imgui-docking/imgui.h"
 #include <stdint.h>
 
-typedef uint32_t ResourceID;
+#include "../Resource.hpp"
+#include "Ease.hpp"
 
 namespace Ease {
 

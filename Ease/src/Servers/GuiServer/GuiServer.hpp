@@ -59,6 +59,7 @@ class GuiServer {
 	void EndChild();
 
 	void Text(const std::string &text);
+	void TextCentered(const std::string &text);
 	void TextUnformatted(const std::string &text);
 	bool Button(const std::string &label, int width = 0, int height = 0);
 	bool DragFloat(const std::string &label, float &f);
@@ -109,11 +110,13 @@ class GuiServer {
 	// input
 	bool IsWindowHovered();
 	bool IsItemHovered();
+	bool IsAnyItemHovered(); // any item hovered in current window
 	bool IsMouseClicked(GuiMouseButton button);
 	bool IsMousePressed(GuiMouseButton button);
 	bool IsMouseDoubleClicked(GuiMouseButton button);
 
 	void OpenContextMenu(const std::string &id);
+	void CloseCurrentContextMenu();
 	bool BeginContextMenu(const std::string &id);
 	void EndContextMenu();
 
@@ -126,6 +129,7 @@ class GuiServer {
 	float GetTitleHeight();
 
 	void SetScrollRatioY(float r); // 0.0 top, 1.0 bottom
+	void SetFocusToNextItem();
 
 	void SameLine();
 

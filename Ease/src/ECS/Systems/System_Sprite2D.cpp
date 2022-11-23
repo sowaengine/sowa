@@ -22,13 +22,7 @@ void System_Sprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
 		if (!spritec.Visible())
 			continue;
 
-		std::shared_ptr<Ease::ImageTexture> tex = nullptr;
-		if (spritec.Texture() == nullptr) {
-			if (loader.HasResource(spritec.TextureID()))
-				tex = loader.GetResource(spritec.TextureID());
-		} else {
-			tex = spritec.Texture();
-		}
+		Reference<Ease::ImageTexture> tex = spritec.Texture();
 
 		if (tex == nullptr)
 			continue;

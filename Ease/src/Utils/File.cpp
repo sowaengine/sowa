@@ -7,7 +7,8 @@
 #include <string.h>
 #include <unordered_map>
 
-namespace Ease::File {
+namespace Ease {
+namespace File {
 // res:// -> res
 std::unordered_map<std::string, std::filesystem::path> File_path_endpoints;
 
@@ -88,4 +89,5 @@ std::filesystem::path CreateTempFile(unsigned char *data, size_t size) {
 
 	return path;
 }
-} // namespace Ease::File
+} // namespace File
+} // namespace Ease

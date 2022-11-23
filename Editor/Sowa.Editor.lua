@@ -196,16 +196,6 @@ editor.start = function()
 
         local scene = app:get_current_scene()
         local selected = app.selected_entity
-
-        local my_entity = scene:create("my_entity")
-
-        app.selected_entity = my_entity
-
-        if my_entity:valid() then
-            -- print("Entity is valid, name:", my_entity.name)
-        else
-            print("Entity is NOT valid")
-        end
     end
 
     -- Entity
@@ -253,6 +243,15 @@ editor.gui_update = function()
     if window_editor then
         if gui:begin_main_menu_bar() then
             if gui:begin_menu("File") then
+                if gui:menu_item("Save Scene") then
+                    Application.get():get_current_scene():save()
+                end
+                if gui:menu_item("Save Scene As") then
+                    -- local path = dialog:open_file_dialog()
+                    -- if path ~= nil then
+                    --      Application:get():get_current_scene():save_to_file(path)
+                    -- end
+                end
                 if gui:begin_menu("New") then
                     gui:menu_item("Scene")
 

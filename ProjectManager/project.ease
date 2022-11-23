@@ -19,5 +19,5 @@ Window:
 
 Modules:
   Lua:
-    - res://Modules/Ease.Editor.lua
+    - res://Modules/Sowa.ProjectManager.lua
     - res://Modules/module_template.lua

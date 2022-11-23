@@ -40,23 +40,6 @@ class ResourceLoader {
 		return nullptr;
 	}
 
-	/**
-	 * @brief Should only used when necessary (e.g. loading nativemodules)
-	 *
-	 * @tparam T
-	 * @param path
-	 * @return Reference<T>
-	 */
-	template <typename T>
-	Reference<T> LoadResourceFromFile(const std::string &path) {
-		std::vector<unsigned char> data = Ease::File::GetFileContent(path.c_str());
-		if (data.size() > 0) {
-			ResourceLoaderImpl<T> loader;
-			return loader.LoadFromFile(Ease::File::CreateTempFile(data.data(), data.size()).c_str());
-		}
-		return nullptr;
-	}
-
 	// Todo: void Poll() that hot reloads resources with Unload() -> Load()
 
   private:

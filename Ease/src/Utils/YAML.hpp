@@ -217,8 +217,4 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const Ease::PhysicsBodyType &type)
 YAML::Emitter &operator<<(YAML::Emitter &out, const Ease::ColliderShape2D &shape);
 } // namespace YAML
 
-namespace Ease::Utils {
-
-} // namespace Ease::Utils
-
 #endif

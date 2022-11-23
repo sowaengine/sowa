@@ -40,7 +40,10 @@ void LuaScriptServer::RegisterECS() {
 		"create",
 		sol::overload(
 			&Scene::Create,
-			[](Ease::Scene &self, const std::string &name) -> Ease::Entity { return self.Create(name, 0U); }));
+			[](Ease::Scene &self, const std::string &name) -> Ease::Entity { return self.Create(name, 0U); }),
+
+		"save", &Scene::Save,
+		"save_to_file", &Scene::SaveToFile);
 
 	_pState->new_enum(
 		"Component",

@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "Resource/Resource.hpp"
 #include <functional>
 #include <stdint.h>
 
-typedef uint32_t ResourceID;
+#include "Ease.hpp"
+#include "Resource/Resource.hpp"
 
 namespace Ease {
 class SpriteSheetAnimation : public BaseResource {
