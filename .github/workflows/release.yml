@@ -41,7 +41,7 @@ jobs:
           generator: "Ninja"
           github_env: $GITHUB_ENV
           nmres: "linux"
-          nmres-app: "./nmres"
+          nmres_app: "./nmres"
         
         - name: "Windows MinGW"
           os: windows-latest
@@ -76,6 +76,7 @@ jobs:
           gcc --version
       
       - name: Install and run nmres
+        shell: bash
         run: |
           wget https://github.com/Lexographics/nmResource/releases/download/v1.1/nmres.${{ matrix.config.nmres }}.zip
           7z x nmres.${{ matrix.config.nmres }}.zip
