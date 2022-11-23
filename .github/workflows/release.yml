@@ -2,6 +2,10 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      release-name:
+        type: string
+        required: true
 
 env:
   BUILD_TYPE: Release
@@ -16,7 +20,7 @@ jobs:
     - name: Create release
       shell: bash
       run: |
-        hub release create -p -m "" ${GITHUB_REF##*/}
+        hub release create -p -m "${{ github.event.inputs.release-name }}" ${GITHUB_REF##*/}
 
   build:
     name: ${{ matrix.config.name }}
