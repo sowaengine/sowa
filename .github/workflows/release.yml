@@ -42,6 +42,7 @@ jobs:
           github_env: $GITHUB_ENV
           nmres: "linux"
           nmres_app: "./nmres"
+          chmod_nmres: chmod +x ${{ matrix.config.nmres_app }}
         
         - name: "Windows MinGW"
           os: windows-latest
@@ -52,6 +53,7 @@ jobs:
           github_env: $env:GITHUB_ENV
           nmres: "windows"
           nmres_app: ".\nmres.exe"
+          chmod_nmres: ""
         
 
     steps:
@@ -86,8 +88,8 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
-          7z x ${{ steps.nmresdownload.outputs.filename }}
-          chmod +x ${{ matrix.config.nmres_app }}
+          7z x nmres/${{ steps.nmresdownload.outputs.filename }}
+          ${{ matrix.config.chmod_nmres }}
           ${{ matrix.config.nmres_app }} --recursive --cwd Ease --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}/res_rules.txt
       
       - name: Configure
