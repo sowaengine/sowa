@@ -51,7 +51,7 @@ jobs:
           generator: "Ninja"
           github_env: $env:GITHUB_ENV
           nmres: "windows"
-          nmres_app: "./nmres.exe"
+          nmres_app: ".\nmres.exe"
         
 
     steps:
@@ -75,13 +75,20 @@ jobs:
           cmake --version
           gcc --version
       
-      - name: Install and run nmres
+      - name: Install nmres
+        uses: suisei-cn/actions-download-file@v1.3.0
+        id: nmresdownload
+        with:
+          url: https://github.com/Lexographics/nmResource/releases/download/v1.1/nmres.${{ matrix.config.nmres }}.zip
+          target: nmres/
+
+      - name: Run nmres
         shell: bash
+        working-directory: ${{ github.workspace }}
         run: |
-          wget https://github.com/Lexographics/nmResource/releases/download/v1.1/nmres.${{ matrix.config.nmres }}.zip
-          7z x nmres.${{ matrix.config.nmres }}.zip
+          7z x ${{ steps.nmresdownload.outputs.filename }}
           chmod +x ${{ matrix.config.nmres_app }}
-          ${{ matrix.config.nmres_app }} --recursive --cwd ${{github.workspace}}/Ease/ --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}/res_rules.txt
+          ${{ matrix.config.nmres_app }} --recursive --cwd Ease --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}/res_rules.txt
       
       - name: Configure
         shell: bash
