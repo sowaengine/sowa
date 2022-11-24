@@ -22,7 +22,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        hub release create -p -m "${{ github.event.inputs.release-name }}" ${GITHUB_REF##*/}
+        hub release create -d -m "${{ github.event.inputs.release-name }}" ${GITHUB_REF##*/}
 
   build:
     name: ${{ matrix.config.name }}
@@ -95,7 +95,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           7z x nmres_app\\${{ steps.nmresdownload.outputs.filename }}
-          .\\nmres.exe --recursive --cwd Ease --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}\\res_rules.txt
+          .\\nmres.exe --recursive --cwd Ease --namespace Ease::Res --suffix .res.hpp --rules res_rules.txt
       
       - name: Configure
         shell: bash
