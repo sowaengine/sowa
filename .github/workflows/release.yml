@@ -94,7 +94,7 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
-          7z x nmres_app\${{ steps.nmresdownload.outputs.filename }}
+          7z x nmres_app/${{ steps.nmresdownload.outputs.filename }}
           .\nmres.exe --recursive --cwd Ease --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}\res_rules.txt
       
       - name: Configure
