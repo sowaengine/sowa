@@ -41,8 +41,6 @@ jobs:
           generator: "Ninja"
           github_env: $GITHUB_ENV
           nmres: "linux"
-          nmres_app: "./nmres"
-          chmod_nmres: chmod +x nmres
         
         - name: "Windows MinGW"
           os: windows-latest
@@ -52,8 +50,6 @@ jobs:
           generator: "Ninja"
           github_env: $env:GITHUB_ENV
           nmres: "windows"
-          nmres_app: ".\nmres.exe"
-          chmod_nmres: ""
         
 
     steps:
@@ -82,15 +78,24 @@ jobs:
         id: nmresdownload
         with:
           url: https://github.com/Lexographics/nmResource/releases/download/v1.1/nmres.${{ matrix.config.nmres }}.zip
-          target: nmres/
+          target: nmres_app/
 
-      - name: Run nmres
+      - name: "[Ubuntu] Run nmres"
+        if: startsWith(matrix.config.os, 'ubuntu')
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
-          7z x nmres/${{ steps.nmresdownload.outputs.filename }}
-          ${{ matrix.config.chmod_nmres }}
-          ${{ matrix.config.nmres_app }} --recursive --cwd Ease --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}/res_rules.txt
+          7z x nmres_app/${{ steps.nmresdownload.outputs.filename }}
+          chmod +x nmres
+          ./nmres --recursive --cwd Ease --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}/res_rules.txt
+        
+      - name: "[Windows] Run nmres"
+        if: startsWith(matrix.config.os, 'windows')
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          7z x nmres_app\${{ steps.nmresdownload.outputs.filename }}
+          .\nmres.exe --recursive --cwd Ease --namespace Ease::Res --suffix .res.hpp --rules ${{github.workspace}}\res_rules.txt
       
       - name: Configure
         shell: bash
