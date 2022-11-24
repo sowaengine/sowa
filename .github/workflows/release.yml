@@ -42,7 +42,7 @@ jobs:
           github_env: $GITHUB_ENV
           nmres: "linux"
           nmres_app: "./nmres"
-          chmod_nmres: chmod +x ${{ matrix.config.nmres_app }}
+          chmod_nmres: chmod +x nmres
         
         - name: "Windows MinGW"
           os: windows-latest
