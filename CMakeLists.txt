@@ -65,6 +65,17 @@ else()
 endif()
 
 
+# Platform detection
+if(WIN32)
+   target_compile_definitions(Sowa PRIVATE SW_WINDOWS)
+elseif(UNIX AND NOT APPLE)
+   target_compile_definitions(Sowa PRIVATE SW_LINUX)
+else()
+   message(FATAL_ERROR "Sowa Engine is not supported on target platform " ${CMAKE_SYSTEM})
+endif()
+
+
+
 
 install(TARGETS Sowa RUNTIME DESTINATION .)
 if(Editor)
