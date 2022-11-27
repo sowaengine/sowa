@@ -15,6 +15,7 @@ std::string OpenFileDialog(
 	int filterCount,
 	const std::vector<std::string> &filterPatterns,
 	bool multipleSelection,
+	bool isRelative,
 	bool *isInDirectory /*= nullptr*/) {
 
 	std::filesystem::path defaultPath = _defaultPath;
@@ -26,15 +27,20 @@ std::string OpenFileDialog(
 	if (path == nullptr)
 		return "";
 
-	std::string relativePath = std::filesystem::relative(path, defaultPath).string();
-	if (isInDirectory != nullptr) {
-		if (relativePath.substr(0, 3) == "../") {
-			*isInDirectory = false;
-		} else {
-			*isInDirectory = true;
+	if (isRelative) {
+		std::string relativePath = std::filesystem::relative(path, defaultPath).string();
+		if (isInDirectory != nullptr) {
+			if (relativePath.substr(0, 3) == "../") {
+				*isInDirectory = false;
+			} else {
+				*isInDirectory = true;
+			}
 		}
+		return relativePath;
+	} else {
+		std::string absolutePath = path;
+		return absolutePath;
 	}
-	return relativePath;
 }
 } // namespace Dialog
 } // namespace Sowa

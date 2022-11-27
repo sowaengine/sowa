@@ -15,6 +15,7 @@ namespace Dialog {
  * @param filterCount
  * @param filterPatterns std::vector{"*.png", "file.png"}
  * @param multipleSelection
+ * @param isRelative will return relative or absolute path
  * @param isInDirectory set to true if selected file is inside of defaultPath (can be in nested folders)
  * @return std::string path of selected file ("" if exited without selecting a file)
  */
@@ -23,6 +24,7 @@ std::string OpenFileDialog(const std::string &title,
 						   int filterCount,
 						   const std::vector<std::string> &filterPatterns,
 						   bool multipleSelection,
+						   bool isRelative,
 						   bool *isInDirectory = nullptr);
 
 } // namespace Dialog
