@@ -11,6 +11,10 @@
 #include "lua.hpp"
 #include "sol/sol.hpp"
 
+#include "Servers/GuiServer/GuiServer.hpp"
+#include "Utils/Dialog.hpp"
+#include <fstream>
+
 namespace Sowa {
 LuaScriptServer::LuaScriptServer(EngineContext &ctx) : _Context(ctx) {
 	_pState = std::make_unique<sol::state>();
@@ -21,6 +25,48 @@ LuaScriptServer::LuaScriptServer(EngineContext &ctx) : _Context(ctx) {
 	RegisterMath();
 	RegisterResources();
 	RegisterSingleton();
+
+	// ProjectManager ( will be removed )
+	static std::vector<std::string> projects;
+
+	(*_pState)["reload_projects"] = []() {
+		projects.clear();
+		std::ifstream ifstream;
+		ifstream.open(File::Path("editor://projects.txt").string(), std::ios_base::binary);
+		if (ifstream.good()) {
+			std::string line;
+			while (std::getline(ifstream, line)) {
+				projects.push_back(line);
+				Debug::Log("Import Project {}", line);
+			}
+		}
+	};
+
+	(*_pState)["import_project"] = []() {
+		std::string pathStr = Dialog::OpenFileDialog("Import Project", "", 1, {"project.ease"}, false, false, nullptr);
+		if (pathStr != "") {
+			std::filesystem::path path = pathStr;
+
+			if (std::filesystem::is_regular_file(path)) {
+				if (path.filename() == "project.ease") {
+					std::ofstream ofstream;
+					ofstream.open(File::Path("editor://projects.txt").string(), std::ios_base::app);
+					if (ofstream.good()) {
+						ofstream << path.string() << '\n';
+					}
+				}
+			}
+		}
+	};
+
+	(*_pState)["draw_projects"] = [this](GuiServer &self, double buttonWidth, double buttonHeight) {
+		for (const std::string &project : projects) {
+			if (self.Button(project, static_cast<int>(buttonWidth), static_cast<int>(buttonHeight))) {
+				Application *app = this->_Context.GetSingleton<Application>(Server::APPLICATION);
+				app->LaunchApp(project);
+			}
+		}
+	};
 }
 LuaScriptServer::~LuaScriptServer() {
 	_pState = nullptr;

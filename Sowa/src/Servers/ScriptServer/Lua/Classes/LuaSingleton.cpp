@@ -18,6 +18,9 @@ void LuaScriptServer::RegisterSingleton() {
 
 		"get_current_scene", &Sowa::Application::GetCurrentScene,
 
+		"start_game", &Application::StartGame,
+		"stop_game", &Application::StopGame,
+
 		"selected_entity",
 		sol::property(
 			[](Sowa::Application &self) -> Sowa::Entity & { return self.SelectedEntity(); },

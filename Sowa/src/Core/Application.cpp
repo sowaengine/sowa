@@ -1,6 +1,9 @@
 #include "Core/Application.hpp"
+
 #include "Debug.hpp"
 #include "Sowa.hpp"
+
+#include <filesystem>
 #include <iostream>
 
 #include "Resource/ResourceLoader.hpp"
@@ -25,6 +28,7 @@
 #include "Core/Input.hpp"
 #include "Utils/Dialog.hpp"
 #include "Utils/File.hpp"
+#include "Utils/String.hpp"
 
 #include "nmGfx/src/Core/nm_Matrix.hpp"
 #include "nmGfx/src/Core/nm_Renderer.hpp"
@@ -40,6 +44,10 @@
 
 #include "res/textures/icon.png.res.hpp"
 
+#ifdef SW_WINDOWS
+#include <windows.h>
+#endif
+
 namespace Sowa {
 Application::Application() {
 	_GameScene = std::make_shared<Sowa::Scene>();
@@ -53,6 +61,8 @@ Application::~Application() {
 
 void Application::Run(int argc, char const *argv[]) {
 	SW_ENTRY()
+
+	_ExecutablePath = argv[0];
 
 	ctx = EngineContext::CreateContext();
 	auto __ = Debug::ScopeTimer("Application");
@@ -203,4 +213,28 @@ void Application::ChangeScene(const char *path) {
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
 	return _renderer->GetData2D()._frameBuffer.GetAlbedoID();
 }
+
+#if defined(SW_LINUX)
+void Application::LaunchApp(const std::string &projectPath) {
+	m_AppRunning = false;
+
+	std::filesystem::path project = projectPath;
+	project = project.parent_path();
+
+	execl(File::Path("abs://Editor/sowa.editor").string().c_str(), "--project", project.string().c_str(), (char *)0);
+}
+#elif defined(SW_WINDOWS)
+void Application::LaunchApp(const std::string &projectPath) {
+	m_AppRunning = false;
+
+	std::filesystem::path project = projectPath;
+	project = project.parent_path();
+
+	std::string appPath = File::Path("abs://Editor/sowa.editor.exe").string();
+	Debug::Log("{} --project {}", appPath, project.string());
+	execl(appPath.c_str(), "--project", project.string().c_str(), (char *)0);
+}
+#else
+#error "Sowa::Application::LaunchApp() is not implemented in current platform"
+#endif
 } // namespace Sowa

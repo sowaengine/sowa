@@ -188,8 +188,8 @@ void LuaScriptServer::RegisterGuiServer() {
 				self.TableNextColumn();
 				if(self.ImageButton(tex, 64, 64)) {
 					bool isRelative = false;
-					std::string path = Dialog::OpenFileDialog("Pick new texture", File::Path("res://").string(), 0, {}, false, &isRelative);
-					
+					std::string path = Dialog::OpenFileDialog("Pick new texture", File::Path("res://").string(), 0, {}, false, true, &isRelative);
+
 					if(!isRelative) {
 						Debug::Error("Loaded resource must be in project directory");
 					} else {
@@ -210,6 +210,11 @@ void LuaScriptServer::RegisterGuiServer() {
 
 			return res; },
 
-		"button", [](GuiServer &self, const std::string &label) -> bool { return self.Button(label); });
+		"set_cursor_pos_x", &GuiServer::SetCursorPosX,
+		"set_cursor_pos_y", &GuiServer::SetCursorPosY,
+
+		"button",
+		sol::overload([](GuiServer &self, const std::string &label) -> bool { return self.Button(label); },
+					  [](GuiServer &self, const std::string &label, double width, double height) -> bool { return self.Button(label, static_cast<int>(width), static_cast<int>(height)); }));
 }
 } // namespace Sowa

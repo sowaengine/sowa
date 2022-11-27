@@ -713,6 +713,13 @@ void GuiServer::SameLine() {
 	ImGui::SameLine();
 }
 
+void GuiServer::SetCursorPosX(float x) {
+	ImGui::SetCursorPosX(x);
+}
+void GuiServer::SetCursorPosY(float y) {
+	ImGui::SetCursorPosY(y);
+}
+
 Vec2 GuiServer::GetMousePosition() {
 	ImVec2 pos = ImGui::GetMousePos();
 	return Vec2(pos.x, pos.y);

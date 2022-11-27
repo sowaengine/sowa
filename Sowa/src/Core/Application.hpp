@@ -40,6 +40,8 @@ class Application {
 
 	uint32_t Renderer_GetAlbedoFramebufferID();
 
+	void LaunchApp(const std::string &projectPath);
+
   private:
 	friend class Window;
 	friend class Renderer;
@@ -59,6 +61,8 @@ class Application {
 	bool m_AppRunning = false;
 
 	Sowa::Entity _SelectedEntity;
+	
+	std::string _ExecutablePath{""};
 };
 } // namespace Sowa
 
