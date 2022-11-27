@@ -96,6 +96,7 @@ editor.start = function()
                 local cam2d = begin_component(selected, Component.Camera2D, "Camera2D")
                 if (cam2d ~= nil) then
                     cam2d.current, changed = gui:check_box("Current", cam2d.current)
+                    cam2d.rotatable, changed = gui:check_box("Rotatable", cam2d.rotatable)
                     cam2d.zoom, changed = gui:drag_float("Zoom", cam2d.zoom)
                     cam2d.center, changed = gui:drag_float2("Center", cam2d.center)
 

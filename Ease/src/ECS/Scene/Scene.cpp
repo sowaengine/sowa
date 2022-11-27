@@ -234,6 +234,7 @@ static void YAMLSerializeEntity(Ease::Entity entity, YAML::Emitter &yaml) {
 
 		yaml << YAML::Key << "Camera2D" << YAML::BeginMap;
 		yaml << YAML::Key << "Current" << YAML::Value << component.Current();
+		yaml << YAML::Key << "Rotatable" << YAML::Value << component.Rotatable();
 		yaml << YAML::Key << "Zoom" << YAML::Value << component.Zoom();
 		yaml << YAML::Key << "Center" << YAML::Value << component.Center();
 		yaml << YAML::EndMap;
@@ -493,6 +494,7 @@ bool Scene::LoadFromFile(const char *file) {
 				if (YAML::Node component_node = components["Camera2D"]; component_node) {
 					Component::Camera2D &component = entity.AddComponent<Component::Camera2D>();
 					component.Current() = component_node["Current"].as<bool>(false);
+					component.Rotatable() = component_node["Rotatable"].as<bool>(true);
 					component.Zoom() = component_node["Zoom"].as<float>(1.f);
 					component.Center() = component_node["Center"].as<Vec2>(Vec2{0.5f, 0.5f});
 				}

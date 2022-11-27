@@ -104,6 +104,13 @@ void LuaScriptServer::RegisterECS() {
 			&ComponentHandle<Component::Camera2D>::
 				set_item<bool, &ComponentHandle<Component::Camera2D>::_Current>),
 
+		"rotatable",
+		sol::property(
+			&ComponentHandle<Component::Camera2D>::
+				get_item<bool, &ComponentHandle<Component::Camera2D>::_Rotatable>,
+			&ComponentHandle<Component::Camera2D>::
+				set_item<bool, &ComponentHandle<Component::Camera2D>::_Rotatable>),
+
 		"zoom",
 		sol::property(
 			&ComponentHandle<Component::Camera2D>::

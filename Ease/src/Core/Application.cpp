@@ -141,7 +141,7 @@ void Application::Run(int argc, char const *argv[]) {
 		_renderer->Begin2D(
 			nmGfx::CalculateModelMatrix(
 				glm::vec3{cam2dtc.Position().x, cam2dtc.Position().y, 0.f},
-				cam2dtc.Rotation(),
+				cam2d.Rotatable() ? cam2dtc.Rotation() : 0.f,
 				glm::vec3{cam2d.Zoom(), cam2d.Zoom(), 1.f}),
 			{cam2d.Center().x, cam2d.Center().y});
 
