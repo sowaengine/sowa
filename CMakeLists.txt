@@ -7,9 +7,9 @@ include(CTest)
 enable_testing()
 
 file(GLOB_RECURSE SOWA_SOURCES
-   ${CMAKE_SOURCE_DIR}/Ease/src/*.cpp
+   ${CMAKE_SOURCE_DIR}/Sowa/src/*.cpp
 )
-list(REMOVE_ITEM SOWA_SOURCES ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp)
+list(REMOVE_ITEM SOWA_SOURCES ${CMAKE_SOURCE_DIR}/Sowa/src/main.cpp)
 
 if(CMAKE_BUILD_TYPE STREQUAL "")
    set(CMAKE_BUILD_TYPE Debug)
@@ -18,9 +18,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
 endif()
 
 set(SOWA_INCLUDE_DIRS
-   ${CMAKE_SOURCE_DIR}/Ease/include/
-   ${CMAKE_SOURCE_DIR}/Ease/src/
-   ${CMAKE_SOURCE_DIR}/Ease/thirdparty/
+   ${CMAKE_SOURCE_DIR}/Sowa/include/
+   ${CMAKE_SOURCE_DIR}/Sowa/src/
+   ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/
 )
 
 set(CMAKE_CXX_STANDARD 17)
@@ -33,7 +33,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 
 if(Editor)
-   add_compile_definitions(EASE_EDITOR)
+   add_compile_definitions(SW_EDITOR)
 endif()
 
 
@@ -41,11 +41,11 @@ include_directories(${CMAKE_SOURCE_DIR}/Ease/thirdparty/glfw-3.3.8/include/)
 
 # thirdparty
 # Modifies ${SOWA_SOURCES} and ${SOWA_INCLUDE_DIRS}
-add_subdirectory(${CMAKE_SOURCE_DIR}/Ease/thirdparty)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Sowa/thirdparty)
 
 
 add_executable(Sowa
-   ${CMAKE_SOURCE_DIR}/Ease/src/main.cpp
+   ${CMAKE_SOURCE_DIR}/Sowa/src/main.cpp
    ${SOWA_SOURCES})
 target_link_libraries(Sowa PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ fmt)
 # target_compile_options(Sowa PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
@@ -58,7 +58,7 @@ elseif(CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 
 if(Editor)
-   target_compile_definitions(Sowa PRIVATE EASE_EDITOR)
+   target_compile_definitions(Sowa PRIVATE SW_EDITOR)
    set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa-Editor")
 else()
    set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa-Engine")

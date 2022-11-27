@@ -39,7 +39,7 @@ class Window {
 	int GetBlackbarWidth();
 	int GetBlackbarHeight();
 
-#ifdef EASE_EDITOR
+#ifdef SW_EDITOR
   public:
 	void Editor_SetBlackbarWidth(int width) { m_Editor_BlackbarWidth = width; }
 	void Editor_SetBlackbarHeight(int height) { m_Editor_BlackbarHeight = height; }

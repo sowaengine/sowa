@@ -29,13 +29,13 @@ set(SOWA_SOURCES
 set(SOWA_INCLUDE_DIRS
    ${SOWA_INCLUDE_DIRS}
 
-   ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/src/
-   ${CMAKE_SOURCE_DIR}/Ease/thirdparty/nmGfx/include/
-   # ${CMAKE_SOURCE_DIR}/Ease/thirdparty/glfw-3.3.8/include/ is included for all targets
-   ${CMAKE_SOURCE_DIR}/Ease/thirdparty/imgui-docking/
-   ${CMAKE_SOURCE_DIR}/Ease/thirdparty/lua-5.4.4/src/
-   ${CMAKE_SOURCE_DIR}/Ease/thirdparty/sol2-3.3.0/
-   ${CMAKE_SOURCE_DIR}/Ease/include/tinyfiledialogs/
+   ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/nmGfx/src/
+   ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/nmGfx/include/
+   # ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/glfw-3.3.8/include/ is included for all targets
+   ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/imgui-docking/
+   ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/lua-5.4.4/src/
+   ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/sol2-3.3.0/
+   ${CMAKE_SOURCE_DIR}/Sowa/include/tinyfiledialogs/
 
    PARENT_SCOPE
 )

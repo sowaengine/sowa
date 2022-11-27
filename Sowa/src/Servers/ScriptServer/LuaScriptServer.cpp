@@ -27,7 +27,7 @@ LuaScriptServer::~LuaScriptServer() {
 }
 
 void LuaScriptServer::InitModules() {
-#ifdef EASE_EDITOR
+#ifdef SW_EDITOR
 	LoadModule("abs://Editor/Sowa.Editor.lua");
 #endif
 

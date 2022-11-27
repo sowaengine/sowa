@@ -123,7 +123,7 @@ void Application::Run(int argc, char const *argv[]) {
 		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 	luaScriptServer->InitModules();
 
-#ifndef EASE_EDITOR
+#ifndef SW_EDITOR
 	StartGame();
 #endif
 

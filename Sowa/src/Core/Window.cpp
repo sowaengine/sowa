@@ -52,7 +52,7 @@ bool Window::SetWindowIcon(Reference<ImageTexture> icon) {
 	}
 }
 
-#ifndef EASE_EDITOR
+#ifndef SW_EDITOR
 int Window::GetBlackbarWidth() {
 	float scale = MIN((float)GetWindowWidth() / GetVideoWidth(), (float)GetWindowHeight() / GetVideoHeight());
 	return (GetWindowWidth() - ((float)GetVideoWidth() * scale)) * 0.5f;

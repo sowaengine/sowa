@@ -35,7 +35,7 @@ class ProjectSettings {
 
 	std::filesystem::path projectpath{""};
 
-#ifdef EASE_EDITOR
+#ifdef SW_EDITOR
 	bool debug_draw = true;
 #else
 	bool debug_draw = false;

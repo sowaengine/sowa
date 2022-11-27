@@ -11,7 +11,7 @@ Vec2 Input::GetMousePos()
    rVec2 mousePos = GetMousePosition();
    //mousePos.x -= GetScreenWidth() * 0.5f;
    //mousePos.y -= GetScreenHeight() * 0.5f;
-#ifndef EASE_EDITOR
+#ifndef SW_EDITOR
    mousePos.x -= window.GetBlackbarWidth();
    mousePos.y -= window.GetBlackbarHeight();
 
@@ -34,7 +34,7 @@ Vec2 Input::GetGameMousePos()
    Sowa::Window& window = Sowa::Application::get_singleton().GetWindow();
 
    Sowa::Vec2 scale;
-#ifndef EASE_EDITOR
+#ifndef SW_EDITOR
    scale.x = (float)window.GetVideoWidth() / ((float)window.GetWindowWidth() - (window.GetBlackbarWidth() * 2));
    scale.y = (float)window.GetVideoHeight() / ((float)window.GetWindowHeight() - (window.GetBlackbarHeight() * 2));
 #else

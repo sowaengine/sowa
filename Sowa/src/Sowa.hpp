@@ -1,5 +1,5 @@
-#ifndef _E_EASE_HPP__
-#define _E_EASE_HPP__
+#ifndef _E_SOWA_HPP__
+#define _E_SOWA_HPP__
 #pragma once
 
 #include <functional>
@@ -11,11 +11,11 @@
 
 #include "ECS/Entity/Entity.hpp"
 
-#define EASE_VERSION_MAJOR 0
-#define EASE_VERSION_MINOR 1
-#define EASE_VERSION_PATCH 0
+#define SOWA_VERSION_MAJOR 0
+#define SOWA_VERSION_MINOR 1
+#define SOWA_VERSION_PATCH 0
 
-#define EASE_VERSION_STRING "0.1.0"
+#define SOWA_VERSION_STRING "0.1.0"
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -44,8 +44,7 @@ namespace Sowa {
 // Singleton Servers
 enum class Server : uint32_t {
 	NONE = 0,
-	SCRIPTSERVER_AS, // AngelScript Language Server
-	GUISERVER,		 // Editor Gui Server
+	GUISERVER, // Editor Gui Server
 	APPLICATION,
 	PROJECTSETTINGS,
 	SCRIPTSERVER_LUA,
@@ -53,4 +52,4 @@ enum class Server : uint32_t {
 
 } // namespace Sowa
 
-#endif
+#endif // _E_SOWA_HPP__

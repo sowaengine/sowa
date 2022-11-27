@@ -1,3 +1,3 @@
-[submodule "Ease/thirdparty/nmGfx"]
-	path = Ease/thirdparty/nmGfx
+[submodule "Sowa/thirdparty/nmGfx"]
+	path = Sowa/thirdparty/nmGfx
 	url = https://github.com/Lexographics/nmGfx/
