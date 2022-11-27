@@ -14,7 +14,7 @@
 ```git submodule update --init --recursive --remote```
 
 - Run [nmres](https://github.com/Lexographics/nmResource) in engine root directory   
-```nmres --recursive --cwd Ease/ --namespace Ease::Res --suffix .res.hpp --rules res_rules.txt```
+```nmres --recursive --cwd Ease --namespace Sowa::Res --suffix .res.hpp --rules res_rules.txt```
 
 - Run following commands to initialize and build cmake project
 ```

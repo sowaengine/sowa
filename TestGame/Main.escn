@@ -1,0 +1,40 @@
+Type: Scene
+
+ResourceList:
+  Texture:
+    4303775522247045161:
+      Path: res://icon.png
+
+    17733261381484491048:
+      Path: res://icon.png
+
+  SpriteSheetAnimation:
+    {}
+
+EntityList:
+  3031357295:
+    Name: Camera Entity
+    Components:
+      Camera2D:
+        Current: true
+        Rotatable: false
+        Zoom: 0.5
+        Center: [0.5, 0.5]
+      Sprite2D:
+        Texture: 17733261381484491048
+        Visible: true
+      Transform2D:
+        Position: [-600, 0]
+        Scale: [0.400000006, 0.400000006]
+        Rotation: 0
+
+  3721498726:
+    Name: Test
+    Components:
+      Sprite2D:
+        Texture: 4303775522247045161
+        Visible: true
+      Transform2D:
+        Position: [-266, 76]
+        Scale: [0.25, 0.25]
+        Rotation: 0

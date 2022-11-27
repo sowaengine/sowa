@@ -2,31 +2,10 @@ Type: Scene
 
 ResourceList:
   Texture:
-    13311984513429165117:
-      Path: res://Textures/icon.png
+    {}
 
   SpriteSheetAnimation:
     {}
 
 EntityList:
-  3031357295:
-    Name: my_entity
-    Components:
-      Sprite2D:
-        Texture: 13311984513429165117
-        Visible: true
-      Transform2D:
-        Position: [-600, 0]
-        Scale: [0.400000006, 0.400000006]
-        Rotation: 0
-
-  3721498726:
-    Name: Test
-    Components:
-      Sprite2D:
-        Texture: 13311984513429165117
-        Visible: true
-      Transform2D:
-        Position: [-272, 76]
-        Scale: [0.25, 0.25]
-        Rotation: 0
+  {}

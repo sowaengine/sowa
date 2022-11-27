@@ -4,8 +4,8 @@
 v: 1
 
 Application:
-  Name: Sowa Engine - Project Manager
-  Description: Project manager for sowa engine
+  Name: Test Game
+  Description: ""
   MainScene: res://Main.escn
   Icon: ""
 
@@ -19,5 +19,4 @@ Window:
 
 Modules:
   Lua:
-    - res://Modules/Sowa.ProjectManager.lua
     - res://Modules/module_template.lua
