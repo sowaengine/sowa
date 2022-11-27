@@ -33,6 +33,13 @@ std::filesystem::path Path(const std::filesystem::path &path, FilePathData *path
 bool InsertFilepathEndpoint(const std::string &endpoint, const std::filesystem::path &path, bool force = false);
 
 /**
+ * @brief Registers data:// and usr://, editor:// endpoints.
+ *
+ * @return data path found and registered
+ */
+bool RegisterDataPath();
+
+/**
  * @brief Return file content and size of given file path
  *
  * @param path with delimiter! (res://image.png ...)

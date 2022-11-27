@@ -69,6 +69,10 @@ void Application::Run(int argc, char const *argv[]) {
 	ctx->RegisterSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS, *projectSettings);
 
 	Ease::File::InsertFilepathEndpoint("abs", "./");
+	if (!Ease::File::RegisterDataPath()) {
+		Debug::Error("Engine data path not found. exiting");
+		return;
+	}
 	bool project_loaded = false;
 	std::string lastArg = argv[0];
 	for (int i = 1; i < argc; i++) {

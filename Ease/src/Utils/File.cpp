@@ -1,11 +1,24 @@
 #include "Utils/File.hpp"
 
+#include "Debug.hpp"
 #include "Utils/String.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <random>
 #include <string.h>
 #include <unordered_map>
+
+#ifdef SW_LINUX
+#include <pwd.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
+#ifdef SW_WINDOWS
+#include <shlobj.h>
+#include <windows.h>
+#endif
 
 namespace Ease {
 namespace File {
@@ -89,5 +102,115 @@ std::filesystem::path CreateTempFile(unsigned char *data, size_t size) {
 
 	return path;
 }
+
+#if defined(SW_LINUX)
+bool RegisterDataPath() {
+	// ~/.local/share/Sowa Engine/
+	const char *homeDir;
+	bool isHome = false; // is homeDir ~/ or ~/.local/share
+
+	homeDir = getenv("XDG_DATA_HOME"); // ~/.local/share
+	if (homeDir == NULL) {
+		isHome = true;
+		homeDir = getenv("HOME"); // ~/
+
+		if (homeDir == NULL) {
+			homeDir = getpwuid(getuid())->pw_dir; // ~/
+		}
+	}
+
+	if (homeDir == NULL) {
+		return false;
+	}
+
+	std::filesystem::path homePath = homeDir;
+	if (isHome) {
+		homePath = homePath / ".local";
+		homePath = homePath / "share";
+	}
+
+	std::filesystem::path dataPath = homePath / "Sowa Engine";
+	if (std::filesystem::exists(dataPath)) {
+		if (!std::filesystem::is_directory(dataPath)) {
+			Debug::Error("~/.local/share/Sowa Engine is a file. Must be a directory");
+			return false;
+		}
+	} else {
+		std::filesystem::create_directories(dataPath);
+	}
+
+	std::filesystem::path usrPath = dataPath / "usr";
+	if (std::filesystem::exists(usrPath)) {
+		if (!std::filesystem::is_directory(usrPath)) {
+			Debug::Error("usr:// path must be a directory");
+			return false;
+		}
+	} else {
+		std::filesystem::create_directories(usrPath);
+	}
+
+	std::filesystem::path editorPath = dataPath / "editor";
+	if (std::filesystem::exists(editorPath)) {
+		if (!std::filesystem::is_directory(editorPath)) {
+			Debug::Error("editor:// path must be a directory");
+			return false;
+		}
+	} else {
+		std::filesystem::create_directories(editorPath);
+	}
+
+	InsertFilepathEndpoint("data", dataPath, true);
+	InsertFilepathEndpoint("usr", usrPath, true);
+	InsertFilepathEndpoint("editor", editorPath, true);
+	return true;
+}
+#elif defined(SW_WINDOWS)
+bool RegisterDataPath() {
+	// C:\Users\USER\Local Settings\Application Data\Sowa Engine
+	TCHAR szPath[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0, szPath))) {
+		std::filesystem::path homePath = szPath;
+
+		std::filesystem::path dataPath = homePath / "Sowa Engine";
+		if (std::filesystem::exists(dataPath)) {
+			if (!std::filesystem::is_directory(dataPath)) {
+				Debug::Error("APPDATA/Sowa Engine is a file. Must be a directory");
+				return false;
+			}
+		} else {
+			std::filesystem::create_directories(dataPath);
+		}
+
+		std::filesystem::path usrPath = dataPath / "usr";
+		if (std::filesystem::exists(usrPath)) {
+			if (!std::filesystem::is_directory(usrPath)) {
+				Debug::Error("usr:// path must be a directory");
+				return false;
+			}
+		} else {
+			std::filesystem::create_directories(usrPath);
+		}
+
+		std::filesystem::path editorPath = dataPath / "editor";
+		if (std::filesystem::exists(editorPath)) {
+			if (!std::filesystem::is_directory(editorPath)) {
+				Debug::Error("editor:// path must be a directory");
+				return false;
+			}
+		} else {
+			std::filesystem::create_directories(editorPath);
+		}
+
+		InsertFilepathEndpoint("data", dataPath, true);
+		InsertFilepathEndpoint("usr", usrPath, true);
+		InsertFilepathEndpoint("editor", editorPath, true);
+		return true;
+	}
+	return false;
+}
+#else
+#error "Ease::File::RegisterDataPath() is not implemented in current platform"
+#endif
+
 } // namespace File
 } // namespace Ease
