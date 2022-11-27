@@ -74,6 +74,11 @@ void LuaScriptServer::RegisterGuiServer() {
 		"register_panel", &GuiServer::RegisterPanel,
 		"draw_view_bar", &GuiServer::DrawViewbar,
 
+		"begin_table", &GuiServer::BeginTable,
+		"table_next_row", &GuiServer::TableNextRow,
+		"table_next_column", &GuiServer::TableNextColumn,
+		"end_table", &GuiServer::EndTable,
+
 		"check_box", [](GuiServer &self, const std::string &label, bool value, sol::this_state L) -> sol::variadic_results {
 				bool val = value;
 				bool ret = self.Checkbox(label, val);
@@ -172,8 +177,15 @@ void LuaScriptServer::RegisterGuiServer() {
 
 				self.PushID(label);
 
+				self.BeginTable("resource_picker", 2);
+				self.TableNextRow();
+				self.TableNextColumn();
 				self.Text(label);
-				self.SameLine();
+				if (self.Button("Remove")) {
+					res.clear(); // remove if there any Resource pushed
+					res.push_back({L, sol::in_place_type<Reference<ImageTexture>>, nullptr});
+				}
+				self.TableNextColumn();
 				if(self.ImageButton(tex, 64, 64)) {
 					bool isRelative = false;
 					std::string path = Dialog::OpenFileDialog("Pick new texture", File::Path("res://").string(), 0, {}, false, &isRelative);
@@ -186,11 +198,8 @@ void LuaScriptServer::RegisterGuiServer() {
 						res.push_back( { L, sol::in_place_type<Reference<ImageTexture>>, loadedTex } );
 					}
 				}
-				if(self.Button("Remove")) {
-					res.clear(); // remove if there any Resource pushed
-					res.push_back( { L, sol::in_place_type<Reference<ImageTexture>>, nullptr} );
-				}
 
+				self.EndTable();
 				self.PopID();
 			}
 

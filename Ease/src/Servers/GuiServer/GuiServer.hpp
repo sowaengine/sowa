@@ -96,6 +96,11 @@ class GuiServer {
 	void CheckerListNextItem();
 	void EndCheckerList();
 
+	bool BeginTable(const std::string &id, int columns);
+	void TableNextRow();
+	void TableNextColumn();
+	void EndTable();
+
 	bool BeginTree(const std::string &label, uint32_t flags = 0);
 	void EndTree();
 

@@ -293,6 +293,19 @@ void GuiServer::EndCheckerList() {
 	ImGui::EndTable();
 }
 
+bool GuiServer::BeginTable(const std::string &id, int columns) {
+	return ImGui::BeginTable(id.c_str(), columns);
+}
+void GuiServer::TableNextRow() {
+	ImGui::TableNextRow();
+}
+void GuiServer::TableNextColumn() {
+	ImGui::TableNextColumn();
+}
+void GuiServer::EndTable() {
+	ImGui::EndTable();
+}
+
 void GuiServer::ShowDemoWindow() {
 	ImGui::ShowDemoWindow();
 }
