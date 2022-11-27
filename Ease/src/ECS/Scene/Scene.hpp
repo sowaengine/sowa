@@ -78,11 +78,11 @@ class Scene {
 	struct {
 		Ease::Component::Camera2D camera2d;
 		Ease::Component::Transform2D transform2d;
-	} m_SceneCamera2D;
+	} m_SceneCamera2D{};
 	struct {
 		Ease::Component::Camera2D camera2d;
 		Ease::Component::Transform2D transform2d;
-	} m_SceneOldCamera2D;
+	} m_SceneOldCamera2D{};
 };
 } // namespace Ease
 

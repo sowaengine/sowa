@@ -13,6 +13,7 @@ namespace Ease::Systems {
 void System_Camera2DLogic(Ease::Scene *pScene) {
 	Ease::Application &app = Ease::Application::get_singleton();
 
+	bool found = false;
 	auto view = app.GetCurrentScene()->m_Registry.view<Component::Camera2D, Component::Transform2D>();
 	for (auto &e : view) {
 		Entity entity(e, &app.GetCurrentScene()->m_Registry);
@@ -22,7 +23,13 @@ void System_Camera2DLogic(Ease::Scene *pScene) {
 		if (camerac.Current()) {
 			pScene->CurrentCamera2D() = camerac;
 			pScene->CurrentCameraTransform2D() = transformc;
+			found = true;
 		}
+	}
+
+	if (!found) {
+		pScene->CurrentCamera2D() = Component::Camera2D();
+		pScene->CurrentCameraTransform2D() = Component::Transform2D();
 	}
 }
 } // namespace Ease::Systems

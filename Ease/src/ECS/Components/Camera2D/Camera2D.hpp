@@ -4,8 +4,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
-// #include "raylib.h"
-#pragma warning("Camera Broken")
+
+#include "Utils/Math.hpp"
 
 namespace Ease::Component {
 class Camera2D {
@@ -13,15 +13,16 @@ class Camera2D {
 	Camera2D();
 	~Camera2D();
 
-	float &Zoom() {
-		static float x = 0;
-		return x;
-	} // m_Camera.zoom; }
+	inline bool &Current() { return _Current; }
+	inline float &Zoom() { return _Zoom; }
 
-	bool &Current() { return m_Current; }
+	inline Vec2 &Center() { return _Center; }
 
-  private:
-	bool m_Current = false;
+  public:
+	bool _Current = false;
+	float _Zoom = 1.f;
+
+	Vec2 _Center{0.5f, 0.5f};
 };
 } // namespace Ease::Component
 

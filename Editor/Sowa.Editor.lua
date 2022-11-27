@@ -62,7 +62,7 @@ editor.start = function()
                 return nil
             end
             local end_component = function(entity, component, name)
-                if gui:button("Remove ") then
+                if gui:button("Remove Component") then
                     gui:separator()
                     entity:remove_component(component)
                 end
@@ -83,7 +83,6 @@ editor.start = function()
 
                     end_component(selected, Component.Transform2D, "Transform2D")
                 end
-
                 local spr = begin_component(selected, Component.Sprite2D, "Sprite2D")
                 if (spr ~= nil) then
 
@@ -93,6 +92,14 @@ editor.start = function()
                     end
 
                     end_component(selected, Component.Sprite2D, "Sprite2D")
+                end
+                local cam2d = begin_component(selected, Component.Camera2D, "Camera2D")
+                if (cam2d ~= nil) then
+                    cam2d.current, changed = gui:check_box("Current", cam2d.current)
+                    cam2d.zoom, changed = gui:drag_float("Zoom", cam2d.zoom)
+                    cam2d.center, changed = gui:drag_float2("Center", cam2d.center)
+
+                    end_component(selected, Component.Camera2D, "Camera2D")
                 end
             end
 
@@ -118,6 +125,11 @@ editor.start = function()
                             selected:add_component(Component.Sprite2D)
                         end
                     end
+                    if not selected:has_component(Component.Camera2D) then
+                        if gui:menu_item("Camera2D", "") then
+                            selected:add_component(Component.Camera2D)
+                        end
+                    end
                     gui:end_menu()
                 end
                 gui:end_context_menu()
@@ -136,8 +148,8 @@ editor.start = function()
                 gui:text_unformatted(editor.console_text)
 
                 gui:set_scroll_ratio_y(1.0)
-                gui:end_child()
             end
+            gui:end_child()
 
         end
     }
@@ -295,8 +307,6 @@ editor.gui_update = function()
         gui:setup_dockspace()
 
         -- panels
-        gui:show_demo_window()
-
         for key, value in pairs(editor.panels) do
             local stylevar_count = 0
 

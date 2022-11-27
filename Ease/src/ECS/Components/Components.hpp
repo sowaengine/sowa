@@ -19,6 +19,7 @@ enum Component_ : uint32_t {
 	Component_Common,
 	Component_Transform2D,
 	Component_Sprite2D,
+	Component_Camera2D,
 };
 }
 

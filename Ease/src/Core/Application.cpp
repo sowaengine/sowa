@@ -125,17 +125,30 @@ void Application::Run(int argc, char const *argv[]) {
 
 	while (!_window.ShouldClose()) {
 		_renderer->GetWindow().PollEvents();
-		// Clear window
 
-		Ease::Component::Transform2D &cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
-		_renderer->Begin2D(
-			nmGfx::CalculateModelMatrix(glm::vec3{cam2dtc.Position().x, cam2dtc.Position().y, 0.f}, cam2dtc.Rotation(), glm::vec3{cam2dtc.Scale().x, cam2dtc.Scale().y, 1.f}));
-		Ease::Systems::System_Sprite2D(_pCurrentScene.get());
-		_renderer->End2D();
+		Component::Transform2D cam2dtc{};
+		Component::Camera2D cam2d{};
+
+		if (m_AppRunning) {
+			cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
+			cam2d = GetCurrentScene()->CurrentCamera2D();
+		}
 
 		if (m_AppRunning) {
 			Ease::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic);
 		}
+
+		_renderer->Begin2D(
+			nmGfx::CalculateModelMatrix(
+				glm::vec3{cam2dtc.Position().x, cam2dtc.Position().y, 0.f},
+				cam2dtc.Rotation(),
+				glm::vec3{cam2d.Zoom(), cam2d.Zoom(), 1.f}),
+			{cam2d.Center().x, cam2d.Center().y});
+
+		Ease::Systems::System_Sprite2D(_pCurrentScene.get());
+
+		_renderer->End2D();
+
 		luaScriptServer->UpdateModules();
 
 		guiServer->BeginGui();

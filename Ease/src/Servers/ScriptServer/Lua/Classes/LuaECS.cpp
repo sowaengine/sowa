@@ -49,7 +49,8 @@ void LuaScriptServer::RegisterECS() {
 		"Component",
 
 		"Transform2D", Component::Component_Transform2D,
-		"Sprite2D", Component::Component_Sprite2D);
+		"Sprite2D", Component::Component_Sprite2D,
+		"Camera2D", Component::Component_Camera2D);
 
 	_pState->new_usertype<ComponentHandle<Component::Transform2D>>(
 		"Transform2D",
@@ -91,6 +92,31 @@ void LuaScriptServer::RegisterECS() {
 				set_item<Reference<ImageTexture>, &ComponentHandle<Component::Sprite2D>::_texture>)
 		);
 
+	_pState->new_usertype<ComponentHandle<Component::Camera2D>>(
+		"Camera2D",
+
+		"new", sol::no_constructor,
+
+		"current",
+		sol::property(
+			&ComponentHandle<Component::Camera2D>::
+				get_item<bool, &ComponentHandle<Component::Camera2D>::_Current>,
+			&ComponentHandle<Component::Camera2D>::
+				set_item<bool, &ComponentHandle<Component::Camera2D>::_Current>),
+
+		"zoom",
+		sol::property(
+			&ComponentHandle<Component::Camera2D>::
+				get_item<float, &ComponentHandle<Component::Camera2D>::_Zoom>,
+			&ComponentHandle<Component::Camera2D>::
+				set_item<float, &ComponentHandle<Component::Camera2D>::_Zoom>),
+
+		"center",
+		sol::property(
+			&ComponentHandle<Component::Camera2D>::
+				get_item<Ease::Vec2, &ComponentHandle<Component::Camera2D>::_Center>,
+			&ComponentHandle<Component::Camera2D>::
+				set_item<Ease::Vec2, &ComponentHandle<Component::Camera2D>::_Center>));
 
 	_pState->new_usertype<Entity>(
 		"Entity",
@@ -111,8 +137,11 @@ void LuaScriptServer::RegisterECS() {
 			else if (component == Component::Component_Sprite2D) {
 				return self.HasComponent<Component::Sprite2D>();
 			}
+			else if (component == Component::Component_Camera2D) {
+				return self.HasComponent<Component::Camera2D>();
+			}
 			return false; },
-		
+
 		"add_component", [](Entity &self, int component, sol::this_state L) -> sol::variadic_results {
 			if (!self.IsValid())
 				return false;
@@ -131,13 +160,19 @@ void LuaScriptServer::RegisterECS() {
 					res.push_back({L, sol::in_place_type<Component::Sprite2D>, comp});
 				}
 			}
+			else if (component == Component::Component_Camera2D) {
+				if(!self.HasComponent<Component::Camera2D>()) {
+					auto& comp = self.AddComponent<Component::Camera2D>();
+					res.push_back({L, sol::in_place_type<Component::Camera2D>, comp});
+				}
+			}
 
 			if(res.size() == 0)
 				res.push_back(sol::nil);
 
 
 			return res; },
-		
+
 		"remove_component", [](Entity &self, int component) -> bool {
 			if (!self.IsValid())
 				return false;
@@ -157,10 +192,16 @@ void LuaScriptServer::RegisterECS() {
 					self.RemoveComponent<Component::Sprite2D>();
 					return true;
 				}
+			} else if (component == Component::Component_Camera2D) {
+				if (!self.HasComponent<Component::Camera2D>())
+					return false;
+				else {
+					self.RemoveComponent<Component::Camera2D>();
+					return true;
+				}
 			}
 
 			return false; },
-
 
 		"get_component", [](Entity &self, int component, sol::this_state L) -> sol::variadic_results {
 			if (!self.IsValid())
@@ -181,8 +222,13 @@ void LuaScriptServer::RegisterECS() {
 
 					res.push_back( { L, sol::in_place_type<ComponentHandle<Component::Sprite2D>>, comp } );
 				}
-			}
+			} else if (component == Component::Component_Camera2D) {
+				if (self.HasComponent<Component::Camera2D>()) {
+					ComponentHandle<Component::Camera2D> comp(self);
 
+					res.push_back({L, sol::in_place_type<ComponentHandle<Component::Camera2D>>, comp});
+				}
+			}
 
 			if(res.size() == 0)
 				res.push_back(sol::nil);
