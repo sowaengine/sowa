@@ -333,8 +333,29 @@ void GuiServer::PopID() {
 }
 
 void GuiServer::DrawFrame() {
-	auto *app = _Context.GetSingleton<Application>(Ease::Server::APPLICATION);
-	ImGui::Image((ImTextureID) static_cast<size_t>(app->Renderer_GetAlbedoFramebufferID()), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+	Application *app = _Context.GetSingleton<Application>(Ease::Server::APPLICATION);
+	Window &window = app->GetWindow();
+
+	int dstWidth = ImGui::GetContentRegionAvail().x;
+	int dstHeight = ImGui::GetContentRegionAvail().y;
+
+	float aspect = (float)window.GetWindowWidth() / (float)window.GetWindowHeight();
+
+	if (ImGui::GetContentRegionAvail().x * aspect > ImGui::GetContentRegionAvail().y && ImGui::GetContentRegionAvail().y * aspect < ImGui::GetContentRegionAvail().x) {
+		dstWidth = ImGui::GetContentRegionAvail().y * aspect;
+		dstHeight = ImGui::GetContentRegionAvail().y;
+
+		float regionAvail = ImGui::GetContentRegionAvail().x;
+		ImGui::SetCursorPosX(((regionAvail - dstWidth) / 2.f) + ImGui::GetCursorPosX());
+	} else {
+		dstWidth = ImGui::GetContentRegionAvail().x;
+		dstHeight = ImGui::GetContentRegionAvail().x / aspect;
+
+		float regionAvail = ImGui::GetContentRegionAvail().y;
+		ImGui::SetCursorPosY(((regionAvail - dstHeight) / 2.f) + ImGui::GetCursorPosY());
+	}
+
+	ImGui::Image((ImTextureID) static_cast<uint64_t>(app->Renderer_GetAlbedoFramebufferID()), ImVec2(dstWidth, dstHeight));
 }
 
 void GuiServer::DrawFilesystem() {
