@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 project(Ease VERSION 0.1.0 LANGUAGES CXX C)
 
 option(Editor "Build Editor executable" ON)
+option(Template "Build export template" ON)
 
 include(CTest)
 enable_testing()
@@ -32,52 +33,83 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 
-if(Editor)
-   add_compile_definitions(SW_EDITOR)
-endif()
-
-
 include_directories(${CMAKE_SOURCE_DIR}/Ease/thirdparty/glfw-3.3.8/include/)
 
 # thirdparty
 # Modifies ${SOWA_SOURCES} and ${SOWA_INCLUDE_DIRS}
 add_subdirectory(${CMAKE_SOURCE_DIR}/Sowa/thirdparty)
 
-
-add_executable(Sowa
+if(Editor)
+add_executable(editor
    ${CMAKE_SOURCE_DIR}/Sowa/src/main.cpp
    ${SOWA_SOURCES})
-target_link_libraries(Sowa PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ fmt)
-# target_compile_options(Sowa PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
-target_include_directories(Sowa PRIVATE ${SOWA_INCLUDE_DIRS})
+target_link_libraries(editor PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ fmt)
+# target_compile_options(editor PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
+target_include_directories(editor PRIVATE ${SOWA_INCLUDE_DIRS})
+endif()
+
+if(Template)
+add_executable(template
+   ${CMAKE_SOURCE_DIR}/Sowa/src/main.cpp
+   ${SOWA_SOURCES})
+target_link_libraries(template PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ fmt)
+# target_compile_options(template PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
+target_include_directories(template PRIVATE ${SOWA_INCLUDE_DIRS})
+endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
-   target_compile_options(Sowa PRIVATE -O2)
+   if(Editor)
+      target_compile_options(editor PRIVATE -O2)
+   endif()
+   if(Template)
+      target_compile_options(template PRIVATE -O2)
+   endif()
 elseif(CMAKE_BUILD_TYPE MATCHES Debug)
-   target_compile_options(Sowa PRIVATE -O0 -g)
+   if(Editor)
+      target_compile_options(editor PRIVATE -O0 -g)
+   endif()
+   if(Template)
+      target_compile_options(template PRIVATE -O0 -g)
+   endif()
 endif()
 
 if(Editor)
-   target_compile_definitions(Sowa PRIVATE SW_EDITOR)
-   set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa-Editor")
-else()
-   set_target_properties(Sowa PROPERTIES OUTPUT_NAME "Sowa-Engine")
+   target_compile_definitions(editor PRIVATE SW_EDITOR)
+   set_target_properties(editor PROPERTIES OUTPUT_NAME "sowa.editor")
+endif()
+if(Template)
+   set_target_properties(template PROPERTIES OUTPUT_NAME "sowa.engine")
 endif()
 
 
 # Platform detection
 if(WIN32)
-   target_compile_definitions(Sowa PRIVATE SW_WINDOWS)
+   if(Editor)
+      target_compile_definitions(editor PRIVATE SW_WINDOWS)
+   endif()
+   if(Template)
+      target_compile_definitions(template PRIVATE SW_WINDOWS)
+   endif()
 elseif(UNIX AND NOT APPLE)
-   target_compile_definitions(Sowa PRIVATE SW_LINUX)
+   if(Editor)
+      target_compile_definitions(editor PRIVATE SW_LINUX)
+   endif()
+   if(Template)
+      target_compile_definitions(template PRIVATE SW_LINUX)
+   endif()
 else()
    message(FATAL_ERROR "Sowa Engine is not supported on target platform " ${CMAKE_SYSTEM})
 endif()
 
 
 
+if(Editor)
+   install(TARGETS editor RUNTIME DESTINATION Editor/)
+endif()
+if(Template)
+   install(TARGETS template RUNTIME DESTINATION .)
+endif()
 
-install(TARGETS Sowa RUNTIME DESTINATION .)
 if(Editor)
    install(DIRECTORY ${CMAKE_SOURCE_DIR}/Editor/ DESTINATION Editor/)
    install(DIRECTORY ${CMAKE_SOURCE_DIR}/ProjectManager/ DESTINATION .)
@@ -85,13 +117,9 @@ endif()
 
 
 
-if(Editor)
-   set(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/package)
-   set(CPACK_PACKAGE_NAME sowaengine)
-else()
-   set(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/package/templates)
-   set(CPACK_PACKAGE_NAME sowaengine-template)
-endif()
+
+set(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/package)
+set(CPACK_PACKAGE_NAME sowaengine)
 
 set(CPACK_PACKAGE_VENDOR Lexographics)
 set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
