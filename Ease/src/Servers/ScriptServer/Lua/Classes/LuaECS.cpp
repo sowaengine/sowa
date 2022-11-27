@@ -2,11 +2,11 @@
 
 #include "ECS/Components/Components.hpp"
 
-namespace Ease {
+namespace Sowa {
 
 class ComponentBaseHandle {
   protected:
-	Ease::Entity _handle;
+	Sowa::Entity _handle;
 };
 
 template <typename T>
@@ -26,7 +26,7 @@ class ComponentHandle : public T, public ComponentBaseHandle {
 		_val = val;
 	}
 
-	ComponentHandle(Ease::Entity &handle) {
+	ComponentHandle(Sowa::Entity &handle) {
 		_handle = handle;
 	}
 };
@@ -40,7 +40,7 @@ void LuaScriptServer::RegisterECS() {
 		"create",
 		sol::overload(
 			&Scene::Create,
-			[](Ease::Scene &self, const std::string &name) -> Ease::Entity { return self.Create(name, 0U); }),
+			[](Sowa::Scene &self, const std::string &name) -> Sowa::Entity { return self.Create(name, 0U); }),
 
 		"save", &Scene::Save,
 		"save_to_file", &Scene::SaveToFile);
@@ -60,16 +60,16 @@ void LuaScriptServer::RegisterECS() {
 		"position",
 		sol::property(
 			&ComponentHandle<Component::Transform2D>::
-				get_item<Ease::Vec2, &ComponentHandle<Component::Transform2D>::m_Position>,
+				get_item<Sowa::Vec2, &ComponentHandle<Component::Transform2D>::m_Position>,
 			&ComponentHandle<Component::Transform2D>::
-				set_item<Ease::Vec2, &ComponentHandle<Component::Transform2D>::m_Position>),
+				set_item<Sowa::Vec2, &ComponentHandle<Component::Transform2D>::m_Position>),
 
 		"scale",
 		sol::property(
 			&ComponentHandle<Component::Transform2D>::
-				get_item<Ease::Vec2, &ComponentHandle<Component::Transform2D>::m_Scale>,
+				get_item<Sowa::Vec2, &ComponentHandle<Component::Transform2D>::m_Scale>,
 			&ComponentHandle<Component::Transform2D>::
-				set_item<Ease::Vec2, &ComponentHandle<Component::Transform2D>::m_Scale>),
+				set_item<Sowa::Vec2, &ComponentHandle<Component::Transform2D>::m_Scale>),
 
 		"rotation",
 		sol::property(
@@ -77,7 +77,6 @@ void LuaScriptServer::RegisterECS() {
 				get_item<float, &ComponentHandle<Component::Transform2D>::m_Rotation>,
 			&ComponentHandle<Component::Transform2D>::
 				set_item<float, &ComponentHandle<Component::Transform2D>::m_Rotation>));
-	
 
 	_pState->new_usertype<ComponentHandle<Component::Sprite2D>>(
 		"Sprite2D",
@@ -121,9 +120,9 @@ void LuaScriptServer::RegisterECS() {
 		"center",
 		sol::property(
 			&ComponentHandle<Component::Camera2D>::
-				get_item<Ease::Vec2, &ComponentHandle<Component::Camera2D>::_Center>,
+				get_item<Sowa::Vec2, &ComponentHandle<Component::Camera2D>::_Center>,
 			&ComponentHandle<Component::Camera2D>::
-				set_item<Ease::Vec2, &ComponentHandle<Component::Camera2D>::_Center>));
+				set_item<Sowa::Vec2, &ComponentHandle<Component::Camera2D>::_Center>));
 
 	_pState->new_usertype<Entity>(
 		"Entity",
@@ -131,8 +130,8 @@ void LuaScriptServer::RegisterECS() {
 		"valid", &Entity::IsValid,
 		"name",
 		sol::property(
-			[](Entity &self) -> const std::string & { return self.GetComponent<Ease::Component::Common>().Name(); },
-			[](Entity &self, const std::string &name) { self.GetComponent<Ease::Component::Common>().Name() = name; }),
+			[](Entity &self) -> const std::string & { return self.GetComponent<Sowa::Component::Common>().Name(); },
+			[](Entity &self, const std::string &name) { self.GetComponent<Sowa::Component::Common>().Name() = name; }),
 
 		"has_component", [](Entity &self, int component) -> bool {
 			if (!self.IsValid())
@@ -244,4 +243,4 @@ void LuaScriptServer::RegisterECS() {
 
 		"new", sol::no_constructor);
 }
-} // namespace Ease
+} // namespace Sowa

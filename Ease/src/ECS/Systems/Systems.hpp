@@ -5,7 +5,7 @@
 
 #include "ECS/Scene/Scene.hpp"
 
-namespace Ease {
+namespace Sowa {
 enum SystemsFlags : uint32_t {
 	SpriteRenderer2D = 1 << 0,
 	AnimatedSprite2D = 1 << 1,
@@ -28,21 +28,21 @@ enum SystemsFlags : uint32_t {
 };
 }
 
-namespace Ease::Systems {
+namespace Sowa::Systems {
 // Updates all systems.
-void ProcessAll(Ease::Scene *pScene, SystemsFlags flags, bool pickable = false);
+void ProcessAll(Sowa::Scene *pScene, SystemsFlags flags, bool pickable = false);
 
 // Specific Systems
-void System_Sprite2D(Ease::Scene *pScene, bool pickable = false);
-void System_AnimatedSprite2D(Ease::Scene *pScene, bool pickable = false);
-void System_Text2D(Ease::Scene *pScene, bool pickable = false);
-void System_PhysicsBody2D(Ease::Scene *pScene);
-void System_Physics2DDebugDraw(Ease::Scene *pScene, bool pickable = false);
-void System_ButtonDraw(Ease::Scene *pScene, bool pickable = false);
-void System_ButtonPicking(Ease::Scene *pScene);
-void System_ButtonLogic(Ease::Scene *pScene);
-void System_Camera2DLogic(Ease::Scene *pScene);
+void System_Sprite2D(Sowa::Scene *pScene, bool pickable = false);
+void System_AnimatedSprite2D(Sowa::Scene *pScene, bool pickable = false);
+void System_Text2D(Sowa::Scene *pScene, bool pickable = false);
+void System_PhysicsBody2D(Sowa::Scene *pScene);
+void System_Physics2DDebugDraw(Sowa::Scene *pScene, bool pickable = false);
+void System_ButtonDraw(Sowa::Scene *pScene, bool pickable = false);
+void System_ButtonPicking(Sowa::Scene *pScene);
+void System_ButtonLogic(Sowa::Scene *pScene);
+void System_Camera2DLogic(Sowa::Scene *pScene);
 
-} // namespace Ease::Systems
+} // namespace Sowa::Systems
 
 #endif

@@ -1,6 +1,6 @@
 #include "Core/Application.hpp"
 #include "Debug.hpp"
-#include "Ease.hpp"
+#include "Sowa.hpp"
 #include <iostream>
 
 #include "Resource/ResourceLoader.hpp"
@@ -40,10 +40,10 @@
 
 #include "res/textures/icon.png.res.hpp"
 
-namespace Ease {
+namespace Sowa {
 Application::Application() {
-	_GameScene = std::make_shared<Ease::Scene>();
-	_CopyScene = std::make_shared<Ease::Scene>();
+	_GameScene = std::make_shared<Sowa::Scene>();
+	_CopyScene = std::make_shared<Sowa::Scene>();
 
 	_pCurrentScene = _GameScene;
 }
@@ -57,19 +57,19 @@ void Application::Run(int argc, char const *argv[]) {
 	ctx = EngineContext::CreateContext();
 	auto __ = Debug::ScopeTimer("Application");
 
-	ctx->RegisterSingleton<Application>(Ease::Server::APPLICATION, *this);
+	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
 
 	GuiServer *guiServer = GuiServer::CreateServer(this, *ctx);
-	ctx->RegisterSingleton<GuiServer>(Ease::Server::GUISERVER, *guiServer);
+	ctx->RegisterSingleton<GuiServer>(Sowa::Server::GUISERVER, *guiServer);
 
 	LuaScriptServer *luaScriptServer = LuaScriptServer::CreateServer(*ctx);
-	ctx->RegisterSingleton<LuaScriptServer>(Ease::Server::SCRIPTSERVER_LUA, *luaScriptServer);
+	ctx->RegisterSingleton<LuaScriptServer>(Sowa::Server::SCRIPTSERVER_LUA, *luaScriptServer);
 
 	ProjectSettings *projectSettings = ProjectSettings::CreateServer(*ctx);
-	ctx->RegisterSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS, *projectSettings);
+	ctx->RegisterSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS, *projectSettings);
 
-	Ease::File::InsertFilepathEndpoint("abs", "./");
-	if (!Ease::File::RegisterDataPath()) {
+	Sowa::File::InsertFilepathEndpoint("abs", "./");
+	if (!Sowa::File::RegisterDataPath()) {
 		Debug::Error("Engine data path not found. exiting");
 		return;
 	}
@@ -139,7 +139,7 @@ void Application::Run(int argc, char const *argv[]) {
 		}
 
 		if (m_AppRunning) {
-			Ease::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic);
+			Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic);
 		}
 
 		_renderer->Begin2D(
@@ -149,7 +149,7 @@ void Application::Run(int argc, char const *argv[]) {
 				glm::vec3{cam2d.Zoom(), cam2d.Zoom(), 1.f}),
 			{cam2d.Center().x, cam2d.Center().y});
 
-		Ease::Systems::System_Sprite2D(_pCurrentScene.get());
+		Sowa::Systems::System_Sprite2D(_pCurrentScene.get());
 
 		_renderer->End2D();
 
@@ -174,7 +174,7 @@ void Application::StartGame() {
 		return;
 	m_AppRunning = true;
 
-	ctx->GetSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS)->debug_draw = false;
+	ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->debug_draw = false;
 	Scene::CopyScene(*_GameScene.get(), *_CopyScene.get());
 
 	_pCurrentScene->StartScene();
@@ -189,7 +189,7 @@ void Application::StopGame() {
 		return;
 	m_AppRunning = false;
 
-	ctx->GetSingleton<ProjectSettings>(Ease::Server::PROJECTSETTINGS)->debug_draw = true;
+	ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->debug_draw = true;
 	Scene::CopyScene(*_CopyScene.get(), *_GameScene.get());
 
 	_pCurrentScene->StopScene();
@@ -203,4 +203,4 @@ void Application::ChangeScene(const char *path) {
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
 	return _renderer->GetData2D()._frameBuffer.GetAlbedoID();
 }
-} // namespace Ease
+} // namespace Sowa

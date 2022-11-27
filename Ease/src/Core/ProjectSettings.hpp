@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace Ease {
+namespace Sowa {
 class ProjectSettings {
   public:
 	struct {
@@ -57,6 +57,6 @@ class ProjectSettings {
 
 	EngineContext &_Context;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif

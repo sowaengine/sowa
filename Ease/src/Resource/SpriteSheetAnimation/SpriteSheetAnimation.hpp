@@ -6,10 +6,10 @@
 #include <functional>
 #include <stdint.h>
 
-#include "Ease.hpp"
 #include "Resource/Resource.hpp"
+#include "Sowa.hpp"
 
-namespace Ease {
+namespace Sowa {
 class SpriteSheetAnimation : public BaseResource {
   public:
 	SpriteSheetAnimation();
@@ -36,6 +36,6 @@ class SpriteSheetAnimation : public BaseResource {
 
 	ResourceID m_Texture;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif

@@ -1,9 +1,9 @@
 #include "ECS/Components/NinePatchRect/NinePatchRect.hpp"
 
-namespace Ease::Component {
+namespace Sowa::Component {
 NinePatchRect::NinePatchRect() {
 }
 
 NinePatchRect::~NinePatchRect() {
 }
-} // namespace Ease::Component
+} // namespace Sowa::Component

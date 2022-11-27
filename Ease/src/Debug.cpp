@@ -2,8 +2,8 @@
 
 namespace Debug {
 
-Ease::Event<void(std::string)> &OnPrint() {
-	static Ease::Event<void(std::string)> _onPrint;
+Sowa::Event<void(std::string)> &OnPrint() {
+	static Sowa::Event<void(std::string)> _onPrint;
 
 	return _onPrint;
 }

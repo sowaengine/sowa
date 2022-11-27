@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class AnimatedSprite2D {
   public:
 	AnimatedSprite2D();
@@ -39,6 +39,6 @@ class AnimatedSprite2D {
 
 	float m_TicksPast;
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

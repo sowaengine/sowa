@@ -4,12 +4,12 @@
 
 #include "Utils/Math.hpp"
 
-namespace Ease::Input {
+namespace Sowa::Input {
 // Returns mouse pos in screen relative to center. center would be 0, 0
-// Ease::Vec2 GetMousePos();
+// Sowa::Vec2 GetMousePos();
 
 // Returns mouse pos in 2d game world. bottom right would be {VideoWidth / 2, VideoHeight / 2}
-// Ease::Vec2 GetGameMousePos();
+// Sowa::Vec2 GetGameMousePos();
 
 enum class Button {
 	LEFT = 0,
@@ -19,6 +19,6 @@ enum class Button {
 // bool IsMouseButtonDown(Button button);
 // bool IsMouseButtonClicked(Button button);
 // bool IsMouseButtonReleased(Button button);
-} // namespace Ease::Input
+} // namespace Sowa::Input
 
 #endif

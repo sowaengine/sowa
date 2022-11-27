@@ -8,8 +8,8 @@
 #include "box2d/box2d.h"
 #include <iostream>
 
-namespace Ease::Systems {
-void System_PhysicsBody2D(Ease::Scene *pScene) {
+namespace Sowa::Systems {
+void System_PhysicsBody2D(Sowa::Scene *pScene) {
 	float timeStep = 1.f / 60.f;
 	std::shared_ptr<b2World> world = pScene->PhysicsWorld2D();
 
@@ -29,4 +29,4 @@ void System_PhysicsBody2D(Ease::Scene *pScene) {
 		}
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

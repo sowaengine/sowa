@@ -8,26 +8,26 @@
 #include "fmt/args.h"
 #include "fmt/core.h"
 
-namespace Ease {
+namespace Sowa {
 void LuaScriptServer::RegisterSingleton() {
 	_pState->new_usertype<Application>(
 		"Application",
 
 		"new", sol::no_constructor,
-		"get", [this]() -> Ease::Application & { return *this->_Context.GetSingleton<Ease::Application>(Ease::Server::APPLICATION); },
+		"get", [this]() -> Sowa::Application & { return *this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION); },
 
-		"get_current_scene", &Ease::Application::GetCurrentScene,
+		"get_current_scene", &Sowa::Application::GetCurrentScene,
 
 		"selected_entity",
 		sol::property(
-			[](Ease::Application &self) -> Ease::Entity & { return self.SelectedEntity(); },
-			[](Ease::Application &self, Ease::Entity &entity) -> void { self.SelectedEntity() = entity; }));
+			[](Sowa::Application &self) -> Sowa::Entity & { return self.SelectedEntity(); },
+			[](Sowa::Application &self, Sowa::Entity &entity) -> void { self.SelectedEntity() = entity; }));
 
 	_pState->new_usertype<Window>(
 		"Window",
 
 		"new", sol::no_constructor,
-		"get", [this]() -> Ease::Window & { return this->_Context.GetSingleton<Ease::Application>(Ease::Server::APPLICATION)->GetWindow(); },
+		"get", [this]() -> Sowa::Window & { return this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetWindow(); },
 
 		"get_window_size", [](Window &self) -> Vec2 { return Vec2((float)self.GetWindowWidth(), (float)self.GetWindowHeight()); });
 
@@ -79,4 +79,4 @@ void LuaScriptServer::RegisterSingleton() {
 									Debug::Log(msg);
 								});
 }
-} // namespace Ease
+} // namespace Sowa

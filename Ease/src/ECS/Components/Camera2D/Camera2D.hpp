@@ -7,7 +7,7 @@
 
 #include "Utils/Math.hpp"
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class Camera2D {
   public:
 	Camera2D();
@@ -26,6 +26,6 @@ class Camera2D {
 
 	Vec2 _Center{0.5f, 0.5f};
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

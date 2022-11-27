@@ -5,7 +5,7 @@
 
 #include "Utils/Math.hpp"
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class Transform2D {
   public:
 	Transform2D();
@@ -22,6 +22,6 @@ class Transform2D {
 	float m_Rotation;
 	int m_ZIndex;
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

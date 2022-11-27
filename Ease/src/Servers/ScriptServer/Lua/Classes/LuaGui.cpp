@@ -9,7 +9,7 @@
 #include "Utils/Dialog.hpp"
 #include "Utils/String.hpp"
 
-namespace Ease {
+namespace Sowa {
 
 void LuaScriptServer::RegisterGuiServer() {
 	_pState->new_enum("gui_window_flags",
@@ -39,7 +39,7 @@ void LuaScriptServer::RegisterGuiServer() {
 		"GuiServer",
 
 		"new", sol::no_constructor,
-		"get", [this]() -> Ease::GuiServer & { return *this->_Context.GetSingleton<Ease::GuiServer>(Ease::Server::GUISERVER); },
+		"get", [this]() -> Sowa::GuiServer & { return *this->_Context.GetSingleton<Sowa::GuiServer>(Sowa::Server::GUISERVER); },
 
 		"begin_window", &GuiServer::BeginWindow,
 		"end_window", &GuiServer::EndWindow,
@@ -193,7 +193,7 @@ void LuaScriptServer::RegisterGuiServer() {
 					if(!isRelative) {
 						Debug::Error("Loaded resource must be in project directory");
 					} else {
-						Reference<Scene> scene = this->_Context.GetSingleton<Ease::Application>(Ease::Server::APPLICATION)->GetCurrentScene();
+						Reference<Scene> scene = this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetCurrentScene();
 						Reference<ImageTexture> loadedTex = scene->GetResourceManager<ImageTexture>().LoadResource(Format("res://{}", path).c_str());
 						res.push_back( { L, sol::in_place_type<Reference<ImageTexture>>, loadedTex } );
 					}
@@ -212,4 +212,4 @@ void LuaScriptServer::RegisterGuiServer() {
 
 		"button", [](GuiServer &self, const std::string &label) -> bool { return self.Button(label); });
 }
-} // namespace Ease
+} // namespace Sowa

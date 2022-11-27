@@ -5,7 +5,7 @@
 
 #include <glm/glm.hpp>
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class UITransform {
   public:
 	UITransform();
@@ -24,6 +24,6 @@ class UITransform {
 	float m_Rotation;
 	int m_ZIndex;
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

@@ -10,9 +10,9 @@
 #include "Core/GL/nm_Texture.hpp"
 
 #include "../Resource.hpp"
-#include "Ease.hpp"
+#include "Sowa.hpp"
 
-namespace Ease {
+namespace Sowa {
 
 class ImageTexture : public BaseResource {
   public:
@@ -36,5 +36,5 @@ class ImageTexture : public BaseResource {
 	nmGfx::Texture _texture{};
 };
 
-} // namespace Ease
+} // namespace Sowa
 #endif

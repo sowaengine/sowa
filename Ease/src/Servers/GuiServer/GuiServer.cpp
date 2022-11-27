@@ -24,7 +24,7 @@
 #include "res/imgui.ini.res.hpp"
 #include "res/default_theme.yml.res.hpp"
 
-namespace Ease {
+namespace Sowa {
 GuiServer::GuiServer(Application *app, EngineContext &ctx) : _Application(app), _Context(ctx) {
 }
 GuiServer::~GuiServer() {
@@ -37,7 +37,7 @@ void GuiServer::InitGui(GLFWwindow *window) {
 	ImGui::GetIO().Fonts->AddFontFromMemoryTTF(Res::include_res_Roboto_Medium_ttf_data.data(), Res::include_res_Roboto_Medium_ttf_data.size(), 16.f);
 
 	ImGui::GetIO().IniFilename = NULL;
-	std::string layout = std::string{reinterpret_cast<char*>(Ease::Res::include_res_imgui_ini_data.data()), Ease::Res::include_res_imgui_ini_data.size()};
+	std::string layout = std::string{reinterpret_cast<char *>(Sowa::Res::include_res_imgui_ini_data.data()), Sowa::Res::include_res_imgui_ini_data.size()};
 	ImGui::LoadIniSettingsFromMemory(layout.c_str());
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -48,18 +48,18 @@ void GuiServer::InitGui(GLFWwindow *window) {
 #endif
 #define PASS_CONTAINER_AS_DATA(container) (container.data()), (container.size())
 
-	_PlayTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_play_png_data));
-	_StopTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_stop_png_data));
+	_PlayTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Sowa::ImageTexture>(PASS_CONTAINER_AS_DATA(Sowa::Res::include_res_textures_play_png_data));
+	_StopTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Sowa::ImageTexture>(PASS_CONTAINER_AS_DATA(Sowa::Res::include_res_textures_stop_png_data));
 
-	_DirectoryTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_folder_png_data));
-	_FileTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_file_png_data));
+	_DirectoryTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Sowa::ImageTexture>(PASS_CONTAINER_AS_DATA(Sowa::Res::include_res_textures_folder_png_data));
+	_FileTexture = ResourceLoader::get_singleton().LoadResourceFromMemory<Sowa::ImageTexture>(PASS_CONTAINER_AS_DATA(Sowa::Res::include_res_textures_file_png_data));
 
-	_FileTextures[".png"] = ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::ImageTexture>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_textures_image_png_data));
+	_FileTextures[".png"] = ResourceLoader::get_singleton().LoadResourceFromMemory<Sowa::ImageTexture>(PASS_CONTAINER_AS_DATA(Sowa::Res::include_res_textures_image_png_data));
 	_FileTextures[".jpg"] = _FileTextures[".png"];
 	_FileTextures[".jpeg"] = _FileTextures[".png"];
 	_FileTextures[".bmp"] = _FileTextures[".png"];
 
-	Reference<Ease::EditorTheme> theme = Ease::ResourceLoader::get_singleton().LoadResourceFromMemory<Ease::EditorTheme>(PASS_CONTAINER_AS_DATA(Ease::Res::include_res_default_theme_yml_data));
+	Reference<Sowa::EditorTheme> theme = Sowa::ResourceLoader::get_singleton().LoadResourceFromMemory<Sowa::EditorTheme>(PASS_CONTAINER_AS_DATA(Sowa::Res::include_res_default_theme_yml_data));
 	ImGui::GetStyle() = theme->GetStyle();
 	
 #undef PASS_CONTAINER_AS_DATA
@@ -247,7 +247,7 @@ bool GuiServer::BeginFooter(const std::string &label) {
 		ImVec2(viewport->Pos.x,
 			   viewport->Pos.y + viewport->Size.y - ImGui::GetFrameHeight()));
 	ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, ImGui::GetFrameHeight()));
-	PushStyleVar(Ease::StyleVar::WindowRounding, 0.f);
+	PushStyleVar(Sowa::StyleVar::WindowRounding, 0.f);
 	// todo add Gui::PushStyleColor
 	ImGui::PushStyleColor(ImGuiCol_MenuBarBg, ImVec4(0.17f, 0.50f, 0.70f, 1.f));	 // (45, 128, 178)
 	ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.20f, 0.55f, 0.75f, 1.f)); // (51, 140, 191)
@@ -333,7 +333,7 @@ void GuiServer::PopID() {
 }
 
 void GuiServer::DrawFrame() {
-	Application *app = _Context.GetSingleton<Application>(Ease::Server::APPLICATION);
+	Application *app = _Context.GetSingleton<Application>(Sowa::Server::APPLICATION);
 	Window &window = app->GetWindow();
 
 	int dstWidth = ImGui::GetContentRegionAvail().x;
@@ -359,7 +359,7 @@ void GuiServer::DrawFrame() {
 }
 
 void GuiServer::DrawFilesystem() {
-	static std::filesystem::path path = _Context.GetSingleton<Ease::ProjectSettings>(Ease::Server::PROJECTSETTINGS)->projectpath;
+	static std::filesystem::path path = _Context.GetSingleton<Sowa::ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->projectpath;
 	static std::filesystem::path rel_path = "";
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
@@ -546,7 +546,7 @@ void GuiServer::DrawFilesystem() {
 }
 
 void GuiServer::DrawPlayButton() {
-	auto *app = _Context.GetSingleton<Ease::Application>(Ease::Server::APPLICATION);
+	auto *app = _Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION);
 	Reference<ImageTexture> tex = app->IsRunning() ? _StopTexture : _PlayTexture;
 
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
@@ -571,14 +571,14 @@ void GuiServer::DrawPlayButton() {
 void GuiServer::DrawScene() {
 	BeginCheckerList("##sceneview");
 
-	auto *app = _Context.GetSingleton<Ease::Application>(Ease::Server::APPLICATION);
-	Reference<Ease::Scene> scene = app->GetCurrentScene();
+	auto *app = _Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION);
+	Reference<Sowa::Scene> scene = app->GetCurrentScene();
 
 	auto view = scene->m_Registry.view<Component::Common>();
-	static Ease::Entity rclickedEntity{};
+	static Sowa::Entity rclickedEntity{};
 	bool openEntityRClickMenu = false;
 	for (auto it = view.rbegin(); it != view.rend(); ++it) {
-		Ease::Entity entity(*it, &scene->m_Registry);
+		Sowa::Entity entity(*it, &scene->m_Registry);
 
 		CheckerListNextItem();
 		PushID(std::to_string(entity.ID()));
@@ -718,4 +718,4 @@ Vec2 GuiServer::GetMousePosition() {
 	return Vec2(pos.x, pos.y);
 }
 
-} // namespace Ease
+} // namespace Sowa

@@ -13,7 +13,7 @@
 #include "Transform2D/Transform2D.hpp"
 #include "UITransform/UITransform.hpp"
 
-namespace Ease::Component {
+namespace Sowa::Component {
 enum Component_ : uint32_t {
 	Component_None = 0,
 	Component_Common,

@@ -8,8 +8,8 @@
 #include "Core/Renderer.hpp"
 #include "box2d/box2d.h"
 
-namespace Ease::Systems {
-void System_Physics2DDebugDraw(Ease::Scene *pScene, bool pickable /*= false*/) {
+namespace Sowa::Systems {
+void System_Physics2DDebugDraw(Sowa::Scene *pScene, bool pickable /*= false*/) {
 	auto view = pScene->m_Registry.view<Component::Transform2D, Component::PhysicsBody2D>();
 	for (const auto &entityID : view) {
 		Entity entity(entityID, &pScene->m_Registry);
@@ -41,4 +41,4 @@ void System_Physics2DDebugDraw(Ease::Scene *pScene, bool pickable /*= false*/) {
 		}
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

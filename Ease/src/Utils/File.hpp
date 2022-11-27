@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace Ease {
+namespace Sowa {
 namespace File {
 
 struct FilePathData {
@@ -56,5 +56,5 @@ std::vector<unsigned char> GetFileContent(const char *path);
  */
 std::filesystem::path CreateTempFile(unsigned char *data, size_t size);
 } // namespace File
-} // namespace Ease
+} // namespace Sowa
 #endif // _E_FILE_HPP__

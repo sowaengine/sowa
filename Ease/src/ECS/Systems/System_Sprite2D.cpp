@@ -9,9 +9,9 @@
 #include "Resource/ResourceManager.hpp"
 #include "Resource/Texture/Texture.hpp"
 
-namespace Ease::Systems {
-void System_Sprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
-	ResourceManager<Ease::ImageTexture> &loader = pScene->GetResourceManager<Ease::ImageTexture>();
+namespace Sowa::Systems {
+void System_Sprite2D(Sowa::Scene *pScene, bool pickable /* = false*/) {
+	ResourceManager<Sowa::ImageTexture> &loader = pScene->GetResourceManager<Sowa::ImageTexture>();
 
 	auto view = pScene->m_Registry.view<Component::Transform2D, Component::Sprite2D>();
 	for (const auto &entityID : view) {
@@ -22,7 +22,7 @@ void System_Sprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
 		if (!spritec.Visible())
 			continue;
 
-		Reference<Ease::ImageTexture> tex = spritec.Texture();
+		Reference<Sowa::ImageTexture> tex = spritec.Texture();
 
 		if (tex == nullptr)
 			continue;
@@ -37,4 +37,4 @@ void System_Sprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
 			pickable ? (uint32_t)entityID : 0);
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

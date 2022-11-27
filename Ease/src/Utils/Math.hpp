@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <initializer_list>
 
-namespace Ease {
+namespace Sowa {
 struct Vec2 {
 	float x;
 	float y;
@@ -39,7 +39,7 @@ struct Vec2 {
 
 	Vec2 &operator=(std::initializer_list<float> rhs) {
 		if (rhs.size() != 2) {
-			assert(false && "Ease::Vec2 initializer list must have 2 float elements");
+			assert(false && "Sowa::Vec2 initializer list must have 2 float elements");
 			return *this;
 		}
 
@@ -60,6 +60,6 @@ struct Vec2 {
 	/// @brief returns angle of vector in radians starting from right and rotates clockwise. (1, 0) -> 0 and (0, 1) -> PI / 2
 	float Angle();
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_MATH_HPP__

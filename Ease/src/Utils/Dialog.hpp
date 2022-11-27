@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace Ease {
+namespace Sowa {
 namespace Dialog {
 /**
  * @brief Displays 'OpenFileDialog' popup
@@ -26,6 +26,6 @@ std::string OpenFileDialog(const std::string &title,
 						   bool *isInDirectory = nullptr);
 
 } // namespace Dialog
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_DIALOG_HPP__

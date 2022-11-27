@@ -1,7 +1,7 @@
 #include "Resource/Resource.hpp"
 #include "Servers/ScriptServer/LuaScriptServer.hpp"
 
-namespace Ease {
+namespace Sowa {
 void LuaScriptServer::RegisterResources() {
 	_pState->new_enum(
 		"Resource",
@@ -11,4 +11,4 @@ void LuaScriptServer::RegisterResources() {
 	_pState->new_usertype<ImageTexture>(
 		"ImageTexture");
 }
-} // namespace Ease
+} // namespace Sowa

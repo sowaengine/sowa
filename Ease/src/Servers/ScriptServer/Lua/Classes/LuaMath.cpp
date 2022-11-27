@@ -1,6 +1,6 @@
 #include "Servers/ScriptServer/LuaScriptServer.hpp"
 
-namespace Ease {
+namespace Sowa {
 void LuaScriptServer::RegisterMath() {
 	_pState->new_usertype<Vec2>(
 		"Vector2",
@@ -13,4 +13,4 @@ void LuaScriptServer::RegisterMath() {
 		"clamp", &Vec2::Clamp,
 		"angle", &Vec2::Angle);
 }
-} // namespace Ease
+} // namespace Sowa

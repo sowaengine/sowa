@@ -9,10 +9,10 @@
 
 #include <iostream>
 
-namespace Ease::Systems {
-void System_ButtonLogic(Ease::Scene *pScene) {
-	Ease::Application &app = Ease::Application::get_singleton();
-	Ease::Entity pickedEntity = app.SelectedEntity();
+namespace Sowa::Systems {
+void System_ButtonLogic(Sowa::Scene *pScene) {
+	Sowa::Application &app = Sowa::Application::get_singleton();
+	Sowa::Entity pickedEntity = app.SelectedEntity();
 
 	auto view = app.GetCurrentScene()->m_Registry.view<Component::Button>();
 	for (auto &e : view) {
@@ -20,7 +20,7 @@ void System_ButtonLogic(Ease::Scene *pScene) {
 		auto &buttonc = entity.GetComponent<Component::Button>();
 
 		Component::Button::ButtonState &state = buttonc.Internal_GetState();
-		// if(state == Component::Button::ButtonState::CLICK && entity == pickedEntity && Input::IsMouseButtonDown(Ease::Input::Button::LEFT))
+		// if(state == Component::Button::ButtonState::CLICK && entity == pickedEntity && Input::IsMouseButtonDown(Sowa::Input::Button::LEFT))
 		//{
 		//
 		//}
@@ -30,23 +30,23 @@ void System_ButtonLogic(Ease::Scene *pScene) {
 		//}
 	}
 
-	if (pickedEntity.HasComponent<Ease::Component::UITransform>() && pickedEntity.HasComponent<Ease::Component::Button>()) {
-		auto &transformc = pickedEntity.GetComponent<Ease::Component::UITransform>();
-		auto &buttonc = pickedEntity.GetComponent<Ease::Component::Button>();
+	if (pickedEntity.HasComponent<Sowa::Component::UITransform>() && pickedEntity.HasComponent<Sowa::Component::Button>()) {
+		auto &transformc = pickedEntity.GetComponent<Sowa::Component::UITransform>();
+		auto &buttonc = pickedEntity.GetComponent<Sowa::Component::Button>();
 
-		if (buttonc.Disabled() && buttonc.GetState() != Ease::Component::Button::ButtonState::DISABLED)
-			buttonc.Internal_GetState() = Ease::Component::Button::ButtonState::DISABLED;
-		else if (buttonc.GetState() == Ease::Component::Button::ButtonState::DISABLED)
-			buttonc.Internal_GetState() = Ease::Component::Button::ButtonState::NORMAL;
+		if (buttonc.Disabled() && buttonc.GetState() != Sowa::Component::Button::ButtonState::DISABLED)
+			buttonc.Internal_GetState() = Sowa::Component::Button::ButtonState::DISABLED;
+		else if (buttonc.GetState() == Sowa::Component::Button::ButtonState::DISABLED)
+			buttonc.Internal_GetState() = Sowa::Component::Button::ButtonState::NORMAL;
 
-		// if(buttonc.GetState() != Ease::Component::Button::ButtonState::DISABLED && Input::IsMouseButtonClicked(Ease::Input::Button::LEFT))
+		// if(buttonc.GetState() != Sowa::Component::Button::ButtonState::DISABLED && Input::IsMouseButtonClicked(Sowa::Input::Button::LEFT))
 		// {
-		//    buttonc.Internal_GetState() = Ease::Component::Button::ButtonState::CLICK;
+		//    buttonc.Internal_GetState() = Sowa::Component::Button::ButtonState::CLICK;
 		//    buttonc.OnClick.Invoke();
 		// }
 
-		if (buttonc.GetState() != Ease::Component::Button::ButtonState::CLICK && buttonc.GetState() != Ease::Component::Button::ButtonState::DISABLED)
-			buttonc.Internal_GetState() = Ease::Component::Button::ButtonState::HOVER;
+		if (buttonc.GetState() != Sowa::Component::Button::ButtonState::CLICK && buttonc.GetState() != Sowa::Component::Button::ButtonState::DISABLED)
+			buttonc.Internal_GetState() = Sowa::Component::Button::ButtonState::HOVER;
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

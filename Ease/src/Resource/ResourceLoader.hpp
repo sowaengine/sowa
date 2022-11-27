@@ -2,11 +2,11 @@
 #define _E_RESOURCELOADER_HPP__
 #pragma once
 
-#include "Ease.hpp"
+#include "Sowa.hpp"
 #include "Utils/File.hpp"
 #include <memory>
 
-namespace Ease {
+namespace Sowa {
 template <typename T>
 struct ResourceLoaderImpl {
 	Reference<T> Load(unsigned char *data, size_t size);
@@ -32,7 +32,7 @@ class ResourceLoader {
 
 	template <typename T>
 	Reference<T> LoadResource(const std::string &path) {
-		std::vector<unsigned char> data = Ease::File::GetFileContent(path.c_str());
+		std::vector<unsigned char> data = Sowa::File::GetFileContent(path.c_str());
 		if (data.size() > 0) {
 			ResourceLoaderImpl<T> loader;
 			return loader.Load(data.data(), data.size());
@@ -46,6 +46,6 @@ class ResourceLoader {
 	ResourceLoader() = default;
 	~ResourceLoader() = default;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif

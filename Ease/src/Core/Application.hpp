@@ -10,14 +10,14 @@
 #include "Core/EngineContext.hpp"
 #include "Core/Window.hpp"
 #include "ECS/Scene/Scene.hpp"
-#include "Ease.hpp"
+#include "Sowa.hpp"
 #include <filesystem>
 
 namespace nmGfx {
 class Renderer;
 }
 
-namespace Ease {
+namespace Sowa {
 class Application {
   public:
 	static Application &get_singleton() {
@@ -33,8 +33,8 @@ class Application {
 	void UpdateGame();
 	void StopGame();
 	bool IsRunning() { return m_AppRunning; }
-	Reference<Ease::Scene> GetCurrentScene() { return _pCurrentScene; }
-	Ease::Entity &SelectedEntity() { return _SelectedEntity; }
+	Reference<Sowa::Scene> GetCurrentScene() { return _pCurrentScene; }
+	Sowa::Entity &SelectedEntity() { return _SelectedEntity; }
 
 	void ChangeScene(const char *path);
 
@@ -44,7 +44,7 @@ class Application {
 	friend class Window;
 	friend class Renderer;
 
-	Ease::EngineContext *ctx{nullptr};
+	Sowa::EngineContext *ctx{nullptr};
 
 	Application();
 	~Application();
@@ -52,14 +52,14 @@ class Application {
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;
 
-	Reference<Ease::Scene> _GameScene;
-	Reference<Ease::Scene> _CopyScene;
-	Reference<Ease::Scene> _pCurrentScene;
+	Reference<Sowa::Scene> _GameScene;
+	Reference<Sowa::Scene> _CopyScene;
+	Reference<Sowa::Scene> _pCurrentScene;
 
 	bool m_AppRunning = false;
 
-	Ease::Entity _SelectedEntity;
+	Sowa::Entity _SelectedEntity;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif

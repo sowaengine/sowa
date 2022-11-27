@@ -4,7 +4,7 @@
 #pragma once
 #include <string>
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class Common {
   public:
 	Common();
@@ -15,6 +15,6 @@ class Common {
   private:
 	std::string m_Name;
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

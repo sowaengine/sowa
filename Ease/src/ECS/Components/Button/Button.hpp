@@ -10,7 +10,7 @@
 
 typedef void(*ButtonClickEvent);
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class Button {
   public:
 	enum class ButtonState {
@@ -23,10 +23,10 @@ class Button {
 	Button();
 	~Button();
 
-	Ease::Component::NinePatchRect &TextureNormal() { return m_TextureNormal; }
-	Ease::Component::NinePatchRect &TextureHover() { return m_TextureHover; }
-	Ease::Component::NinePatchRect &TextureClick() { return m_TextureClick; }
-	Ease::Component::NinePatchRect &TextureDisabled() { return m_TextureDisabled; }
+	Sowa::Component::NinePatchRect &TextureNormal() { return m_TextureNormal; }
+	Sowa::Component::NinePatchRect &TextureHover() { return m_TextureHover; }
+	Sowa::Component::NinePatchRect &TextureClick() { return m_TextureClick; }
+	Sowa::Component::NinePatchRect &TextureDisabled() { return m_TextureDisabled; }
 
 	std::string &Text() { return m_Text; }
 
@@ -37,15 +37,15 @@ class Button {
 
 	ButtonState &Internal_GetState() { return m_ButtonState; }
 
-	Ease::Event<void()> OnClick;
+	Sowa::Event<void()> OnClick;
 
-	static Ease::Component::NinePatchRect GetDefaultButtonTexture(ButtonState state);
+	static Sowa::Component::NinePatchRect GetDefaultButtonTexture(ButtonState state);
 
   private:
-	Ease::Component::NinePatchRect m_TextureNormal;
-	Ease::Component::NinePatchRect m_TextureHover;
-	Ease::Component::NinePatchRect m_TextureClick;
-	Ease::Component::NinePatchRect m_TextureDisabled;
+	Sowa::Component::NinePatchRect m_TextureNormal;
+	Sowa::Component::NinePatchRect m_TextureHover;
+	Sowa::Component::NinePatchRect m_TextureClick;
+	Sowa::Component::NinePatchRect m_TextureDisabled;
 
 	std::string m_Text{"Button"};
 
@@ -54,6 +54,6 @@ class Button {
 
 	ButtonState m_ButtonState = ButtonState::NORMAL;
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

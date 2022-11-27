@@ -2,15 +2,15 @@
 #define _E_WINDOW_HPP__
 #pragma once
 
-#include "Ease.hpp"
 #include "Resource/Texture/Texture.hpp"
+#include "Sowa.hpp"
 #include <string>
 
 namespace nmGfx {
 class Window;
 }
 
-namespace Ease {
+namespace Sowa {
 class Window {
   public:
 	Window();
@@ -72,6 +72,6 @@ class Window {
 
 	nmGfx::Window *_windowHandle{nullptr};
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif

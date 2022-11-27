@@ -1,6 +1,6 @@
 #include "Servers/ScriptServer/ScriptServer.hpp"
 
-namespace Ease {
+namespace Sowa {
 ScriptServer::ScriptServer() {}
 ScriptServer::~ScriptServer() {}
-} // namespace Ease
+} // namespace Sowa

@@ -9,9 +9,9 @@
 #include "Resource/ResourceManager.hpp"
 #include "Resource/Texture/Texture.hpp"
 
-namespace Ease::Systems {
-void System_ButtonDraw(Ease::Scene *pScene, bool pickable /* = false*/) {
-	ResourceManager<Ease::ImageTexture> &loader = pScene->GetResourceManager<Ease::ImageTexture>();
+namespace Sowa::Systems {
+void System_ButtonDraw(Sowa::Scene *pScene, bool pickable /* = false*/) {
+	ResourceManager<Sowa::ImageTexture> &loader = pScene->GetResourceManager<Sowa::ImageTexture>();
 
 	auto view = pScene->m_Registry.view<Component::UITransform, Component::Button>();
 	for (const auto &entityID : view) {
@@ -23,7 +23,7 @@ void System_ButtonDraw(Ease::Scene *pScene, bool pickable /* = false*/) {
 			continue;
 
 		Component::Button::ButtonState state = buttonc.GetState();
-		Ease::Component::NinePatchRect nPatch;
+		Sowa::Component::NinePatchRect nPatch;
 		switch (state) {
 		case Component::Button::ButtonState::NORMAL:
 			nPatch = buttonc.TextureNormal();
@@ -41,14 +41,6 @@ void System_ButtonDraw(Ease::Scene *pScene, bool pickable /* = false*/) {
 			continue;
 			break;
 		}
-
-		if (pickable) {
-			// Ease::Renderer::get_singleton().DrawNinePatchRectWithID(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch, (uint32_t)entityID);
-			// Ease::Renderer::get_singleton().DrawTextAligned(transformc.Position(), transformc.Size(), {0.5f, 0.5f}, 0, transformc.Rotation(), 128.f, buttonc.Text(), {80.f, 80.f, 80.f, 255.f});
-		} else {
-			// Ease::Renderer::get_singleton().DrawNinePatchRect(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch);
-			// Ease::Renderer::get_singleton().DrawTextAligned(transformc.Position(), transformc.Size(), {0.5f, 0.5f}, 0, transformc.Rotation(), 128.f, buttonc.Text(), {80.f, 80.f, 80.f, 255.f});
-		}
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

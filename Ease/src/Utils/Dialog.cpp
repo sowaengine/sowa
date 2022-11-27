@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace Ease {
+namespace Sowa {
 namespace Dialog {
 
 std::string OpenFileDialog(
@@ -37,4 +37,4 @@ std::string OpenFileDialog(
 	return relativePath;
 }
 } // namespace Dialog
-} // namespace Ease
+} // namespace Sowa

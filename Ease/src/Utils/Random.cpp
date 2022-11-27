@@ -3,7 +3,7 @@
 #include <chrono>
 #include <random>
 
-namespace Ease {
+namespace Sowa {
 
 uint64_t Random::GenerateID() {
 	size_t id = 0;
@@ -46,4 +46,4 @@ void Random::RandomNumberGenerator::Generate(double &number, double begin /*= 0.
 	std::uniform_real_distribution<double> dist(begin, end);
 	number = dist(_Engine);
 }
-} // namespace Ease
+} // namespace Sowa

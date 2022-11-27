@@ -8,7 +8,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace Ease {
+namespace Sowa {
 ProjectSettings::ProjectSettings(EngineContext &ctx) : _Context(ctx) {
 }
 
@@ -20,7 +20,7 @@ bool ProjectSettings::LoadProject(const char *path) {
 
 	YAML::Node project = YAML::LoadFile((projectpath / "project.ease").string());
 
-	Ease::File::InsertFilepathEndpoint("res", projectpath, true);
+	Sowa::File::InsertFilepathEndpoint("res", projectpath, true);
 
 	int version = project["v"].as<int>(0);
 
@@ -101,4 +101,4 @@ bool ProjectSettings::SaveProject() {
 	ofstream << yaml.c_str();
 	return true;
 }
-} // namespace Ease
+} // namespace Sowa

@@ -39,7 +39,7 @@ using Reference = std::shared_ptr<T>;
 typedef uint64_t ResourceID;
 typedef uint32_t EntityID;
 
-namespace Ease {
+namespace Sowa {
 
 // Singleton Servers
 enum class Server : uint32_t {
@@ -51,6 +51,6 @@ enum class Server : uint32_t {
 	SCRIPTSERVER_LUA,
 };
 
-} // namespace Ease
+} // namespace Sowa
 
 #endif

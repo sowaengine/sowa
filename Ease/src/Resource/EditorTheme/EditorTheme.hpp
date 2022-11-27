@@ -7,9 +7,9 @@
 #include <stdint.h>
 
 #include "../Resource.hpp"
-#include "Ease.hpp"
+#include "Sowa.hpp"
 
-namespace Ease {
+namespace Sowa {
 
 class EditorTheme : public BaseResource {
   public:
@@ -26,5 +26,5 @@ class EditorTheme : public BaseResource {
 	ImGuiStyle style;
 };
 
-} // namespace Ease
+} // namespace Sowa
 #endif

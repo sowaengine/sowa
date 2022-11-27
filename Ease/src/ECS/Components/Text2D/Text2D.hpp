@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <string>
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class Text2D {
   public:
 	Text2D();
@@ -23,6 +23,6 @@ class Text2D {
 	float m_FontSize = 64.f;
 	bool m_Visible = true;
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

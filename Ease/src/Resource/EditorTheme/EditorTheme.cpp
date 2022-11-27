@@ -5,7 +5,7 @@
 #include "yaml-cpp/yaml.h"
 #include <string_view>
 
-namespace Ease {
+namespace Sowa {
 template <>
 Reference<EditorTheme> ResourceLoaderImpl<EditorTheme>::Load(unsigned char *data, size_t size) {
 	if (size <= 1) {
@@ -131,4 +131,4 @@ EditorTheme::~EditorTheme() {
 void EditorTheme::LoadFromStyle(ImGuiStyle _style) {
 	style = _style;
 }
-} // namespace Ease
+} // namespace Sowa

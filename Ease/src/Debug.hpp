@@ -28,7 +28,7 @@
 
 namespace Debug {
 
-Ease::Event<void(std::string)> &OnPrint();
+Sowa::Event<void(std::string)> &OnPrint();
 
 /**
  * @brief Internal print function used by Other logging functions

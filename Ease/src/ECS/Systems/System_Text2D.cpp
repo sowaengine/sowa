@@ -6,8 +6,8 @@
 
 #include "Core/Renderer.hpp"
 
-namespace Ease::Systems {
-void System_Text2D(Ease::Scene *pScene, bool pickable /* = false*/) {
+namespace Sowa::Systems {
+void System_Text2D(Sowa::Scene *pScene, bool pickable /* = false*/) {
 	auto view = pScene->m_Registry.view<Component::Transform2D, Component::Text2D>();
 	for (const auto &entityID : view) {
 		Entity entity(entityID, &pScene->m_Registry);
@@ -23,4 +23,4 @@ void System_Text2D(Ease::Scene *pScene, bool pickable /* = false*/) {
 		//    Renderer::get_singleton().DrawText(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), textrendererc.FontSize(), textrendererc.Text(), textrendererc.Color());
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

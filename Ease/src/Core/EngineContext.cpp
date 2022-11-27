@@ -1,9 +1,9 @@
 #include "Core/EngineContext.hpp"
 
-namespace Ease {
+namespace Sowa {
 EngineContext::EngineContext() {
 }
 
 EngineContext::~EngineContext() {
 }
-} // namespace Ease
+} // namespace Sowa

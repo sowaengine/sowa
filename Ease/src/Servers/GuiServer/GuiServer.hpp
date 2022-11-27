@@ -11,7 +11,7 @@
 
 class GLFWwindow;
 
-namespace Ease {
+namespace Sowa {
 class Application;
 
 enum WindowFlags {
@@ -170,13 +170,13 @@ class GuiServer {
 	int _panelStack = 0;
 
 	//
-	Reference<Ease::ImageTexture> _PlayTexture{nullptr};
-	Reference<Ease::ImageTexture> _StopTexture{nullptr};
+	Reference<Sowa::ImageTexture> _PlayTexture{nullptr};
+	Reference<Sowa::ImageTexture> _StopTexture{nullptr};
 
-	Reference<Ease::ImageTexture> _DirectoryTexture{nullptr};
-	Reference<Ease::ImageTexture> _FileTexture{nullptr};
-	std::unordered_map<std::string, Reference<Ease::ImageTexture>> _FileTextures;
+	Reference<Sowa::ImageTexture> _DirectoryTexture{nullptr};
+	Reference<Sowa::ImageTexture> _FileTexture{nullptr};
+	std::unordered_map<std::string, Reference<Sowa::ImageTexture>> _FileTextures;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_GUISERVER_HPP__

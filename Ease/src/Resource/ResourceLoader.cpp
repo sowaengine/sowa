@@ -1,5 +1,5 @@
 #include "Resource/ResourceLoader.hpp"
 
-namespace Ease {
+namespace Sowa {
 
-} // namespace Ease
+} // namespace Sowa

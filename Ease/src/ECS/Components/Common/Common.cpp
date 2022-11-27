@@ -1,10 +1,10 @@
 #include "ECS/Components/Common/Common.hpp"
 
-namespace Ease::Component {
+namespace Sowa::Component {
 Common::Common()
 	: m_Name("New Entity") {
 }
 
 Common::~Common() {
 }
-} // namespace Ease::Component
+} // namespace Sowa::Component

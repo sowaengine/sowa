@@ -1,5 +1,5 @@
 #include "Core/Window.hpp"
-#include "Ease.hpp"
+#include "Sowa.hpp"
 
 #include "GLFW/glfw3.h"
 #include <iostream>
@@ -12,7 +12,7 @@
 #include "ECS/Entity/Entity.hpp"
 #include "nmGfx/src/Core/nm_Window.hpp"
 
-namespace Ease {
+namespace Sowa {
 Window::Window() {}
 Window::~Window() {
 }
@@ -69,4 +69,4 @@ int Window::GetBlackbarHeight() {
 	return m_Editor_BlackbarHeight;
 }
 #endif
-} // namespace Ease
+} // namespace Sowa

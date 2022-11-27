@@ -7,7 +7,7 @@
 #include <functional>
 #include <map>
 
-namespace Ease {
+namespace Sowa {
 template <typename T>
 class Event {
   public:
@@ -33,6 +33,6 @@ class Event {
 
 	uint32_t m_IDCounter = 0;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_EVENT_HPP__

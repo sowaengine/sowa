@@ -5,7 +5,7 @@
 
 #include <string>
 
-namespace Ease {
+namespace Sowa {
 class LuaModule {
   public:
 	LuaModule();
@@ -33,6 +33,6 @@ class LuaModule {
 
 	sol::function _OnPrint{};
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_LUA_MODULE_HPP__

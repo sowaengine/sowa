@@ -11,7 +11,7 @@
 #include "lua.hpp"
 #include "sol/sol.hpp"
 
-namespace Ease {
+namespace Sowa {
 LuaScriptServer::LuaScriptServer(EngineContext &ctx) : _Context(ctx) {
 	_pState = std::make_unique<sol::state>();
 	_pState->open_libraries(sol::lib::base);
@@ -31,7 +31,7 @@ void LuaScriptServer::InitModules() {
 	LoadModule("abs://Editor/Sowa.Editor.lua");
 #endif
 
-	for (const std::string &path : _Context.GetSingleton<Ease::ProjectSettings>(Ease::Server::PROJECTSETTINGS)->_modules.lua) {
+	for (const std::string &path : _Context.GetSingleton<Sowa::ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->_modules.lua) {
 		LoadModule(path.c_str());
 	}
 
@@ -51,9 +51,9 @@ void LuaScriptServer::GuiUpdateModules() {
 }
 
 void LuaScriptServer::LoadModule(const char *path) {
-	std::filesystem::path fullpath = Ease::File::Path(path);
+	std::filesystem::path fullpath = Sowa::File::Path(path);
 
-	std::vector<unsigned char> code = Ease::File::GetFileContent(path);
+	std::vector<unsigned char> code = Sowa::File::GetFileContent(path);
 	if (code.size() == 0) {
 		Debug::Error("Module not found at {}", path);
 		return;
@@ -148,4 +148,4 @@ void LuaScriptServer::LoadModule(const char *path) {
 	}
 }
 
-} // namespace Ease
+} // namespace Sowa

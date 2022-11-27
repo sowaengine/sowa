@@ -13,14 +13,14 @@
 #include <vector>
 
 class b2World;
-namespace Ease {
+namespace Sowa {
 class Scene {
   public:
 	Scene();
 	~Scene();
 
 	Entity Create(const std::string &name, EntityID id = 0);
-	void Destroy(Ease::Entity &entity);
+	void Destroy(Sowa::Entity &entity);
 
 	entt::registry m_Registry;
 
@@ -30,10 +30,10 @@ class Scene {
 	std::filesystem::path path;
 
 	// Returns first entity that is in given group
-	Ease::Entity GetEntityInGroup(const std::string &group);
-	std::vector<Ease::Entity> GetEntitiesInGroup(const std::string &group);
+	Sowa::Entity GetEntityInGroup(const std::string &group);
+	std::vector<Sowa::Entity> GetEntitiesInGroup(const std::string &group);
 
-	Ease::Entity GetEntityByID(uint32_t id);
+	Sowa::Entity GetEntityByID(uint32_t id);
 
 	void StartScene();
 	void StopScene();
@@ -41,18 +41,18 @@ class Scene {
 	// Copies all entities of src to dst
 	static void CopyScene(Scene &src, Scene &dst);
 
-	void CopyEntity(Ease::Entity entity);
-	void AddCopiedEntity(Ease::Entity entity);
+	void CopyEntity(Sowa::Entity entity);
+	void AddCopiedEntity(Sowa::Entity entity);
 	void ClearCopiedEntities();
-	Ease::Entity PasteCopiedEntity();
-	std::vector<Ease::Entity> PasteCopiedEntities();
+	Sowa::Entity PasteCopiedEntity();
+	std::vector<Sowa::Entity> PasteCopiedEntities();
 	uint32_t GetCopiedEntityCount();
 
 	Vec2 &Gravity() { return m_Gravity; }
 	std::shared_ptr<b2World> PhysicsWorld2D() { return m_pPhysicsWorld2D; }
 
-	Ease::Component::Camera2D &CurrentCamera2D() { return m_SceneCamera2D.camera2d; };
-	Ease::Component::Transform2D &CurrentCameraTransform2D() { return m_SceneCamera2D.transform2d; }
+	Sowa::Component::Camera2D &CurrentCamera2D() { return m_SceneCamera2D.camera2d; };
+	Sowa::Component::Transform2D &CurrentCameraTransform2D() { return m_SceneCamera2D.transform2d; }
 
 	template <typename T>
 	ResourceManager<T> &GetResourceManager() {
@@ -76,14 +76,14 @@ class Scene {
 	std::shared_ptr<b2World> m_pPhysicsWorld2D;
 
 	struct {
-		Ease::Component::Camera2D camera2d;
-		Ease::Component::Transform2D transform2d;
+		Sowa::Component::Camera2D camera2d;
+		Sowa::Component::Transform2D transform2d;
 	} m_SceneCamera2D{};
 	struct {
-		Ease::Component::Camera2D camera2d;
-		Ease::Component::Transform2D transform2d;
+		Sowa::Component::Camera2D camera2d;
+		Sowa::Component::Transform2D transform2d;
 	} m_SceneOldCamera2D{};
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif

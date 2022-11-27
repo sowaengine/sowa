@@ -1,12 +1,12 @@
 #include "Core/Input.hpp"
 #include "Core/Application.hpp"
-#include "Ease.hpp"
+#include "Sowa.hpp"
 
-namespace Ease {
+namespace Sowa {
 /*
 Vec2 Input::GetMousePos()
 {
-   Ease::Window& window = Ease::Application::get_singleton().GetWindow();
+   Sowa::Window& window = Sowa::Application::get_singleton().GetWindow();
 
    rVec2 mousePos = GetMousePosition();
    //mousePos.x -= GetScreenWidth() * 0.5f;
@@ -16,7 +16,7 @@ Vec2 Input::GetMousePos()
    mousePos.y -= window.GetBlackbarHeight();
 
 #else
-   Ease::Vec2 scale;
+   Sowa::Vec2 scale;
    scale.x = (float)window.GetWindowWidth() / (float)window.Editor_GetWindowWidth();
    scale.y = (float)window.GetWindowHeight() / (float)window.Editor_GetWindowHeight();
 
@@ -26,14 +26,14 @@ Vec2 Input::GetMousePos()
    mousePos.y *= scale.y;
 #endif
 
-   return Ease::Vec2(mousePos.x, mousePos.y);
+   return Sowa::Vec2(mousePos.x, mousePos.y);
 }
 
 Vec2 Input::GetGameMousePos()
 {
-   Ease::Window& window = Ease::Application::get_singleton().GetWindow();
+   Sowa::Window& window = Sowa::Application::get_singleton().GetWindow();
 
-   Ease::Vec2 scale;
+   Sowa::Vec2 scale;
 #ifndef EASE_EDITOR
    scale.x = (float)window.GetVideoWidth() / ((float)window.GetWindowWidth() - (window.GetBlackbarWidth() * 2));
    scale.y = (float)window.GetVideoHeight() / ((float)window.GetWindowHeight() - (window.GetBlackbarHeight() * 2));
@@ -42,7 +42,7 @@ Vec2 Input::GetGameMousePos()
    scale.y = (float)window.GetVideoHeight() / (float)window.GetWindowHeight();
 #endif
 
-   Ease::Vec2 mousePos = Input::GetMousePos();
+   Sowa::Vec2 mousePos = Input::GetMousePos();
    mousePos.x *= scale.x;
    mousePos.y *= scale.y;
 
@@ -80,4 +80,4 @@ bool Input::IsMouseButtonReleased(Button button)
    return ::IsMouseButtonReleased(btn);
 }
 */
-} // namespace Ease
+} // namespace Sowa

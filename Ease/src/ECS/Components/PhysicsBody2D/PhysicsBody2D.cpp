@@ -1,6 +1,6 @@
 #include "ECS/Components/PhysicsBody2D/PhysicsBody2D.hpp"
 
-namespace Ease::Component {
+namespace Sowa::Component {
 PhysicsBody2D::PhysicsBody2D() {
 }
 
@@ -10,4 +10,4 @@ b2BodyType PhysicsBody2D::GetInternalBodyType() {
 		   : m_BodyType == PhysicsBodyType::KINEMATIC ? b2_kinematicBody
 													  : b2_staticBody;
 }
-} // namespace Ease::Component
+} // namespace Sowa::Component

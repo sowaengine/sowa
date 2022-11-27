@@ -6,13 +6,13 @@
 #include <memory>
 #include <stdint.h>
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class NinePatchRect {
   public:
 	NinePatchRect();
 	~NinePatchRect();
 
-	std::weak_ptr<Ease::ImageTexture> &Texture() { return m_Texture; }
+	std::weak_ptr<Sowa::ImageTexture> &Texture() { return m_Texture; }
 	bool &Visible() { return m_Visible; }
 
 	int &Left() { return m_Left; }
@@ -21,7 +21,7 @@ class NinePatchRect {
 	int &Bottom() { return m_Bottom; }
 
   private:
-	std::weak_ptr<Ease::ImageTexture> m_Texture;
+	std::weak_ptr<Sowa::ImageTexture> m_Texture;
 	bool m_Visible = true;
 
 	int m_Left;
@@ -29,6 +29,6 @@ class NinePatchRect {
 	int m_Right;
 	int m_Bottom;
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

@@ -3,7 +3,7 @@
 
 #include "Exceptions.hpp"
 
-namespace Ease {
+namespace Sowa {
 
 LuaModule::LuaModule() {}
 LuaModule::~LuaModule() {}
@@ -45,4 +45,4 @@ void LuaModule::CallOnPrint(const std::string &message) {
 		}
 	}
 }
-} // namespace Ease
+} // namespace Sowa

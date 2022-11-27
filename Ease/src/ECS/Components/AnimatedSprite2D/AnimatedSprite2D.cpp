@@ -3,7 +3,7 @@
 #include "Resource/ResourceManager.hpp"
 #include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 
-namespace Ease::Component {
+namespace Sowa::Component {
 AnimatedSprite2D::AnimatedSprite2D()
 	: m_CurrentFrame(0), m_SelectedAnimation(0), m_SelectedAnimationName(""), m_FPS(1), m_TicksPast(0.f) {
 }
@@ -55,4 +55,4 @@ ResourceID AnimatedSprite2D::GetCurrentTexture() {
 	//    return loader.GetResource(m_SelectedAnimation)->Texture();
 	return 0;
 }
-} // namespace Ease::Component
+} // namespace Sowa::Component

@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "Debug.hpp"
-#include "Ease.hpp"
+#include "Sowa.hpp"
 
 #include "Resource/EditorTheme/EditorTheme.hpp"
 #include "Resource/ResourceLoader.hpp"
@@ -16,7 +16,7 @@
 
 #include "Utils/Random.hpp"
 
-namespace Ease {
+namespace Sowa {
 template <typename T>
 class ResourceManager {
   public:
@@ -74,7 +74,7 @@ class ResourceManager {
 
 // todo: ResourceSaver
 template <>
-bool ResourceManager<Ease::EditorTheme>::SaveResource(const char *path, std::shared_ptr<Ease::EditorTheme> resource);
-} // namespace Ease
+bool ResourceManager<Sowa::EditorTheme>::SaveResource(const char *path, std::shared_ptr<Sowa::EditorTheme> resource);
+} // namespace Sowa
 
 #endif

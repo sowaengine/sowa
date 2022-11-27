@@ -1,6 +1,6 @@
 #include "ECS/Entity/Entity.hpp"
 
-namespace Ease {
+namespace Sowa {
 Entity::Entity() {
 }
 
@@ -11,4 +11,4 @@ Entity::Entity(entt::entity entityID, entt::registry *pRegistry) {
 
 Entity::~Entity() {
 }
-} // namespace Ease
+} // namespace Sowa

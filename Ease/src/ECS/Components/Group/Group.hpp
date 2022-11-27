@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class Group {
   public:
 	Group();
@@ -16,6 +16,6 @@ class Group {
   private:
 	std::vector<std::string> m_Groups;
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

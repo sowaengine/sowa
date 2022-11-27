@@ -5,7 +5,7 @@
 
 #include "entt/entt.hpp"
 
-namespace Ease {
+namespace Sowa {
 class Entity {
   public:
 	Entity();
@@ -46,6 +46,6 @@ class Entity {
 	entt::entity m_Entity;
 	entt::registry *m_pRegistry = nullptr;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif

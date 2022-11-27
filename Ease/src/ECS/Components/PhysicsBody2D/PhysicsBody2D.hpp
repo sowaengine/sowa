@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "Ease.hpp"
+#include "Sowa.hpp"
 #include "box2d/box2d.h"
 #include <memory>
 #include <string>
 
-namespace Ease {
+namespace Sowa {
 
 enum class PhysicsBodyType {
 	STATIC = 0,
@@ -41,9 +41,9 @@ struct Collider2D {
 };
 
 class Scene;
-} // namespace Ease
+} // namespace Sowa
 
-namespace Ease::Component {
+namespace Sowa::Component {
 class PhysicsBody2D {
   public:
 	PhysicsBody2D();
@@ -66,12 +66,12 @@ class PhysicsBody2D {
 	std::vector<Collider2D> m_Colliders;
 
 	// internal box2d
-	friend class Ease::Scene;
+	friend class Sowa::Scene;
 	b2BodyDef m_b2BodyDef;
 	b2Body *m_b2Body = nullptr;
 
 	b2BodyType GetInternalBodyType();
 };
-} // namespace Ease::Component
+} // namespace Sowa::Component
 
 #endif

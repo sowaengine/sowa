@@ -1,9 +1,9 @@
 #include "ECS/Components/Sprite2D/Sprite2D.hpp"
 
-namespace Ease::Component {
+namespace Sowa::Component {
 Sprite2D::Sprite2D() {
 }
 
 Sprite2D::~Sprite2D() {
 }
-} // namespace Ease::Component
+} // namespace Sowa::Component

@@ -6,9 +6,9 @@
 #include <stdint.h>
 #include <string>
 
-#include "Ease.hpp"
+#include "Sowa.hpp"
 
-namespace Ease {
+namespace Sowa {
 
 class BaseResource {
   public:
@@ -31,6 +31,6 @@ enum Resource_ : uint32_t {
 	Resource_ImageTexture
 };
 
-} // namespace Ease
+} // namespace Sowa
 
 #endif

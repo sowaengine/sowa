@@ -29,7 +29,7 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const glm::vec4 &vec) {
 	return out;
 }
 
-YAML::Emitter &operator<<(YAML::Emitter &out, const Ease::Vec2 &vec) {
+YAML::Emitter &operator<<(YAML::Emitter &out, const Sowa::Vec2 &vec) {
 	out << YAML::Flow;
 	out << YAML::BeginSeq << vec.x << vec.y << YAML::EndSeq;
 	return out;
@@ -41,22 +41,22 @@ YAML::Emitter &operator<<(YAML::Emitter &out, const b2Vec2 &vec) {
 	return out;
 }
 
-YAML::Emitter &operator<<(YAML::Emitter &out, const Ease::PhysicsBodyType &type) {
-	if (type == Ease::PhysicsBodyType::STATIC)
+YAML::Emitter &operator<<(YAML::Emitter &out, const Sowa::PhysicsBodyType &type) {
+	if (type == Sowa::PhysicsBodyType::STATIC)
 		out << "STATIC";
-	else if (type == Ease::PhysicsBodyType::DYNAMIC)
+	else if (type == Sowa::PhysicsBodyType::DYNAMIC)
 		out << "DYNAMIC";
-	else if (type == Ease::PhysicsBodyType::KINEMATIC)
+	else if (type == Sowa::PhysicsBodyType::KINEMATIC)
 		out << "KINEMATIC";
 	else
 		out << "STATIC";
 	return out;
 }
 
-YAML::Emitter &operator<<(YAML::Emitter &out, const Ease::ColliderShape2D &type) {
-	if (type == Ease::ColliderShape2D::BOX)
+YAML::Emitter &operator<<(YAML::Emitter &out, const Sowa::ColliderShape2D &type) {
+	if (type == Sowa::ColliderShape2D::BOX)
 		out << "BOX";
-	else if (type == Ease::ColliderShape2D::CIRCLE)
+	else if (type == Sowa::ColliderShape2D::CIRCLE)
 		out << "CIRCLE";
 	else
 		out << "BOX";

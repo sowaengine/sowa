@@ -9,9 +9,9 @@
 
 #include <iostream>
 
-namespace Ease::Systems {
-void System_Camera2DLogic(Ease::Scene *pScene) {
-	Ease::Application &app = Ease::Application::get_singleton();
+namespace Sowa::Systems {
+void System_Camera2DLogic(Sowa::Scene *pScene) {
+	Sowa::Application &app = Sowa::Application::get_singleton();
 
 	bool found = false;
 	auto view = app.GetCurrentScene()->m_Registry.view<Component::Camera2D, Component::Transform2D>();
@@ -32,4 +32,4 @@ void System_Camera2DLogic(Ease::Scene *pScene) {
 		pScene->CurrentCameraTransform2D() = Component::Transform2D();
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

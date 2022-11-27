@@ -9,9 +9,9 @@
 #include "Resource/ResourceManager.hpp"
 #include "Resource/Texture/Texture.hpp"
 
-namespace Ease::Systems {
-void System_ButtonPicking(Ease::Scene *pScene) {
-	ResourceManager<Ease::ImageTexture> &loader = pScene->GetResourceManager<Ease::ImageTexture>();
+namespace Sowa::Systems {
+void System_ButtonPicking(Sowa::Scene *pScene) {
+	ResourceManager<Sowa::ImageTexture> &loader = pScene->GetResourceManager<Sowa::ImageTexture>();
 
 	auto view = pScene->m_Registry.view<Component::UITransform, Component::Button>();
 	for (const auto &entityID : view) {
@@ -22,7 +22,7 @@ void System_ButtonPicking(Ease::Scene *pScene) {
 		if (!buttonc.Visible())
 			continue;
 		Component::Button::ButtonState state = buttonc.GetState();
-		Ease::Component::NinePatchRect nPatch;
+		Sowa::Component::NinePatchRect nPatch;
 		switch (state) {
 		case Component::Button::ButtonState::NORMAL:
 			nPatch = buttonc.TextureNormal();
@@ -41,7 +41,7 @@ void System_ButtonPicking(Ease::Scene *pScene) {
 			break;
 		}
 
-		// Ease::Renderer::get_singleton().DrawNinePatchRectWithID(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch, (uint32_t)entityID);
+		// Sowa::Renderer::get_singleton().DrawNinePatchRectWithID(transformc.Position(), transformc.Size(), transformc.Scale(), 0, transformc.Rotation(), nPatch, (uint32_t)entityID);
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

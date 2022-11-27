@@ -5,7 +5,7 @@
 
 int main(int argc, char const *argv[]) {
 	SW_ENTRY()
-	Ease::Application &app = Ease::Application::get_singleton();
+	Sowa::Application &app = Sowa::Application::get_singleton();
 
 	Debug::Info("---> Sowa Engine v{} Init <---", EASE_VERSION_STRING);
 

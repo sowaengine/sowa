@@ -13,7 +13,7 @@ namespace sol {
 class state;
 }
 
-namespace Ease {
+namespace Sowa {
 
 class LuaScriptServer : public ScriptServer {
   protected:
@@ -80,6 +80,6 @@ class LuaScriptServer : public ScriptServer {
 	std::unordered_map<std::string, LuaModule> _Modules{};
 };
 
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_LUASCRIPTSERVER_HPP__

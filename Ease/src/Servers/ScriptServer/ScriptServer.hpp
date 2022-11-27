@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace Ease {
+namespace Sowa {
 class ScriptServer {
   public:
 	ScriptServer(const ScriptServer &) = delete;
@@ -17,6 +17,6 @@ class ScriptServer {
 	ScriptServer();
 	virtual ~ScriptServer();
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_SCRIPTSERVER_HPP__

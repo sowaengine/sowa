@@ -17,24 +17,24 @@
 
 #define CALL_FOR_ALL_COMPONENTS(func, ...)                    \
 	do {                                                      \
-		func<Ease::Component::AnimatedSprite2D>(__VA_ARGS__); \
-		func<Ease::Component::Button>(__VA_ARGS__);           \
-		func<Ease::Component::Camera2D>(__VA_ARGS__);         \
-		func<Ease::Component::Group>(__VA_ARGS__);            \
-		func<Ease::Component::NinePatchRect>(__VA_ARGS__);    \
-		func<Ease::Component::PhysicsBody2D>(__VA_ARGS__);    \
-		func<Ease::Component::Sprite2D>(__VA_ARGS__);         \
-		func<Ease::Component::Text2D>(__VA_ARGS__);           \
-		func<Ease::Component::Transform2D>(__VA_ARGS__);      \
-		func<Ease::Component::UITransform>(__VA_ARGS__);      \
+		func<Sowa::Component::AnimatedSprite2D>(__VA_ARGS__); \
+		func<Sowa::Component::Button>(__VA_ARGS__);           \
+		func<Sowa::Component::Camera2D>(__VA_ARGS__);         \
+		func<Sowa::Component::Group>(__VA_ARGS__);            \
+		func<Sowa::Component::NinePatchRect>(__VA_ARGS__);    \
+		func<Sowa::Component::PhysicsBody2D>(__VA_ARGS__);    \
+		func<Sowa::Component::Sprite2D>(__VA_ARGS__);         \
+		func<Sowa::Component::Text2D>(__VA_ARGS__);           \
+		func<Sowa::Component::Transform2D>(__VA_ARGS__);      \
+		func<Sowa::Component::UITransform>(__VA_ARGS__);      \
 	} while (0)
 
-namespace Ease {
+namespace Sowa {
 void Scene::StartScene() {
 	m_SceneOldCamera2D.camera2d = m_SceneCamera2D.camera2d;
 	m_SceneOldCamera2D.transform2d = m_SceneCamera2D.transform2d;
-	m_SceneCamera2D.transform2d = Ease::Component::Transform2D();
-	m_SceneCamera2D.camera2d = Ease::Component::Camera2D();
+	m_SceneCamera2D.transform2d = Sowa::Component::Transform2D();
+	m_SceneCamera2D.camera2d = Sowa::Component::Camera2D();
 
 	m_pPhysicsWorld2D = std::make_shared<b2World>(b2Vec2(m_Gravity.x, m_Gravity.y));
 
@@ -84,7 +84,7 @@ void Scene::StopScene() {
 }
 
 template <typename T>
-void CopyComponent(Ease::Entity &srcEntity, Ease::Entity &dstEntity) {
+void CopyComponent(Sowa::Entity &srcEntity, Sowa::Entity &dstEntity) {
 	if (srcEntity.HasComponent<T>()) {
 		auto &srcComponent = srcEntity.GetComponent<T>();
 		auto &dstComponent = dstEntity.AddComponent<T>();
@@ -96,23 +96,23 @@ void CopyComponent(Ease::Entity &srcEntity, Ease::Entity &dstEntity) {
 // static
 void Scene::CopyScene(Scene &src, Scene &dst) {
 	dst.m_Registry.clear();
-	auto view = src.m_Registry.view<Ease::Component::Common>();
+	auto view = src.m_Registry.view<Sowa::Component::Common>();
 	for (const auto &entityID : view) {
 		Entity srcEntity(entityID, &src.m_Registry);
-		Entity dstEntity = dst.Create(srcEntity.GetComponent<Ease::Component::Common>().Name(), (uint32_t)entityID);
+		Entity dstEntity = dst.Create(srcEntity.GetComponent<Sowa::Component::Common>().Name(), (uint32_t)entityID);
 
 		CALL_FOR_ALL_COMPONENTS(CopyComponent, srcEntity, dstEntity);
 	}
 }
 
-void Scene::CopyEntity(Ease::Entity entity) {
+void Scene::CopyEntity(Sowa::Entity entity) {
 	ClearCopiedEntities();
 	AddCopiedEntity(entity);
 }
 
-void Scene::AddCopiedEntity(Ease::Entity entity) {
+void Scene::AddCopiedEntity(Sowa::Entity entity) {
 	entt::entity copyID = m_CopyRegistry.create((entt::entity)entity.ID());
-	Ease::Entity copyEntity(copyID, &m_CopyRegistry);
+	Sowa::Entity copyEntity(copyID, &m_CopyRegistry);
 
 	// Copy components
 	auto &common = copyEntity.AddComponent<Component::Common>();
@@ -132,9 +132,9 @@ void Scene::ClearCopiedEntities() {
 /**
  * @brief Create an Entity From {srcRegistry} on {scene}
  */
-Ease::Entity CreateEntityFromRegistry(entt::entity id, entt::registry &srcRegistry, Ease::Scene &scene) {
-	Ease::Entity copyEntity(id, &srcRegistry);
-	Ease::Entity entity = scene.Create(copyEntity.GetComponent<Component::Common>().Name());
+Sowa::Entity CreateEntityFromRegistry(entt::entity id, entt::registry &srcRegistry, Sowa::Scene &scene) {
+	Sowa::Entity copyEntity(id, &srcRegistry);
+	Sowa::Entity entity = scene.Create(copyEntity.GetComponent<Component::Common>().Name());
 
 	// Copy components
 	CopyComponent<Component::AnimatedSprite2D>(copyEntity, entity);
@@ -146,20 +146,20 @@ Ease::Entity CreateEntityFromRegistry(entt::entity id, entt::registry &srcRegist
 	return entity;
 }
 
-Ease::Entity Scene::PasteCopiedEntity() {
+Sowa::Entity Scene::PasteCopiedEntity() {
 	if (m_CopyRegistry.size() < 1)
 		throw std::runtime_error("There is no copied entity");
 
 	entt::entity copyEntityID = m_CopyRegistry.view<Component::Common>()[0];
-	Ease::Entity newEntity = CreateEntityFromRegistry(copyEntityID, m_CopyRegistry, *this);
+	Sowa::Entity newEntity = CreateEntityFromRegistry(copyEntityID, m_CopyRegistry, *this);
 	return newEntity;
 }
 
-std::vector<Ease::Entity> Scene::PasteCopiedEntities() {
+std::vector<Sowa::Entity> Scene::PasteCopiedEntities() {
 	if (m_CopyRegistry.size() < 1)
 		throw std::runtime_error("There are no copied entities");
 
-	std::vector<Ease::Entity> entities;
+	std::vector<Sowa::Entity> entities;
 	auto view = m_CopyRegistry.view<Component::Common>();
 	for (int i = 0; view.size(); i++) {
 		entities.push_back(CreateEntityFromRegistry(view[i], m_CopyRegistry, *this));
@@ -194,7 +194,7 @@ Entity Scene::Create(const std::string &name, EntityID _id /* = 0*/) {
 	return entity;
 }
 
-void Scene::Destroy(Ease::Entity &entity) {
+void Scene::Destroy(Sowa::Entity &entity) {
 	if (m_Registry.valid((entt::entity)entity.ID())) {
 		m_Registry.destroy((entt::entity)entity.ID());
 	}
@@ -202,9 +202,9 @@ void Scene::Destroy(Ease::Entity &entity) {
 	entity.SetRegistry(nullptr);
 }
 
-static void YAMLSerializeEntity(Ease::Entity entity, YAML::Emitter &yaml) {
+static void YAMLSerializeEntity(Sowa::Entity entity, YAML::Emitter &yaml) {
 	yaml << YAML::Key << entity.ID() << YAML::Value << YAML::BeginMap;
-	yaml << YAML::Key << "Name" << YAML::Value << entity.GetComponent<Ease::Component::Common>().Name();
+	yaml << YAML::Key << "Name" << YAML::Value << entity.GetComponent<Sowa::Component::Common>().Name();
 
 	// <Components>
 	yaml << YAML::Key << "Components" << YAML::BeginMap;
@@ -340,7 +340,7 @@ bool Scene::Save() {
 	return SaveToFile(path.string().c_str());
 }
 bool Scene::SaveToFile(const char *file) {
-	std::filesystem::path savepath = Ease::File::Path(file);
+	std::filesystem::path savepath = Sowa::File::Path(file);
 	YAML::Emitter yaml;
 	yaml << YAML::BeginMap;
 	yaml << YAML::Key << "Type" << YAML::Value << "Scene";
@@ -349,10 +349,10 @@ bool Scene::SaveToFile(const char *file) {
 	// <Resources>
 	yaml << YAML::Key << "ResourceList" << YAML::Value;
 	yaml << YAML::BeginMap;
-	{ // <Ease::Texture>
+	{ // <Sowa::Texture>
 		yaml << YAML::Key << "Texture" << YAML::Value << YAML::BeginMap;
-		ResourceManager<Ease::ImageTexture> &loader_texture = GetResourceManager<Ease::ImageTexture>();
-		std::map<ResourceID, Reference<Ease::ImageTexture>> &textures = loader_texture.GetResources();
+		ResourceManager<Sowa::ImageTexture> &loader_texture = GetResourceManager<Sowa::ImageTexture>();
+		std::map<ResourceID, Reference<Sowa::ImageTexture>> &textures = loader_texture.GetResources();
 
 		// remove unused resources
 		for (auto it = textures.cbegin(), next_it = it; it != textures.cend(); it = next_it) {
@@ -377,11 +377,11 @@ bool Scene::SaveToFile(const char *file) {
 		}
 
 		yaml << YAML::EndMap;
-	} // </Ease::Texture>
-	{ // <Ease::SpriteSheetAnimation>
+	} // </Sowa::Texture>
+	{ // <Sowa::SpriteSheetAnimation>
 		yaml << YAML::Key << "SpriteSheetAnimation" << YAML::Value << YAML::BeginMap;
-		ResourceManager<Ease::SpriteSheetAnimation> &loader_anims = GetResourceManager<Ease::SpriteSheetAnimation>();
-		std::map<ResourceID, std::shared_ptr<Ease::SpriteSheetAnimation>> &anims = loader_anims.GetResources();
+		ResourceManager<Sowa::SpriteSheetAnimation> &loader_anims = GetResourceManager<Sowa::SpriteSheetAnimation>();
+		std::map<ResourceID, std::shared_ptr<Sowa::SpriteSheetAnimation>> &anims = loader_anims.GetResources();
 
 		for (auto [id, anim] : anims) {
 			yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
@@ -398,15 +398,15 @@ bool Scene::SaveToFile(const char *file) {
 		}
 
 		yaml << YAML::EndMap;
-	} // </Ease::SpriteSheetAnimation>
+	} // </Sowa::SpriteSheetAnimation>
 	yaml << YAML::Newline << YAML::EndMap;
 	// </Resources>
 
 	yaml << YAML::Key << "EntityList" << YAML::Value;
 	yaml << YAML::BeginMap;
-	auto view = m_Registry.view<Ease::Component::Common>();
+	auto view = m_Registry.view<Sowa::Component::Common>();
 	for (auto it = view.rbegin(); it < view.rend(); ++it)
-		YAMLSerializeEntity(Ease::Entity(*it, &m_Registry), yaml);
+		YAMLSerializeEntity(Sowa::Entity(*it, &m_Registry), yaml);
 	yaml << YAML::EndMap;
 	yaml << YAML::EndMap;
 
@@ -420,10 +420,10 @@ bool Scene::SaveToFile(const char *file) {
 bool Scene::LoadFromFile(const char *file) {
 	m_Registry.clear();
 
-	ClearResourceManager<Ease::ImageTexture>();
-	ClearResourceManager<Ease::SpriteSheetAnimation>();
+	ClearResourceManager<Sowa::ImageTexture>();
+	ClearResourceManager<Sowa::SpriteSheetAnimation>();
 
-	std::filesystem::path inpath = Ease::File::Path(file);
+	std::filesystem::path inpath = Sowa::File::Path(file);
 	path = file;
 	Debug::Log("Loading scene from {}", inpath.string());
 
@@ -434,9 +434,9 @@ bool Scene::LoadFromFile(const char *file) {
 	}
 	YAML::Node resources = node["ResourceList"];
 	if (resources) {
-		{ // <Ease::Texture>
+		{ // <Sowa::Texture>
 			if (YAML::Node resource_node = resources["Texture"]; resource_node) {
-				ResourceManager<Ease::ImageTexture> &resource_loader = GetResourceManager<Ease::ImageTexture>();
+				ResourceManager<Sowa::ImageTexture> &resource_loader = GetResourceManager<Sowa::ImageTexture>();
 				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
 					ResourceID id = it->first.as<ResourceID>(0);
 					YAML::Node tex_node = it->second;
@@ -446,15 +446,15 @@ bool Scene::LoadFromFile(const char *file) {
 					}
 				}
 			}
-		} // </Ease::Texture>
-		{ // <Ease::SpriteSheetAnimation>
+		} // </Sowa::Texture>
+		{ // <Sowa::SpriteSheetAnimation>
 			if (YAML::Node resource_node = resources["SpriteSheetAnimation"]; resource_node) {
-				ResourceManager<Ease::SpriteSheetAnimation> &resource_loader = GetResourceManager<Ease::SpriteSheetAnimation>();
+				ResourceManager<Sowa::SpriteSheetAnimation> &resource_loader = GetResourceManager<Sowa::SpriteSheetAnimation>();
 				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
 					ResourceID id = it->first.as<ResourceID>(0);
 					YAML::Node tex_node = it->second;
 
-					Reference<Ease::SpriteSheetAnimation> anim = resource_loader.LoadResource("", id);
+					Reference<Sowa::SpriteSheetAnimation> anim = resource_loader.LoadResource("", id);
 					anim->HFrames() = tex_node["HFrames"].as<int>(0);
 					anim->VFrames() = tex_node["VFrames"].as<int>(0);
 					anim->SelectedRow() = tex_node["SelectedRow"].as<int>(0);
@@ -465,7 +465,7 @@ bool Scene::LoadFromFile(const char *file) {
 					anim->Texture() = tex_node["Texture"].as<ResourceID>(0);
 				}
 			}
-		} // </Ease::SpriteSheetAnimation>
+		} // </Sowa::SpriteSheetAnimation>
 	}
 
 	YAML::Node entities = node["EntityList"];
@@ -475,7 +475,7 @@ bool Scene::LoadFromFile(const char *file) {
 			YAML::Node entity_node = it->second;
 			std::string name = entity_node["Name"].as<std::string>("Entity");
 
-			Ease::Entity entity = Create(name, id);
+			Sowa::Entity entity = Create(name, id);
 			YAML::Node components = entity_node["Components"];
 			if (components) {
 				if (YAML::Node component_node = components["AnimatedSprite2D"]; component_node) {
@@ -528,7 +528,7 @@ bool Scene::LoadFromFile(const char *file) {
 					Component::Sprite2D &component = entity.AddComponent<Component::Sprite2D>();
 					ResourceID id = component_node["Texture"].as<ResourceID>(0);
 					if (id != 0)
-						component.Texture() = GetResourceManager<Ease::ImageTexture>().GetResource(id);
+						component.Texture() = GetResourceManager<Sowa::ImageTexture>().GetResource(id);
 					component.Visible() = component_node["Visible"].as<bool>(true);
 				}
 				if (YAML::Node component_node = components["Text2D"]; component_node) {
@@ -560,10 +560,10 @@ bool Scene::LoadFromFile(const char *file) {
 	return true;
 }
 
-Ease::Entity Scene::GetEntityInGroup(const std::string &group) {
+Sowa::Entity Scene::GetEntityInGroup(const std::string &group) {
 	auto view = m_Registry.view<Component::Group>();
 	for (auto it = view.rbegin(); it != view.rend(); ++it) {
-		Ease::Entity e(*it, &m_Registry);
+		Sowa::Entity e(*it, &m_Registry);
 
 		auto groups = e.GetComponent<Component::Group>().Groups();
 		for (std::string &g : groups) {
@@ -574,11 +574,11 @@ Ease::Entity Scene::GetEntityInGroup(const std::string &group) {
 	return Entity(entt::null, nullptr);
 }
 
-std::vector<Ease::Entity> Scene::GetEntitiesInGroup(const std::string &group) {
-	std::vector<Ease::Entity> entities;
+std::vector<Sowa::Entity> Scene::GetEntitiesInGroup(const std::string &group) {
+	std::vector<Sowa::Entity> entities;
 	auto view = m_Registry.view<Component::Group>();
 	for (auto it = view.rbegin(); it != view.rend(); ++it) {
-		Ease::Entity e(*it, &m_Registry);
+		Sowa::Entity e(*it, &m_Registry);
 
 		auto groups = e.GetComponent<Component::Group>().Groups();
 		for (std::string &g : groups) {
@@ -589,10 +589,10 @@ std::vector<Ease::Entity> Scene::GetEntitiesInGroup(const std::string &group) {
 	return entities;
 }
 
-Ease::Entity Scene::GetEntityByID(uint32_t id) {
+Sowa::Entity Scene::GetEntityByID(uint32_t id) {
 	if (m_Registry.valid((entt::entity)id))
-		return Ease::Entity((entt::entity)id, &m_Registry);
+		return Sowa::Entity((entt::entity)id, &m_Registry);
 
-	return Ease::Entity(entt::null, nullptr);
+	return Sowa::Entity(entt::null, nullptr);
 }
-} // namespace Ease
+} // namespace Sowa

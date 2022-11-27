@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <string>
 
-namespace Ease {
+namespace Sowa {
 enum class ExportPlatform {
 	NONE = 0,
 	LINUX,
@@ -49,6 +49,6 @@ class ExportGenerator {
 	bool _canExport = false;
 	int _warningCount = 0;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_EXPORTGENERATOR_HPP__

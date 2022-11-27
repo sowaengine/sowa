@@ -2,21 +2,21 @@
 #define _E_ENGINECONTEXT_HPP__
 
 #include "Debug.hpp"
-#include "Ease.hpp"
+#include "Sowa.hpp"
 #include <iostream>
 #include <string>
 #include <unordered_map>
 
-namespace Ease {
+namespace Sowa {
 class EngineContext {
   public:
 	template <typename T>
-	void RegisterSingleton(Ease::Server id, T &singleton) {
+	void RegisterSingleton(Sowa::Server id, T &singleton) {
 		_singletons[id] = reinterpret_cast<void *>(&singleton);
 	}
 
 	template <typename T>
-	T *GetSingleton(Ease::Server id) {
+	T *GetSingleton(Sowa::Server id) {
 		if (_singletons.count(id) != 1) {
 			Debug::Error("Singleton '{}' doesn't exists", (uint32_t)id);
 			return nullptr;
@@ -31,7 +31,7 @@ class EngineContext {
 	}
 
   private:
-	std::unordered_map<Ease::Server, void *> _singletons{};
+	std::unordered_map<Sowa::Server, void *> _singletons{};
 
   private:
 	EngineContext();
@@ -42,6 +42,6 @@ class EngineContext {
 	EngineContext &operator=(const EngineContext &) = delete;
 	EngineContext &operator=(const EngineContext &&) = delete;
 };
-} // namespace Ease
+} // namespace Sowa
 
 #endif // _E_ENGINECONTEXT_HPP__

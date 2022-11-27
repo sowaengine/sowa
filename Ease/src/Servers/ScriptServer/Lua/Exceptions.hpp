@@ -6,7 +6,7 @@
 #include <exception>
 #include <string>
 
-namespace Ease::Lua {
+namespace Sowa::Lua {
 class LuaException : public std::runtime_error {
   public:
 	LuaException(const char *msg)
@@ -25,6 +25,6 @@ class TypeMismatchException : public std::runtime_error {
 		: std::runtime_error(fmt::format("TypeMismatchException on '{}': Given type: '{}', Expected '{}'", variableName, sol::type_name(L, _type), sol::type_name(L, expectedType))) {}
 };
 
-} // namespace Ease::Lua
+} // namespace Sowa::Lua
 
 #endif // _E_LUA_EXCEPTIONS_HPP__

@@ -9,10 +9,10 @@
 #include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 #include "Resource/Texture/Texture.hpp"
 
-namespace Ease::Systems {
-void System_AnimatedSprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
-	ResourceManager<Ease::ImageTexture> &tex_loader = pScene->GetResourceManager<Ease::ImageTexture>();
-	ResourceManager<Ease::SpriteSheetAnimation> &anim_loader = pScene->GetResourceManager<Ease::SpriteSheetAnimation>();
+namespace Sowa::Systems {
+void System_AnimatedSprite2D(Sowa::Scene *pScene, bool pickable /* = false*/) {
+	ResourceManager<Sowa::ImageTexture> &tex_loader = pScene->GetResourceManager<Sowa::ImageTexture>();
+	ResourceManager<Sowa::SpriteSheetAnimation> &anim_loader = pScene->GetResourceManager<Sowa::SpriteSheetAnimation>();
 
 	auto view = pScene->m_Registry.view<Component::Transform2D, Component::AnimatedSprite2D>();
 	for (const auto &entityID : view) {
@@ -36,8 +36,8 @@ void System_AnimatedSprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
 		glm::vec2 uv1;
 		glm::vec2 uv2;
 
-		Ease::ImageTexture tex = *tex_loader.GetResource(animsprc.GetCurrentTexture()).get();
-		std::shared_ptr<Ease::SpriteSheetAnimation> anim = anim_loader.GetResource(animsprc.GetSelectedAnimation());
+		Sowa::ImageTexture tex = *tex_loader.GetResource(animsprc.GetCurrentTexture()).get();
+		std::shared_ptr<Sowa::SpriteSheetAnimation> anim = anim_loader.GetResource(animsprc.GetSelectedAnimation());
 
 		glm::vec2 size = {1.0f / anim->HFrames(), 1.0f / anim->VFrames()};
 		glm::vec2 pos = {anim->StartFrame() + animsprc.CurrentFrame() * size.x, anim->SelectedRow() * size.y};
@@ -51,4 +51,4 @@ void System_AnimatedSprite2D(Ease::Scene *pScene, bool pickable /* = false*/) {
 		//    Renderer::get_singleton().DrawQuad(transformc.Position(), transformc.Scale(), transformc.ZIndex(), transformc.Rotation(), tex, uv1, uv2);
 	}
 }
-} // namespace Ease::Systems
+} // namespace Sowa::Systems

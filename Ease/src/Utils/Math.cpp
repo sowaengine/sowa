@@ -1,7 +1,7 @@
 #include "Utils/Math.hpp"
 #include <cmath>
 
-namespace Ease {
+namespace Sowa {
 float Vec2::Length() {
 	return sqrt(x * x + y * y);
 }
@@ -15,4 +15,4 @@ float Vec2::Angle() {
 	return atan2(y, x);
 }
 
-} // namespace Ease
+} // namespace Sowa
