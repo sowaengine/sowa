@@ -221,18 +221,32 @@ void Application::LaunchApp(const std::string &projectPath) {
 	std::filesystem::path project = projectPath;
 	project = project.parent_path();
 
-	execl(File::Path("abs://Editor/sowa.editor").string().c_str(), "--project", project.string().c_str(), (char *)0);
+	if (execl(File::Path("abs://Editor/sowa.editor").string().c_str(), "--project", project.string().c_str(), (char *)0) == -1) {
+		Debug::Error("Failed to launch project");
+	}
 }
 #elif defined(SW_WINDOWS)
 void Application::LaunchApp(const std::string &projectPath) {
-	m_AppRunning = false;
-
 	std::filesystem::path project = projectPath;
 	project = project.parent_path();
 
 	std::string appPath = File::Path("abs://Editor/sowa.editor.exe").string();
 	Debug::Log("{} --project {}", appPath, project.string());
-	execl(appPath.c_str(), "--project", project.string().c_str(), (char *)0);
+
+	std::string params = Format("--project {}", project.string());
+
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	ZeroMemory(&pi, sizeof(pi));
+
+	if (!CreateProcess((LPSTR)appPath.c_str(), (LPSTR)params.c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+		Debug::Error("Failed to launch project");
+	}
+
+	exit(EXIT_SUCCESS);
 }
 #else
 #error "Sowa::Application::LaunchApp() is not implemented in current platform"
