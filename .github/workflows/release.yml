@@ -60,8 +60,6 @@ jobs:
       - name: "[Windows] Install dependencies"
         if: startsWith(matrix.config.os, 'windows')
         run: |
-          choco install mingw
-          choco upgrade mingw
           ninja --version
           cmake --version
         
