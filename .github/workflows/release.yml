@@ -38,7 +38,7 @@ jobs:
           artifact: "linux"
           cc: "gcc"
           cxx: "g++"
-          generator: "Ninja"
+          generator: "Unix Makefiles"
           github_env: $GITHUB_ENV
           nmres: "linux"
         
@@ -47,7 +47,7 @@ jobs:
           artifact: "windows"
           cc: "gcc"
           cxx: "g++"
-          generator: "Ninja"
+          generator: "MinGW Makefiles"
           github_env: $env:GITHUB_ENV
           nmres: "windows"
         
@@ -96,6 +96,9 @@ jobs:
         run: |
           7z x nmres_app\\${{ steps.nmresdownload.outputs.filename }}
           .\\nmres.exe --recursive --cwd Sowa --namespace Sowa::Res --suffix .res.hpp --rules res_rules.txt
+        
+      - name: Setup MinGW
+        uses: egor-tensin/setup-mingw@v2
       
       - name: Configure
         shell: bash
