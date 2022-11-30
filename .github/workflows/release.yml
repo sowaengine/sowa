@@ -38,7 +38,7 @@ jobs:
           artifact: "linux"
           cc: "gcc"
           cxx: "g++"
-          generator: "Unix Makefiles"
+          generator: "Ninja"
           github_env: $GITHUB_ENV
           nmres: "linux"
         
@@ -98,6 +98,7 @@ jobs:
           .\\nmres.exe --recursive --cwd Sowa --namespace Sowa::Res --suffix .res.hpp --rules res_rules.txt
         
       - name: Setup MinGW
+        if: startsWith(matrix.config.os, 'windows')
         uses: egor-tensin/setup-mingw@v2
       
       - name: Configure
