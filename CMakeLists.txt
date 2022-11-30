@@ -39,11 +39,16 @@ include_directories(${CMAKE_SOURCE_DIR}/Ease/thirdparty/glfw-3.3.8/include/)
 # Modifies ${SOWA_SOURCES} and ${SOWA_INCLUDE_DIRS}
 add_subdirectory(${CMAKE_SOURCE_DIR}/Sowa/thirdparty)
 
+set(LD_FLAG_STATIC "")
+if(WIN32)
+   set(LD_FLAG_STATIC -static)
+endif()
+
 if(Editor)
 add_executable(editor
    ${CMAKE_SOURCE_DIR}/Sowa/src/main.cpp
    ${SOWA_SOURCES})
-target_link_libraries(editor PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ -static fmt)
+target_link_libraries(editor PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ ${LD_FLAG_STATIC} fmt)
 # target_compile_options(editor PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
 target_include_directories(editor PRIVATE ${SOWA_INCLUDE_DIRS})
 endif()
@@ -52,7 +57,7 @@ if(Template)
 add_executable(template
    ${CMAKE_SOURCE_DIR}/Sowa/src/main.cpp
    ${SOWA_SOURCES})
-target_link_libraries(template PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ -static fmt)
+target_link_libraries(template PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ ${LD_FLAG_STATIC} fmt)
 # target_compile_options(template PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
 target_include_directories(template PRIVATE ${SOWA_INCLUDE_DIRS})
 endif()
