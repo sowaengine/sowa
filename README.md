@@ -1,6 +1,6 @@
 # Sowa Engine
 
-<img src="https://raw.githubusercontent.com/Lexographics/Easengine/main/.gh_resources/icon-1024x.png" width="200" alt="Sowa Engine Logo"><br><br>
+<img src="https://raw.githubusercontent.com/sowaengine/sowa/main/.gh_resources/icon-1024x.png" width="200" alt="Sowa Engine Logo"><br><br>
 
 
 **Sowa Engine** is a 2D Game/Rendering Engine
@@ -14,7 +14,7 @@
 ```git submodule update --init --recursive --remote```
 
 - Run [nmres](https://github.com/Lexographics/nmResource) in engine root directory   
-```nmres --recursive --cwd Ease --namespace Sowa::Res --suffix .res.hpp --rules res_rules.txt```
+```nmres --recursive --cwd Sowa --namespace Sowa::Res --suffix .res.hpp --rules res_rules.txt```
 
 - Run following commands to initialize and build cmake project
 ```
