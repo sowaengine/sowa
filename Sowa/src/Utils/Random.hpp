@@ -10,6 +10,7 @@ namespace Sowa {
 namespace Random {
 
 uint64_t GenerateID();
+int32_t GenerateID31();
 uint32_t GenerateID32();
 
 class RandomNumberGenerator {
@@ -22,6 +23,9 @@ class RandomNumberGenerator {
 
 	// generate number between 0 and UINT_MAX (2^32)
 	void Generate(uint32_t &number, uint32_t begin = 0, uint32_t end = UINT_MAX);
+
+	// generate number between 0 and INT_MAX (2^31)
+	void Generate(int32_t &number, int32_t begin = 0, int32_t end = INT_MAX);
 
 	// generate number between 0.0 and 1.0
 	void Generate(double &number, double begin = 0.0, double end = 1.0);
