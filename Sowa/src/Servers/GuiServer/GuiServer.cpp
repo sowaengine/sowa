@@ -395,7 +395,29 @@ void GuiServer::DrawFrame() {
 		}
 	}
 
+#ifdef SW_EDITOR
+	window.Editor_SetBlackbarWidth(((ImGui::GetContentRegionAvail().x - dstWidth) / 2));
+	window.Editor_SetBlackbarHeight(((ImGui::GetContentRegionAvail().y - dstHeight) / 2.f));
+	window.Editor_SetWindowWidth(dstWidth);
+	window.Editor_SetWindowHeight(dstHeight);
+	ImVec2 windowPos = ImGui::GetWindowPos();
+	window.Editor_SetWindowPos(windowPos.x + ImGui::GetCursorPosX(), windowPos.y + ImGui::GetCursorPosY());
+#endif
+
 	ImGui::Image((ImTextureID) static_cast<uint64_t>(app->Renderer_GetAlbedoFramebufferID()), ImVec2(dstWidth, dstHeight));
+
+	if (IsMouseClicked(GuiMouseButton::Left) && IsItemHovered()) {
+		Vec2 mousepos = app->_window.GetGameMousePosition();
+		int id = app->_renderer->Get2DPickIDSafe(mousepos.x, mousepos.y);
+		Entity entity = Entity((entt::entity)id, &app->GetCurrentScene()->m_Registry);
+
+		if (entity.IsValid()) {
+			app->SelectedEntity() = entity;
+		} else {
+			app->SelectedEntity().SetRegistry(nullptr);
+			app->SelectedEntity().SetEntityID(entt::null);
+		}
+	}
 }
 
 void GuiServer::DrawFilesystem() {
