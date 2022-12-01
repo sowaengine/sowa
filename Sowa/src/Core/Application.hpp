@@ -45,6 +45,7 @@ class Application {
   private:
 	friend class Window;
 	friend class Renderer;
+	friend class GuiServer;
 
 	Sowa::EngineContext *ctx{nullptr};
 

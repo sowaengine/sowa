@@ -1,13 +1,13 @@
 #include "Servers/GuiServer/GuiServer.hpp"
 
+#include <GLFW/glfw3.h>
+
 #include "imgui-docking/backends/imgui_impl_glfw.h"
 #include "imgui-docking/backends/imgui_impl_opengl3.h"
 #include "imgui-docking/imgui.h"
 #include "imgui-docking/misc/cpp/imgui_stdlib.h"
 
-#include <GLFW/glfw3.h>
-
-#include "res/Roboto-Medium.ttf.res.hpp"
+#include "ImGuizmo-1.83/ImGuizmo.h"
 
 #include "Core/Application.hpp"
 #include "Core/ProjectSettings.hpp"
@@ -15,6 +15,10 @@
 #include "Resource/EditorTheme/EditorTheme.hpp"
 #include "Resource/ResourceLoader.hpp"
 
+#include "Core/nm_Matrix.hpp"
+#include "Core/nm_Renderer.hpp"
+
+#include "res/Roboto-Medium.ttf.res.hpp"
 #include "res/textures/file.png.res.hpp"
 #include "res/textures/folder.png.res.hpp"
 #include "res/textures/image.png.res.hpp"
@@ -69,6 +73,9 @@ void GuiServer::BeginGui() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
+
+	ImGuizmo::BeginFrame();
+	ImGuizmo::SetOrthographic(true);
 }
 
 void GuiServer::EndGui() {
@@ -353,6 +360,39 @@ void GuiServer::DrawFrame() {
 
 		float regionAvail = ImGui::GetContentRegionAvail().y;
 		ImGui::SetCursorPosY(((regionAvail - dstHeight) / 2.f) + ImGui::GetCursorPosY());
+	}
+
+	if (app->SelectedEntity().IsValid()) {
+		if (app->SelectedEntity().HasComponent<Component::Transform2D>()) {
+			auto &tc = app->SelectedEntity().GetComponent<Component::Transform2D>();
+
+			Vec2 inversePos = tc.Position();
+			inversePos.y *= -1;
+
+			glm::mat4 mat = nmGfx::CalculateModelMatrix(inversePos, -tc.Rotation(), tc.Scale());
+			ImGuiIO &io = ImGui::GetIO();
+			ImGuizmo::SetRect(ImGui::GetWindowPos().x + ImGui::GetCursorPosX(), ImGui::GetWindowPos().y + ImGui::GetCursorPosY(), dstWidth, dstHeight);
+			ImGuizmo::Manipulate(
+				&app->_renderer->GetData2D()._viewMatrix[0][0],
+				&app->_renderer->GetData2D()._projectionMatrix[0][0],
+				ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y | ImGuizmo::OPERATION::ROTATE_Z,
+				ImGuizmo::MODE::WORLD,
+				&mat[0][0]);
+
+			glm::vec3 translation;
+			glm::vec3 rotation;
+			glm::vec3 scale;
+			if (nmGfx::DecomposeMatrix(mat, translation, rotation, scale)) {
+				if (!isnan(translation.x) && !isnan(translation.y))
+					tc.Position() = {translation.x, -translation.y};
+
+				if (!isnan(rotation.z))
+					tc.Rotation() = rotation.z;
+
+				if (!isnan(scale.x) && !isnan(scale.y))
+					tc.Scale() = {scale.x, scale.y};
+			}
+		}
 	}
 
 	ImGui::Image((ImTextureID) static_cast<uint64_t>(app->Renderer_GetAlbedoFramebufferID()), ImVec2(dstWidth, dstHeight));
