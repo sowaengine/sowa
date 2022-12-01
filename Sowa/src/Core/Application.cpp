@@ -162,6 +162,9 @@ void Application::Run(int argc, char const *argv[]) {
 
 		Sowa::Systems::System_Sprite2D(_pCurrentScene.get());
 
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 2.f, {1.f, 0.f, 0.f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 2.f, {0.f, 1.f, 0.f});
+
 		_renderer->End2D();
 
 		luaScriptServer->UpdateModules();
