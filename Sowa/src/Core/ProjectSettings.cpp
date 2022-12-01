@@ -4,6 +4,8 @@
 
 #include "Debug.hpp"
 #include "Utils/File.hpp"
+#include "Utils/YAML.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -41,6 +43,7 @@ bool ProjectSettings::LoadProject(const char *path) {
 			_window.VideoWidth = __window["VideoWidth"].as<int>(_window.VideoWidth);
 			_window.VideoHeight = __window["VideoHeight"].as<int>(_window.VideoHeight);
 			_window.Fullscreen = __window["Fullscreen"].as<bool>(_window.Fullscreen);
+			_window.ClearColor = __window["ClearColor"].as<glm::vec4>(_window.ClearColor);
 		}
 		if (project["Modules"]) {
 			YAML::Node __modules = project["Modules"];
@@ -84,6 +87,7 @@ bool ProjectSettings::SaveProject() {
 	yaml << YAML::Key << "VideoWidth" << YAML::Value << _window.VideoWidth;
 	yaml << YAML::Key << "VideoHeight" << YAML::Value << _window.VideoHeight;
 	yaml << YAML::Key << "Fullscreen" << YAML::Value << _window.Fullscreen;
+	yaml << YAML::Key << "ClearColor" << YAML::Value << _window.ClearColor;
 	yaml << YAML::Newline;
 	yaml << YAML::EndMap;
 	/** </Window> */

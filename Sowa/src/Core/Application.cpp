@@ -157,7 +157,8 @@ void Application::Run(int argc, char const *argv[]) {
 				glm::vec3{cam2dtc.Position().x, cam2dtc.Position().y, 0.f},
 				cam2d.Rotatable() ? cam2dtc.Rotation() : 0.f,
 				glm::vec3{cam2d.Zoom(), cam2d.Zoom(), 1.f}),
-			{cam2d.Center().x, cam2d.Center().y});
+			{cam2d.Center().x, cam2d.Center().y},
+			projectSettings->_window.ClearColor);
 
 		Sowa::Systems::System_Sprite2D(_pCurrentScene.get());
 
