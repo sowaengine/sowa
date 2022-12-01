@@ -34,7 +34,7 @@ void System_Sprite2D(Sowa::Scene *pScene, bool pickable /* = false*/) {
 			transformc.ZIndex(),
 			transformc.Rotation(),
 			*tex,
-			pickable ? (uint32_t)entityID : 0);
+			(uint32_t)entityID);
 	}
 }
 } // namespace Sowa::Systems

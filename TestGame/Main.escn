@@ -12,7 +12,7 @@ ResourceList:
     {}
 
 EntityList:
-  3031357295:
+  303135729:
     Name: Camera Entity
     Components:
       Camera2D:
@@ -24,11 +24,11 @@ EntityList:
         Texture: 17733261381484491048
         Visible: true
       Transform2D:
-        Position: [-600, 0]
+        Position: [-556.363647, -67.2843475]
         Scale: [0.400000006, 0.400000006]
-        Rotation: 0
+        Rotation: -10.3110304
 
-  3721498726:
+  372149872:
     Name: Test
     Components:
       Sprite2D:

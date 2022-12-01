@@ -183,7 +183,7 @@ Entity Scene::Create(const std::string &name, EntityID _id /* = 0*/) {
 
 	// if id == 0 or there is an entity with given id, create entity with generated id
 	if (id == 0 || m_Registry.valid((entt::entity)id))
-		return Create(name, Random::GenerateID32());
+		return Create(name, Random::GenerateID31());
 
 	entity.SetEntityID(m_Registry.create((entt::entity)id));
 	entity.SetRegistry(&m_Registry);
