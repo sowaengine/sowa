@@ -17,6 +17,9 @@ set(SOWA_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/backends/imgui_impl_glfw.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking/backends/imgui_impl_opengl3.cpp
 
+   # ImGuizmo
+   ${CMAKE_CURRENT_SOURCE_DIR}/ImGuizmo-1.83/ImGuizmo.cpp
+
    # lua-5.4.4
    ${LUA_SOURCES}
 
@@ -33,6 +36,7 @@ set(SOWA_INCLUDE_DIRS
    ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/nmGfx/include/
    # ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/glfw-3.3.8/include/ is included for all targets
    ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/imgui-docking/
+   ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/ImGuizmo-1.83/
    ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/lua-5.4.4/src/
    ${CMAKE_SOURCE_DIR}/Sowa/thirdparty/sol2-3.3.0/
    ${CMAKE_SOURCE_DIR}/Sowa/include/tinyfiledialogs/
