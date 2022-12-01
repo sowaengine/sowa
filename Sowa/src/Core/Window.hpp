@@ -2,9 +2,12 @@
 #define _E_WINDOW_HPP__
 #pragma once
 
-#include "Resource/Texture/Texture.hpp"
 #include "Sowa.hpp"
 #include <string>
+
+#include "Utils/Math.hpp"
+
+#include "Resource/Texture/Texture.hpp"
 
 namespace nmGfx {
 class Window;
@@ -15,6 +18,10 @@ class Window {
   public:
 	Window();
 	~Window();
+
+	/* -- Input -- */
+	Vec2 GetMousePosition();
+	Vec2 GetGameMousePosition();
 
 	/**
 	 * @brief Video Size : Render resolution of scene, different than window size
