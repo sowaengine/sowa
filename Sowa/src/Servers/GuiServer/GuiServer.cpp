@@ -551,18 +551,18 @@ void GuiServer::DrawFilesystem() {
 		}
 		if (BeginMenu("New File")) {
 			if (MenuItem("Empty File")) {
-				openNewFolderMenu = true;
+				openNewFileMenu = true;
 			}
 			if (MenuItem("Text File")) {
-				openNewFolderMenu = true;
+				openNewFileMenu = true;
 				fileName = "File.txt";
 			}
 			if (MenuItem("Script File")) {
-				openNewFolderMenu = true;
+				openNewFileMenu = true;
 				fileName = "script.lua";
 			}
 			if (MenuItem("Scene File")) {
-				openNewFolderMenu = true;
+				openNewFileMenu = true;
 				fileName = "scene.escn";
 			}
 
@@ -590,7 +590,7 @@ void GuiServer::DrawFilesystem() {
 		EndContextMenu();
 	}
 
-	if (openNewFolderMenu) {
+	if (openNewFileMenu) {
 		OpenContextMenu("__CTXMENU_filesystem_create_file");
 	}
 
