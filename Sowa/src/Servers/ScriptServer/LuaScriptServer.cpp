@@ -6,6 +6,7 @@
 #include "Utils/String.hpp"
 
 #include "Lua/Exceptions.hpp"
+#include "Lua/LuaBehaviour.hpp"
 #include "Lua/LuaModule.hpp"
 
 #include "lua.hpp"
@@ -26,8 +27,29 @@ LuaScriptServer::LuaScriptServer(EngineContext &ctx) : _Context(ctx) {
 	RegisterResources();
 	RegisterSingleton();
 
+	_pState->new_usertype<LuaBehaviour>(
+		"LuaBehaviour",
+
+		"new", sol::constructors<LuaBehaviour(const std::string &, const std::string &)>(),
+
+		"start", sol::property(&LuaBehaviour::_Start),
+		"update", sol::property(&LuaBehaviour::_Update),
+
+		"register", [this](LuaBehaviour &self) -> bool {
+			if (self.Id() == "")
+				return false;
+
+			Debug::Log("Registered behaviour id: {}, label: {}", self.Id(), self.Label());
+
+			this->_Behaviours[self.Id()] = self;
+			return true;
+		}
+
+	);
+
 	// ProjectManager ( will be removed )
-	static std::vector<std::string> projects;
+	static std::vector<std::string>
+		projects;
 
 	(*_pState)["reload_projects"] = []() {
 		projects.clear();
