@@ -27,6 +27,7 @@
 		func<Sowa::Component::Text2D>(__VA_ARGS__);           \
 		func<Sowa::Component::Transform2D>(__VA_ARGS__);      \
 		func<Sowa::Component::UITransform>(__VA_ARGS__);      \
+		func<Sowa::Component::ScriptContainer>(__VA_ARGS__);  \
 	} while (0)
 
 namespace Sowa {
@@ -280,6 +281,15 @@ static void YAMLSerializeEntity(Sowa::Entity entity, YAML::Emitter &yaml) {
 		yaml << YAML::EndMap;
 	}
 	// </PhysicsBody2D>
+	// <ScriptContainer>
+	if (entity.HasComponent<Component::ScriptContainer>()) {
+		Component::ScriptContainer &component = entity.GetComponent<Component::ScriptContainer>();
+
+		yaml << YAML::Key << "ScriptContainer" << YAML::BeginMap;
+		yaml << YAML::Key << "LuaScripts" << YAML::Value << component._LuaScripts;
+		yaml << YAML::EndMap;
+	}
+	// </ScriptContainer>
 	// <Sprite2D>
 	if (entity.HasComponent<Component::Sprite2D>()) {
 		Component::Sprite2D &component = entity.GetComponent<Component::Sprite2D>();
@@ -523,6 +533,10 @@ bool Scene::LoadFromFile(const char *file) {
 							colliders.push_back(collider);
 						}
 					}
+				}
+				if (YAML::Node component_node = components["ScriptContainer"]; component_node) {
+					Component::ScriptContainer &component = entity.AddComponent<Component::ScriptContainer>();
+					component._LuaScripts = component_node["LuaScripts"].as<std::vector<std::string>>(std::vector<std::string>{});
 				}
 				if (YAML::Node component_node = components["Sprite2D"]; component_node) {
 					Component::Sprite2D &component = entity.AddComponent<Component::Sprite2D>();

@@ -102,6 +102,50 @@ editor.start = function()
 
                     end_component(selected, Component.Camera2D, "Camera2D")
                 end
+                --
+                --
+                gui:set_cursor_pos_y(gui:get_cursor_pos_y() + 80)
+                gui:separator()
+                --
+                -- Script
+                if gui:header("Scripts") then
+                    gui:indent()
+                    if not selected:has_component(Component.ScriptContainer) then
+                        selected:add_component(Component.ScriptContainer)
+                    end
+                    local script_container = selected:get_component(Component.ScriptContainer)
+                    if (script_container ~= nil) then
+                        local begin_script_tab = function(label, id)
+                            gui:push_id(id)
+                            if label == "" then
+                                label = "{ Invalid Script }"
+                            end
+                            if gui:header(label) then
+                                gui:indent()
+
+                                local new_id
+                                local changed
+                                new_id, changed = gui:input_text("Script Id", id)
+                                if changed then
+                                    script_container:remove_script(id)
+                                    script_container:add_script(new_id)
+                                end
+
+                                if gui:button("Remove Script") then
+                                    script_container:remove_script(id)
+                                end
+
+                                gui:unindent()
+                            end
+                            gui:pop_id()
+                        end
+
+                        for key, id in pairs(script_container.lua_scripts) do
+                            begin_script_tab(script_container:get_label(id), id)
+                        end
+                    end
+                    gui:unindent()
+                end
             end
 
 

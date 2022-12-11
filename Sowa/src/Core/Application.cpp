@@ -149,7 +149,7 @@ void Application::Run(int argc, char const *argv[]) {
 		}
 
 		if (m_AppRunning) {
-			Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic);
+			Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic, *ctx);
 		}
 
 		_renderer->Begin2D(
@@ -160,10 +160,10 @@ void Application::Run(int argc, char const *argv[]) {
 			{cam2d.Center().x, cam2d.Center().y},
 			projectSettings->_window.ClearColor);
 
-		Sowa::Systems::System_Sprite2D(_pCurrentScene.get());
+		Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Draw, *ctx);
 
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 2.f, {1.f, 0.f, 0.f});
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 2.f, {0.f, 1.f, 0.f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
 
 		_renderer->End2D();
 

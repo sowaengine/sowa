@@ -8,6 +8,7 @@
 #include "Group/Group.hpp"
 #include "NinePatchRect/NinePatchRect.hpp"
 #include "PhysicsBody2D/PhysicsBody2D.hpp"
+#include "ScriptContainer/ScriptContainer.hpp"
 #include "Sprite2D/Sprite2D.hpp"
 #include "Text2D/Text2D.hpp"
 #include "Transform2D/Transform2D.hpp"
@@ -20,6 +21,7 @@ enum Component_ : uint32_t {
 	Component_Transform2D,
 	Component_Sprite2D,
 	Component_Camera2D,
+	Component_ScriptContainer,	
 };
 }
 
