@@ -212,6 +212,11 @@ void LuaScriptServer::RegisterGuiServer() {
 
 		"set_cursor_pos_x", &GuiServer::SetCursorPosX,
 		"set_cursor_pos_y", &GuiServer::SetCursorPosY,
+		"get_cursor_pos_x", &GuiServer::GetCursorPosX,
+		"get_cursor_pos_y", &GuiServer::GetCursorPosY,
+
+		"push_id", &GuiServer::PushID,
+		"pop_id", &GuiServer::PopID,
 
 		"button",
 		sol::overload([](GuiServer &self, const std::string &label) -> bool { return self.Button(label); },

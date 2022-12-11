@@ -782,6 +782,13 @@ void GuiServer::SetCursorPosY(float y) {
 	ImGui::SetCursorPosY(y);
 }
 
+float GuiServer::GetCursorPosX() {
+	return ImGui::GetCursorPosX();
+}
+float GuiServer::GetCursorPosY() {
+	return ImGui::GetCursorPosY();
+}
+
 Vec2 GuiServer::GetMousePosition() {
 	ImVec2 pos = ImGui::GetMousePos();
 	return Vec2(pos.x, pos.y);
