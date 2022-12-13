@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(Ease VERSION 0.1.0 LANGUAGES CXX C)
+project(Sowa VERSION 0.1.0 LANGUAGES CXX C)
 
 option(Editor "Build Editor executable" ON)
 option(Template "Build export template" ON)
@@ -33,7 +33,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 
-include_directories(${CMAKE_SOURCE_DIR}/Ease/thirdparty/glfw-3.3.8/include/)
+include_directories(${CMAKE_SOURCE_DIR}/Sowa/thirdparty/glfw-3.3.8/include/)
 
 # thirdparty
 # Modifies ${SOWA_SOURCES} and ${SOWA_INCLUDE_DIRS}
