@@ -5,6 +5,9 @@ ResourceList:
     4303775522247045161:
       Path: res://icon.png
 
+    12425600123178371834:
+      Path: res://icon.png
+
     17733261381484491048:
       Path: res://icon.png
 
@@ -16,7 +19,7 @@ EntityList:
     Name: Camera Entity
     Components:
       Camera2D:
-        Current: true
+        Current: false
         Rotatable: false
         Zoom: 0.5
         Center: [0.5, 0.5]
@@ -29,12 +32,40 @@ EntityList:
         Rotation: -10.3110304
 
   372149872:
-    Name: Test
+    Name: Object1
     Components:
       Sprite2D:
         Texture: 4303775522247045161
         Visible: true
       Transform2D:
-        Position: [-266, 76]
+        Position: [365.649506, -281.507141]
         Scale: [0.25, 0.25]
+        Rotation: 0
+
+  372149873:
+    Name: Object2
+    Components:
+      ScriptContainer:
+        LuaScripts:
+          []
+      Sprite2D:
+        Texture: 4303775522247045161
+        Visible: true
+      Transform2D:
+        Position: [204.03241, 329.228455]
+        Scale: [0.25, 0.25]
+        Rotation: 0
+
+  1965680663:
+    Name: Sprite2D
+    Components:
+      ScriptContainer:
+        LuaScripts:
+          - testgame.playercontroller
+      Sprite2D:
+        Texture: 12425600123178371834
+        Visible: true
+      Transform2D:
+        Position: [-171.634567, -126.462692]
+        Scale: [0.400000066, 0.400000095]
         Rotation: 0

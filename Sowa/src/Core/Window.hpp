@@ -2,9 +2,11 @@
 #define _E_WINDOW_HPP__
 #pragma once
 
-#include "Sowa.hpp"
+#include <map>
 #include <string>
 
+#include "Core/Input.hpp"
+#include "Sowa.hpp"
 #include "Utils/Math.hpp"
 
 #include "Resource/Texture/Texture.hpp"
@@ -14,14 +16,35 @@ class Window;
 }
 
 namespace Sowa {
+
+class EngineContext;
+
+/// @brief implemented in Window.cpp, used for accessing and modifying internal window data
+class WindowAccessor;
+
+enum class KeyState : uint32_t {
+	UP = 0,	  // key is up
+	DOWN,	  // key is down
+	PRESSED,  // key just pressed
+	RELEASED, // key just released
+};
+
 class Window {
   public:
 	Window();
 	~Window();
 
+	void InitWindow(nmGfx::Window &window, EngineContext &ctx);
+	void UpdateEvents(); // call before polling glfw events
+
 	/* -- Input -- */
 	Vec2 GetMousePosition();
 	Vec2 GetGameMousePosition();
+
+	bool IsKeyJustPressed(int key);
+	bool IsKeyJustReleased(int key);
+	bool IsKeyDown(int key);
+	bool IsKeyUp(int key);
 
 	/**
 	 * @brief Video Size : Render resolution of scene, different than window size
@@ -76,8 +99,12 @@ class Window {
 #endif
   private:
 	friend class Application;
+	friend class WindowAccessor;
 
 	nmGfx::Window *_windowHandle{nullptr};
+	EngineContext *_Ctx{nullptr};
+
+	std::map<int, KeyState> _KeyStates{};
 };
 } // namespace Sowa
 

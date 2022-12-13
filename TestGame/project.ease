@@ -21,3 +21,4 @@ Window:
 Modules:
   Lua:
     - res://Modules/module_template.lua
+    - res://Modules/testgame.lua

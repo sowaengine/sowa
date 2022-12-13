@@ -105,6 +105,7 @@ void Application::Run(int argc, char const *argv[]) {
 		projectSettings->_application.Name.c_str(),
 		nmGfx::WindowFlags::NONE);
 	_window._windowHandle = &_renderer->GetWindow();
+	_window.InitWindow(_renderer->GetWindow(), *ctx);
 
 	{
 		Reference<ImageTexture> icon = nullptr;
@@ -138,6 +139,7 @@ void Application::Run(int argc, char const *argv[]) {
 #endif
 
 	while (!_window.ShouldClose()) {
+		_window.UpdateEvents();
 		_renderer->GetWindow().PollEvents();
 
 		Component::Transform2D cam2dtc{};
