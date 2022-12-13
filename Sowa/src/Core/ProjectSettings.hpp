@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 namespace Sowa {
 class ProjectSettings {
   public:
@@ -25,6 +27,8 @@ class ProjectSettings {
 		int VideoHeight = 1280;
 
 		bool Fullscreen = false;
+
+		glm::vec4 ClearColor = {0.f, 0.f, 0.f, 0.f};
 	} _window;
 	struct {
 		std::vector<std::string> lua;

@@ -7,14 +7,109 @@
 #include "Resource/Texture/Texture.hpp"
 
 #include "Core/Application.hpp"
+#include "Core/EngineContext.hpp"
 #include "Core/Input.hpp"
+
 #include "ECS/Components/Common/Common.hpp"
 #include "ECS/Entity/Entity.hpp"
-#include "nmGfx/src/Core/nm_Window.hpp"
+
+#include "Core/nm_Window.hpp"
 
 namespace Sowa {
 Window::Window() {}
-Window::~Window() {
+Window::~Window() {}
+
+struct WindowCallback {
+	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+};
+
+class WindowAccessor {
+  public:
+	WindowAccessor(GLFWwindow *window);
+	~WindowAccessor() {}
+
+	WindowAccessor &RegisterKeyEvent(int key, int scancode, int action, int mods);
+
+  private:
+	void LoadContext();
+
+	EngineContext *_Ctx{nullptr};
+	GLFWwindow *_Window{nullptr};
+};
+
+void Window::InitWindow(nmGfx::Window &window, EngineContext &ctx) {
+	_windowHandle = &window;
+	_Ctx = &ctx;
+
+	glfwSetWindowUserPointer(_windowHandle->GetGLFWwindow(), reinterpret_cast<void *>(&ctx));
+	glfwSetKeyCallback(_windowHandle->GetGLFWwindow(), &WindowCallback::KeyCallback);
+}
+
+void Window::UpdateEvents() {
+	for (auto &[key, state] : _KeyStates) {
+		if (state == KeyState::PRESSED)
+			_KeyStates[key] = KeyState::DOWN;
+		else if (state == KeyState::RELEASED)
+			_KeyStates[key] = KeyState::UP;
+	}
+}
+
+/* -- Input -- */
+Vec2 Window::GetMousePosition() {
+	double x, y;
+	glfwGetCursorPos(_windowHandle->GetGLFWwindow(), &x, &y);
+
+	// x -= GetWindowWidth() * 0.5f;
+	// y -= GetWindowHeight() * 0.5f;
+
+#ifndef SW_EDITOR
+	x -= GetBlackbarWidth();
+	y -= GetBlackbarHeight();
+#else
+	Vec2 scale;
+	scale.x = (float)GetWindowWidth() / (float)Editor_GetWindowWidth();
+	scale.y = (float)GetWindowHeight() / (float)Editor_GetWindowHeight();
+
+	x -= Editor_GetWindowPosX();
+	y -= Editor_GetWindowPosY();
+	x *= scale.x;
+	y *= scale.y;
+#endif
+
+	return Vec2(x, y);
+}
+
+Vec2 Window::GetGameMousePosition() {
+
+	Vec2 scale;
+#ifndef SW_EDITOR
+	scale.x = (float)GetVideoWidth() / ((float)GetWindowWidth() - (GetBlackbarWidth() * 2));
+	scale.y = (float)GetVideoHeight() / ((float)GetWindowHeight() - (GetBlackbarHeight() * 2));
+#else
+
+	scale.x = (float)GetVideoWidth() / (float)GetWindowWidth();
+	scale.y = (float)GetVideoHeight() / (float)GetWindowHeight();
+#endif
+
+	Vec2 mousePos = GetMousePosition();
+	mousePos.x *= scale.x;
+	mousePos.y *= scale.y;
+
+	return mousePos;
+}
+
+bool Window::IsKeyJustPressed(int key) {
+	return _KeyStates[key] == KeyState::PRESSED;
+}
+bool Window::IsKeyJustReleased(int key) {
+	return _KeyStates[key] == KeyState::RELEASED;
+}
+
+bool Window::IsKeyDown(int key) {
+	return _KeyStates[key] == KeyState::DOWN;
+}
+bool Window::IsKeyUp(int key) {
+	return _KeyStates[key] == KeyState::UP;
 }
 
 int Window::GetVideoWidth() { return _windowHandle->GetVideoWidth(); }
@@ -69,4 +164,33 @@ int Window::GetBlackbarHeight() {
 	return m_Editor_BlackbarHeight;
 }
 #endif
+
+//
+//
+WindowAccessor::WindowAccessor(GLFWwindow *window) {
+	_Window = window;
+	LoadContext();
+}
+void WindowAccessor::LoadContext() {
+	_Ctx = reinterpret_cast<EngineContext *>(glfwGetWindowUserPointer(_Window));
+}
+
+WindowAccessor &WindowAccessor::RegisterKeyEvent(int key, int scancode, int action, int mods) {
+	Sowa::Window &window = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION)->GetWindow();
+
+	if (action == GLFW_PRESS)
+		window._KeyStates[key] = KeyState::PRESSED;
+	else if (action == GLFW_RELEASE)
+		window._KeyStates[key] = KeyState::RELEASED;
+
+	return *this;
+}
+
+//
+//
+
+void WindowCallback::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	WindowAccessor(window).RegisterKeyEvent(key, scancode, action, mods);
+}
+
 } // namespace Sowa

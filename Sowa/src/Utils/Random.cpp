@@ -12,6 +12,13 @@ uint64_t Random::GenerateID() {
 	gen.Generate(id);
 	return id;
 }
+int32_t Random::GenerateID31() {
+	int32_t id = 0;
+
+	RandomNumberGenerator gen{};
+	gen.Generate(id);
+	return id;
+}
 uint32_t Random::GenerateID32() {
 	uint32_t id = 0;
 
@@ -39,6 +46,11 @@ void Random::RandomNumberGenerator::Generate(uint64_t &number, uint64_t begin /*
 
 void Random::RandomNumberGenerator::Generate(uint32_t &number, uint32_t begin /*= 0*/, uint32_t end /*= UINT_MAX*/) {
 	std::uniform_int_distribution<uint32_t> dist(begin, end);
+	number = dist(_Engine);
+}
+
+void Random::RandomNumberGenerator::Generate(int32_t &number, int32_t begin /*= 0*/, int32_t end /*= INT_MAX*/) {
+	std::uniform_int_distribution<int32_t> dist(begin, end);
 	number = dist(_Engine);
 }
 

@@ -141,6 +141,9 @@ class GuiServer {
 	void SetCursorPosX(float x);
 	void SetCursorPosY(float y);
 
+	float GetCursorPosX();
+	float GetCursorPosY();
+
 	// returns mouse position relative to window position (0, 0) being top-left
 	Vec2 GetMousePosition();
 

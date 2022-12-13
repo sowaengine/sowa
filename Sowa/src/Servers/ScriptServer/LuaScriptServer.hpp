@@ -6,6 +6,7 @@
 
 #include "Core/Application.hpp"
 #include "Core/EngineContext.hpp"
+#include "Lua/LuaBehaviour.hpp"
 #include "Lua/LuaModule.hpp"
 #include "Servers/ScriptServer/ScriptServer.hpp"
 
@@ -16,6 +17,9 @@ class state;
 namespace Sowa {
 
 class LuaScriptServer : public ScriptServer {
+  public:
+	std::unordered_map<std::string, LuaBehaviour> &Behaviours() { return _Behaviours; }
+
   protected:
 	friend class Application;
 	LuaScriptServer(EngineContext &ctx);
@@ -78,6 +82,8 @@ class LuaScriptServer : public ScriptServer {
 	std::unique_ptr<sol::state> _pState{nullptr};
 
 	std::unordered_map<std::string, LuaModule> _Modules{};
+
+	std::unordered_map<std::string, LuaBehaviour> _Behaviours{};
 };
 
 } // namespace Sowa

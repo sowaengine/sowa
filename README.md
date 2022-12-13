@@ -1,5 +1,9 @@
 # Sowa Engine
 
+[![](https://dcbadge.vercel.app/api/server/HP7SDFU2Ep)](https://discord.gg/HP7SDFU2Ep)
+
+<br>
+
 <img src="https://raw.githubusercontent.com/sowaengine/sowa/main/.gh_resources/icon-1024x.png" width="200" alt="Sowa Engine Logo"><br><br>
 
 

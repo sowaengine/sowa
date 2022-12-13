@@ -5,7 +5,6 @@ editor.version = 1
 
 editor.console_text = ""
 editor.panels = {}
-editor.game_rclick_start_pos = nil
 
 
 editor.start = function()
@@ -102,6 +101,50 @@ editor.start = function()
 
                     end_component(selected, Component.Camera2D, "Camera2D")
                 end
+                --
+                --
+                gui:set_cursor_pos_y(gui:get_cursor_pos_y() + 80)
+                gui:separator()
+                --
+                -- Script
+                if gui:header("Scripts") then
+                    gui:indent()
+                    if not selected:has_component(Component.ScriptContainer) then
+                        selected:add_component(Component.ScriptContainer)
+                    end
+                    local script_container = selected:get_component(Component.ScriptContainer)
+                    if (script_container ~= nil) then
+                        local begin_script_tab = function(label, id)
+                            gui:push_id(id)
+                            if label == "" then
+                                label = "{ Invalid Script }"
+                            end
+                            if gui:header(label) then
+                                gui:indent()
+
+                                local new_id
+                                local changed
+                                new_id, changed = gui:input_text("Script Id", id)
+                                if changed then
+                                    script_container:remove_script(id)
+                                    script_container:add_script(new_id)
+                                end
+
+                                if gui:button("Remove Script") then
+                                    script_container:remove_script(id)
+                                end
+
+                                gui:unindent()
+                            end
+                            gui:pop_id()
+                        end
+
+                        for key, id in pairs(script_container.lua_scripts) do
+                            begin_script_tab(script_container:get_label(id), id)
+                        end
+                    end
+                    gui:unindent()
+                end
             end
 
 
@@ -164,21 +207,27 @@ editor.start = function()
         name = "Game",
         func = function()
             if gui:is_window_hovered() then
+                -- panning
                 if gui:is_mouse_pressed(gui_mouse_button.right) then
-                    if editor.game_rclick_start_pos == nil then
-                        editor.game_rclick_start_pos = gui:get_mouse_position()
+                    if editor.game_rclick_start == nil then
+                        editor.game_rclick_start = gui:get_mouse_position()
+                        editor.game_rclick_camera_pos = Application.get():get_editor_camera_position()
                     end
                 else
-                    editor.game_rclick_start_pos = nil
+                    editor.game_rclick_start = nil
+                    editor.game_rclick_camera_pos = nil
                 end
 
 
                 if gui:is_mouse_pressed(gui_mouse_button.right) then
 
-                    local dt = Vector2.new(gui:get_mouse_position().x - editor.game_rclick_start_pos.x,
-                        gui:get_mouse_position().y - editor.game_rclick_start_pos.y)
+                    local dt = Vector2.new(editor.game_rclick_start.x - gui:get_mouse_position().x,
+                        editor.game_rclick_start.y - gui:get_mouse_position().y)
 
-                    -- editor camera position should be module.game_rclick_start_pos + dt
+                    local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + dt.x,
+                        editor.game_rclick_camera_pos.y + dt.y)
+
+                    Application.get():set_editor_camera_position(camera_pos)
                 end
             end
 

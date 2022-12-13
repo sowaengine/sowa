@@ -15,8 +15,10 @@ Window:
   VideoWidth: 1920
   VideoHeight: 1080
   Fullscreen: false
+  ClearColor: [0.2, 0.2, 0.2, 1.0]
 
 
 Modules:
   Lua:
     - res://Modules/module_template.lua
+    - res://Modules/testgame.lua

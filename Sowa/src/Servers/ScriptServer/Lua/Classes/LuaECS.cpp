@@ -1,35 +1,9 @@
 #include "Servers/ScriptServer/LuaScriptServer.hpp"
 
 #include "ECS/Components/Components.hpp"
+#include "Servers/ScriptServer/Lua/ComponentHandle.hpp"
 
 namespace Sowa {
-
-class ComponentBaseHandle {
-  protected:
-	Sowa::Entity _handle;
-};
-
-template <typename T>
-class ComponentHandle : public T, public ComponentBaseHandle {
-  public:
-	template <typename Val, auto Member>
-	Val get_item() {
-		T &comp = _handle.GetComponent<T>();
-		Val &val = comp.*Member;
-		return val;
-	}
-
-	template <typename Val, auto Member>
-	void set_item(const Val &val) {
-		T &comp = _handle.GetComponent<T>();
-		Val &_val = comp.*Member;
-		_val = val;
-	}
-
-	ComponentHandle(Sowa::Entity &handle) {
-		_handle = handle;
-	}
-};
 
 void LuaScriptServer::RegisterECS() {
 	_pState->new_usertype<Scene>(
@@ -50,7 +24,8 @@ void LuaScriptServer::RegisterECS() {
 
 		"Transform2D", Component::Component_Transform2D,
 		"Sprite2D", Component::Component_Sprite2D,
-		"Camera2D", Component::Component_Camera2D);
+		"Camera2D", Component::Component_Camera2D,
+		"ScriptContainer", Component::Component_ScriptContainer);
 
 	_pState->new_usertype<ComponentHandle<Component::Transform2D>>(
 		"Transform2D",
@@ -124,6 +99,35 @@ void LuaScriptServer::RegisterECS() {
 			&ComponentHandle<Component::Camera2D>::
 				set_item<Sowa::Vec2, &ComponentHandle<Component::Camera2D>::_Center>));
 
+	_pState->new_usertype<ComponentHandle<Component::ScriptContainer>>(
+		"ScriptContainer",
+
+		"new", sol::no_constructor,
+
+		"lua_scripts",
+		sol::property(
+			&ComponentHandle<Component::ScriptContainer>::
+				get_item<std::vector<std::string>, &ComponentHandle<Component::ScriptContainer>::_LuaScripts>,
+			&ComponentHandle<Component::ScriptContainer>::
+				set_item<std::vector<std::string>, &ComponentHandle<Component::ScriptContainer>::_LuaScripts>),
+
+		"remove_script",
+		[](ComponentHandle<Component::ScriptContainer> &self, const std::string &id) -> bool {
+			return self.Handle().GetComponent<Component::ScriptContainer>().RemoveScript(id);
+		},
+
+		"add_script",
+		[](ComponentHandle<Component::ScriptContainer> &self, const std::string &id) -> void {
+			self.Handle().GetComponent<Component::ScriptContainer>().AddScript(id);
+		},
+
+		"get_label",
+		[this](ComponentHandle<Component::ScriptContainer> &self, const std::string &id) -> const std::string & {
+			return (this->_Context.GetSingleton<LuaScriptServer>(Server::SCRIPTSERVER_LUA))->_Behaviours[id].Label();
+		}
+
+	);
+
 	_pState->new_usertype<Entity>(
 		"Entity",
 
@@ -145,6 +149,8 @@ void LuaScriptServer::RegisterECS() {
 			}
 			else if (component == Component::Component_Camera2D) {
 				return self.HasComponent<Component::Camera2D>();
+			} else if (component == Component::Component_ScriptContainer) {
+				return self.HasComponent<Component::ScriptContainer>();
 			}
 			return false; },
 
@@ -170,6 +176,11 @@ void LuaScriptServer::RegisterECS() {
 				if(!self.HasComponent<Component::Camera2D>()) {
 					auto& comp = self.AddComponent<Component::Camera2D>();
 					res.push_back({L, sol::in_place_type<Component::Camera2D>, comp});
+				}
+			} else if (component == Component::Component_ScriptContainer) {
+				if (!self.HasComponent<Component::ScriptContainer>()) {
+					auto &comp = self.AddComponent<Component::ScriptContainer>();
+					res.push_back({L, sol::in_place_type<Component::ScriptContainer>, comp});
 				}
 			}
 
@@ -205,6 +216,13 @@ void LuaScriptServer::RegisterECS() {
 					self.RemoveComponent<Component::Camera2D>();
 					return true;
 				}
+			} else if (component == Component::Component_ScriptContainer) {
+				if (!self.HasComponent<Component::ScriptContainer>())
+					return false;
+				else {
+					self.RemoveComponent<Component::ScriptContainer>();
+					return true;
+				}
 			}
 
 			return false; },
@@ -233,6 +251,12 @@ void LuaScriptServer::RegisterECS() {
 					ComponentHandle<Component::Camera2D> comp(self);
 
 					res.push_back({L, sol::in_place_type<ComponentHandle<Component::Camera2D>>, comp});
+				}
+			} else if (component == Component::Component_ScriptContainer) {
+				if (self.HasComponent<Component::ScriptContainer>()) {
+					ComponentHandle<Component::ScriptContainer> comp(self);
+
+					res.push_back({L, sol::in_place_type<ComponentHandle<Component::ScriptContainer>>, comp});
 				}
 			}
 

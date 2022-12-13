@@ -105,6 +105,7 @@ void Application::Run(int argc, char const *argv[]) {
 		projectSettings->_application.Name.c_str(),
 		nmGfx::WindowFlags::NONE);
 	_window._windowHandle = &_renderer->GetWindow();
+	_window.InitWindow(_renderer->GetWindow(), *ctx);
 
 	{
 		Reference<ImageTexture> icon = nullptr;
@@ -138,6 +139,7 @@ void Application::Run(int argc, char const *argv[]) {
 #endif
 
 	while (!_window.ShouldClose()) {
+		_window.UpdateEvents();
 		_renderer->GetWindow().PollEvents();
 
 		Component::Transform2D cam2dtc{};
@@ -147,9 +149,15 @@ void Application::Run(int argc, char const *argv[]) {
 			cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
 			cam2d = GetCurrentScene()->CurrentCamera2D();
 		}
+#ifdef SW_EDITOR
+		else {
+			cam2dtc = _EditorCamera2D.transform;
+			cam2d = _EditorCamera2D.camera;
+		}
+#endif
 
 		if (m_AppRunning) {
-			Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic);
+			Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic, *ctx);
 		}
 
 		_renderer->Begin2D(
@@ -157,9 +165,13 @@ void Application::Run(int argc, char const *argv[]) {
 				glm::vec3{cam2dtc.Position().x, cam2dtc.Position().y, 0.f},
 				cam2d.Rotatable() ? cam2dtc.Rotation() : 0.f,
 				glm::vec3{cam2d.Zoom(), cam2d.Zoom(), 1.f}),
-			{cam2d.Center().x, cam2d.Center().y});
+			{cam2d.Center().x, cam2d.Center().y},
+			projectSettings->_window.ClearColor);
 
-		Sowa::Systems::System_Sprite2D(_pCurrentScene.get());
+		Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Draw, *ctx);
+
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
 
 		_renderer->End2D();
 
@@ -251,4 +263,12 @@ void Application::LaunchApp(const std::string &projectPath) {
 #else
 #error "Sowa::Application::LaunchApp() is not implemented in current platform"
 #endif
+
+void Application::SetEditorCameraPosition(const Vec2 &pos) {
+	_EditorCamera2D.transform.Position() = pos;
+}
+void Application::SetEditorCameraZoom(float zoom) {
+	_EditorCamera2D.camera.Zoom() = zoom;
+}
+
 } // namespace Sowa
