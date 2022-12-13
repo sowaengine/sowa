@@ -3,15 +3,19 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
 #include "Core/EngineContext.hpp"
 #include "Core/Window.hpp"
+
+#include "ECS/Components/Components.hpp"
 #include "ECS/Scene/Scene.hpp"
+
 #include "Sowa.hpp"
-#include <filesystem>
+#include "Utils/Math.hpp"
 
 namespace nmGfx {
 class Renderer;
@@ -42,6 +46,11 @@ class Application {
 
 	void LaunchApp(const std::string &projectPath);
 
+	void SetEditorCameraPosition(const Vec2 &pos);
+	void SetEditorCameraZoom(float zoom);
+	const Vec2 &GetEditorCameraPosition() { return _EditorCamera2D.transform.Position(); }
+	float GetEditorCameraZoom() { return _EditorCamera2D.camera.Zoom(); }
+
   private:
 	friend class Window;
 	friend class Renderer;
@@ -64,6 +73,11 @@ class Application {
 	Sowa::Entity _SelectedEntity;
 	
 	std::string _ExecutablePath{""};
+
+	struct {
+		Component::Transform2D transform;
+		Component::Camera2D camera;
+	} _EditorCamera2D;
 };
 } // namespace Sowa
 

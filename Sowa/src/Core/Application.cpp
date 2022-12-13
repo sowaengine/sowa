@@ -147,6 +147,12 @@ void Application::Run(int argc, char const *argv[]) {
 			cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
 			cam2d = GetCurrentScene()->CurrentCamera2D();
 		}
+#ifdef SW_EDITOR
+		else {
+			cam2dtc = _EditorCamera2D.transform;
+			cam2d = _EditorCamera2D.camera;
+		}
+#endif
 
 		if (m_AppRunning) {
 			Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic, *ctx);
@@ -255,4 +261,12 @@ void Application::LaunchApp(const std::string &projectPath) {
 #else
 #error "Sowa::Application::LaunchApp() is not implemented in current platform"
 #endif
+
+void Application::SetEditorCameraPosition(const Vec2 &pos) {
+	_EditorCamera2D.transform.Position() = pos;
+}
+void Application::SetEditorCameraZoom(float zoom) {
+	_EditorCamera2D.camera.Zoom() = zoom;
+}
+
 } // namespace Sowa

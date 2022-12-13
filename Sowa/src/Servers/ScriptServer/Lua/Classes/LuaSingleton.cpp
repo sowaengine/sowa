@@ -21,10 +21,17 @@ void LuaScriptServer::RegisterSingleton() {
 		"start_game", &Application::StartGame,
 		"stop_game", &Application::StopGame,
 
+		"set_editor_camera_position", &Application::SetEditorCameraPosition,
+		"set_editor_camera_zoom", &Application::SetEditorCameraZoom,
+		"get_editor_camera_position", &Application::GetEditorCameraPosition,
+		"get_editor_camera_zoom", &Application::GetEditorCameraZoom,
+
 		"selected_entity",
 		sol::property(
 			[](Sowa::Application &self) -> Sowa::Entity & { return self.SelectedEntity(); },
-			[](Sowa::Application &self, Sowa::Entity &entity) -> void { self.SelectedEntity() = entity; }));
+			[](Sowa::Application &self, Sowa::Entity &entity) -> void { self.SelectedEntity() = entity; })
+
+	);
 
 	_pState->new_usertype<Window>(
 		"Window",
