@@ -99,7 +99,9 @@ void LuaScriptServer::RegisterGuiServer() {
 
 			return values; },
 
-		"drag_float", [](GuiServer &self, const std::string &label, float value, sol::this_state L) -> sol::variadic_results {
+		"drag_float",
+		sol::overload(
+			[](GuiServer &self, const std::string &label, float value, sol::this_state L) -> sol::variadic_results {
 			float val = value;
 			bool ret = self.DragFloat(label, val);
 
@@ -108,8 +110,19 @@ void LuaScriptServer::RegisterGuiServer() {
 			values.push_back( {L, sol::in_place_type<bool>, ret} );
 
 			return values; },
+			[](GuiServer &self, const std::string &label, float value, float speed, sol::this_state L) -> sol::variadic_results {
+			float val = value;
+			bool ret = self.DragFloat(label, val, speed);
 
-		"drag_float2", [](GuiServer &self, const std::string &label, Vec2 value, sol::this_state L) -> sol::variadic_results {
+			sol::variadic_results values;
+			values.push_back( {L, sol::in_place_type<float>, val} );
+			values.push_back( {L, sol::in_place_type<bool>, ret} );
+
+			return values; }),
+
+		"drag_float2",
+		sol::overload(
+			[](GuiServer &self, const std::string &label, Vec2 value, sol::this_state L) -> sol::variadic_results {
 			Vec2 val = value;
 			bool ret = self.DragFloat2(label, val.x, val.y);
 
@@ -118,6 +131,15 @@ void LuaScriptServer::RegisterGuiServer() {
 			values.push_back( {L, sol::in_place_type<bool>, ret} );
 
 			return values; },
+			[](GuiServer &self, const std::string &label, Vec2 value, float speed, sol::this_state L) -> sol::variadic_results {
+			Vec2 val = value;
+			bool ret = self.DragFloat2(label, val.x, val.y, speed);
+
+			sol::variadic_results values;
+			values.push_back( {L, sol::in_place_type<Vec2>, val} );
+			values.push_back( {L, sol::in_place_type<bool>, ret} );
+
+			return values; }),
 
 		"setup_dockspace", &GuiServer::SetupDockspace,
 

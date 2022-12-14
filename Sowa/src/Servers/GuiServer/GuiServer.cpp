@@ -151,12 +151,12 @@ bool GuiServer::Button(const std::string &label, int width /*= 0*/, int height /
 	return ImGui::Button(label.c_str(), ImVec2(width, height));
 }
 
-bool GuiServer::DragFloat(const std::string &label, float &f) {
-	return ImGui::DragFloat(label.c_str(), &f);
+bool GuiServer::DragFloat(const std::string &label, float &f, float speed /*= 0.f*/) {
+	return ImGui::DragFloat(label.c_str(), &f, speed);
 }
-bool GuiServer::DragFloat2(const std::string &label, float &f1, float &f2) {
+bool GuiServer::DragFloat2(const std::string &label, float &f1, float &f2, float speed /*= 0.f*/) {
 	float v[2] = {f1, f2};
-	bool drag = ImGui::DragFloat2(label.c_str(), v);
+	bool drag = ImGui::DragFloat2(label.c_str(), v, speed);
 
 	f1 = v[0];
 	f2 = v[1];

@@ -77,7 +77,7 @@ editor.start = function()
                 local tc = begin_component(selected, Component.Transform2D, "Transform2D")
                 if (tc ~= nil) then
                     tc.position, changed = gui:drag_float2("Position", tc.position)
-                    tc.scale, changed = gui:drag_float2("Scale", tc.scale)
+                    tc.scale, changed = gui:drag_float2("Scale", tc.scale, 0.02)
                     tc.rotation, changed = gui:drag_float("Rotation", tc.rotation)
 
                     end_component(selected, Component.Transform2D, "Transform2D")
