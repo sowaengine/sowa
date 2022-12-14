@@ -48,7 +48,9 @@ void LuaScriptServer::RegisterSingleton() {
 		"is_key_just_pressed", sol::as_function([this](int key) -> bool { return this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetWindow().IsKeyJustPressed(key); }),
 		"is_key_just_released", sol::as_function([this](int key) -> bool { return this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetWindow().IsKeyJustReleased(key); }),
 		"is_key_down", sol::as_function([this](int key) -> bool { return this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetWindow().IsKeyDown(key); }),
-		"is_key_up", sol::as_function([this](int key) -> bool { return this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetWindow().IsKeyUp(key); })
+		"is_key_up", sol::as_function([this](int key) -> bool { return this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetWindow().IsKeyUp(key); }),
+		"get_scroll_delta_y", sol::as_function([this]() -> double { return this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetWindow().GetScrollDeltaY(); }),
+		"get_scroll_delta_x", sol::as_function([this]() -> double { return this->_Context.GetSingleton<Sowa::Application>(Sowa::Server::APPLICATION)->GetWindow().GetScrollDeltaX(); })
 
 	);
 
