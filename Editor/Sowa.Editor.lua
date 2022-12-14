@@ -209,6 +209,16 @@ editor.start = function()
             if not Application.get():is_running() then
 
                 if gui:is_window_hovered() then
+                    -- zooming
+                    local zoom = Application.get():get_editor_camera_zoom()
+                    local scroll = Input.get_scroll_delta_y()
+
+                    -- scroll > 0 ? zoom in
+
+                    if (zoom > 0.5 or scroll < 0) and (zoom < 5 or scroll > 0) then
+                        Application.get():set_editor_camera_zoom(zoom -
+                            (scroll * zoom * 0.2))
+                    end
                     -- panning
                     if gui:is_mouse_pressed(gui_mouse_button.right) then
                         if editor.game_rclick_start == nil then
@@ -223,11 +233,12 @@ editor.start = function()
 
                 if gui:is_mouse_pressed(gui_mouse_button.right) then
                     if editor.game_rclick_start ~= nil and editor.game_rclick_camera_pos ~= nil then
+                        local zoom = Application.get():get_editor_camera_zoom()
                         local dt = Vector2.new(editor.game_rclick_start.x - gui:get_mouse_position().x,
                             editor.game_rclick_start.y - gui:get_mouse_position().y)
     
-                        local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + dt.x,
-                            editor.game_rclick_camera_pos.y - dt.y)
+                        local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + (dt.x * zoom),
+                            editor.game_rclick_camera_pos.y - (dt.y * zoom))
 
                         Application.get():set_editor_camera_position(camera_pos)
                     end
