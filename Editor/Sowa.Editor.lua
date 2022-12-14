@@ -219,14 +219,16 @@ editor.start = function()
                 end
 
 
-                if gui:is_mouse_pressed(gui_mouse_button.right) then
+            end
 
+            if gui:is_mouse_pressed(gui_mouse_button.right) then
+                if editor.game_rclick_start ~= nil and editor.game_rclick_camera_pos ~= nil then
                     local dt = Vector2.new(editor.game_rclick_start.x - gui:get_mouse_position().x,
                         editor.game_rclick_start.y - gui:get_mouse_position().y)
-
+    
                     local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + dt.x,
                         editor.game_rclick_camera_pos.y - dt.y)
-
+    
                     Application.get():set_editor_camera_position(camera_pos)
                 end
             end
