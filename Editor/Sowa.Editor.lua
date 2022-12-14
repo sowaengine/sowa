@@ -225,7 +225,7 @@ editor.start = function()
                         editor.game_rclick_start.y - gui:get_mouse_position().y)
 
                     local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + dt.x,
-                        editor.game_rclick_camera_pos.y + dt.y)
+                        editor.game_rclick_camera_pos.y - dt.y)
 
                     Application.get():set_editor_camera_position(camera_pos)
                 end

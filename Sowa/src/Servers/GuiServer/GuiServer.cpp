@@ -370,10 +370,12 @@ void GuiServer::DrawFrame() {
 			inversePos.y *= -1;
 
 			glm::mat4 mat = nmGfx::CalculateModelMatrix(inversePos, -tc.Rotation(), tc.Scale());
-			ImGuiIO &io = ImGui::GetIO();
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x + ImGui::GetCursorPosX(), ImGui::GetWindowPos().y + ImGui::GetCursorPosY(), dstWidth, dstHeight);
+			glm::mat4 viewMatrix = app->_renderer->GetData2D()._viewMatrix;
+			viewMatrix[3][1] *= -1;
+
 			ImGuizmo::Manipulate(
-				&app->_renderer->GetData2D()._viewMatrix[0][0],
+				&viewMatrix[0][0],
 				&app->_renderer->GetData2D()._projectionMatrix[0][0],
 				ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y | ImGuizmo::OPERATION::ROTATE_Z,
 				ImGuizmo::MODE::WORLD,
