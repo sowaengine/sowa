@@ -77,7 +77,7 @@ editor.start = function()
                 local tc = begin_component(selected, Component.Transform2D, "Transform2D")
                 if (tc ~= nil) then
                     tc.position, changed = gui:drag_float2("Position", tc.position)
-                    tc.scale, changed = gui:drag_float2("Scale", tc.scale)
+                    tc.scale, changed = gui:drag_float2("Scale", tc.scale, 0.02)
                     tc.rotation, changed = gui:drag_float("Rotation", tc.rotation)
 
                     end_component(selected, Component.Transform2D, "Transform2D")
@@ -140,7 +140,12 @@ editor.start = function()
                         end
 
                         for key, id in pairs(script_container.lua_scripts) do
+                            gui:push_id(tostring(key))
                             begin_script_tab(script_container:get_label(id), id)
+                            gui:pop_id()
+                        end
+                        if gui:button("+", 32, 32) then
+                            script_container:add_script("module.script")
                         end
                     end
                     gui:unindent()
@@ -209,6 +214,16 @@ editor.start = function()
             if not Application.get():is_running() then
 
                 if gui:is_window_hovered() then
+                    -- zooming
+                    local zoom = Application.get():get_editor_camera_zoom()
+                    local scroll = Input.get_scroll_delta_y()
+
+                    -- scroll > 0 ? zoom in
+
+                    if (zoom > 0.5 or scroll < 0) and (zoom < 5 or scroll > 0) then
+                        Application.get():set_editor_camera_zoom(zoom -
+                            (scroll * zoom * 0.2))
+                    end
                     -- panning
                     if gui:is_mouse_pressed(gui_mouse_button.right) then
                         if editor.game_rclick_start == nil then
@@ -223,11 +238,12 @@ editor.start = function()
 
                 if gui:is_mouse_pressed(gui_mouse_button.right) then
                     if editor.game_rclick_start ~= nil and editor.game_rclick_camera_pos ~= nil then
+                        local zoom = Application.get():get_editor_camera_zoom()
                         local dt = Vector2.new(editor.game_rclick_start.x - gui:get_mouse_position().x,
                             editor.game_rclick_start.y - gui:get_mouse_position().y)
     
-                        local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + dt.x,
-                            editor.game_rclick_camera_pos.y - dt.y)
+                        local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + (dt.x * zoom),
+                            editor.game_rclick_camera_pos.y - (dt.y * zoom))
 
                         Application.get():set_editor_camera_position(camera_pos)
                     end

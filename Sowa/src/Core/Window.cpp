@@ -21,6 +21,7 @@ Window::~Window() {}
 
 struct WindowCallback {
 	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+	static void ScrollCallback(GLFWwindow *window, double xOffset, double yOffset);
 };
 
 class WindowAccessor {
@@ -29,6 +30,7 @@ class WindowAccessor {
 	~WindowAccessor() {}
 
 	WindowAccessor &RegisterKeyEvent(int key, int scancode, int action, int mods);
+	WindowAccessor &RegisterScrollEvent(double xOffset, double yOffset);
 
   private:
 	void LoadContext();
@@ -43,6 +45,7 @@ void Window::InitWindow(nmGfx::Window &window, EngineContext &ctx) {
 
 	glfwSetWindowUserPointer(_windowHandle->GetGLFWwindow(), reinterpret_cast<void *>(&ctx));
 	glfwSetKeyCallback(_windowHandle->GetGLFWwindow(), &WindowCallback::KeyCallback);
+	glfwSetScrollCallback(_windowHandle->GetGLFWwindow(), &WindowCallback::ScrollCallback);
 }
 
 void Window::UpdateEvents() {
@@ -52,6 +55,9 @@ void Window::UpdateEvents() {
 		else if (state == KeyState::RELEASED)
 			_KeyStates[key] = KeyState::UP;
 	}
+
+	_ScrollDeltaX = 0.0;
+	_ScrollDeltaY = 0.0;
 }
 
 /* -- Input -- */
@@ -112,6 +118,15 @@ bool Window::IsKeyUp(int key) {
 	return _KeyStates[key] == KeyState::UP;
 }
 
+double Window::GetScrollDeltaY() {
+	return _ScrollDeltaY;
+}
+double Window::GetScrollDeltaX() {
+	return _ScrollDeltaX;
+}
+
+//
+//
 int Window::GetVideoWidth() { return _windowHandle->GetVideoWidth(); }
 int Window::GetVideoHeight() { return _windowHandle->GetVideoHeight(); }
 
@@ -185,12 +200,23 @@ WindowAccessor &WindowAccessor::RegisterKeyEvent(int key, int scancode, int acti
 
 	return *this;
 }
+WindowAccessor &WindowAccessor::RegisterScrollEvent(double xOffset, double yOffset) {
+	Sowa::Window &window = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION)->GetWindow();
+
+	window._ScrollDeltaY = yOffset;
+	window._ScrollDeltaX += xOffset;
+
+	return *this;
+}
 
 //
 //
 
 void WindowCallback::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 	WindowAccessor(window).RegisterKeyEvent(key, scancode, action, mods);
+}
+void WindowCallback::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
+	WindowAccessor(window).RegisterScrollEvent(xOffset, yOffset);
 }
 
 } // namespace Sowa

@@ -62,8 +62,8 @@ class GuiServer {
 	void TextCentered(const std::string &text);
 	void TextUnformatted(const std::string &text);
 	bool Button(const std::string &label, int width = 0, int height = 0);
-	bool DragFloat(const std::string &label, float &f);
-	bool DragFloat2(const std::string &label, float &f1, float &f2);
+	bool DragFloat(const std::string &label, float &f, float speed = 1.f);
+	bool DragFloat2(const std::string &label, float &f1, float &f2, float speed = 1.f);
 	bool SliderFloat(const std::string &label, float &f, float min, float max);
 	bool Checkbox(const std::string &label, bool &value);
 	bool InputText(const std::string &label, std::string &value);

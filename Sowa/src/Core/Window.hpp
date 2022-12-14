@@ -46,6 +46,9 @@ class Window {
 	bool IsKeyDown(int key);
 	bool IsKeyUp(int key);
 
+	double GetScrollDeltaY();
+	double GetScrollDeltaX();
+
 	/**
 	 * @brief Video Size : Render resolution of scene, different than window size
 	 *
@@ -105,6 +108,8 @@ class Window {
 	EngineContext *_Ctx{nullptr};
 
 	std::map<int, KeyState> _KeyStates{};
+	double _ScrollDeltaY{0.0};
+	double _ScrollDeltaX{0.0};
 };
 } // namespace Sowa
 
