@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(Sowa VERSION 0.1.0 LANGUAGES CXX C)
+project(Sowa VERSION 0.1.1 LANGUAGES CXX C)
 
 option(Editor "Build Editor executable" ON)
 option(Template "Build export template" ON)
