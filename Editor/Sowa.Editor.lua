@@ -206,30 +206,31 @@ editor.start = function()
     editor.panels.game = {
         name = "Game",
         func = function()
-            if gui:is_window_hovered() then
-                -- panning
-                if gui:is_mouse_pressed(gui_mouse_button.right) then
-                    if editor.game_rclick_start == nil then
-                        editor.game_rclick_start = gui:get_mouse_position()
-                        editor.game_rclick_camera_pos = Application.get():get_editor_camera_position()
+            if not Application.get():is_running() then
+
+                if gui:is_window_hovered() then
+                    -- panning
+                    if gui:is_mouse_pressed(gui_mouse_button.right) then
+                        if editor.game_rclick_start == nil then
+                            editor.game_rclick_start = gui:get_mouse_position()
+                            editor.game_rclick_camera_pos = Application.get():get_editor_camera_position()
+                        end
+                    else
+                        editor.game_rclick_start = nil
+                        editor.game_rclick_camera_pos = nil
                     end
-                else
-                    editor.game_rclick_start = nil
-                    editor.game_rclick_camera_pos = nil
                 end
 
-
-            end
-
-            if gui:is_mouse_pressed(gui_mouse_button.right) then
-                if editor.game_rclick_start ~= nil and editor.game_rclick_camera_pos ~= nil then
-                    local dt = Vector2.new(editor.game_rclick_start.x - gui:get_mouse_position().x,
-                        editor.game_rclick_start.y - gui:get_mouse_position().y)
+                if gui:is_mouse_pressed(gui_mouse_button.right) then
+                    if editor.game_rclick_start ~= nil and editor.game_rclick_camera_pos ~= nil then
+                        local dt = Vector2.new(editor.game_rclick_start.x - gui:get_mouse_position().x,
+                            editor.game_rclick_start.y - gui:get_mouse_position().y)
     
-                    local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + dt.x,
-                        editor.game_rclick_camera_pos.y - dt.y)
-    
-                    Application.get():set_editor_camera_position(camera_pos)
+                        local camera_pos = Vector2.new(editor.game_rclick_camera_pos.x + dt.x,
+                            editor.game_rclick_camera_pos.y - dt.y)
+
+                        Application.get():set_editor_camera_position(camera_pos)
+                    end
                 end
             end
 

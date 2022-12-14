@@ -145,7 +145,7 @@ void Application::Run(int argc, char const *argv[]) {
 		Component::Transform2D cam2dtc{};
 		Component::Camera2D cam2d{};
 
-		if (m_AppRunning) {
+		if (_AppRunning) {
 			cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
 			cam2d = GetCurrentScene()->CurrentCamera2D();
 		}
@@ -156,7 +156,7 @@ void Application::Run(int argc, char const *argv[]) {
 		}
 #endif
 
-		if (m_AppRunning) {
+		if (_AppRunning) {
 			Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic, *ctx);
 		}
 
@@ -170,8 +170,10 @@ void Application::Run(int argc, char const *argv[]) {
 
 		Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Draw, *ctx);
 
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
+		if (!_AppRunning) {
+			Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
+			Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
+		}
 
 		_renderer->End2D();
 
@@ -192,9 +194,9 @@ void Application::Run(int argc, char const *argv[]) {
 }
 
 void Application::StartGame() {
-	if (m_AppRunning)
+	if (_AppRunning)
 		return;
-	m_AppRunning = true;
+	_AppRunning = true;
 
 	ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->debug_draw = false;
 	Scene::CopyScene(*_GameScene.get(), *_CopyScene.get());
@@ -207,9 +209,9 @@ void Application::UpdateGame() {
 }
 
 void Application::StopGame() {
-	if (!m_AppRunning)
+	if (!_AppRunning)
 		return;
-	m_AppRunning = false;
+	_AppRunning = false;
 
 	ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->debug_draw = true;
 	Scene::CopyScene(*_CopyScene.get(), *_GameScene.get());
@@ -228,7 +230,7 @@ uint32_t Application::Renderer_GetAlbedoFramebufferID() {
 
 #if defined(SW_LINUX)
 void Application::LaunchApp(const std::string &projectPath) {
-	m_AppRunning = false;
+	_AppRunning = false;
 
 	std::filesystem::path project = projectPath;
 	project = project.parent_path();

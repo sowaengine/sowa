@@ -36,7 +36,7 @@ class Application {
 	void StartGame();
 	void UpdateGame();
 	void StopGame();
-	bool IsRunning() { return m_AppRunning; }
+	bool IsRunning() { return _AppRunning; }
 	Reference<Sowa::Scene> GetCurrentScene() { return _pCurrentScene; }
 	Sowa::Entity &SelectedEntity() { return _SelectedEntity; }
 
@@ -68,7 +68,7 @@ class Application {
 	Reference<Sowa::Scene> _CopyScene;
 	Reference<Sowa::Scene> _pCurrentScene;
 
-	bool m_AppRunning = false;
+	bool _AppRunning = false;
 
 	Sowa::Entity _SelectedEntity;
 	

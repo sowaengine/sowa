@@ -22,6 +22,8 @@ void LuaScriptServer::RegisterSingleton() {
 		"start_game", &Application::StartGame,
 		"stop_game", &Application::StopGame,
 
+		"is_running", &Application::IsRunning,
+
 		"set_editor_camera_position", &Application::SetEditorCameraPosition,
 		"set_editor_camera_zoom", &Application::SetEditorCameraZoom,
 		"get_editor_camera_position", &Application::GetEditorCameraPosition,
