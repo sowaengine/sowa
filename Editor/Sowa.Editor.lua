@@ -140,7 +140,12 @@ editor.start = function()
                         end
 
                         for key, id in pairs(script_container.lua_scripts) do
+                            gui:push_id(tostring(key))
                             begin_script_tab(script_container:get_label(id), id)
+                            gui:pop_id()
+                        end
+                        if gui:button("+", 32, 32) then
+                            script_container:add_script("module.script")
                         end
                     end
                     gui:unindent()
