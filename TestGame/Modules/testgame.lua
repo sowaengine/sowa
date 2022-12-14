@@ -12,10 +12,10 @@ playercontroller.update = function(entity)
     local tc = entity:get_component(Component.Transform2D)
     local input = Vector2.new(0, 0)
     if Input.is_key_down(Key.KEY_W) then
-        input.y = input.y - 1
+        input.y = input.y + 1
     end
     if Input.is_key_down(Key.KEY_S) then
-        input.y = input.y + 1
+        input.y = input.y - 1
     end
 
     if Input.is_key_down(Key.KEY_D) then

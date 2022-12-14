@@ -367,12 +367,18 @@ void GuiServer::DrawFrame() {
 			auto &tc = app->SelectedEntity().GetComponent<Component::Transform2D>();
 
 			Vec2 inversePos = tc.Position();
-			inversePos.y *= -1;
 
 			glm::mat4 mat = nmGfx::CalculateModelMatrix(inversePos, -tc.Rotation(), tc.Scale());
 			ImGuizmo::SetRect(ImGui::GetWindowPos().x + ImGui::GetCursorPosX(), ImGui::GetWindowPos().y + ImGui::GetCursorPosY(), dstWidth, dstHeight);
 			glm::mat4 viewMatrix = app->_renderer->GetData2D()._viewMatrix;
-			viewMatrix[3][1] *= -1;
+			glm::vec3 viewTranslation;
+			glm::vec3 viewRotation;
+			glm::vec3 viewScale;
+			if(nmGfx::DecomposeMatrix(viewMatrix, viewTranslation, viewRotation, viewScale)) {
+				viewMatrix = nmGfx::CalculateModelMatrix({viewTranslation.x, -viewTranslation.y, viewTranslation.z}, viewRotation, viewScale);
+			} else {
+				viewMatrix[3][1] *= -1;
+			}
 
 			ImGuizmo::Manipulate(
 				&viewMatrix[0][0],
@@ -386,7 +392,7 @@ void GuiServer::DrawFrame() {
 			glm::vec3 scale;
 			if (nmGfx::DecomposeMatrix(mat, translation, rotation, scale)) {
 				if (!isnan(translation.x) && !isnan(translation.y))
-					tc.Position() = {translation.x, -translation.y};
+					tc.Position() = {translation.x, translation.y};
 
 				if (!isnan(rotation.z))
 					tc.Rotation() = rotation.z;
