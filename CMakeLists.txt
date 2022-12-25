@@ -52,7 +52,7 @@ target_link_libraries(engine PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -stat
 target_include_directories(engine PRIVATE ${SOWA_INCLUDE_DIRS})
 target_precompile_headers(engine PRIVATE
    "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_SOURCE_DIR}/Sowa/src/stlpch.hpp>"
-   )
+   "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_SOURCE_DIR}/Sowa/thirdparty/sol2-3.3.0/sol/sol.hpp>")
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
    target_compile_options(engine PRIVATE -O2)

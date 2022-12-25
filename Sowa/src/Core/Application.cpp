@@ -243,7 +243,7 @@ void Application::LaunchApp(const std::string &projectPath) {
 	std::filesystem::path project = projectPath;
 	project = project.parent_path();
 
-	if (execl(File::Path("abs://Editor/sowa.editor").string().c_str(), "--project", project.string().c_str(), (char *)0) == -1) {
+	if (execl(_ExecutablePath.c_str(), "--project", project.string().c_str(), "--module", "abs://Editor/Sowa.Editor.lua", (char *)0) == -1) {
 		Debug::Error("Failed to launch project");
 	}
 }
@@ -252,10 +252,10 @@ void Application::LaunchApp(const std::string &projectPath) {
 	std::filesystem::path project = projectPath;
 	project = project.parent_path();
 
-	std::string appPath = File::Path("abs://Editor/sowa.editor.exe").string();
+	std::string appPath = _ExecutablePath;
 	Debug::Log("{} --project {}", appPath, project.string());
 
-	std::string params = Format("--project {}", project.string());
+	std::string params = Format("--project {} --module abs://Editor/Sowa.Editor.lua", project.string());
 
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
