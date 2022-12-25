@@ -2,9 +2,8 @@
 #define _E_MATH_HPP__
 #pragma once
 
-#include <cassert>
+#include "stlpch.hpp"
 #include <glm/glm.hpp>
-#include <initializer_list>
 
 namespace Sowa {
 struct Vec2 {

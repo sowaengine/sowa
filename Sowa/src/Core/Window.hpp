@@ -2,8 +2,7 @@
 #define _E_WINDOW_HPP__
 #pragma once
 
-#include <map>
-#include <string>
+#include "stlpch.hpp"
 
 #include "Core/Input.hpp"
 #include "Sowa.hpp"

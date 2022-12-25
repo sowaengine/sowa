@@ -7,8 +7,6 @@
 #include "Core/Application.hpp"
 #include "Core/Input.hpp"
 
-#include <iostream>
-
 namespace Sowa::Systems {
 void System_ButtonLogic(Sowa::Scene *pScene) {
 	Sowa::Application &app = Sowa::Application::get_singleton();

@@ -2,10 +2,7 @@
 #define _E_EVENT_HPP__
 #pragma once
 
-#include <cstdint>
-#include <cstdlib>
-#include <functional>
-#include <map>
+#include "stlpch.hpp"
 
 namespace Sowa {
 template <typename T>

@@ -5,8 +5,7 @@
 #include "ECS/Components/NinePatchRect/NinePatchRect.hpp"
 #include "Resource/Texture/Texture.hpp"
 #include "Utils/Event.hpp"
-#include <memory>
-#include <stdint.h>
+#include "stlpch.hpp"
 
 typedef void(*ButtonClickEvent);
 

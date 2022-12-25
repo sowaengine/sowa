@@ -4,7 +4,6 @@
 #include "fmt/core.h"
 #include "sol/sol.hpp"
 #include <exception>
-#include <string>
 
 namespace Sowa::Lua {
 class LuaException : public std::runtime_error {

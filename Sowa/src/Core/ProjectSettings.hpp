@@ -4,9 +4,8 @@
 #pragma once
 
 #include "Core/EngineContext.hpp"
-#include <filesystem>
-#include <string>
-#include <vector>
+
+#include "stlpch.hpp"
 
 #include <glm/glm.hpp>
 

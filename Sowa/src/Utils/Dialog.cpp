@@ -1,10 +1,7 @@
 #include "Utils/Dialog.hpp"
 #include "tinyfiledialogs.h"
 
-#include <filesystem>
-#include <iostream>
-#include <string>
-#include <vector>
+#include "stlpch.hpp"
 
 namespace Sowa {
 namespace Dialog {

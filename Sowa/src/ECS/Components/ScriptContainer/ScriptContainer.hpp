@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include "stlpch.hpp"
 
 namespace Sowa::Component {
 class ScriptContainer {

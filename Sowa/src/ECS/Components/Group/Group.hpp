@@ -2,8 +2,7 @@
 #define _E_GROUP_HPP__
 
 #pragma once
-#include <string>
-#include <vector>
+#include "stlpch.hpp"
 
 namespace Sowa::Component {
 class Group {

@@ -3,9 +3,7 @@
 
 #pragma once
 
-#include <memory>
-#include <stdint.h>
-#include <string>
+#include "stlpch.hpp"
 
 #include "Core/GL/nm_Texture.hpp"
 

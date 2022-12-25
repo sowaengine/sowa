@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include <map>
-#include <memory>
+#include "stlpch.hpp"
 
 #include "Debug.hpp"
 #include "Sowa.hpp"

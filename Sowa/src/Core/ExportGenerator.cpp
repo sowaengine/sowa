@@ -1,7 +1,7 @@
 #include "Core/ExportGenerator.hpp"
 #include "Core/ProjectSettings.hpp"
 #include "Utils/File.hpp"
-#include <iostream>
+#include "stlpch.hpp"
 
 namespace Sowa {
 ExportGenerator::ExportGenerator(EngineContext &ctx) : _Ctx(ctx) {}

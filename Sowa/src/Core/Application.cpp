@@ -3,8 +3,7 @@
 #include "Debug.hpp"
 #include "Sowa.hpp"
 
-#include <filesystem>
-#include <iostream>
+#include "stlpch.hpp"
 
 #include "Resource/ResourceLoader.hpp"
 #include "Resource/ResourceManager.hpp"
@@ -84,12 +83,18 @@ void Application::Run(int argc, char const *argv[]) {
 		return;
 	}
 	bool project_loaded = false;
+
+	std::vector<std::string> modulesToLoad{};
+
 	std::string lastArg = argv[0];
 	for (int i = 1; i < argc; i++) {
 		if (lastArg == "--project") {
 			projectSettings->LoadProject(argv[i]);
 			project_loaded = true;
+		} else if (lastArg == "--module") {
+			modulesToLoad.push_back(argv[i]);
 		}
+
 		lastArg = argv[i];
 	}
 	if (!project_loaded)
@@ -132,6 +137,9 @@ void Application::Run(int argc, char const *argv[]) {
 
 	if (projectSettings->_application.MainScene != "")
 		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
+	for (const auto &mod : modulesToLoad) {
+		luaScriptServer->LoadModule(mod.c_str());
+	}
 	luaScriptServer->InitModules();
 
 #ifndef SW_EDITOR

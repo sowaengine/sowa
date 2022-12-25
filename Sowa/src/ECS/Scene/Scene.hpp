@@ -9,8 +9,8 @@
 #include "Resource/ResourceManager.hpp"
 #include "Utils/Math.hpp"
 #include "entt/entt.hpp"
-#include <filesystem>
-#include <vector>
+
+#include "stlpch.hpp"
 
 class b2World;
 namespace Sowa {

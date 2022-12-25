@@ -2,7 +2,7 @@
 #include "Sowa.hpp"
 
 #include "GLFW/glfw3.h"
-#include <iostream>
+#include "stlpch.hpp"
 
 #include "Resource/Texture/Texture.hpp"
 

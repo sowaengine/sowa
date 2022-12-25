@@ -2,9 +2,7 @@
 #define _E_RANDOM_HPP__
 #pragma once
 
-#include <limits.h>
-#include <random>
-#include <stdlib.h>
+#include "stlpch.hpp"
 
 namespace Sowa {
 namespace Random {

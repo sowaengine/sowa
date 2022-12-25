@@ -6,9 +6,7 @@
 #include "Utils/File.hpp"
 #include "Utils/YAML.hpp"
 
-#include <fstream>
-#include <iostream>
-#include <sstream>
+#include "stlpch.hpp"
 
 namespace Sowa {
 ProjectSettings::ProjectSettings(EngineContext &ctx) : _Context(ctx) {

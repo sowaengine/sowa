@@ -5,8 +5,8 @@
 
 #include "Sowa.hpp"
 #include "box2d/box2d.h"
-#include <memory>
-#include <string>
+
+#include "stlpch.hpp"
 
 namespace Sowa {
 

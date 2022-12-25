@@ -1,7 +1,6 @@
 #include "Random.hpp"
 
-#include <chrono>
-#include <random>
+#include "stlpch.hpp"
 
 namespace Sowa {
 

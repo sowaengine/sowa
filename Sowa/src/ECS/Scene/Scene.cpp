@@ -9,11 +9,8 @@
 #include "Utils/YAML.hpp"
 #include "box2d/box2d.h"
 #include "yaml-cpp/yaml.h"
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <unordered_map>
+
+#include "stlpch.hpp"
 
 #define CALL_FOR_ALL_COMPONENTS(func, ...)                    \
 	do {                                                      \

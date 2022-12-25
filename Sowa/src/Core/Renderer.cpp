@@ -4,7 +4,8 @@
 #include "Core/Application.hpp"
 #include "Core/nm_Matrix.hpp"
 #include "nmGfx/src/Core/nm_Renderer.hpp"
-#include <vector>
+
+#include "stlpch.hpp"
 
 namespace Sowa {
 Renderer::Renderer() {

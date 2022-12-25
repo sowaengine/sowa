@@ -2,7 +2,6 @@
 #include "Resource/ResourceLoader.hpp"
 #include "Resource/ResourceManager.hpp"
 #include "Resource/Texture/Texture.hpp"
-#include <iostream>
 
 namespace Sowa::Component {
 Button::Button() {

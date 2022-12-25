@@ -2,9 +2,6 @@
 #define _E_SCRIPTSERVER_HPP__
 #pragma once
 
-#include <string>
-#include <vector>
-
 namespace Sowa {
 class ScriptServer {
   public:

@@ -3,8 +3,7 @@
 #pragma once
 
 #include "fmt/core.h"
-#include <string>
-#include <vector>
+#include "stlpch.hpp"
 
 namespace Sowa {
 std::vector<std::string> Split(const std::string &text, const std::string &delimiter);

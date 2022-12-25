@@ -1,5 +1,4 @@
 #include "Debug.hpp"
-#include <iostream>
 
 #include "Core/Application.hpp"
 

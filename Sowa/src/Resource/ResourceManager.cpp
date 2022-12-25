@@ -5,8 +5,8 @@
 #include "Utils/File.hpp"
 #include "Utils/YAML.hpp"
 #include "yaml-cpp/yaml.h"
-#include <fstream>
-#include <iostream>
+
+#include "stlpch.hpp"
 
 namespace Sowa {
 

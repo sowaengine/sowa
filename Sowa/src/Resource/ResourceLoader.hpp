@@ -4,7 +4,7 @@
 
 #include "Sowa.hpp"
 #include "Utils/File.hpp"
-#include <memory>
+#include "stlpch.hpp"
 
 namespace Sowa {
 template <typename T>

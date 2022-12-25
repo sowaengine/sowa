@@ -2,12 +2,7 @@
 #define _E_SOWA_HPP__
 #pragma once
 
-#include <functional>
-#include <iostream>
-#include <memory>
-#include <stdlib.h>
-#include <string>
-#include <unordered_map>
+#include "stlpch.hpp"
 
 #include "ECS/Entity/Entity.hpp"
 

@@ -3,7 +3,6 @@
 #include "Utils/YAML.hpp"
 #include "imgui-docking/imgui.h"
 #include "yaml-cpp/yaml.h"
-#include <string_view>
 
 namespace Sowa {
 template <>

@@ -3,15 +3,12 @@
 
 #pragma once
 
-#include <filesystem>
-#include <memory>
-#include <string>
-#include <unordered_map>
+#include "stlpch.hpp"
 
-#include "Core/EngineContext.hpp"
 #include "Core/Window.hpp"
 
-#include "ECS/Components/Components.hpp"
+#include "ECS/Components/Camera2D/Camera2D.hpp"
+#include "ECS/Components/Transform2D/Transform2D.hpp"
 #include "ECS/Scene/Scene.hpp"
 
 #include "Sowa.hpp"
@@ -22,6 +19,8 @@ class Renderer;
 }
 
 namespace Sowa {
+class EngineContext;
+
 class Application {
   public:
 	static Application &get_singleton() {

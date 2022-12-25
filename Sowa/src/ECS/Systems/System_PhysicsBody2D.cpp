@@ -6,7 +6,6 @@
 
 #include "Core/Renderer.hpp"
 #include "box2d/box2d.h"
-#include <iostream>
 
 namespace Sowa::Systems {
 void System_PhysicsBody2D(Sowa::Scene *pScene) {

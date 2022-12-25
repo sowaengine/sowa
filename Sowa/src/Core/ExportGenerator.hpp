@@ -2,8 +2,7 @@
 #define _E_EXPORTGENERATOR_HPP__
 
 #include "Core/EngineContext.hpp"
-#include <filesystem>
-#include <string>
+#include "stlpch.hpp"
 
 namespace Sowa {
 enum class ExportPlatform {

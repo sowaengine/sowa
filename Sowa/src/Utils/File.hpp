@@ -2,9 +2,7 @@
 #define _E_FILE_HPP__
 #pragma once
 
-#include <filesystem>
-#include <string>
-#include <vector>
+#include "stlpch.hpp"
 
 namespace Sowa {
 namespace File {

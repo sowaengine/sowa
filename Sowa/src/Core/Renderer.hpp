@@ -6,7 +6,8 @@
 #include "ECS/Components/NinePatchRect/NinePatchRect.hpp"
 #include "Resource/Texture/Texture.hpp"
 #include <glm/glm.hpp>
-#include <string>
+
+#include "stlpch.hpp"
 
 namespace Sowa {
 

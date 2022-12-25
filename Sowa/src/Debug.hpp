@@ -9,18 +9,7 @@
 #define DEBUG_HPP_
 #pragma once
 
-#include <cassert>
-#include <chrono>
-#include <cmath>
-#include <ctime>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <stack>
-#include <stdexcept>
-#include <stdlib.h>
-#include <unistd.h>
+#include "stlpch.hpp"
 
 #include "fmt/core.h"
 

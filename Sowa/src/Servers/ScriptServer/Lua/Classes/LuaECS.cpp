@@ -63,8 +63,7 @@ void LuaScriptServer::RegisterECS() {
 			&ComponentHandle<Component::Sprite2D>::
 				get_item<Reference<ImageTexture>, &ComponentHandle<Component::Sprite2D>::_texture>,
 			&ComponentHandle<Component::Sprite2D>::
-				set_item<Reference<ImageTexture>, &ComponentHandle<Component::Sprite2D>::_texture>)
-		);
+				set_item<Reference<ImageTexture>, &ComponentHandle<Component::Sprite2D>::_texture>));
 
 	_pState->new_usertype<ComponentHandle<Component::Camera2D>>(
 		"Camera2D",

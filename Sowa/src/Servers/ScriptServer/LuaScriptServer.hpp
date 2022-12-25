@@ -1,8 +1,7 @@
 #ifndef _E_LUASCRIPTSERVER_HPP__
 #define _E_LUASCRIPTSERVER_HPP__
 
-#include <memory>
-#include <unordered_map>
+#include "stlpch.hpp"
 
 #include "Core/Application.hpp"
 #include "Core/EngineContext.hpp"

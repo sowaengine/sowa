@@ -14,7 +14,7 @@
 
 #include "Servers/GuiServer/GuiServer.hpp"
 #include "Utils/Dialog.hpp"
-#include <fstream>
+#include "stlpch.hpp"
 
 namespace Sowa {
 LuaScriptServer::LuaScriptServer(EngineContext &ctx) : _Context(ctx) {
@@ -95,10 +95,6 @@ LuaScriptServer::~LuaScriptServer() {
 }
 
 void LuaScriptServer::InitModules() {
-#ifdef SW_EDITOR
-	LoadModule("abs://Editor/Sowa.Editor.lua");
-#endif
-
 	for (const std::string &path : _Context.GetSingleton<Sowa::ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->_modules.lua) {
 		LoadModule(path.c_str());
 	}

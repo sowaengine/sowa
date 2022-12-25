@@ -3,8 +3,7 @@
 
 #pragma once
 #include "Resource/Texture/Texture.hpp"
-#include <memory>
-#include <stdint.h>
+#include "stlpch.hpp"
 
 namespace Sowa {
 class ImageTexture;

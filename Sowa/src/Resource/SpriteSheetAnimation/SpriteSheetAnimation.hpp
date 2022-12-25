@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include <functional>
-#include <stdint.h>
+#include "stlpch.hpp"
 
 #include "Resource/Resource.hpp"
 #include "Sowa.hpp"

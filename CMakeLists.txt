@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.0.0)
 project(Sowa VERSION 0.1.1 LANGUAGES CXX C)
 
 option(Editor "Build Editor executable" ON)
-option(Template "Build export template" ON)
 
 include(CTest)
 enable_testing()
@@ -44,82 +43,46 @@ if(WIN32)
    set(LD_FLAG_STATIC -static)
 endif()
 
-if(Editor)
-add_executable(editor
-   ${CMAKE_SOURCE_DIR}/Sowa/src/main.cpp
-   ${SOWA_SOURCES})
-target_link_libraries(editor PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ ${LD_FLAG_STATIC} fmt)
-# target_compile_options(editor PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
-target_include_directories(editor PRIVATE ${SOWA_INCLUDE_DIRS})
-endif()
 
-if(Template)
-add_executable(template
+add_executable(engine
    ${CMAKE_SOURCE_DIR}/Sowa/src/main.cpp
    ${SOWA_SOURCES})
-target_link_libraries(template PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ ${LD_FLAG_STATIC} fmt)
-# target_compile_options(template PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
-target_include_directories(template PRIVATE ${SOWA_INCLUDE_DIRS})
-endif()
+target_link_libraries(engine PRIVATE ${CMAKE_DL_LIBS} yaml-cpp box2d nmGfx -static-libgcc -static-libstdc++ ${LD_FLAG_STATIC} fmt)
+# target_compile_options(engine PRIVATE -Wall -Wextra -pedantic -Wshadow -Wconversion -Wuninitialized)
+target_include_directories(engine PRIVATE ${SOWA_INCLUDE_DIRS})
+target_precompile_headers(engine PRIVATE
+   "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_SOURCE_DIR}/Sowa/src/stlpch.hpp>"
+   )
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
-   if(Editor)
-      target_compile_options(editor PRIVATE -O2)
-   endif()
-   if(Template)
-      target_compile_options(template PRIVATE -O2)
-   endif()
+   target_compile_options(engine PRIVATE -O2)
 elseif(CMAKE_BUILD_TYPE MATCHES Debug)
-   if(Editor)
-      target_compile_options(editor PRIVATE -O0 -g)
-   endif()
-   if(Template)
-      target_compile_options(template PRIVATE -O0 -g)
-   endif()
+   target_compile_options(engine PRIVATE -O0 -g)
 endif()
 
 if(Editor)
-   target_compile_definitions(editor PRIVATE SW_EDITOR)
-   set_target_properties(editor PROPERTIES OUTPUT_NAME "sowa.editor")
-endif()
-if(Template)
-   set_target_properties(template PROPERTIES OUTPUT_NAME "sowa.engine")
+   target_compile_definitions(engine PRIVATE SW_EDITOR)
+   set_target_properties(engine PROPERTIES OUTPUT_NAME "sowa.engine")
+else()
+   set_target_properties(engine PROPERTIES OUTPUT_NAME "sowa.template")
 endif()
 
 
 # Platform detection
 if(WIN32)
-   if(Editor)
-      target_compile_definitions(editor PRIVATE SW_WINDOWS)
-   endif()
-   if(Template)
-      target_compile_definitions(template PRIVATE SW_WINDOWS)
-   endif()
+   target_compile_definitions(engine PRIVATE SW_WINDOWS)
 elseif(UNIX AND NOT APPLE)
-   if(Editor)
-      target_compile_definitions(editor PRIVATE SW_LINUX)
-   endif()
-   if(Template)
-      target_compile_definitions(template PRIVATE SW_LINUX)
-   endif()
+   target_compile_definitions(engine PRIVATE SW_LINUX)
 else()
    message(FATAL_ERROR "Sowa Engine is not supported on target platform " ${CMAKE_SYSTEM})
 endif()
 
 
 
-if(Editor)
-   install(TARGETS editor RUNTIME DESTINATION Editor/)
-endif()
-if(Template)
-   install(TARGETS template RUNTIME DESTINATION .)
-endif()
 
-if(Editor)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/Editor/ DESTINATION Editor/)
-   install(DIRECTORY ${CMAKE_SOURCE_DIR}/ProjectManager/ DESTINATION .)
-endif()
-
+install(TARGETS engine RUNTIME DESTINATION Editor/)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/Editor/ DESTINATION Editor/)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/ProjectManager/ DESTINATION .)
 
 
 

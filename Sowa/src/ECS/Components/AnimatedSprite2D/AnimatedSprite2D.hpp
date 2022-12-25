@@ -3,11 +3,7 @@
 
 #pragma once
 #include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
-#include <map>
-#include <stdint.h>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include "stlpch.hpp"
 
 namespace Sowa::Component {
 class AnimatedSprite2D {

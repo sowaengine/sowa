@@ -3,9 +3,7 @@
 
 #include "Debug.hpp"
 #include "Sowa.hpp"
-#include <iostream>
-#include <string>
-#include <unordered_map>
+#include "stlpch.hpp"
 
 namespace Sowa {
 class EngineContext {
