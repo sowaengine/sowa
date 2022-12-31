@@ -12,17 +12,7 @@
 
 ## Notes
    This software is not in usable state yet.
+   Documentation can be found at https://docs.sowaengine.com
    
 ## Building
-- After cloning the repository, update submodules <br>
-```git submodule update --init --recursive --remote```
-
-- Run [nmres](https://github.com/Lexographics/nmResource) in engine root directory   
-```nmres --recursive --cwd Sowa --namespace Sowa::Res --suffix .res.hpp --rules res_rules.txt```
-
-- Run following commands to initialize and build cmake project
-```
-    mkdir build/
-    cmake -S . -B build/ -DCMAKE_BUILD_TYPE=Release
-    cmake --build build/   # --parallel (count) argument can be passed to run multiple instances of compilers
-```
+- Building instructions can be found in [Building For Windows](https://docs.sowaengine.com/en/latest/engine_development/building_for_windows.html)
