@@ -42,7 +42,6 @@ enum class Server : uint32_t {
 	GUISERVER, // Editor Gui Server
 	APPLICATION,
 	PROJECTSETTINGS,
-	SCRIPTSERVER_LUA,
 };
 
 } // namespace Sowa

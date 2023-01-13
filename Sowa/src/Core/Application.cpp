@@ -34,7 +34,6 @@
 #include "nmGfx/src/Core/nm_Window.hpp"
 
 #include "Servers/GuiServer/GuiServer.hpp"
-#include "Servers/ScriptServer/LuaScriptServer.hpp"
 
 #include "res/shaders/default2d.glsl.res.hpp"
 #include "res/shaders/default3d.glsl.res.hpp"
