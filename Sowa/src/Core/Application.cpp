@@ -71,9 +71,6 @@ void Application::Run(int argc, char const *argv[]) {
 	GuiServer *guiServer = GuiServer::CreateServer(this, *ctx);
 	ctx->RegisterSingleton<GuiServer>(Sowa::Server::GUISERVER, *guiServer);
 
-	// LuaScriptServer *luaScriptServer = LuaScriptServer::CreateServer(*ctx);
-	// ctx->RegisterSingleton<LuaScriptServer>(Sowa::Server::SCRIPTSERVER_LUA, *luaScriptServer);
-
 	ProjectSettings *projectSettings = ProjectSettings::CreateServer(*ctx);
 	ctx->RegisterSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS, *projectSettings);
 
@@ -82,33 +79,8 @@ void Application::Run(int argc, char const *argv[]) {
 		Debug::Error("Engine data path not found. exiting");
 		return;
 	}
-	bool project_loaded = false;
 
-	std::vector<std::string> modulesToLoad{};
-#ifdef SW_EDITOR
-	bool editor = true;
-#endif
-
-	std::string lastArg = argv[0];
-	for (int i = 1; i < argc; i++) {
-		std::string arg = argv[i];
-
-		if (lastArg == "--project") {
-			projectSettings->LoadProject(arg.c_str());
-			project_loaded = true;
-		} else if (lastArg == "--module") {
-			modulesToLoad.push_back(arg);
-		}
-#ifdef SW_EDITOR
-		else if (arg == "--no-editor") {
-			editor = false;
-		}
-#endif
-
-		lastArg = argv[i];
-	}
-	if (!project_loaded)
-		projectSettings->LoadProject("./");
+	ParseArgs(argc, argv);
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
 	_renderer->Init(
@@ -147,10 +119,6 @@ void Application::Run(int argc, char const *argv[]) {
 
 	if (projectSettings->_application.MainScene != "")
 		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
-		// for (const auto &mod : modulesToLoad) {
-		// luaScriptServer->LoadModule(mod.c_str());
-		// }
-		// luaScriptServer->InitModules();
 
 #ifndef SW_EDITOR
 	StartGame();
@@ -189,7 +157,7 @@ void Application::Run(int argc, char const *argv[]) {
 		Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Draw, *ctx);
 
 #ifdef SW_EDITOR
-		if (editor) {
+		if (argParse.editor) {
 			if (!_AppRunning) {
 				Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
 				Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
@@ -293,6 +261,35 @@ void Application::SetEditorCameraPosition(const Vec2 &pos) {
 }
 void Application::SetEditorCameraZoom(float zoom) {
 	_EditorCamera2D.camera.Zoom() = zoom;
+}
+
+void Application::ParseArgs(int argc, char const *argv[]) {
+	std::vector<std::string> args(argc - 1);
+	for (int i = 1; i < argc; i++) {
+		args.push_back(argv[i]);
+	}
+
+	bool projectLoaded = false;
+
+	std::string lastArg = args[0];
+	for (size_t i = 0; i < args.size(); i++) {
+		std::string arg = args[i];
+
+		if (lastArg == "--project") {
+			ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->LoadProject(arg.c_str());
+			projectLoaded = true;
+		}
+#ifdef SW_EDITOR
+		else if (arg == "--no-editor") {
+			argParse.editor = false;
+		}
+#endif
+
+		lastArg = args[i];
+	}
+
+	if (!projectLoaded)
+		ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->LoadProject("./");
 }
 
 } // namespace Sowa

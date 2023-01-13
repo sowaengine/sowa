@@ -29,6 +29,7 @@ class Application {
 	}
 
 	void Run(int argc, char const *argv[]);
+	void ParseArgs(int argc, char const *argv[]);
 
 	Window &GetWindow() { return _window; }
 
@@ -77,6 +78,12 @@ class Application {
 		Component::Transform2D transform;
 		Component::Camera2D camera;
 	} _EditorCamera2D;
+
+	struct {
+#ifdef SW_EDITOR
+		bool editor = true;
+#endif
+	} argParse;
 };
 } // namespace Sowa
 
