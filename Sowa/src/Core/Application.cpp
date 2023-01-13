@@ -71,8 +71,8 @@ void Application::Run(int argc, char const *argv[]) {
 	GuiServer *guiServer = GuiServer::CreateServer(this, *ctx);
 	ctx->RegisterSingleton<GuiServer>(Sowa::Server::GUISERVER, *guiServer);
 
-	LuaScriptServer *luaScriptServer = LuaScriptServer::CreateServer(*ctx);
-	ctx->RegisterSingleton<LuaScriptServer>(Sowa::Server::SCRIPTSERVER_LUA, *luaScriptServer);
+	// LuaScriptServer *luaScriptServer = LuaScriptServer::CreateServer(*ctx);
+	// ctx->RegisterSingleton<LuaScriptServer>(Sowa::Server::SCRIPTSERVER_LUA, *luaScriptServer);
 
 	ProjectSettings *projectSettings = ProjectSettings::CreateServer(*ctx);
 	ctx->RegisterSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS, *projectSettings);
@@ -85,15 +85,25 @@ void Application::Run(int argc, char const *argv[]) {
 	bool project_loaded = false;
 
 	std::vector<std::string> modulesToLoad{};
+#ifdef SW_EDITOR
+	bool editor = true;
+#endif
 
 	std::string lastArg = argv[0];
 	for (int i = 1; i < argc; i++) {
+		std::string arg = argv[i];
+
 		if (lastArg == "--project") {
-			projectSettings->LoadProject(argv[i]);
+			projectSettings->LoadProject(arg.c_str());
 			project_loaded = true;
 		} else if (lastArg == "--module") {
-			modulesToLoad.push_back(argv[i]);
+			modulesToLoad.push_back(arg);
 		}
+#ifdef SW_EDITOR
+		else if (arg == "--no-editor") {
+			editor = false;
+		}
+#endif
 
 		lastArg = argv[i];
 	}
@@ -137,10 +147,10 @@ void Application::Run(int argc, char const *argv[]) {
 
 	if (projectSettings->_application.MainScene != "")
 		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
-	for (const auto &mod : modulesToLoad) {
-		luaScriptServer->LoadModule(mod.c_str());
-	}
-	luaScriptServer->InitModules();
+		// for (const auto &mod : modulesToLoad) {
+		// luaScriptServer->LoadModule(mod.c_str());
+		// }
+		// luaScriptServer->InitModules();
 
 #ifndef SW_EDITOR
 	StartGame();
@@ -178,18 +188,22 @@ void Application::Run(int argc, char const *argv[]) {
 
 		Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Draw, *ctx);
 
-		if (!_AppRunning) {
-			Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
-			Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
+#ifdef SW_EDITOR
+		if (editor) {
+			if (!_AppRunning) {
+				Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
+				Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
+			}
 		}
+#endif
 
 		_renderer->End2D();
 
-		luaScriptServer->UpdateModules();
+		// luaScriptServer->UpdateModules();
 
 		guiServer->BeginGui();
 
-		luaScriptServer->GuiUpdateModules();
+		// luaScriptServer->GuiUpdateModules();
 		ImGui::Render();
 
 		_renderer->ClearLayers();
