@@ -4,7 +4,6 @@
 #include "ECS/Components/PhysicsBody2D/PhysicsBody2D.hpp"
 #include "ECS/Components/Transform2D/Transform2D.hpp"
 
-#include "Core/ProjectSettings.hpp"
 #include "Core/Renderer.hpp"
 // #include "box2d/box2d.h"
 

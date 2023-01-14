@@ -1,5 +1,4 @@
 #include "Core/ExportGenerator.hpp"
-#include "Core/ProjectSettings.hpp"
 #include "Utils/File.hpp"
 #include "stlpch.hpp"
 
@@ -49,16 +48,16 @@ bool ExportGenerator::BeginExport(ExportPlatform platform) {
 	}
 
 	std::cout << "Begin exporting to " << _buildDir << std::endl;
-	Sowa::ProjectSettings &projectSettings = *_Ctx.GetSingleton<Sowa::ProjectSettings>(Sowa::Server::PROJECTSETTINGS);
+	// Sowa::ProjectSettings &projectSettings = *_Ctx.GetSingleton<Sowa::ProjectSettings>(Sowa::Server::PROJECTSETTINGS);
 
 	// add export template to root directory
 	std::filesystem::path exportTemplatePath = "abs://build/Sowa Engine";
 	// exportTemplatePath /= GetPlatformString();
-	if (!AddFileTo(exportTemplatePath, projectSettings._application.Name, false)) {
-		std::cout << "Can not include export template: " << exportTemplatePath << std::endl;
-		_canExport = false;
-		return false;
-	}
+	// if (!AddFileTo(exportTemplatePath, projectSettings._application.Name, false)) {
+	// 	std::cout << "Can not include export template: " << exportTemplatePath << std::endl;
+	// 	_canExport = false;
+	// 	return false;
+	// }
 	return true;
 }
 

@@ -11,7 +11,6 @@
 
 #include "Core/EngineContext.hpp"
 #include "Core/ExportGenerator.hpp"
-#include "Core/ProjectSettings.hpp"
 #include "Core/Renderer.hpp"
 #include "Core/Window.hpp"
 
@@ -61,9 +60,6 @@ void Application::Run(int argc, char const *argv[]) {
 
 	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
 
-	ProjectSettings *projectSettings = ProjectSettings::CreateServer(*ctx);
-	ctx->RegisterSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS, *projectSettings);
-
 	Sowa::File::InsertFilepathEndpoint("abs", "./");
 	if (!Sowa::File::RegisterDataPath()) {
 		Debug::Error("Engine data path not found. exiting");
@@ -74,39 +70,28 @@ void Application::Run(int argc, char const *argv[]) {
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
 	_renderer->Init(
-		projectSettings->_window.WindowWidth,
-		projectSettings->_window.WindowHeight,
-		projectSettings->_window.VideoWidth,
-		projectSettings->_window.VideoHeight,
-
-		projectSettings->_application.Name.c_str(),
+		1920, 1080,
+		1280, 720,
+		// projectSettings->_window.WindowWidth,
+		// projectSettings->_window.WindowHeight,
+		// projectSettings->_window.VideoWidth,
+		// projectSettings->_window.VideoHeight,
+		"Sowa Engine",
+		// projectSettings->_application.Name.c_str(),
 		nmGfx::WindowFlags::NONE);
 	_window._windowHandle = &_renderer->GetWindow();
 	_window.InitWindow(_renderer->GetWindow(), *ctx);
 
-	{
-		Reference<ImageTexture> icon = nullptr;
-
-		if (projectSettings->_application.Icon != "") {
-			icon = ResourceLoader::get_singleton().LoadResource<ImageTexture>(projectSettings->_application.Icon);
-
-			if (!_window.SetWindowIcon(icon))
-				icon = nullptr;
-		}
-
-		if (icon == nullptr) {
-			icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(Res::include_res_textures_icon_png_data.data(), Res::include_res_textures_icon_png_data.size());
-			_window.SetWindowIcon(icon);
-		}
-	}
+	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(Res::include_res_textures_icon_png_data.data(), Res::include_res_textures_icon_png_data.size());
+	_window.SetWindowIcon(icon);
 
 	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default2d_glsl_data.data()), Res::include_res_shaders_default2d_glsl_data.size()));
 	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default3d_glsl_data.data()), Res::include_res_shaders_default3d_glsl_data.size()));
 	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_fullscreen_glsl_data.data()), Res::include_res_shaders_fullscreen_glsl_data.size()));
 	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_skybox_glsl_data.data()), Res::include_res_shaders_skybox_glsl_data.size()));
 
-	if (projectSettings->_application.MainScene != "")
-		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
+	// if (projectSettings->_application.MainScene != "")
+	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
 #ifndef SW_EDITOR
 	StartGame();
@@ -140,7 +125,7 @@ void Application::Run(int argc, char const *argv[]) {
 				cam2d.Rotatable() ? cam2dtc.Rotation() : 0.f,
 				glm::vec3{cam2d.Zoom(), cam2d.Zoom(), 1.f}),
 			{cam2d.Center().x, cam2d.Center().y},
-			projectSettings->_window.ClearColor);
+			{0.2f, 0.2f, 0.2f, 1.f});
 
 		Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Draw, *ctx);
 
@@ -167,7 +152,6 @@ void Application::StartGame() {
 		return;
 	_AppRunning = true;
 
-	ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->debug_draw = false;
 	Scene::CopyScene(*_GameScene.get(), *_CopyScene.get());
 
 	_pCurrentScene->StartScene();
@@ -182,7 +166,6 @@ void Application::StopGame() {
 		return;
 	_AppRunning = false;
 
-	ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->debug_draw = true;
 	Scene::CopyScene(*_CopyScene.get(), *_GameScene.get());
 
 	_pCurrentScene->StopScene();

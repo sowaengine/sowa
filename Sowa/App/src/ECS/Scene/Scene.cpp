@@ -1,6 +1,5 @@
 #include "ECS/Scene/Scene.hpp"
 #include "Core/Application.hpp"
-#include "Core/ProjectSettings.hpp"
 #include "Debug.hpp"
 #include "ECS/Components/Components.hpp"
 #include "Resource/ResourceLoader.hpp"
