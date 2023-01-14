@@ -29,10 +29,6 @@ class Scene {
 	bool LoadFromFile(const char *file);
 	std::filesystem::path path;
 
-	// Returns first entity that is in given group
-	Sowa::Entity GetEntityInGroup(const std::string &group);
-	std::vector<Sowa::Entity> GetEntitiesInGroup(const std::string &group);
-
 	Sowa::Entity GetEntityByID(uint32_t id);
 
 	void StartScene();

@@ -11,19 +11,11 @@
 
 #include "stlpch.hpp"
 
-#define CALL_FOR_ALL_COMPONENTS(func, ...)                    \
-	do {                                                      \
-		func<Sowa::Component::AnimatedSprite2D>(__VA_ARGS__); \
-		func<Sowa::Component::Button>(__VA_ARGS__);           \
-		func<Sowa::Component::Camera2D>(__VA_ARGS__);         \
-		func<Sowa::Component::Group>(__VA_ARGS__);            \
-		func<Sowa::Component::NinePatchRect>(__VA_ARGS__);    \
-		func<Sowa::Component::PhysicsBody2D>(__VA_ARGS__);    \
-		func<Sowa::Component::Sprite2D>(__VA_ARGS__);         \
-		func<Sowa::Component::Text2D>(__VA_ARGS__);           \
-		func<Sowa::Component::Transform2D>(__VA_ARGS__);      \
-		func<Sowa::Component::UITransform>(__VA_ARGS__);      \
-		func<Sowa::Component::ScriptContainer>(__VA_ARGS__);  \
+#define CALL_FOR_ALL_COMPONENTS(func, ...)               \
+	do {                                                 \
+		func<Sowa::Component::Camera2D>(__VA_ARGS__);    \
+		func<Sowa::Component::Sprite2D>(__VA_ARGS__);    \
+		func<Sowa::Component::Transform2D>(__VA_ARGS__); \
 	} while (0)
 
 namespace Sowa {
@@ -32,52 +24,11 @@ void Scene::StartScene() {
 	m_SceneOldCamera2D.transform2d = m_SceneCamera2D.transform2d;
 	m_SceneCamera2D.transform2d = Sowa::Component::Transform2D();
 	m_SceneCamera2D.camera2d = Sowa::Component::Camera2D();
-
-	// m_pPhysicsWorld2D = std::make_shared<b2World>(b2Vec2(m_Gravity.x, m_Gravity.y));
-
-	{
-		auto view = m_Registry.view<Component::Transform2D, Component::PhysicsBody2D>();
-		for (auto &e : view) {
-			Entity entity(e, &m_Registry);
-			auto &tc = entity.GetComponent<Component::Transform2D>();
-			auto &body = entity.GetComponent<Component::PhysicsBody2D>();
-
-			// body.m_b2BodyDef.type = body.GetInternalBodyType();
-			// body.m_b2BodyDef.position.Set(SCREEN_TO_WORLD(tc.Position().x), SCREEN_TO_WORLD(tc.Position().y));
-			// body.m_b2BodyDef.angle = -tc.Rotation() * DEG2RAD;
-			//
-			// body.m_b2Body = m_pPhysicsWorld2D->CreateBody(&body.m_b2BodyDef);
-
-			// for (Collider2D &collider : body.Colliders()) {
-			// if (collider.shape == ColliderShape2D::BOX) {
-			// 	collider.polyShape.SetAsBox(
-			// 		SCREEN_TO_WORLD(static_cast<float>(collider.width) / 2.f), SCREEN_TO_WORLD(static_cast<float>(collider.height) / 2.f),
-			// 		b2Vec2(SCREEN_TO_WORLD(collider.offset.x), SCREEN_TO_WORLD(collider.offset.y)),
-			// 		DEG2RAD * collider.rotation);
-
-			// 	collider.fixtureDef.shape = &collider.polyShape;
-			// }
-			// if (collider.shape == ColliderShape2D::CIRCLE) {
-			// 	collider.circleShape.m_p = {SCREEN_TO_WORLD(collider.offset.x), SCREEN_TO_WORLD(collider.offset.y)};
-			// 	collider.circleShape.m_radius = SCREEN_TO_WORLD(static_cast<float>(collider.radius));
-
-			// 	collider.fixtureDef.shape = &collider.circleShape;
-			// }
-			// collider.fixtureDef.density = collider.density;
-			// collider.fixtureDef.friction = collider.friction;
-			// collider.fixtureDef.restitution = collider.restitution;
-			// collider.fixtureDef.restitutionThreshold = collider.restitutionThreshold;
-			// collider.fixture = body.m_b2Body->CreateFixture(&collider.fixtureDef);
-			// }
-		}
-	}
 }
 
 void Scene::StopScene() {
 	m_SceneCamera2D.camera2d = m_SceneOldCamera2D.camera2d;
 	m_SceneCamera2D.transform2d = m_SceneOldCamera2D.transform2d;
-
-	// m_pPhysicsWorld2D = nullptr;
 }
 
 template <typename T>
@@ -115,10 +66,7 @@ void Scene::AddCopiedEntity(Sowa::Entity entity) {
 	auto &common = copyEntity.AddComponent<Component::Common>();
 	common.Name() = entity.GetComponent<Component::Common>().Name();
 
-	CopyComponent<Component::AnimatedSprite2D>(entity, copyEntity);
-	CopyComponent<Component::Group>(entity, copyEntity);
 	CopyComponent<Component::Sprite2D>(entity, copyEntity);
-	CopyComponent<Component::Text2D>(entity, copyEntity);
 	CopyComponent<Component::Transform2D>(entity, copyEntity);
 }
 
@@ -134,10 +82,7 @@ Sowa::Entity CreateEntityFromRegistry(entt::entity id, entt::registry &srcRegist
 	Sowa::Entity entity = scene.Create(copyEntity.GetComponent<Component::Common>().Name());
 
 	// Copy components
-	CopyComponent<Component::AnimatedSprite2D>(copyEntity, entity);
-	CopyComponent<Component::Group>(copyEntity, entity);
 	CopyComponent<Component::Sprite2D>(copyEntity, entity);
-	CopyComponent<Component::Text2D>(copyEntity, entity);
 	CopyComponent<Component::Transform2D>(copyEntity, entity);
 
 	return entity;
@@ -205,26 +150,6 @@ static void YAMLSerializeEntity(Sowa::Entity entity, YAML::Emitter &yaml) {
 
 	// <Components>
 	yaml << YAML::Key << "Components" << YAML::BeginMap;
-	// <AnimatedSprite2D>
-	if (entity.HasComponent<Component::AnimatedSprite2D>()) {
-		Component::AnimatedSprite2D &component = entity.GetComponent<Component::AnimatedSprite2D>();
-
-		yaml << YAML::Key << "AnimatedSprite2D" << YAML::BeginMap;
-		yaml << YAML::Key << "Animations" << YAML::Value << component.Animations();
-		yaml << YAML::EndMap;
-	}
-	// </AnimatedSprite2D>
-	// <Button>
-	if (entity.HasComponent<Component::Button>()) {
-		Component::Button &component = entity.GetComponent<Component::Button>();
-
-		yaml << YAML::Key << "Button" << YAML::BeginMap;
-		yaml << YAML::Key << "Text" << YAML::Value << component.Text();
-		yaml << YAML::Key << "Visible" << YAML::Value << component.Visible();
-		yaml << YAML::Key << "Disabled" << YAML::Value << component.Disabled();
-		yaml << YAML::EndMap;
-	}
-	// </Button>
 	// <Camera2D>
 	if (entity.HasComponent<Component::Camera2D>()) {
 		Component::Camera2D &component = entity.GetComponent<Component::Camera2D>();
@@ -237,55 +162,6 @@ static void YAMLSerializeEntity(Sowa::Entity entity, YAML::Emitter &yaml) {
 		yaml << YAML::EndMap;
 	}
 	// </Camera2D>
-	// <Group>
-	if (entity.HasComponent<Component::Group>()) {
-		Component::Group &component = entity.GetComponent<Component::Group>();
-
-		yaml << YAML::Key << "Group" << YAML::BeginMap;
-		yaml << YAML::Key << "Groups" << YAML::Value << component.Groups();
-		yaml << YAML::EndMap;
-	}
-	// </Group>
-	// <PhysicsBody2D>
-	if (entity.HasComponent<Component::PhysicsBody2D>()) {
-		Component::PhysicsBody2D &component = entity.GetComponent<Component::PhysicsBody2D>();
-
-		yaml << YAML::Key << "PhysicsBody2D" << YAML::BeginMap;
-		yaml << YAML::Key << "BodyType" << YAML::Value << component.BodyType();
-		yaml << YAML::Key << "Colliders" << YAML::Value << YAML::BeginSeq;
-		for (Collider2D &collider : component.Colliders()) {
-			yaml << YAML::BeginMap;
-			yaml << YAML::Key << "Shape" << YAML::Value << collider.shape;
-			// yaml << YAML::Key << "Offset" << YAML::Value << collider.offset;
-			yaml << YAML::Key << "Rotation" << YAML::Value << collider.rotation;
-
-			if (collider.shape == ColliderShape2D::BOX) {
-				yaml << YAML::Key << "Width" << YAML::Value << collider.width;
-				yaml << YAML::Key << "Height" << YAML::Value << collider.height;
-			} else if (collider.shape == ColliderShape2D::CIRCLE) {
-				yaml << YAML::Key << "Radius" << YAML::Value << collider.radius;
-			}
-
-			yaml << YAML::Key << "Density" << YAML::Value << collider.density;
-			yaml << YAML::Key << "Friction" << YAML::Value << collider.friction;
-			yaml << YAML::Key << "Restitution" << YAML::Value << collider.restitution;
-			yaml << YAML::Key << "RestitutionThreshold" << YAML::Value << collider.restitutionThreshold;
-			yaml << YAML::EndMap;
-		}
-		yaml << YAML::EndSeq;
-
-		yaml << YAML::EndMap;
-	}
-	// </PhysicsBody2D>
-	// <ScriptContainer>
-	if (entity.HasComponent<Component::ScriptContainer>()) {
-		Component::ScriptContainer &component = entity.GetComponent<Component::ScriptContainer>();
-
-		yaml << YAML::Key << "ScriptContainer" << YAML::BeginMap;
-		yaml << YAML::Key << "LuaScripts" << YAML::Value << component._LuaScripts;
-		yaml << YAML::EndMap;
-	}
-	// </ScriptContainer>
 	// <Sprite2D>
 	if (entity.HasComponent<Component::Sprite2D>()) {
 		Component::Sprite2D &component = entity.GetComponent<Component::Sprite2D>();
@@ -297,18 +173,6 @@ static void YAMLSerializeEntity(Sowa::Entity entity, YAML::Emitter &yaml) {
 		yaml << YAML::EndMap;
 	}
 	// </Sprite2D>
-	// <Text2D>
-	if (entity.HasComponent<Component::Text2D>()) {
-		Component::Text2D &component = entity.GetComponent<Component::Text2D>();
-
-		yaml << YAML::Key << "Text2D" << YAML::BeginMap;
-		yaml << YAML::Key << "Text" << YAML::Value << component.Text();
-		yaml << YAML::Key << "Color" << YAML::Value << component.Color();
-		yaml << YAML::Key << "FontSize" << YAML::Value << component.FontSize();
-		yaml << YAML::Key << "Visible" << YAML::Value << component.Visible();
-		yaml << YAML::EndMap;
-	}
-	// </Text2D>
 	// <Transform2D>
 	if (entity.HasComponent<Component::Transform2D>()) {
 		Component::Transform2D &component = entity.GetComponent<Component::Transform2D>();
@@ -321,19 +185,6 @@ static void YAMLSerializeEntity(Sowa::Entity entity, YAML::Emitter &yaml) {
 		yaml << YAML::EndMap;
 	}
 	// </Transform2D>
-	// <UITransform>
-	if (entity.HasComponent<Component::UITransform>()) {
-		Component::UITransform &component = entity.GetComponent<Component::UITransform>();
-
-		yaml << YAML::Key << "UITransform" << YAML::BeginMap;
-		yaml << YAML::Key << "Position" << YAML::Value << component.Position();
-		yaml << YAML::Key << "Scale" << YAML::Value << component.Scale();
-		yaml << YAML::Key << "Size" << YAML::Value << component.Size();
-		yaml << YAML::Key << "Rotation" << YAML::Value << component.Rotation();
-		// yaml << YAML::Key << "ZIndex" << YAML::Value << component.ZIndex();
-		yaml << YAML::EndMap;
-	}
-	// </UITransform>
 
 	yaml << YAML::EndMap;
 	// </Components>
@@ -484,55 +335,12 @@ bool Scene::LoadFromFile(const char *file) {
 			Sowa::Entity entity = Create(name, id);
 			YAML::Node components = entity_node["Components"];
 			if (components) {
-				if (YAML::Node component_node = components["AnimatedSprite2D"]; component_node) {
-					Component::AnimatedSprite2D &component = entity.AddComponent<Component::AnimatedSprite2D>();
-					component.Animations() = component_node["Animations"].as<std::map<std::string, ResourceID>>();
-
-					if (std::string anim_name = component_node["SelectedAnimation"].as<std::string>(""); anim_name != "")
-						component.SelectAnimation(anim_name);
-				}
-				if (YAML::Node component_node = components["Button"]; component_node) {
-					Component::Button &component = entity.AddComponent<Component::Button>();
-					component.Text() = component_node["Text"].as<std::string>(std::string{""});
-					component.Visible() = component_node["Visible"].as<bool>(true);
-					component.Disabled() = component_node["Disabled"].as<bool>(false);
-				}
 				if (YAML::Node component_node = components["Camera2D"]; component_node) {
 					Component::Camera2D &component = entity.AddComponent<Component::Camera2D>();
 					component.Current() = component_node["Current"].as<bool>(false);
 					component.Rotatable() = component_node["Rotatable"].as<bool>(true);
 					component.Zoom() = component_node["Zoom"].as<float>(1.f);
 					component.Center() = component_node["Center"].as<Vec2>(Vec2{0.5f, 0.5f});
-				}
-				if (YAML::Node component_node = components["Group"]; component_node) {
-					Component::Group &component = entity.AddComponent<Component::Group>();
-					component.Groups() = component_node["Groups"].as<std::vector<std::string>>(std::vector<std::string>{});
-				}
-				if (YAML::Node component_node = components["PhysicsBody2D"]; component_node) {
-					Component::PhysicsBody2D &component = entity.AddComponent<Component::PhysicsBody2D>();
-					component.BodyType() = component_node["BodyType"].as<PhysicsBodyType>(component.BodyType());
-					std::vector<Collider2D> &colliders = component.Colliders();
-					if (component_node["Colliders"]) {
-						for (size_t i = 0; i < component_node["Colliders"].size(); i++) {
-							YAML::Node yaml_collider = component_node["Colliders"][i];
-							Collider2D collider;
-							collider.shape = yaml_collider["Shape"].as<ColliderShape2D>(collider.shape);
-							// collider.offset = yaml_collider["Offset"].as<b2Vec2>(collider.offset);
-							collider.rotation = yaml_collider["Rotation"].as<float>(collider.rotation);
-							collider.width = yaml_collider["Width"].as<float>(static_cast<float>(collider.width));
-							collider.height = yaml_collider["Height"].as<float>(static_cast<float>(collider.height));
-							collider.radius = yaml_collider["Radius"].as<float>(static_cast<float>(collider.radius));
-							collider.density = yaml_collider["Density"].as<float>(collider.density);
-							collider.friction = yaml_collider["Friction"].as<float>(collider.friction);
-							collider.restitution = yaml_collider["Restitution"].as<float>(collider.restitution);
-							collider.restitutionThreshold = yaml_collider["RestitutionThreshold"].as<float>(collider.restitutionThreshold);
-							colliders.push_back(collider);
-						}
-					}
-				}
-				if (YAML::Node component_node = components["ScriptContainer"]; component_node) {
-					Component::ScriptContainer &component = entity.AddComponent<Component::ScriptContainer>();
-					component._LuaScripts = component_node["LuaScripts"].as<std::vector<std::string>>(std::vector<std::string>{});
 				}
 				if (YAML::Node component_node = components["Sprite2D"]; component_node) {
 					Component::Sprite2D &component = entity.AddComponent<Component::Sprite2D>();
@@ -541,14 +349,6 @@ bool Scene::LoadFromFile(const char *file) {
 						component.Texture() = GetResourceManager<Sowa::ImageTexture>().GetResource(id);
 					component.Visible() = component_node["Visible"].as<bool>(true);
 				}
-				if (YAML::Node component_node = components["Text2D"]; component_node) {
-					Component::Text2D &component = entity.AddComponent<Component::Text2D>();
-					component.Text() = component_node["Text"].as<std::string>("");
-					component.Color() = component_node["Color"].as<glm::vec4>(glm::vec4{255.f, 255.f, 255.f, 255.f});
-					component.FontSize() = component_node["FontSize"].as<float>(64.f);
-					component.Visible() = component_node["Visible"].as<bool>(true);
-					// component.ZIndex() = component_node["ZIndex"].as<int>(0);
-				}
 				if (YAML::Node component_node = components["Transform2D"]; component_node) {
 					Component::Transform2D &component = entity.AddComponent<Component::Transform2D>();
 					component.Position() = component_node["Position"].as<glm::vec2>(glm::vec2{0.f, 0.f});
@@ -556,47 +356,11 @@ bool Scene::LoadFromFile(const char *file) {
 					component.Rotation() = component_node["Rotation"].as<float>(0.f);
 					// component.ZIndex() = component_node["ZIndex"].as<int>(0);
 				}
-				if (YAML::Node component_node = components["UITransform"]; component_node) {
-					Component::UITransform &component = entity.AddComponent<Component::UITransform>();
-					component.Position() = component_node["Position"].as<glm::vec2>(glm::vec2{0.f, 0.f});
-					component.Scale() = component_node["Scale"].as<glm::vec2>(glm::vec2{1.f, 1.f});
-					component.Size() = component_node["Size"].as<glm::vec2>(glm::vec2{64.f, 64.f});
-					component.Rotation() = component_node["Rotation"].as<float>(0.f);
-				}
 			}
 		}
 	}
 
 	return true;
-}
-
-Sowa::Entity Scene::GetEntityInGroup(const std::string &group) {
-	auto view = m_Registry.view<Component::Group>();
-	for (auto it = view.rbegin(); it != view.rend(); ++it) {
-		Sowa::Entity e(*it, &m_Registry);
-
-		auto groups = e.GetComponent<Component::Group>().Groups();
-		for (std::string &g : groups) {
-			if (g == group)
-				return e;
-		}
-	}
-	return Entity(entt::null, nullptr);
-}
-
-std::vector<Sowa::Entity> Scene::GetEntitiesInGroup(const std::string &group) {
-	std::vector<Sowa::Entity> entities;
-	auto view = m_Registry.view<Component::Group>();
-	for (auto it = view.rbegin(); it != view.rend(); ++it) {
-		Sowa::Entity e(*it, &m_Registry);
-
-		auto groups = e.GetComponent<Component::Group>().Groups();
-		for (std::string &g : groups) {
-			if (g == group)
-				entities.push_back(e);
-		}
-	}
-	return entities;
 }
 
 Sowa::Entity Scene::GetEntityByID(uint32_t id) {

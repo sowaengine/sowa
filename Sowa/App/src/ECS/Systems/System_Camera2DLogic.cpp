@@ -1,9 +1,6 @@
 #include "ECS/Scene/Scene.hpp"
 #include "ECS/Systems/Systems.hpp"
 
-#include "ECS/Components/Button/Button.hpp"
-#include "ECS/Components/UITransform/UITransform.hpp"
-
 #include "Core/Application.hpp"
 #include "Core/Input.hpp"
 

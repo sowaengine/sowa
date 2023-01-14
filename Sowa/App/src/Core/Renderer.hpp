@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "ECS/Components/NinePatchRect/NinePatchRect.hpp"
 #include "Resource/Texture/Texture.hpp"
 #include <glm/glm.hpp>
 
