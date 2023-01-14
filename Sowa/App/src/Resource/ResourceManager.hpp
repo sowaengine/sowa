@@ -9,7 +9,6 @@
 #include "Sowa.hpp"
 
 #include "Resource/ResourceLoader.hpp"
-#include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 #include "Resource/Texture/Texture.hpp"
 
 #include "Utils/Random.hpp"

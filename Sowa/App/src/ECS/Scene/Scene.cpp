@@ -235,27 +235,6 @@ bool Scene::SaveToFile(const char *file) {
 
 		yaml << YAML::EndMap;
 	} // </Sowa::Texture>
-	{ // <Sowa::SpriteSheetAnimation>
-		yaml << YAML::Key << "SpriteSheetAnimation" << YAML::Value << YAML::BeginMap;
-		ResourceManager<Sowa::SpriteSheetAnimation> &loader_anims = GetResourceManager<Sowa::SpriteSheetAnimation>();
-		std::map<ResourceID, std::shared_ptr<Sowa::SpriteSheetAnimation>> &anims = loader_anims.GetResources();
-
-		for (auto [id, anim] : anims) {
-			yaml << YAML::Key << id << YAML::Value << YAML::BeginMap;
-			yaml << YAML::Key << "HFrames" << YAML::Value << anim->HFrames();
-			yaml << YAML::Key << "VFrames" << YAML::Value << anim->VFrames();
-			yaml << YAML::Key << "SelectedRow" << YAML::Value << anim->SelectedRow();
-			yaml << YAML::Key << "FrameCount" << YAML::Value << anim->FrameCount();
-			yaml << YAML::Key << "StartFrame" << YAML::Value << anim->StartFrame();
-			yaml << YAML::Key << "FPS" << YAML::Value << anim->FPS();
-
-			yaml << YAML::Key << "Texture" << YAML::Value << anim->Texture();
-			yaml << YAML::Newline;
-			yaml << YAML::EndMap;
-		}
-
-		yaml << YAML::EndMap;
-	} // </Sowa::SpriteSheetAnimation>
 	yaml << YAML::Newline << YAML::EndMap;
 	// </Resources>
 
@@ -278,7 +257,6 @@ bool Scene::LoadFromFile(const char *file) {
 	m_Registry.clear();
 
 	ClearResourceManager<Sowa::ImageTexture>();
-	ClearResourceManager<Sowa::SpriteSheetAnimation>();
 
 	std::filesystem::path inpath = Sowa::File::Path(file);
 	path = file;
@@ -304,25 +282,6 @@ bool Scene::LoadFromFile(const char *file) {
 				}
 			}
 		} // </Sowa::Texture>
-		{ // <Sowa::SpriteSheetAnimation>
-			if (YAML::Node resource_node = resources["SpriteSheetAnimation"]; resource_node) {
-				ResourceManager<Sowa::SpriteSheetAnimation> &resource_loader = GetResourceManager<Sowa::SpriteSheetAnimation>();
-				for (auto it = resource_node.begin(); it != resource_node.end(); ++it) {
-					ResourceID id = it->first.as<ResourceID>(0);
-					YAML::Node tex_node = it->second;
-
-					Reference<Sowa::SpriteSheetAnimation> anim = resource_loader.LoadResource("", id);
-					anim->HFrames() = tex_node["HFrames"].as<int>(0);
-					anim->VFrames() = tex_node["VFrames"].as<int>(0);
-					anim->SelectedRow() = tex_node["SelectedRow"].as<int>(0);
-					anim->FrameCount() = tex_node["FrameCount"].as<int>(0);
-					anim->StartFrame() = tex_node["StartFrame"].as<int>(0);
-					anim->FPS() = tex_node["FPS"].as<int>(0);
-
-					anim->Texture() = tex_node["Texture"].as<ResourceID>(0);
-				}
-			}
-		} // </Sowa::SpriteSheetAnimation>
 	}
 
 	YAML::Node entities = node["EntityList"];
