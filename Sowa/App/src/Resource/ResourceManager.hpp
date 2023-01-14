@@ -8,7 +8,6 @@
 #include "Debug.hpp"
 #include "Sowa.hpp"
 
-#include "Resource/EditorTheme/EditorTheme.hpp"
 #include "Resource/ResourceLoader.hpp"
 #include "Resource/SpriteSheetAnimation/SpriteSheetAnimation.hpp"
 #include "Resource/Texture/Texture.hpp"
@@ -71,9 +70,6 @@ class ResourceManager {
 	}
 };
 
-// todo: ResourceSaver
-template <>
-bool ResourceManager<Sowa::EditorTheme>::SaveResource(const char *path, std::shared_ptr<Sowa::EditorTheme> resource);
 } // namespace Sowa
 
 #endif

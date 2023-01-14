@@ -5,53 +5,12 @@
 
 #include "ECS/Components/PhysicsBody2D/PhysicsBody2D.hpp"
 #include "Utils/Math.hpp"
-// #include "box2d/box2d.h"
 #include "glm/glm.hpp"
-#include "imgui-docking/imgui.h"
 #include "yaml-cpp/yaml.h"
 
 #include <string>
 
 namespace YAML {
-template <>
-struct convert<ImVec2> {
-	static Node encode(const ImVec2 &vec) {
-		Node node;
-		node.push_back(vec.x);
-		node.push_back(vec.y);
-		return node;
-	}
-	static bool decode(const Node &node, ImVec2 &vec) {
-		if (!node.IsSequence() || node.size() != 2)
-			return false;
-
-		vec.x = node[0].as<float>();
-		vec.y = node[1].as<float>();
-		return true;
-	}
-};
-
-template <>
-struct convert<ImVec4> {
-	static Node encode(const ImVec4 &vec) {
-		Node node;
-		node.push_back(vec.x);
-		node.push_back(vec.y);
-		node.push_back(vec.z);
-		node.push_back(vec.w);
-		return node;
-	}
-	static bool decode(const Node &node, ImVec4 &vec) {
-		if (!node.IsSequence() || node.size() != 4)
-			return false;
-
-		vec.x = node[0].as<float>();
-		vec.y = node[1].as<float>();
-		vec.z = node[2].as<float>();
-		vec.w = node[3].as<float>();
-		return true;
-	}
-};
 
 template <>
 struct convert<glm::vec2> {
@@ -129,24 +88,6 @@ struct convert<Sowa::Vec2> {
 	}
 };
 
-// template <>
-// struct convert<b2Vec2> {
-// 	static Node encode(const b2Vec2 &vec) {
-// 		Node node;
-// 		node.push_back(vec.x);
-// 		node.push_back(vec.y);
-// 		return node;
-// 	}
-// 	static bool decode(const Node &node, b2Vec2 &vec) {
-// 		if (!node.IsSequence() || node.size() != 2)
-// 			return false;
-// 
-// 		vec.x = node[0].as<float>();
-// 		vec.y = node[1].as<float>();
-// 		return true;
-// 	}
-// };
-
 template <>
 struct convert<Sowa::PhysicsBodyType> {
 	static Node encode(const Sowa::PhysicsBodyType &bodyType) {
@@ -202,9 +143,6 @@ struct convert<Sowa::ColliderShape2D> {
 		return false;
 	}
 };
-
-YAML::Emitter &operator<<(YAML::Emitter &out, const ImVec2 &vec);
-YAML::Emitter &operator<<(YAML::Emitter &out, const ImVec4 &vec);
 
 YAML::Emitter &operator<<(YAML::Emitter &out, const glm::vec2 &vec);
 YAML::Emitter &operator<<(YAML::Emitter &out, const glm::vec3 &vec);

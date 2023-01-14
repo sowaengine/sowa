@@ -20,10 +20,6 @@
 #include "ECS/Scene/Scene.hpp"
 #include "ECS/Systems/Systems.hpp"
 
-#include "imgui-docking/backends/imgui_impl_glfw.h"
-#include "imgui-docking/backends/imgui_impl_opengl3.h"
-#include "imgui-docking/imgui.h"
-
 #include "Core/Input.hpp"
 #include "Utils/Dialog.hpp"
 #include "Utils/File.hpp"
@@ -32,8 +28,6 @@
 #include "nmGfx/src/Core/nm_Matrix.hpp"
 #include "nmGfx/src/Core/nm_Renderer.hpp"
 #include "nmGfx/src/Core/nm_Window.hpp"
-
-#include "Servers/GuiServer/GuiServer.hpp"
 
 #include "res/shaders/default2d.glsl.res.hpp"
 #include "res/shaders/default3d.glsl.res.hpp"
@@ -66,9 +60,6 @@ void Application::Run(int argc, char const *argv[]) {
 	auto __ = Debug::ScopeTimer("Application");
 
 	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
-
-	GuiServer *guiServer = GuiServer::CreateServer(this, *ctx);
-	ctx->RegisterSingleton<GuiServer>(Sowa::Server::GUISERVER, *guiServer);
 
 	ProjectSettings *projectSettings = ProjectSettings::CreateServer(*ctx);
 	ctx->RegisterSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS, *projectSettings);
@@ -113,8 +104,6 @@ void Application::Run(int argc, char const *argv[]) {
 	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default3d_glsl_data.data()), Res::include_res_shaders_default3d_glsl_data.size()));
 	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_fullscreen_glsl_data.data()), Res::include_res_shaders_fullscreen_glsl_data.size()));
 	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_skybox_glsl_data.data()), Res::include_res_shaders_skybox_glsl_data.size()));
-
-	guiServer->InitGui(_renderer->GetWindow().GetGLFWwindow());
 
 	if (projectSettings->_application.MainScene != "")
 		_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());

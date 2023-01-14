@@ -39,7 +39,6 @@ namespace Sowa {
 // Singleton Servers
 enum class Server : uint32_t {
 	NONE = 0,
-	GUISERVER, // Editor Gui Server
 	APPLICATION,
 	PROJECTSETTINGS,
 };
