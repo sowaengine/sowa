@@ -3,6 +3,7 @@
 #pragma once
 
 #include <algorithm>
+#include <assert.h>
 #include <cassert>
 #include <chrono>
 #include <cmath>

@@ -28,7 +28,6 @@ add_library(app
 target_link_libraries(app
    PRIVATE
       ${CMAKE_DL_LIBS}
-      yaml-cpp
       nmGfx
       -static-libgcc -static-libstdc++ ${LD_FLAG_STATIC}
       fmt)
