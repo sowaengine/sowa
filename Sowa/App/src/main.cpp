@@ -2,7 +2,7 @@
 
 #include "Core/Application.hpp"
 
-int amain(int argc, char const *argv[]) {
+int main(int argc, char const *argv[]) {
 	SW_ENTRY()
 	Sowa::Application &app = Sowa::Application::get_singleton();
 

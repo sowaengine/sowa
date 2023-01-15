@@ -40,6 +40,7 @@ namespace Sowa {
 enum class Server : uint32_t {
 	NONE = 0,
 	APPLICATION,
+	PROJECT,
 };
 
 } // namespace Sowa

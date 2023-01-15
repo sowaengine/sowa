@@ -11,6 +11,7 @@
 
 #include "Core/EngineContext.hpp"
 #include "Core/ExportGenerator.hpp"
+#include "Core/Project.hpp"
 #include "Core/Renderer.hpp"
 #include "Core/Window.hpp"
 
@@ -60,6 +61,9 @@ void Application::Run(int argc, char const *argv[]) {
 
 	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
 
+	Project *project = new Project(*ctx);
+	ctx->RegisterSingleton<Project>(Sowa::Server::PROJECT, *project);
+
 	Sowa::File::InsertFilepathEndpoint("abs", "./");
 	if (!Sowa::File::RegisterDataPath()) {
 		Debug::Error("Engine data path not found. exiting");
@@ -70,14 +74,11 @@ void Application::Run(int argc, char const *argv[]) {
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
 	_renderer->Init(
-		1920, 1080,
-		1280, 720,
-		// projectSettings->_window.WindowWidth,
-		// projectSettings->_window.WindowHeight,
-		// projectSettings->_window.VideoWidth,
-		// projectSettings->_window.VideoHeight,
-		"Sowa Engine",
-		// projectSettings->_application.Name.c_str(),
+		project->proj.settings.window.windowsize.x,
+		project->proj.settings.window.windowsize.y,
+		project->proj.settings.window.videosize.x,
+		project->proj.settings.window.videosize.y,
+		project->proj.settings.application.name.c_str(),
 		nmGfx::WindowFlags::NONE);
 	_window._windowHandle = &_renderer->GetWindow();
 	_window.InitWindow(_renderer->GetWindow(), *ctx);
@@ -145,6 +146,8 @@ void Application::Run(int argc, char const *argv[]) {
 
 		_renderer->GetWindow().SwapBuffers();
 	}
+
+	Project::Of(ctx).Save();
 }
 
 void Application::StartGame() {
@@ -230,6 +233,8 @@ void Application::ParseArgs(int argc, char const *argv[]) {
 	for (int i = 1; i < argc; i++) {
 		args.push_back(argv[i]);
 	}
+	if (args.size() == 0)
+		return;
 
 	bool projectLoaded = false;
 
@@ -238,7 +243,7 @@ void Application::ParseArgs(int argc, char const *argv[]) {
 		std::string arg = args[i];
 
 		if (lastArg == "--project") {
-
+			Project::Of(ctx).Load(arg.c_str());
 			projectLoaded = true;
 		}
 #ifdef SW_EDITOR
@@ -250,8 +255,8 @@ void Application::ParseArgs(int argc, char const *argv[]) {
 		lastArg = args[i];
 	}
 
-	// if (!projectLoaded)
-	// 	ctx->GetSingleton<ProjectSettings>(Sowa::Server::PROJECTSETTINGS)->LoadProject("./");
+	if (!projectLoaded)
+		Project::Of(ctx).Load("./");
 }
 
 } // namespace Sowa

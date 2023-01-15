@@ -23,14 +23,17 @@ if(WIN32)
 endif()
 
 
-add_library(app
+add_executable(app
    ${SOWA_SOURCES})
 target_link_libraries(app
    PRIVATE
-      ${CMAKE_DL_LIBS}
-      nmGfx
-      -static-libgcc -static-libstdc++ ${LD_FLAG_STATIC}
-      fmt)
+   nmGfx
+   pugixml
+   fmt
+   -static-libgcc
+   -static-libstdc++
+   ${LD_FLAG_STATIC}
+   ${CMAKE_DL_LIBS})
 target_include_directories(app
     PRIVATE
         ${SOWA_INCLUDE_DIRS})
