@@ -11,6 +11,7 @@ void Scene::UpdateDraw() {
 
 Node *Scene::Create(const std::string &name) {
 	Node *node = new Node(name);
+	return node;
 }
 
 } // namespace Sowa

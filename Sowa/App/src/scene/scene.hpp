@@ -18,8 +18,12 @@ class Scene {
 
 	inline Node *Root() { return _Root; }
 
+	void SetPause(bool v) { _Paused = v; }
+	bool IsPaused() { return _Paused; }
+
   private:
-	Node *_Root;
+	Node *_Root{nullptr};
+	bool _Paused{false};
 };
 } // namespace Sowa
 
