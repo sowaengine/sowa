@@ -4,8 +4,6 @@
 
 #include "stlpch.hpp"
 
-#include "ECS/Entity/Entity.hpp"
-
 #define SOWA_VERSION_MAJOR 0
 #define SOWA_VERSION_MINOR 1
 #define SOWA_VERSION_PATCH 1

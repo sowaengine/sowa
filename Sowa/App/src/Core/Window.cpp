@@ -10,9 +10,6 @@
 #include "Core/EngineContext.hpp"
 #include "Core/Input.hpp"
 
-#include "ECS/Components/Common/Common.hpp"
-#include "ECS/Entity/Entity.hpp"
-
 #include "Core/nm_Window.hpp"
 
 namespace Sowa {

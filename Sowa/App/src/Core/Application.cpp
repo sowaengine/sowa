@@ -15,11 +15,6 @@
 #include "Core/Renderer.hpp"
 #include "Core/Window.hpp"
 
-#include "ECS/Components/Components.hpp"
-#include "ECS/Entity/Entity.hpp"
-#include "ECS/Scene/Scene.hpp"
-#include "ECS/Systems/Systems.hpp"
-
 #include "Core/Input.hpp"
 #include "Utils/Dialog.hpp"
 #include "Utils/File.hpp"
@@ -42,10 +37,6 @@
 
 namespace Sowa {
 Application::Application() {
-	_GameScene = std::make_shared<Sowa::Scene>();
-	_CopyScene = std::make_shared<Sowa::Scene>();
-
-	_pCurrentScene = _GameScene;
 }
 
 Application::~Application() {
@@ -102,13 +93,6 @@ void Application::Run(int argc, char const *argv[]) {
 		_window.UpdateEvents();
 		_renderer->GetWindow().PollEvents();
 
-		Component::Transform2D cam2dtc{};
-		Component::Camera2D cam2d{};
-
-		if (_AppRunning) {
-			cam2dtc = GetCurrentScene()->CurrentCameraTransform2D();
-			cam2d = GetCurrentScene()->CurrentCamera2D();
-		}
 #ifdef SW_EDITOR
 		else {
 			cam2dtc = _EditorCamera2D.transform;
@@ -116,19 +100,13 @@ void Application::Run(int argc, char const *argv[]) {
 		}
 #endif
 
-		if (_AppRunning) {
-			Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Logic, *ctx);
-		}
-
 		_renderer->Begin2D(
 			nmGfx::CalculateModelMatrix(
-				glm::vec3{cam2dtc.Position().x, -cam2dtc.Position().y, 0.f},
-				cam2d.Rotatable() ? cam2dtc.Rotation() : 0.f,
-				glm::vec3{cam2d.Zoom(), cam2d.Zoom(), 1.f}),
-			{cam2d.Center().x, cam2d.Center().y},
+				glm::vec3{0.f, 0.f, 0.f},
+				0.f,
+				glm::vec3{1.f, 1.f, 1.f}),
+			{0.5f, 0.5f},
 			{0.2f, 0.2f, 0.2f, 1.f});
-
-		Sowa::Systems::ProcessAll(_pCurrentScene.get(), SystemsFlags::Update_Draw, *ctx);
 
 #ifdef SW_EDITOR
 		if (argParse.editor) {
@@ -154,11 +132,6 @@ void Application::StartGame() {
 	if (_AppRunning)
 		return;
 	_AppRunning = true;
-
-	Scene::CopyScene(*_GameScene.get(), *_CopyScene.get());
-
-	_pCurrentScene->StartScene();
-	_SelectedEntity.SetRegistry(&_pCurrentScene->m_Registry);
 }
 
 void Application::UpdateGame() {
@@ -168,15 +141,10 @@ void Application::StopGame() {
 	if (!_AppRunning)
 		return;
 	_AppRunning = false;
-
-	Scene::CopyScene(*_CopyScene.get(), *_GameScene.get());
-
-	_pCurrentScene->StopScene();
-	_SelectedEntity.SetRegistry(&_pCurrentScene->m_Registry);
 }
 
 void Application::ChangeScene(const char *path) {
-	_pCurrentScene->LoadFromFile(path);
+	Debug::Error("Application::ChangeScene() not implemented");
 }
 
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
@@ -220,13 +188,6 @@ void Application::LaunchApp(const std::string &projectPath) {
 #else
 #error "Sowa::Application::LaunchApp() is not implemented in current platform"
 #endif
-
-void Application::SetEditorCameraPosition(const Vec2 &pos) {
-	_EditorCamera2D.transform.Position() = pos;
-}
-void Application::SetEditorCameraZoom(float zoom) {
-	_EditorCamera2D.camera.Zoom() = zoom;
-}
 
 void Application::ParseArgs(int argc, char const *argv[]) {
 	std::vector<std::string> args(argc - 1);
