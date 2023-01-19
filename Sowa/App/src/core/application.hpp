@@ -7,6 +7,7 @@
 
 #include "core/window.hpp"
 
+#include "debug.hpp"
 #include "sowa.hpp"
 #include "utils/math.hpp"
 
@@ -25,8 +26,8 @@ class Application {
 		return app;
 	}
 
-	void Run(int argc, char const *argv[]);
-	void ParseArgs(int argc, char const *argv[]);
+	bool Init(int argc, char const *argv[]);
+	bool Process();
 
 	Window &GetWindow() { return _window; }
 
@@ -46,7 +47,9 @@ class Application {
   private:
 	friend class Window;
 	friend class Renderer;
-	friend class GuiServer;
+
+	void ParseArgs(int argc, char const *argv[]);
+	Debug::ScopeTimer _AppTime = Debug::ScopeTimer("Application");
 
 	Sowa::EngineContext *ctx{nullptr};
 

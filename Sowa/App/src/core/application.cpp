@@ -43,15 +43,14 @@ Application::Application() {
 }
 
 Application::~Application() {
+	Project::Of(ctx).Save();
 }
 
-void Application::Run(int argc, char const *argv[]) {
-	SW_ENTRY()
+bool Application::Init(int argc, char const *argv[]) {
+	SW_ENTRY();
 
 	_ExecutablePath = argv[0];
-
 	ctx = EngineContext::CreateContext();
-	auto __ = Debug::ScopeTimer("Application");
 
 	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
 
@@ -61,7 +60,7 @@ void Application::Run(int argc, char const *argv[]) {
 	Sowa::File::InsertFilepathEndpoint("abs", "./");
 	if (!Sowa::File::RegisterDataPath()) {
 		Debug::Error("Engine data path not found. exiting");
-		return;
+		return false;
 	}
 
 	ParseArgs(argc, argv);
@@ -88,51 +87,49 @@ void Application::Run(int argc, char const *argv[]) {
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
-#ifndef SW_EDITOR
-	StartGame();
-#else
-	if (argParse.editor) {
-		StartGame();
+	return true;
+}
+
+bool Application::Process() {
+	SW_ENTRY()
+
+	_window.UpdateEvents();
+	_renderer->GetWindow().PollEvents();
+	if (_window.ShouldClose())
+		return false;
+
+	if (_Scene != nullptr) {
+		_Scene->UpdateLogic();
 	}
-#endif
 
-	while (!_window.ShouldClose()) {
-		_window.UpdateEvents();
-		_renderer->GetWindow().PollEvents();
-
-		if (_Scene != nullptr) {
-			_Scene->UpdateLogic();
-		}
-
-		_renderer->Begin2D(
-			nmGfx::CalculateModelMatrix(
-				glm::vec3{0.f, 0.f, 0.f},
-				0.f,
-				glm::vec3{1.f, 1.f, 1.f}),
-			{0.5f, 0.5f},
-			{0.2f, 0.2f, 0.2f, 1.f});
+	_renderer->Begin2D(
+		nmGfx::CalculateModelMatrix(
+			glm::vec3{0.f, 0.f, 0.f},
+			0.f,
+			glm::vec3{1.f, 1.f, 1.f}),
+		{0.5f, 0.5f},
+		{0.2f, 0.2f, 0.2f, 1.f});
 
 #ifdef SW_EDITOR
-		if (argParse.editor) {
-			if (!_AppRunning) {
-				Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
-				Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
-			}
+	if (argParse.editor) {
+		if (!_AppRunning) {
+			Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
+			Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
 		}
+	}
 #endif
-		if (_Scene != nullptr) {
-			_Scene->UpdateDraw();
-		}
-
-		_renderer->End2D();
-
-		_renderer->ClearLayers();
-		_renderer->Draw2DLayer();
-
-		_renderer->GetWindow().SwapBuffers();
+	if (_Scene != nullptr) {
+		_Scene->UpdateDraw();
 	}
 
-	Project::Of(ctx).Save();
+	_renderer->End2D();
+
+	_renderer->ClearLayers();
+	_renderer->Draw2DLayer();
+
+	_renderer->GetWindow().SwapBuffers();
+
+	return true;
 }
 
 void Application::StartGame() {
