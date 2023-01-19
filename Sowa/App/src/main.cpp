@@ -1,6 +1,6 @@
-#include "Debug.hpp"
+#include "debug.hpp"
 
-#include "Core/Application.hpp"
+#include "core/application.hpp"
 
 int main(int argc, char const *argv[]) {
 	SW_ENTRY()
