@@ -1,5 +1,2 @@
->App/include/res/*.ttf
 >App/include/res/textures/*.png
 >App/include/res/shaders/*.glsl
->App/include/res/*imgui.ini
->App/include/res/*default_theme.yml
