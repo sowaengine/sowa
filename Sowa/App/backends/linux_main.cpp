@@ -5,11 +5,13 @@
 int main(int argc, char const *argv[]) {
 	SW_ENTRY()
 	Sowa::Application &app = Sowa::Application::get_singleton();
+	app.Init(argc, argv);
 
 	Debug::Info("---> Sowa Engine v{} Init <---", SOWA_VERSION_STRING);
 
 	try {
-		app.Run(argc, argv);
+		while (app.Process())
+			;
 	} catch (const std::exception &e) {
 		Debug::Error("{}", e.what());
 	}

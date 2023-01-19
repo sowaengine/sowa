@@ -4,6 +4,15 @@ file(GLOB_RECURSE SOWA_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
+if(WIN32)
+   set(SOWA_SOURCES ${SOWA_SOURCES}
+      ${CMAKE_CURRENT_SOURCE_DIR}/backends/win_main.cpp
+   )
+elseif(UNIX AND NOT APPLE)
+   set(SOWA_SOURCES ${SOWA_SOURCES}
+      ${CMAKE_CURRENT_SOURCE_DIR}/backends/linux_main.cpp
+   )
+endif()
 
 set(SOWA_INCLUDE_DIRS
    ${CMAKE_CURRENT_SOURCE_DIR}/include/
