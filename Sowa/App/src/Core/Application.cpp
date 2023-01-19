@@ -15,6 +15,9 @@
 #include "Core/Renderer.hpp"
 #include "Core/Window.hpp"
 
+#include "Scene/Node.hpp"
+#include "Scene/Scene.hpp"
+
 #include "Core/Input.hpp"
 #include "Utils/Dialog.hpp"
 #include "Utils/File.hpp"
@@ -87,18 +90,19 @@ void Application::Run(int argc, char const *argv[]) {
 
 #ifndef SW_EDITOR
 	StartGame();
+#else
+	if (argParse.editor) {
+		StartGame();
+	}
 #endif
 
 	while (!_window.ShouldClose()) {
 		_window.UpdateEvents();
 		_renderer->GetWindow().PollEvents();
 
-#ifdef SW_EDITOR
-		else {
-			cam2dtc = _EditorCamera2D.transform;
-			cam2d = _EditorCamera2D.camera;
+		if (_Scene != nullptr) {
+			_Scene->UpdateLogic();
 		}
-#endif
 
 		_renderer->Begin2D(
 			nmGfx::CalculateModelMatrix(
@@ -116,6 +120,9 @@ void Application::Run(int argc, char const *argv[]) {
 			}
 		}
 #endif
+		if (_Scene != nullptr) {
+			_Scene->UpdateDraw();
+		}
 
 		_renderer->End2D();
 

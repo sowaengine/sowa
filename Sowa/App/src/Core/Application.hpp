@@ -16,6 +16,7 @@ class Renderer;
 
 namespace Sowa {
 class EngineContext;
+class Scene;
 
 class Application {
   public:
@@ -40,6 +41,8 @@ class Application {
 
 	void LaunchApp(const std::string &projectPath);
 
+	inline Reference<Scene> CurrentScene() { return _Scene; }
+
   private:
 	friend class Window;
 	friend class Renderer;
@@ -49,6 +52,8 @@ class Application {
 
 	Application();
 	~Application();
+
+	Reference<Scene> _Scene{nullptr};
 
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;
