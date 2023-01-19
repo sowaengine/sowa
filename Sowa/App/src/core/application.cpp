@@ -76,13 +76,13 @@ bool Application::Init(int argc, char const *argv[]) {
 	_window._windowHandle = &_renderer->GetWindow();
 	_window.InitWindow(_renderer->GetWindow(), *ctx);
 
-	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(Res::include_res_textures_icon_png_data.data(), Res::include_res_textures_icon_png_data.size());
+	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(Res::App_include_res_textures_icon_png_data.data(), Res::App_include_res_textures_icon_png_data.size());
 	_window.SetWindowIcon(icon);
 
-	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default2d_glsl_data.data()), Res::include_res_shaders_default2d_glsl_data.size()));
-	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_default3d_glsl_data.data()), Res::include_res_shaders_default3d_glsl_data.size()));
-	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_fullscreen_glsl_data.data()), Res::include_res_shaders_fullscreen_glsl_data.size()));
-	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::include_res_shaders_skybox_glsl_data.data()), Res::include_res_shaders_skybox_glsl_data.size()));
+	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_default2d_glsl_data.data()), Res::App_include_res_shaders_default2d_glsl_data.size()));
+	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_default3d_glsl_data.data()), Res::App_include_res_shaders_default3d_glsl_data.size()));
+	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_fullscreen_glsl_data.data()), Res::App_include_res_shaders_fullscreen_glsl_data.size()));
+	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_skybox_glsl_data.data()), Res::App_include_res_shaders_skybox_glsl_data.size()));
 
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
