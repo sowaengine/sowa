@@ -1,0 +1,1 @@
+cmake --build build --parallel 2

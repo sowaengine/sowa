@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<swproj version="1">
+	<settings>
+		<application>
+			<name> Test Project - Sowa Engine</name>
+			<desc></desc>
+			<mainscene></mainscene>
+			<icon></icon>
+		</application>
+		<window fullscreen="false">
+			<windowsize w="1280" h="720" />
+			<videosize w="1920" h="1080" />
+		</window>
+	</settings>
+</swproj>
