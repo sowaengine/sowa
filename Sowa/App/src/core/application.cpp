@@ -22,6 +22,7 @@
 #include "utils/dialog.hpp"
 #include "utils/file.hpp"
 #include "utils/string.hpp"
+#include "utils/time.hpp"
 
 #include "nmGfx/src/Core/nm_Matrix.hpp"
 #include "nmGfx/src/Core/nm_Renderer.hpp"
@@ -47,7 +48,8 @@ Application::~Application() {
 }
 
 bool Application::Init(int argc, char const *argv[]) {
-	SW_ENTRY();
+	SW_ENTRY()
+	using namespace Debug;
 
 	_ExecutablePath = argv[0];
 	ctx = EngineContext::CreateContext();
@@ -64,6 +66,26 @@ bool Application::Init(int argc, char const *argv[]) {
 	}
 
 	ParseArgs(argc, argv);
+
+	auto &streams = Streams::GetInstance();
+	streams.SetLevelText((uint32_t)LogLevel::Log, "LOG");
+	streams.SetLevelText((uint32_t)LogLevel::Info, "INFO");
+	streams.SetLevelText((uint32_t)LogLevel::Warn, "WARN");
+	streams.SetLevelText((uint32_t)LogLevel::Error, "ERR");
+
+	static std::ofstream tempStream;
+	tempStream.open(fmt::format(argParse.logFile != "" ? argParse.logFile : "{}/sowa-{}.log", std::filesystem::temp_directory_path().string(), Sowa::Time::GetTime()), std::ios_base::app);
+
+	streams.Add((uint32_t)LogLevel::Log, &std::cout);
+	streams.Add((uint32_t)LogLevel::Info, &std::cout);
+	streams.Add((uint32_t)LogLevel::Warn, &std::cout);
+	streams.Add((uint32_t)LogLevel::Error, &std::cout);
+
+	streams.Add((uint32_t)LogLevel::Info, reinterpret_cast<std::ostream *>(&tempStream));
+	streams.Add((uint32_t)LogLevel::Warn, reinterpret_cast<std::ostream *>(&tempStream));
+	streams.Add((uint32_t)LogLevel::Error, reinterpret_cast<std::ostream *>(&tempStream));
+
+	project->Load(argParse.projectPath.c_str());
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
 	_renderer->Init(
@@ -86,6 +108,8 @@ bool Application::Init(int argc, char const *argv[]) {
 
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
+
+	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
 
 	return true;
 }
@@ -194,34 +218,30 @@ void Application::LaunchApp(const std::string &projectPath) {
 #endif
 
 void Application::ParseArgs(int argc, char const *argv[]) {
-	std::vector<std::string> args(argc - 1);
+	std::vector<std::string> args;
 	for (int i = 1; i < argc; i++) {
 		args.push_back(argv[i]);
 	}
-	if (args.size() == 0)
-		return;
 
-	bool projectLoaded = false;
+	if (args.size() > 0) {
+		std::string lastArg = "";
+		for (size_t i = 0; i < args.size(); i++) {
+			std::string arg = args[i];
 
-	std::string lastArg = args[0];
-	for (size_t i = 0; i < args.size(); i++) {
-		std::string arg = args[i];
-
-		if (lastArg == "--project") {
-			Project::Of(ctx).Load(arg.c_str());
-			projectLoaded = true;
-		}
+			if (lastArg == "--project") {
+				argParse.projectPath = arg;
+			} else if (lastArg == "--log-file") {
+				argParse.logFile = arg;
+			}
 #ifdef SW_EDITOR
-		else if (arg == "--no-editor") {
-			argParse.editor = false;
-		}
+			else if (arg == "--no-editor") {
+				argParse.editor = false;
+			}
 #endif
 
-		lastArg = args[i];
+			lastArg = args[i];
+		}
 	}
-
-	if (!projectLoaded)
-		Project::Of(ctx).Load("./");
 }
 
 } // namespace Sowa

@@ -13,11 +13,43 @@
 
 #include "fmt/core.h"
 
-#include "utils/event.hpp"
+#include "utils/time.hpp"
 
 namespace Debug {
 
-Sowa::Event<void(std::string)> &OnPrint();
+enum class LogLevel : std::uint32_t {
+	Log = 0,
+	Info,
+	Warn,
+	Error
+};
+
+class Streams {
+  public:
+	Streams() = default;
+	~Streams() = default;
+
+	static Streams &GetInstance();
+
+	std::vector<std::ostream *> &Get(uint32_t level) {
+		return _Streams[level];
+	}
+
+	void Add(uint32_t level, std::ostream *stream) {
+		_Streams[level].push_back(stream);
+	}
+
+	void SetLevelText(uint32_t level, const std::string &text) {
+		_LevelTexts[level] = text;
+	}
+	const std::string &GetLevelText(uint32_t level) {
+		return _LevelTexts[level];
+	}
+
+  private:
+	std::unordered_map<uint32_t, std::vector<std::ostream *>> _Streams{};
+	std::unordered_map<uint32_t, std::string> _LevelTexts{};
+};
 
 /**
  * @brief Internal print function used by Other logging functions
@@ -33,53 +65,37 @@ Sowa::Event<void(std::string)> &OnPrint();
  * @param args
  */
 template <typename... Args>
-void Print(const std::string &levelText, bool toFile, const std::string &format, Args... args) {
-	std::time_t t = std::time(nullptr);
-	std::tm tp = *std::localtime(&t);
-	std::stringstream time;
-	time << std::put_time(&tp, "%Y-%m-%d %H:%M:%S");
-
-	static std::ofstream logStream;
-	static bool first = true;
-	if (first) {
-		first = false;
-
-		std::stringstream date;
-		date << std::put_time(&tp, "%Y-%m-%d");
-
-		logStream.open(fmt::format("./sowa-{}.log", date.str()), std::ios_base::app);
+void Print(uint32_t level, const std::string &format, Args... args) {
+	std::string time = Sowa::Time::GetTime("%Y-%m-%d %H:%M:%S");
+	std::string msg = fmt::format("[{}] [{}]: {}\n", time, Streams::GetInstance().GetLevelText(level), fmt::format(format, args...));
+	auto &streams = Streams::GetInstance().Get(level);
+	for (size_t i = 0; i < streams.size(); i++) {
+		std::ostream *stream = streams[i];
+		*stream << msg << std::flush;
 	}
-
-	std::string msg = fmt::format("[{}] [{}]: {}\n", time.str(), levelText, fmt::format(format, args...));
-
-	std::cout << msg << std::flush;
-	OnPrint().Invoke(msg);
-	if (toFile)
-		logStream << msg << std::flush;
 }
 
 // Only prints to console
 template <typename... Args>
 void Log(const std::string &format, Args... args) {
-	Debug::Print("LOG", false, format, args...);
+	Print((uint32_t)LogLevel::Log, format, args...);
 }
 
-// Used for logging info that should be seen in log file (system spec etc.)
 template <typename... Args>
 void Info(const std::string &format, Args... args) {
-	Debug::Print("INFO", true, format, args...);
+	Print((uint32_t)LogLevel::Info, format, args...);
 }
 
 //
 template <typename... Args>
 void Warn(const std::string &format, Args... args) {
-	Debug::Print("WARN", true, format, args...);
+	Print((uint32_t)LogLevel::Warn, format, args...);
 }
 
 //
 template <typename... Args>
 void Error(const std::string &format, Args... args) {
-	Debug::Print("ERROR", true, format, args...);
+	Print((uint32_t)LogLevel::Error, format, args...);
 }
 
 class ScopeTimer {

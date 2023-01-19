@@ -2,10 +2,9 @@
 
 namespace Debug {
 
-Sowa::Event<void(std::string)> &OnPrint() {
-	static Sowa::Event<void(std::string)> _onPrint;
-
-	return _onPrint;
+Streams &Streams::GetInstance() {
+	static Streams streams;
+	return streams;
 }
 
 static CallStack s_StackTrace;

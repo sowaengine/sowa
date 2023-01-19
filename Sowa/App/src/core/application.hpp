@@ -69,6 +69,8 @@ class Application {
 #ifdef SW_EDITOR
 		bool editor = true;
 #endif
+		std::string projectPath{"./"};
+		std::string logFile{""};
 	} argParse;
 };
 } // namespace Sowa
