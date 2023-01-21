@@ -61,8 +61,8 @@ class Application {
 	Application();
 	~Application();
 
-	Reference<Scene> _Scene{nullptr};
 	std::unordered_map<std::string, std::function<void(Node *)>> _NodeTypeDestructors;
+	Reference<Scene> _Scene{nullptr};
 
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;
