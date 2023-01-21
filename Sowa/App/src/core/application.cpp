@@ -16,6 +16,7 @@
 #include "core/window.hpp"
 
 #include "scene/2d/node2d.hpp"
+#include "scene/2d/sprite2d.hpp"
 #include "scene/node.hpp"
 #include "scene/scene.hpp"
 
@@ -61,13 +62,14 @@ bool Application::Init(int argc, char const *argv[]) {
 	Project *project = new Project(*ctx);
 	ctx->RegisterSingleton<Project>(Sowa::Server::PROJECT, *project);
 
+	ParseArgs(argc, argv);
+
 	Sowa::File::InsertFilepathEndpoint("abs", "./");
+	Sowa::File::InsertFilepathEndpoint("res", argParse.projectPath);
 	if (!Sowa::File::RegisterDataPath()) {
 		Debug::Error("Engine data path not found. exiting");
 		return false;
 	}
-
-	ParseArgs(argc, argv);
 
 	auto &streams = Streams::GetInstance();
 	streams.SetLevelText((uint32_t)LogLevel::Log, "LOG");
@@ -117,6 +119,9 @@ bool Application::Init(int argc, char const *argv[]) {
 	RegisterNodeDestructor("Node2D", [](Node *node) {
 		Allocator<Node2D>::Get().deallocate(reinterpret_cast<Node2D *>(node), 1);
 	});
+	RegisterNodeDestructor("Sprite2D", [](Node *node) {
+		Allocator<Sprite2D>::Get().deallocate(reinterpret_cast<Sprite2D *>(node), 1);
+	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
 
@@ -125,7 +130,7 @@ bool Application::Init(int argc, char const *argv[]) {
 
 	Node2D *node1 = scene->Create<Node2D>("Node1");
 	Node2D *node2 = scene->Create<Node2D>("Node2");
-	Node2D *node3 = scene->Create<Node2D>("Node3");
+	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
 
 	node->AddChild(node1);
 	node->AddChild(node2);

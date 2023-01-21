@@ -48,8 +48,14 @@ void Scene::Exit() {
 }
 
 void Scene::UpdateLogic() {
+	for (Node *node : _RegisteredNodes) {
+		node->UpdateLogic();
+	}
 }
 void Scene::UpdateDraw() {
+	for (Node *node : _RegisteredNodes) {
+		node->UpdateDraw();
+	}
 }
 
 Reference<Scene> Scene::New() {
