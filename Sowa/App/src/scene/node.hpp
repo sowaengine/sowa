@@ -33,16 +33,29 @@ class Node {
 	inline PauseMode GetPauseMode() { return _PauseMode; }
 	void SetPauseMode(PauseMode mode) { _PauseMode = mode; }
 
+	void Lock() { _Locked = true; }
+	void Unlock() { _Locked = false; }
+	bool IsLocked() { return _Locked; }
+
+	inline Node *GetParent() { return _Parent; }
 	inline std::vector<Node *> GetChildren() { return _Children; }
+
+	void AddChild(Node *node);
+	Node *GetChild(const std::string &name);
+	void RemoveChild(const std::string &name);
+	void RemoveNode(Node *node);
+	void SetParent(Node *node);
 
   private:
 	friend class Scene;
 	friend class Application;
 	std::string _Name;
 
+	bool _Locked{false};
+
 	std::weak_ptr<Scene> _pScene{};
 	std::vector<Node *> _Children;
-	Node *_Parent;
+	Node *_Parent{nullptr};
 
 	PauseMode _PauseMode{PauseMode::Inherit};
 
