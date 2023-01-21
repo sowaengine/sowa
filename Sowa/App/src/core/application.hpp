@@ -8,6 +8,7 @@
 #include "core/window.hpp"
 
 #include "debug.hpp"
+#include "scene/node.hpp"
 #include "sowa.hpp"
 #include "utils/math.hpp"
 
@@ -36,13 +37,17 @@ class Application {
 	void StopGame();
 	bool IsRunning() { return _AppRunning; }
 
-	void ChangeScene(const char *path);
+	Reference<Scene> LoadScene(const char *path);
 
 	uint32_t Renderer_GetAlbedoFramebufferID();
 
 	void LaunchApp(const std::string &projectPath);
 
-	inline Reference<Scene> CurrentScene() { return _Scene; }
+	inline const Reference<Scene> GetCurrentScene() { return _Scene; }
+	void SetCurrentScene(Reference<Scene> scene);
+
+	void RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor);
+	void DestructNode(Node *node);
 
   private:
 	friend class Window;
@@ -57,6 +62,7 @@ class Application {
 	~Application();
 
 	Reference<Scene> _Scene{nullptr};
+	std::unordered_map<std::string, std::function<void(Node *)>> _NodeTypeDestructors;
 
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;

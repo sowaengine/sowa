@@ -15,6 +15,7 @@
 #include "core/renderer.hpp"
 #include "core/window.hpp"
 
+#include "scene/2d/node2d.hpp"
 #include "scene/node.hpp"
 #include "scene/scene.hpp"
 
@@ -109,7 +110,18 @@ bool Application::Init(int argc, char const *argv[]) {
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
+	RegisterNodeDestructor("Node2D", [](Node *node) {
+		delete reinterpret_cast<Node2D *>(node);
+	});
+
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
+
+	Reference<Scene> scene = std::make_shared<Scene>();
+	Node *node = new Node2D();
+	node->Name() = "New Node";
+	scene->Register(node);
+	scene->SetRoot(node);
+	SetCurrentScene(scene);
 
 	return true;
 }
@@ -171,8 +183,29 @@ void Application::StopGame() {
 	_AppRunning = false;
 }
 
-void Application::ChangeScene(const char *path) {
-	Debug::Error("Application::ChangeScene() not implemented");
+Reference<Scene> Application::LoadScene(const char *path) {
+	Debug::Error("Application::LoadScene() not implemented");
+	return nullptr;
+}
+
+void Application::SetCurrentScene(Reference<Scene> scene) {
+	_Scene = scene;
+	if (_Scene != nullptr) {
+		_Scene->Enter();
+	}
+}
+
+void Application::RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor) {
+	_NodeTypeDestructors[nodeType] = dtor;
+}
+void Application::DestructNode(Node *node) {
+	Debug::Log("Delete node '{}':'{}'", node->_NodeType, node->_NodeType);
+
+	if (_NodeTypeDestructors[node->_NodeType] != nullptr) {
+		_NodeTypeDestructors[node->_NodeType](node);
+	} else {
+		delete node;
+	}
 }
 
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
