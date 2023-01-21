@@ -5,6 +5,7 @@
 #include "stlpch.hpp"
 
 #include "node.hpp"
+#include "utils/memory.hpp"
 
 namespace Sowa {
 
@@ -21,7 +22,8 @@ class Scene {
 
 	template <typename T>
 	T *Create(const std::string &name) {
-		T *node = new T;
+		std::allocator<T> allocator = Allocator<T>::Get();
+		T *node = allocator.allocate(1);
 		node->Name() = name;
 		Register(node);
 

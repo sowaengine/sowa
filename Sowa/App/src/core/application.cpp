@@ -22,6 +22,7 @@
 #include "core/input.hpp"
 #include "utils/dialog.hpp"
 #include "utils/file.hpp"
+#include "utils/memory.hpp"
 #include "utils/string.hpp"
 #include "utils/time.hpp"
 
@@ -111,15 +112,14 @@ bool Application::Init(int argc, char const *argv[]) {
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
 	RegisterNodeDestructor("Node2D", [](Node *node) {
-		delete reinterpret_cast<Node2D *>(node);
+		Allocator<Node2D>::Get().deallocate(reinterpret_cast<Node2D *>(node), 1);
 	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
 
 	Reference<Scene> scene = std::make_shared<Scene>();
-	Node *node = new Node2D();
-	node->Name() = "New Node";
-	scene->Register(node);
+	Node2D *node = scene->Create<Node2D>("New Node");
+
 	scene->SetRoot(node);
 	SetCurrentScene(scene);
 
@@ -204,7 +204,7 @@ void Application::DestructNode(Node *node) {
 	if (_NodeTypeDestructors[node->_NodeType] != nullptr) {
 		_NodeTypeDestructors[node->_NodeType](node);
 	} else {
-		delete node;
+		Allocator<Node>::Get().deallocate(node, 1);
 	}
 }
 
