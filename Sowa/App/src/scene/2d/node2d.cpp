@@ -2,6 +2,10 @@
 #include "debug.hpp"
 
 namespace Sowa {
+Node2D::Node2D() {
+	_NodeType = "Node2D";
+}
+
 void Node2D::EnterScene() {
 	Debug::Log("Node 2D '{}' entered tree", Name());
 }

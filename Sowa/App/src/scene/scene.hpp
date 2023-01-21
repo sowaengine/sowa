@@ -4,26 +4,44 @@
 #include "sowa.hpp"
 #include "stlpch.hpp"
 
+#include "node.hpp"
+
 namespace Sowa {
-class Node;
 
 class Scene {
   public:
-	void Start();
+	Scene() = default;
+	~Scene();
 
-	Node *Create(const std::string &name);
+	void Enter();
+	void Exit();
 
 	void UpdateLogic();
 	void UpdateDraw();
 
-	inline Node *Root() { return _Root; }
+	template <typename T>
+	T *Create(const std::string &name) {
+		T *node = new T;
+		node->Name() = name;
+		Register(node);
+
+		return node;
+	}
+
+	void Register(Node *node);
 
 	void SetPause(bool v) { _Paused = v; }
 	bool IsPaused() { return _Paused; }
 
+	inline void SetRoot(Node *node) { _Root = node; }
+	inline Node *GetRoot() { return _Root; }
+
   private:
-	Node *_Root{nullptr};
 	bool _Paused{false};
+
+	std::vector<Node *> _RegisteredNodes{};
+
+	Node *_Root{nullptr};
 };
 } // namespace Sowa
 

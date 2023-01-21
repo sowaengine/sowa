@@ -6,6 +6,13 @@
 
 namespace Sowa {
 class Scene;
+class Application;
+
+enum class PauseMode {
+	Inherit = 0,
+	Ignore,
+	Stop,
+};
 
 class Node {
   public:
@@ -23,11 +30,24 @@ class Node {
 	virtual void UpdateLogic() {}
 	virtual void UpdateDraw() {}
 
+	inline PauseMode GetPauseMode() { return _PauseMode; }
+	void SetPauseMode(PauseMode mode) { _PauseMode = mode; }
+
+	inline std::vector<Node *> GetChildren() { return _Children; }
+
   private:
+	friend class Scene;
+	friend class Application;
 	std::string _Name;
 
 	std::weak_ptr<Scene> _pScene{};
 	std::vector<Node *> _Children;
+	Node *_Parent;
+
+	PauseMode _PauseMode{PauseMode::Inherit};
+
+  protected:
+	std::string _NodeType{"Node"};
 };
 } // namespace Sowa
 

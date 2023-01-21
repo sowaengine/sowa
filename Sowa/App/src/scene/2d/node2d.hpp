@@ -7,6 +7,8 @@
 namespace Sowa {
 class Node2D : public Node {
   public:
+	Node2D();
+
 	void EnterScene() override;
 	void ExitScene() override;
 	void UpdateLogic() override;
