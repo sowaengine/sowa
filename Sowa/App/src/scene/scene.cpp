@@ -6,6 +6,7 @@
 #include "utils/random.hpp"
 
 namespace Sowa {
+Scene::Scene() {}
 Scene::~Scene() {
 	Exit();
 	for (Node *node : _RegisteredNodes) {
@@ -51,8 +52,39 @@ void Scene::UpdateLogic() {
 void Scene::UpdateDraw() {
 }
 
+Reference<Scene> Scene::New() {
+	struct SceneCreator : public Scene {};
+
+	Reference<Scene> scene = std::make_shared<SceneCreator>();
+	scene->_SelfRef = scene;
+	return scene;
+}
+
 void Scene::Register(Node *node) {
 	_RegisteredNodes.push_back(node);
+}
+
+void Scene::CollectNodes() {
+	for (size_t i = 0; i < _RegisteredNodes.size();) {
+		Node *node = _RegisteredNodes[i];
+		if (node == nullptr) {
+			_RegisteredNodes.erase(_RegisteredNodes.begin() + i);
+			continue;
+		}
+		if (!node->IsLocked() && !node->IsValid()) {
+			_RegisteredNodes.erase(_RegisteredNodes.begin() + i);
+			Application::get_singleton().DestructNode(node);
+			continue;
+		}
+
+		if (!node->IsLocked() && (node->_Parent == nullptr && node != GetRoot())) {
+			_RegisteredNodes.erase(_RegisteredNodes.begin() + i);
+			Application::get_singleton().DestructNode(node);
+			continue;
+		}
+
+		i++;
+	}
 }
 
 } // namespace Sowa

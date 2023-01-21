@@ -67,7 +67,12 @@ class Application {
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;
 
+	void Step();
+
 	bool _AppRunning = false;
+	uint64_t _FrameCount{0};
+
+	int _SceneCollectInterval{240};
 
 	std::string _ExecutablePath{""};
 

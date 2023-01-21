@@ -11,7 +11,6 @@ namespace Sowa {
 
 class Scene {
   public:
-	Scene() = default;
 	~Scene();
 
 	void Enter();
@@ -24,25 +23,38 @@ class Scene {
 	T *Create(const std::string &name) {
 		std::allocator<T> allocator = Allocator<T>::Get();
 		T *node = allocator.allocate(1);
+		new (node) T;
+		node->_pScene = _SelfRef;
 		node->Name() = name;
 		Register(node);
 
 		return node;
 	}
 
+	static Reference<Scene> New();
+
 	void Register(Node *node);
 
 	void SetPause(bool v) { _Paused = v; }
 	bool IsPaused() { return _Paused; }
 
-	inline void SetRoot(Node *node) { _Root = node; }
+	inline void SetRoot(Node *node) {
+		_Root = node;
+		if (_Root != nullptr)
+			_Root->SetParent(nullptr);
+	}
 	inline Node *GetRoot() { return _Root; }
 
+	// Deallocates parentless entities
+	void CollectNodes();
+
   private:
+	Scene();
 	bool _Paused{false};
 
 	std::vector<Node *> _RegisteredNodes{};
 
+	std::weak_ptr<Scene> _SelfRef{};
 	Node *_Root{nullptr};
 };
 } // namespace Sowa

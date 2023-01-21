@@ -111,14 +111,25 @@ bool Application::Init(int argc, char const *argv[]) {
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
+	RegisterNodeDestructor("Node", [](Node *node) {
+		Allocator<Node>::Get().deallocate(reinterpret_cast<Node *>(node), 1);
+	});
 	RegisterNodeDestructor("Node2D", [](Node *node) {
 		Allocator<Node2D>::Get().deallocate(reinterpret_cast<Node2D *>(node), 1);
 	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
 
-	Reference<Scene> scene = std::make_shared<Scene>();
+	Reference<Scene> scene = Scene::New();
 	Node2D *node = scene->Create<Node2D>("New Node");
+
+	Node2D *node1 = scene->Create<Node2D>("Node1");
+	Node2D *node2 = scene->Create<Node2D>("Node2");
+	Node2D *node3 = scene->Create<Node2D>("Node3");
+
+	node->AddChild(node1);
+	node->AddChild(node2);
+	node->AddChild(node3);
 
 	scene->SetRoot(node);
 	SetCurrentScene(scene);
@@ -165,6 +176,7 @@ bool Application::Process() {
 
 	_renderer->GetWindow().SwapBuffers();
 
+	Step();
 	return true;
 }
 
@@ -199,12 +211,25 @@ void Application::RegisterNodeDestructor(const std::string &nodeType, std::funct
 	_NodeTypeDestructors[nodeType] = dtor;
 }
 void Application::DestructNode(Node *node) {
-	Debug::Log("Delete node '{}':'{}'", node->_NodeType, node->_NodeType);
+	Debug::Log("Delete node '{}':'{}'", node->Name(), node->_NodeType);
 
-	if (_NodeTypeDestructors[node->_NodeType] != nullptr) {
+	for (Node *child : node->GetChildren()) {
+		node->RemoveNode(child);
+	}
+	if (_NodeTypeDestructors.find(node->_NodeType) != _NodeTypeDestructors.end()) {
 		_NodeTypeDestructors[node->_NodeType](node);
 	} else {
-		Allocator<Node>::Get().deallocate(node, 1);
+		Debug::Error("Tried to destruct unknown node type '{}'", node->_NodeType);
+	}
+}
+
+void Application::Step() {
+	_FrameCount++;
+
+	if (_FrameCount % _SceneCollectInterval == 0) {
+		if (_Scene != nullptr) {
+			_Scene->CollectNodes();
+		}
 	}
 }
 
