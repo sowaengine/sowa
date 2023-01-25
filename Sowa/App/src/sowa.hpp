@@ -30,7 +30,6 @@ template <typename T>
 using Reference = std::shared_ptr<T>;
 
 typedef uint64_t ResourceID;
-typedef int32_t EntityID;
 
 namespace Sowa {
 

@@ -8,6 +8,7 @@
 #include "core/window.hpp"
 
 #include "debug.hpp"
+#include "scene/node.hpp"
 #include "sowa.hpp"
 #include "utils/math.hpp"
 
@@ -26,7 +27,7 @@ class Application {
 		return app;
 	}
 
-	bool Init(int argc, char const *argv[]);
+	bool Init(const std::vector<std::string>& args);
 	bool Process();
 
 	Window &GetWindow() { return _window; }
@@ -36,19 +37,24 @@ class Application {
 	void StopGame();
 	bool IsRunning() { return _AppRunning; }
 
-	void ChangeScene(const char *path);
+	Reference<Scene> LoadScene(const char *path);
 
 	uint32_t Renderer_GetAlbedoFramebufferID();
 
 	void LaunchApp(const std::string &projectPath);
 
-	inline Reference<Scene> CurrentScene() { return _Scene; }
+	inline const Reference<Scene> GetCurrentScene() { return _Scene; }
+	void SetCurrentScene(Reference<Scene> scene);
 
+	void RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor);
+	void DestructNode(Node *node);
+
+	std::unique_ptr<nmGfx::Renderer>& RendererHandle() { return _renderer; }
   private:
 	friend class Window;
 	friend class Renderer;
 
-	void ParseArgs(int argc, char const *argv[]);
+	void ParseArgs(const std::vector<std::string>& args);
 	Debug::ScopeTimer _AppTime = Debug::ScopeTimer("Application");
 
 	Sowa::EngineContext *ctx{nullptr};
@@ -56,12 +62,18 @@ class Application {
 	Application();
 	~Application();
 
+	std::unordered_map<std::string, std::function<void(Node *)>> _NodeTypeDestructors;
 	Reference<Scene> _Scene{nullptr};
 
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;
 
+	void Step();
+
 	bool _AppRunning = false;
+	uint64_t _FrameCount{0};
+
+	int _SceneCollectInterval{240};
 
 	std::string _ExecutablePath{""};
 
@@ -69,6 +81,9 @@ class Application {
 #ifdef SW_EDITOR
 		bool editor = true;
 #endif
+		std::string projectPath{"./"};
+		std::string logFile{""};
+		bool window{true};
 	} argParse;
 };
 } // namespace Sowa

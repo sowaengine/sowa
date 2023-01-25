@@ -58,7 +58,7 @@ void Window::UpdateEvents() {
 }
 
 /* -- Input -- */
-Vec2 Window::GetMousePosition() {
+Vector2 Window::GetMousePosition() {
 	double x, y;
 	glfwGetCursorPos(_windowHandle->GetGLFWwindow(), &x, &y);
 
@@ -69,7 +69,7 @@ Vec2 Window::GetMousePosition() {
 	x -= GetBlackbarWidth();
 	y -= GetBlackbarHeight();
 #else
-	Vec2 scale;
+	Vector2 scale;
 	scale.x = (float)GetWindowWidth() / (float)Editor_GetWindowWidth();
 	scale.y = (float)GetWindowHeight() / (float)Editor_GetWindowHeight();
 
@@ -79,12 +79,12 @@ Vec2 Window::GetMousePosition() {
 	y *= scale.y;
 #endif
 
-	return Vec2(x, y);
+	return Vector2(x, y);
 }
 
-Vec2 Window::GetGameMousePosition() {
+Vector2 Window::GetGameMousePosition() {
 
-	Vec2 scale;
+	Vector2 scale;
 #ifndef SW_EDITOR
 	scale.x = (float)GetVideoWidth() / ((float)GetWindowWidth() - (GetBlackbarWidth() * 2));
 	scale.y = (float)GetVideoHeight() / ((float)GetWindowHeight() - (GetBlackbarHeight() * 2));
@@ -94,7 +94,7 @@ Vec2 Window::GetGameMousePosition() {
 	scale.y = (float)GetVideoHeight() / (float)GetWindowHeight();
 #endif
 
-	Vec2 mousePos = GetMousePosition();
+	Vector2 mousePos = GetMousePosition();
 	mousePos.x *= scale.x;
 	mousePos.y *= scale.y;
 

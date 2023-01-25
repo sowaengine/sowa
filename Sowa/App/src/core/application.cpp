@@ -15,13 +15,18 @@
 #include "core/renderer.hpp"
 #include "core/window.hpp"
 
+#include "scene/2d/node2d.hpp"
+#include "scene/2d/sprite2d.hpp"
 #include "scene/node.hpp"
 #include "scene/scene.hpp"
+#include "scene/2d/text2d.hpp"
 
 #include "core/input.hpp"
 #include "utils/dialog.hpp"
 #include "utils/file.hpp"
+#include "utils/memory.hpp"
 #include "utils/string.hpp"
+#include "utils/time.hpp"
 
 #include "nmGfx/src/Core/nm_Matrix.hpp"
 #include "nmGfx/src/Core/nm_Renderer.hpp"
@@ -46,10 +51,16 @@ Application::~Application() {
 	Project::Of(ctx).Save();
 }
 
-bool Application::Init(int argc, char const *argv[]) {
-	SW_ENTRY();
+bool Application::Init(const std::vector<std::string>& args) {
+	SW_ENTRY()
+	using namespace Debug;
 
-	_ExecutablePath = argv[0];
+	if (args.size() == 0) {
+		Debug::Log("Application::Init expects at least one argument (argv[0]");
+		return false;
+	}
+
+	_ExecutablePath = args[0];
 	ctx = EngineContext::CreateContext();
 
 	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
@@ -57,28 +68,52 @@ bool Application::Init(int argc, char const *argv[]) {
 	Project *project = new Project(*ctx);
 	ctx->RegisterSingleton<Project>(Sowa::Server::PROJECT, *project);
 
+	ParseArgs(args);
+
 	Sowa::File::InsertFilepathEndpoint("abs", "./");
+	Sowa::File::InsertFilepathEndpoint("res", argParse.projectPath);
 	if (!Sowa::File::RegisterDataPath()) {
 		Debug::Error("Engine data path not found. exiting");
 		return false;
 	}
 
-	ParseArgs(argc, argv);
+	auto &streams = Streams::GetInstance();
+	streams.SetLevelText((uint32_t)LogLevel::Log, "LOG");
+	streams.SetLevelText((uint32_t)LogLevel::Info, "INFO");
+	streams.SetLevelText((uint32_t)LogLevel::Warn, "WARN");
+	streams.SetLevelText((uint32_t)LogLevel::Error, "ERR");
+
+	static std::ofstream tempStream;
+	tempStream.open(fmt::format(argParse.logFile != "" ? argParse.logFile : "{}/sowa-{}.log", std::filesystem::temp_directory_path().string(), Sowa::Time::GetTime()), std::ios_base::app);
+
+	streams.Add((uint32_t)LogLevel::Log, &std::cout);
+	streams.Add((uint32_t)LogLevel::Info, &std::cout);
+	streams.Add((uint32_t)LogLevel::Warn, &std::cout);
+	streams.Add((uint32_t)LogLevel::Error, &std::cout);
+
+	streams.Add((uint32_t)LogLevel::Info, reinterpret_cast<std::ostream *>(&tempStream));
+	streams.Add((uint32_t)LogLevel::Warn, reinterpret_cast<std::ostream *>(&tempStream));
+	streams.Add((uint32_t)LogLevel::Error, reinterpret_cast<std::ostream *>(&tempStream));
+
+	project->Load(argParse.projectPath.c_str());
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
+	unsigned int windowFlags = nmGfx::WindowFlags::NONE;
+	windowFlags = !argParse.window ? windowFlags | nmGfx::WindowFlags::NO_WINDOW : windowFlags;
 	_renderer->Init(
 		project->proj.settings.window.windowsize.x,
 		project->proj.settings.window.windowsize.y,
 		project->proj.settings.window.videosize.x,
 		project->proj.settings.window.videosize.y,
 		project->proj.settings.application.name.c_str(),
-		nmGfx::WindowFlags::NONE);
+		windowFlags);
 	_window._windowHandle = &_renderer->GetWindow();
 	_window.InitWindow(_renderer->GetWindow(), *ctx);
 
 	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(Res::App_include_res_textures_icon_png_data.data(), Res::App_include_res_textures_icon_png_data.size());
 	_window.SetWindowIcon(icon);
 
+	_renderer->SetBlending(true);
 	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_default2d_glsl_data.data()), Res::App_include_res_shaders_default2d_glsl_data.size()));
 	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_default3d_glsl_data.data()), Res::App_include_res_shaders_default3d_glsl_data.size()));
 	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_fullscreen_glsl_data.data()), Res::App_include_res_shaders_fullscreen_glsl_data.size()));
@@ -86,6 +121,38 @@ bool Application::Init(int argc, char const *argv[]) {
 
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
+
+	RegisterNodeDestructor("Node", [](Node *node) {
+		Allocator<Node>::Get().deallocate(reinterpret_cast<Node *>(node), 1);
+	});
+	RegisterNodeDestructor("Node2D", [](Node *node) {
+		Allocator<Node2D>::Get().deallocate(reinterpret_cast<Node2D *>(node), 1);
+	});
+	RegisterNodeDestructor("Sprite2D", [](Node *node) {
+		Allocator<Sprite2D>::Get().deallocate(reinterpret_cast<Sprite2D *>(node), 1);
+	});
+	RegisterNodeDestructor("Text2D", [](Node *node) {
+		Allocator<Text2D>::Get().deallocate(reinterpret_cast<Text2D *>(node), 1);
+	});
+
+	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
+
+	Reference<Scene> scene = Scene::New();
+	Node2D *node = scene->Create<Node2D>("New Node");
+
+	Node2D *node1 = scene->Create<Node2D>("Node1");
+	Node2D *node2 = scene->Create<Node2D>("Node2");
+	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
+	Text2D *node4 = scene->Create<Text2D>("Node4");
+
+	node->AddChild(node1);
+	node->AddChild(node2);
+	node->AddChild(node3);
+	node->AddChild(node4);
+	node4->SetText("Sowa Engine");
+
+	scene->SetRoot(node);
+	SetCurrentScene(scene);
 
 	return true;
 }
@@ -129,6 +196,7 @@ bool Application::Process() {
 
 	_renderer->GetWindow().SwapBuffers();
 
+	Step();
 	return true;
 }
 
@@ -147,8 +215,42 @@ void Application::StopGame() {
 	_AppRunning = false;
 }
 
-void Application::ChangeScene(const char *path) {
-	Debug::Error("Application::ChangeScene() not implemented");
+Reference<Scene> Application::LoadScene(const char *path) {
+	Debug::Error("Application::LoadScene() not implemented");
+	return nullptr;
+}
+
+void Application::SetCurrentScene(Reference<Scene> scene) {
+	_Scene = scene;
+	if (_Scene != nullptr) {
+		_Scene->Enter();
+	}
+}
+
+void Application::RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor) {
+	_NodeTypeDestructors[nodeType] = dtor;
+}
+void Application::DestructNode(Node *node) {
+	Debug::Log("Delete node '{}':'{}'", node->Name(), node->_NodeType);
+
+	for (Node *child : node->GetChildren()) {
+		node->RemoveNode(child);
+	}
+	if (_NodeTypeDestructors.find(node->_NodeType) != _NodeTypeDestructors.end()) {
+		_NodeTypeDestructors[node->_NodeType](node);
+	} else {
+		Debug::Error("Tried to destruct unknown node type '{}'", node->_NodeType);
+	}
+}
+
+void Application::Step() {
+	_FrameCount++;
+
+	if (_FrameCount % _SceneCollectInterval == 0) {
+		if (_Scene != nullptr) {
+			_Scene->CollectNodes();
+		}
+	}
 }
 
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
@@ -193,35 +295,27 @@ void Application::LaunchApp(const std::string &projectPath) {
 #error "Sowa::Application::LaunchApp() is not implemented in current platform"
 #endif
 
-void Application::ParseArgs(int argc, char const *argv[]) {
-	std::vector<std::string> args(argc - 1);
-	for (int i = 1; i < argc; i++) {
-		args.push_back(argv[i]);
-	}
-	if (args.size() == 0)
-		return;
-
-	bool projectLoaded = false;
-
-	std::string lastArg = args[0];
-	for (size_t i = 0; i < args.size(); i++) {
+void Application::ParseArgs(const std::vector<std::string>& args) {
+	std::string lastArg = "";
+	for (size_t i = 1; i < args.size(); i++) {
 		std::string arg = args[i];
 
 		if (lastArg == "--project") {
-			Project::Of(ctx).Load(arg.c_str());
-			projectLoaded = true;
+			argParse.projectPath = arg;
+		} else if (lastArg == "--log-file") {
+			argParse.logFile = arg;
 		}
 #ifdef SW_EDITOR
 		else if (arg == "--no-editor") {
 			argParse.editor = false;
 		}
 #endif
+		else if (arg == "--no-window") {
+			argParse.window = false;
+		}
 
 		lastArg = args[i];
 	}
-
-	if (!projectLoaded)
-		Project::Of(ctx).Load("./");
 }
 
 } // namespace Sowa

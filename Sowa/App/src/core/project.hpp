@@ -34,8 +34,8 @@ class Project {
 			} application;
 			struct {
 				bool fullscreen{false};
-				Vec2 windowsize{1280.f, 720.f};
-				Vec2 videosize{1920.f, 1080.f};
+				Vector2 windowsize{1280.f, 720.f};
+				Vector2 videosize{1920.f, 1080.f};
 			} window;
 		} settings;
 	} proj;
