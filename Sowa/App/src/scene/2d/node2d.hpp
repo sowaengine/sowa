@@ -14,7 +14,7 @@ class Node2D : public Node {
 	void UpdateLogic() override;
 	void UpdateDraw() override;
 
-  private:
+  protected:
 	Vec2 _Position{0.f, 0.f};
 	float _Rotation{0.f};
 	Vec2 _Scale{1.f, 1.f};
