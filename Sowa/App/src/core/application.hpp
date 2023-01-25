@@ -27,7 +27,7 @@ class Application {
 		return app;
 	}
 
-	bool Init(int argc, char const *argv[]);
+	bool Init(const std::vector<std::string>& args);
 	bool Process();
 
 	Window &GetWindow() { return _window; }
@@ -54,7 +54,7 @@ class Application {
 	friend class Window;
 	friend class Renderer;
 
-	void ParseArgs(int argc, char const *argv[]);
+	void ParseArgs(const std::vector<std::string>& args);
 	Debug::ScopeTimer _AppTime = Debug::ScopeTimer("Application");
 
 	Sowa::EngineContext *ctx{nullptr};

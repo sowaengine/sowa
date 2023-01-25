@@ -6,8 +6,12 @@ int main(int argc, char const *argv[]) {
 	SW_ENTRY()
 	Debug::Streams::GetInstance();
 
+	std::vector<std::string> args;
+	for (int i = 0; i < argc; i++)
+		args.push_back(argv[i]);
+
 	Sowa::Application &app = Sowa::Application::get_singleton();
-	app.Init(argc, argv);
+	app.Init(args);
 
 	try {
 		while (app.Process())

@@ -51,11 +51,16 @@ Application::~Application() {
 	Project::Of(ctx).Save();
 }
 
-bool Application::Init(int argc, char const *argv[]) {
+bool Application::Init(const std::vector<std::string>& args) {
 	SW_ENTRY()
 	using namespace Debug;
 
-	_ExecutablePath = argv[0];
+	if (args.size() == 0) {
+		Debug::Log("Application::Init expects at least one argument (argv[0]");
+		return false;
+	}
+
+	_ExecutablePath = args[0];
 	ctx = EngineContext::CreateContext();
 
 	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
@@ -63,7 +68,7 @@ bool Application::Init(int argc, char const *argv[]) {
 	Project *project = new Project(*ctx);
 	ctx->RegisterSingleton<Project>(Sowa::Server::PROJECT, *project);
 
-	ParseArgs(argc, argv);
+	ParseArgs(args);
 
 	Sowa::File::InsertFilepathEndpoint("abs", "./");
 	Sowa::File::InsertFilepathEndpoint("res", argParse.projectPath);
@@ -290,33 +295,26 @@ void Application::LaunchApp(const std::string &projectPath) {
 #error "Sowa::Application::LaunchApp() is not implemented in current platform"
 #endif
 
-void Application::ParseArgs(int argc, char const *argv[]) {
-	std::vector<std::string> args;
-	for (int i = 1; i < argc; i++) {
-		args.push_back(argv[i]);
-	}
+void Application::ParseArgs(const std::vector<std::string>& args) {
+	std::string lastArg = "";
+	for (size_t i = 1; i < args.size(); i++) {
+		std::string arg = args[i];
 
-	if (args.size() > 0) {
-		std::string lastArg = "";
-		for (size_t i = 0; i < args.size(); i++) {
-			std::string arg = args[i];
-
-			if (lastArg == "--project") {
-				argParse.projectPath = arg;
-			} else if (lastArg == "--log-file") {
-				argParse.logFile = arg;
-			}
-#ifdef SW_EDITOR
-			else if (arg == "--no-editor") {
-				argParse.editor = false;
-			}
-#endif
-			else if (arg == "--no-window") {
-				argParse.window = false;
-			}
-
-			lastArg = args[i];
+		if (lastArg == "--project") {
+			argParse.projectPath = arg;
+		} else if (lastArg == "--log-file") {
+			argParse.logFile = arg;
 		}
+#ifdef SW_EDITOR
+		else if (arg == "--no-editor") {
+			argParse.editor = false;
+		}
+#endif
+		else if (arg == "--no-window") {
+			argParse.window = false;
+		}
+
+		lastArg = args[i];
 	}
 }
 
