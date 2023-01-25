@@ -93,13 +93,15 @@ bool Application::Init(int argc, char const *argv[]) {
 	project->Load(argParse.projectPath.c_str());
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
+	unsigned int windowFlags = nmGfx::WindowFlags::NONE;
+	windowFlags = !argParse.window ? windowFlags | nmGfx::WindowFlags::NO_WINDOW : windowFlags;
 	_renderer->Init(
 		project->proj.settings.window.windowsize.x,
 		project->proj.settings.window.windowsize.y,
 		project->proj.settings.window.videosize.x,
 		project->proj.settings.window.videosize.y,
 		project->proj.settings.application.name.c_str(),
-		nmGfx::WindowFlags::NONE);
+		windowFlags);
 	_window._windowHandle = &_renderer->GetWindow();
 	_window.InitWindow(_renderer->GetWindow(), *ctx);
 
@@ -309,6 +311,9 @@ void Application::ParseArgs(int argc, char const *argv[]) {
 				argParse.editor = false;
 			}
 #endif
+			else if (arg == "--no-window") {
+				argParse.window = false;
+			}
 
 			lastArg = args[i];
 		}

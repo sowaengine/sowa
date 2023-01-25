@@ -83,6 +83,7 @@ class Application {
 #endif
 		std::string projectPath{"./"};
 		std::string logFile{""};
+		bool window{true};
 	} argParse;
 };
 } // namespace Sowa
