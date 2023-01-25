@@ -19,6 +19,7 @@
 #include "scene/2d/sprite2d.hpp"
 #include "scene/node.hpp"
 #include "scene/scene.hpp"
+#include "scene/2d/text2d.hpp"
 
 #include "core/input.hpp"
 #include "utils/dialog.hpp"
@@ -105,6 +106,7 @@ bool Application::Init(int argc, char const *argv[]) {
 	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(Res::App_include_res_textures_icon_png_data.data(), Res::App_include_res_textures_icon_png_data.size());
 	_window.SetWindowIcon(icon);
 
+	_renderer->SetBlending(true);
 	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_default2d_glsl_data.data()), Res::App_include_res_shaders_default2d_glsl_data.size()));
 	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_default3d_glsl_data.data()), Res::App_include_res_shaders_default3d_glsl_data.size()));
 	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_fullscreen_glsl_data.data()), Res::App_include_res_shaders_fullscreen_glsl_data.size()));
@@ -122,6 +124,9 @@ bool Application::Init(int argc, char const *argv[]) {
 	RegisterNodeDestructor("Sprite2D", [](Node *node) {
 		Allocator<Sprite2D>::Get().deallocate(reinterpret_cast<Sprite2D *>(node), 1);
 	});
+	RegisterNodeDestructor("Text2D", [](Node *node) {
+		Allocator<Text2D>::Get().deallocate(reinterpret_cast<Text2D *>(node), 1);
+	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
 
@@ -131,10 +136,13 @@ bool Application::Init(int argc, char const *argv[]) {
 	Node2D *node1 = scene->Create<Node2D>("Node1");
 	Node2D *node2 = scene->Create<Node2D>("Node2");
 	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
+	Text2D *node4 = scene->Create<Text2D>("Node4");
 
 	node->AddChild(node1);
 	node->AddChild(node2);
 	node->AddChild(node3);
+	node->AddChild(node4);
+	node4->SetText("Sowa Engine");
 
 	scene->SetRoot(node);
 	SetCurrentScene(scene);
