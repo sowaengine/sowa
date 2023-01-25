@@ -49,6 +49,7 @@ class Application {
 	void RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor);
 	void DestructNode(Node *node);
 
+	std::unique_ptr<nmGfx::Renderer>& RendererHandle() { return _renderer; }
   private:
 	friend class Window;
 	friend class Renderer;
