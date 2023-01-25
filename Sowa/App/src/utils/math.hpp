@@ -6,11 +6,13 @@
 #include <glm/glm.hpp>
 
 namespace Sowa {
-struct Vec2 {
-	float x;
-	float y;
 
-	Vec2(float _x, float _y)
+template <typename T>
+struct Vec2 {
+	T x;
+	T y;
+
+	Vec2(T _x, T _y)
 		: x(_x), y(_y) {
 	}
 
@@ -36,7 +38,7 @@ struct Vec2 {
 		return glm::vec2(x, y);
 	}
 
-	Vec2 &operator=(std::initializer_list<float> rhs) {
+	Vec2 &operator=(std::initializer_list<T> rhs) {
 		if (rhs.size() != 2) {
 			assert(false && "Sowa::Vec2 initializer list must have 2 float elements");
 			return *this;
@@ -51,14 +53,25 @@ struct Vec2 {
 	}
 
 	/// @brief Returns magnitude of vector
-	float Length();
+	float Length() {
+		return sqrt(x * x + y * y);
+	}
 
 	/// @brief returns a vector with same direction with magnitude @param length
-	Vec2 Clamp(float length = 1.0f);
+	T Clamp(float length = 1.0f) {
+		float vecLen = Length();
+		return T((x / vecLen) * length, (y / vecLen) * length);
+	}
 
 	/// @brief returns angle of vector in radians starting from right and rotates clockwise. (1, 0) -> 0 and (0, 1) -> PI / 2
-	float Angle();
+	float Angle() {
+		return atan2(y, x);
+	}
 };
+
+typedef Vec2<float> Vector2;
+typedef Vec2<double> Vector2d;
+
 } // namespace Sowa
 
 #endif // _E_MATH_HPP__

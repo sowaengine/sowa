@@ -15,9 +15,9 @@ class Node2D : public Node {
 	void UpdateDraw() override;
 
   protected:
-	Vec2 _Position{0.f, 0.f};
-	float _Rotation{0.f};
-	Vec2 _Scale{1.f, 1.f};
+	Vector2 _Position{0.f, 0.f};
+	double _Rotation{0.0};
+	Vector2 _Scale{1.f, 1.f};
 };
 } // namespace Sowa
 

@@ -37,8 +37,8 @@ class Window {
 	void UpdateEvents(); // call before polling glfw events
 
 	/* -- Input -- */
-	Vec2 GetMousePosition();
-	Vec2 GetGameMousePosition();
+	Vector2 GetMousePosition();
+	Vector2 GetGameMousePosition();
 
 	bool IsKeyJustPressed(int key);
 	bool IsKeyJustReleased(int key);
