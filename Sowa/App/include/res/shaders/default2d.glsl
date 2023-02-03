@@ -6,12 +6,13 @@ layout (location = 1) in vec2 aTexCoords;
 
 uniform mat4 uModel;
 uniform mat4 uViewProjection;
+uniform vec2 uBaseScale;
 
 out vec2 vTexCoords;
 
 void main()
 {
-    gl_Position = uViewProjection * uModel * vec4(aPos.x, aPos.y, 0.0, 1.0);
+    gl_Position = uViewProjection * uModel * vec4(aPos.x * uBaseScale.x, aPos.y * uBaseScale.y, 0.0, 1.0);
     vTexCoords = aTexCoords;
 }
 

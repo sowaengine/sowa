@@ -48,6 +48,8 @@ class Application {
 
 	void RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor);
 	void DestructNode(Node *node);
+	
+	uint64_t GetFrameCount() { return _FrameCount; }
 
 	std::unique_ptr<nmGfx::Renderer>& RendererHandle() { return _renderer; }
   private:

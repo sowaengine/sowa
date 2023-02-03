@@ -40,6 +40,10 @@ target_precompile_headers(
   "$<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/src/stlpch.hpp>")
 
 add_executable(app ${SW_MAIN})
+target_include_directories(
+  app
+  PRIVATE ${SOWA_INCLUDE_DIRS}
+)
 target_link_libraries(app PUBLIC sowa)
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
