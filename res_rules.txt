@@ -1,2 +1,3 @@
 >App/include/res/textures/*.png
 >App/include/res/shaders/*.glsl
+>App/include/res/*.ttf
