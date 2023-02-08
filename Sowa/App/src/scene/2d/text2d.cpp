@@ -9,8 +9,6 @@
 namespace Sowa {
 Text2D::Text2D() {
 	_NodeType = "Text2D";
-
-	_Font = ResourceLoader::get_singleton().LoadResource<Font>("res://test-font.ttf");
 }
 
 void Text2D::EnterScene() {
