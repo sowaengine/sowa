@@ -79,4 +79,9 @@ void Renderer::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thicknes
 	Application::get_singleton()._renderer->DrawTexture(&texture, mat, color);
 }
 
+
+bool Renderer::LoadFont(Sowa::Font& font, unsigned char* data, unsigned size) {
+	return Application::get_singleton().RendererHandle()->LoadFont(&font._Font, data, size);
+}
+
 } // namespace Sowa

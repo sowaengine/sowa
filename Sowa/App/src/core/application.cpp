@@ -36,6 +36,7 @@
 #include "res/shaders/default3d.glsl.res.hpp"
 #include "res/shaders/fullscreen.glsl.res.hpp"
 #include "res/shaders/skybox.glsl.res.hpp"
+#include "res/Roboto-Medium.ttf.res.hpp"
 
 #include "res/textures/icon.png.res.hpp"
 
@@ -48,7 +49,7 @@ Application::Application() {
 }
 
 Application::~Application() {
-	Project::Of(ctx).Save();
+	// Project::Of(ctx).Save();
 }
 
 bool Application::Init(const std::vector<std::string>& args) {
@@ -119,6 +120,11 @@ bool Application::Init(const std::vector<std::string>& args) {
 	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_fullscreen_glsl_data.data()), Res::App_include_res_shaders_fullscreen_glsl_data.size()));
 	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_skybox_glsl_data.data()), Res::App_include_res_shaders_skybox_glsl_data.size()));
 
+	if(!Renderer::get_singleton().LoadFont(_DefaultFont, Res::App_include_res_Roboto_Medium_ttf_data.data(), (unsigned)Res::App_include_res_Roboto_Medium_ttf_data.size())) {
+		Debug::Error("Failed to load default font");
+		return false;
+	}
+
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
@@ -144,6 +150,9 @@ bool Application::Init(const std::vector<std::string>& args) {
 	Node2D *node2 = scene->Create<Node2D>("Node2");
 	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
 	Text2D *node4 = scene->Create<Text2D>("Node4");
+
+	node3->Scale() = {0.25f, 0.25f};
+	node4->Position() = {200.f, 0.f};
 
 	node->AddChild(node1);
 	node->AddChild(node2);

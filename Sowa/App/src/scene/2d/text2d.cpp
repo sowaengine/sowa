@@ -2,6 +2,7 @@
 
 #include "debug.hpp"
 
+#include "core/application.hpp"
 #include "core/renderer.hpp"
 #include "resource/resource_loader.hpp"
 
@@ -19,9 +20,7 @@ void Text2D::ExitScene() {
 void Text2D::UpdateLogic() {
 }
 void Text2D::UpdateDraw() {
-
-	if (_Font != nullptr) {
-        Renderer::get_singleton().DrawText(CalculateTransform(), _Text, *_Font.get());
-	}
+	Font& fontHandle = _Font != nullptr ? *_Font.get() : Application::get_singleton().GetDefaultFont();
+	Renderer::get_singleton().DrawText(CalculateTransform(), _Text, fontHandle);
 }
 } // namespace Sowa

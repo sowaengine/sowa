@@ -12,6 +12,8 @@
 #include "sowa.hpp"
 #include "utils/math.hpp"
 
+#include "resource/font/font.hpp"
+
 namespace nmGfx {
 class Renderer;
 }
@@ -46,6 +48,8 @@ class Application {
 	inline const Reference<Scene> GetCurrentScene() { return _Scene; }
 	void SetCurrentScene(Reference<Scene> scene);
 
+	Font& GetDefaultFont() { return _DefaultFont; }
+
 	void RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor);
 	void DestructNode(Node *node);
 	
@@ -66,6 +70,8 @@ class Application {
 
 	std::unordered_map<std::string, std::function<void(Node *)>> _NodeTypeDestructors;
 	Reference<Scene> _Scene{nullptr};
+
+	Font _DefaultFont{};
 
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;

@@ -28,6 +28,10 @@ class Renderer {
 	void DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, glm::vec3 color = {1.f, 1.f, 1.f});
 
   private:
+	friend class Application;
+  // Called from Application
+	bool LoadFont(Sowa::Font& font, unsigned char* data, unsigned size);
+
 	Renderer();
 	~Renderer();
 };
