@@ -46,6 +46,7 @@ class Node {
 	void RemoveNode(Node *node);
 	void SetParent(Node *node);
 
+	const std::string& GetNodeType() { return _NodeType; }
   private:
 	friend class Scene;
 	friend class Application;

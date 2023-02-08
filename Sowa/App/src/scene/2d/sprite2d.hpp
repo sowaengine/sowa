@@ -18,7 +18,7 @@ class Sprite2D : public Node2D {
 	void UpdateDraw() override;
 
   private:
-
+	friend class Application;
 	Reference<ImageTexture> _Texture;
 };
 } // namespace Sowa
