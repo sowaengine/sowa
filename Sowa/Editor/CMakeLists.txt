@@ -9,7 +9,7 @@ if(WIN32)
 endif()
 
 add_executable(editor ${EDITOR_SOURCES})
-target_link_libraries(editor PRIVATE sowa -static-libgcc -static-libstdc++
+target_link_libraries(editor PRIVATE nmGfx sowa -static-libgcc -static-libstdc++
                                      ${LD_FLAG_STATIC} ${CMAKE_DL_LIBS})
 target_include_directories(editor PRIVATE ${SOWA_INCLUDE_DIRS})
 
