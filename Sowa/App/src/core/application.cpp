@@ -179,18 +179,18 @@ bool Application::Init(const std::vector<std::string>& args) {
 
 	OnInput() += [this](InputEvent e) {
 		if (e.Type() == InputEventType::MouseMove) {
-			Debug::Log("Mouse Pos: ({},{}), delta: ({},{})", e.mouseMove.posX, e.mouseMove.posY, e.mouseMove.deltaX, e.mouseMove.posY);
+			// Debug::Log("Mouse Pos: ({},{}), delta: ({},{})", e.mouseMove.posX, e.mouseMove.posY, e.mouseMove.deltaX, e.mouseMove.posY);
 		} else if (e.Type() == InputEventType::Key) {
-			Debug::Log("Key Event: key: {}, scancode: {}", e.key.key, e.key.scanCode);
+			// Debug::Log("Key Event: key: {}, scancode: {}", e.key.key, e.key.scanCode);
 			if (e.key.key == GLFW_KEY_ESCAPE) {
 				exit(0);
 			}
 		} else if (e.Type() == InputEventType::Scroll) {
-			Debug::Log("Scroll Event: x: {}, y: {}", e.scroll.scrollX, e.scroll.scrollY);
+			// Debug::Log("Scroll Event: x: {}, y: {}", e.scroll.scrollX, e.scroll.scrollY);
 		} else if (e.Type() == InputEventType::MouseButton) {
-			Debug::Log("Mouse Button Event: button: {}, action: {}, mods: {}", e.mouseButton.button, e.mouseButton.action, e.mouseButton.modifiers);
+			// Debug::Log("Mouse Button Event: button: {}, action: {}, mods: {}", e.mouseButton.button, e.mouseButton.action, e.mouseButton.modifiers);
 		} else if (e.Type() == InputEventType::Character) {
-			Debug::Log("Character Event: codePoint: {}", (char)e.character.codePoint);
+			// Debug::Log("Character Event: codePoint: {}", (char)e.character.codePoint);
 		}
 	};
 
@@ -256,6 +256,8 @@ bool Application::Process() {
 
 		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
 		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
+	} else {
+		((Node2D*)_Scene->GetRoot()->GetChild("Node4"))->Rotation() += 0.2f;
 	}
 	//	}
 	// #endif
@@ -384,16 +386,18 @@ void Application::ParseArgs(const std::vector<std::string>& args) {
 	for (size_t i = 1; i < args.size(); i++) {
 		std::string arg = args[i];
 
-		if (lastArg == "--project") {
+		if (lastArg == "open") {
 			argParse.projectPath = arg;
-		} else if (lastArg == "--log-file") {
+		}
+		if (lastArg == "run") {
+			argParse.projectPath = arg;
+			StartGame();
+		}
+		
+		
+		else if (lastArg == "--log-file") {
 			argParse.logFile = arg;
 		}
-#ifdef SW_EDITOR
-		else if (arg == "--no-editor") {
-			argParse.editor = false;
-		}
-#endif
 		else if (arg == "--no-window") {
 			argParse.window = false;
 		}
