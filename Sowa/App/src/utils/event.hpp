@@ -5,6 +5,9 @@
 #include "stlpch.hpp"
 
 namespace Sowa {
+
+typedef uint32_t EventRegister;
+
 template <typename T>
 class Event {
   public:
@@ -15,20 +18,20 @@ class Event {
 				m_Functions[i](args...);
 	}
 
-	uint32_t operator+=(const std::function<T> &func) {
+	EventRegister operator+=(const std::function<T> &func) {
 		m_IDCounter += 1;
 		m_Functions[m_IDCounter] = func;
 		return m_IDCounter;
 	}
-	void operator-=(uint32_t id) {
+	void operator-=(EventRegister id) {
 		if (m_Functions.count(id) > 0)
 			m_Functions.erase(id);
 	}
 
   private:
-	std::map<uint32_t, std::function<T>> m_Functions;
+	std::map<EventRegister, std::function<T>> m_Functions;
 
-	uint32_t m_IDCounter = 0;
+	EventRegister m_IDCounter = 0;
 };
 } // namespace Sowa
 

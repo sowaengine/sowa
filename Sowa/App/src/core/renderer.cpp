@@ -1,5 +1,5 @@
 #include "core/renderer.hpp"
-#include "resource/texture/texture.hpp"
+#include "resource/texture/image_texture.hpp"
 
 #include "core/application.hpp"
 
@@ -23,6 +23,7 @@ void Renderer::DrawTexture(const glm::vec2 &position, const glm::vec2 &scale, fl
 void Renderer::DrawTexture(const glm::mat4 &transform, Sowa::ImageTexture &texture, const Vector2& scale, uint32_t id /*= 0*/) {
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {scale.x, scale.y});
 	Application::get_singleton()._renderer->DrawTexture(&texture._texture, transform, {1.f, 1.f, 1.f}, id);
+	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {1.f, 1.f});
 }
 
 void Renderer::DrawText(const glm::vec2 &position, float scale, float rotation, const std::string &text, Sowa::Font &font) {
@@ -48,12 +49,18 @@ void Renderer::DrawText(const glm::mat4 &transform, const std::string &text, Sow
 	if (!loaded) {
 		shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_text_glsl_data.data()), Res::App_include_res_shaders_text_glsl_data.size()));
 
-		glm::mat4 projection = nmGfx::CalculateProjectionMatrix(1920, 1080, .5f, .5f, 0.f, 10.f);
-		shader.UniformMat4("projection", projection);
 		shader.UniformVec3("textColor", {1.f, 1.f, 1.f});
 
 		loaded = true;
 	}
+	Application &app = Application::get_singleton();
+
+	glm::mat4 projection = nmGfx::CalculateProjectionMatrix(app.GetWindow().GetVideoWidth(), app.GetWindow().GetVideoHeight(), .5f, .5f, 0.f, 10.f);
+	glm::mat4 camera = app.GetCameraTransform();
+	camera = glm::inverse(camera);
+
+	glm::mat4 view_projection = projection * camera;
+	shader.UniformMat4("projection", view_projection);
 
 	shader.UniformMat4("model", transform);
 	Application::get_singleton()._renderer->DrawText(shader, font._Font, text, 1.f);

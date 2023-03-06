@@ -4,7 +4,7 @@
 #include "GLFW/glfw3.h"
 #include "stlpch.hpp"
 
-#include "resource/texture/texture.hpp"
+#include "resource/texture/image_texture.hpp"
 
 #include "core/application.hpp"
 #include "core/engine_context.hpp"
@@ -19,6 +19,9 @@ Window::~Window() {}
 struct WindowCallback {
 	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 	static void ScrollCallback(GLFWwindow *window, double xOffset, double yOffset);
+	static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+	static void CursorPosCallback(GLFWwindow *window, double xPos, double yPos);
+	static void CharCallback(GLFWwindow *window, unsigned int codePoint);
 };
 
 class WindowAccessor {
@@ -28,6 +31,9 @@ class WindowAccessor {
 
 	WindowAccessor &RegisterKeyEvent(int key, int scancode, int action, int mods);
 	WindowAccessor &RegisterScrollEvent(double xOffset, double yOffset);
+	WindowAccessor &RegisterButtonEvent(int button, int action, int mods);
+	WindowAccessor &RegisterMousePosEvent(double xPos, double yPos);
+	WindowAccessor &RegisterCharEvent(unsigned int codePoint);
 
   private:
 	void LoadContext();
@@ -43,6 +49,9 @@ void Window::InitWindow(nmGfx::Window &window, EngineContext &ctx) {
 	glfwSetWindowUserPointer(_windowHandle->GetGLFWwindow(), reinterpret_cast<void *>(&ctx));
 	glfwSetKeyCallback(_windowHandle->GetGLFWwindow(), &WindowCallback::KeyCallback);
 	glfwSetScrollCallback(_windowHandle->GetGLFWwindow(), &WindowCallback::ScrollCallback);
+	glfwSetMouseButtonCallback(_windowHandle->GetGLFWwindow(), &WindowCallback::MouseButtonCallback);
+	glfwSetCursorPosCallback(_windowHandle->GetGLFWwindow(), &WindowCallback::CursorPosCallback);
+	glfwSetCharCallback(_windowHandle->GetGLFWwindow(), &WindowCallback::CharCallback);
 }
 
 void Window::UpdateEvents() {
@@ -51,6 +60,12 @@ void Window::UpdateEvents() {
 			_KeyStates[key] = KeyState::DOWN;
 		else if (state == KeyState::RELEASED)
 			_KeyStates[key] = KeyState::UP;
+	}
+	for (auto &[button, state] : _ButtonStates) {
+		if (state == ButtonState::PRESSED)
+			_ButtonStates[button] = ButtonState::DOWN;
+		else if (state == ButtonState::RELEASED)
+			_ButtonStates[button] = ButtonState::UP;
 	}
 
 	_ScrollDeltaX = 0.0;
@@ -113,6 +128,20 @@ bool Window::IsKeyDown(int key) {
 }
 bool Window::IsKeyUp(int key) {
 	return _KeyStates[key] == KeyState::UP;
+}
+
+bool Window::IsButtonJustPressed(int button) {
+	return _ButtonStates[button] == ButtonState::PRESSED;
+}
+bool Window::IsButtonJustReleased(int button) {
+	return _ButtonStates[button] == ButtonState::RELEASED;
+}
+
+bool Window::IsButtonDown(int button) {
+	return _ButtonStates[button] == ButtonState::DOWN;
+}
+bool Window::IsButtonUp(int button) {
+	return _ButtonStates[button] == ButtonState::UP;
 }
 
 double Window::GetScrollDeltaY() {
@@ -188,21 +217,91 @@ void WindowAccessor::LoadContext() {
 }
 
 WindowAccessor &WindowAccessor::RegisterKeyEvent(int key, int scancode, int action, int mods) {
-	Sowa::Window &window = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION)->GetWindow();
+	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
+	Sowa::Window &window = app->GetWindow();
 
 	if (action == GLFW_PRESS)
 		window._KeyStates[key] = KeyState::PRESSED;
 	else if (action == GLFW_RELEASE)
 		window._KeyStates[key] = KeyState::RELEASED;
 
+	InputEvent e;
+	e._Type = InputEventType::Key;
+	e.key.key = key;
+	e.key.scanCode = scancode;
+	e.key.action = action;
+	e.key.modifiers = mods;
+
+	app->OnInput().Invoke(e);
 	return *this;
 }
 WindowAccessor &WindowAccessor::RegisterScrollEvent(double xOffset, double yOffset) {
-	Sowa::Window &window = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION)->GetWindow();
+	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
+	Sowa::Window &window = app->GetWindow();
 
-	window._ScrollDeltaY = yOffset;
+	window._ScrollDeltaY += yOffset;
 	window._ScrollDeltaX += xOffset;
 
+	InputEvent e;
+	e._Type = InputEventType::Scroll;
+	e.scroll.scrollX = xOffset;
+	e.scroll.scrollY = yOffset;
+
+	app->OnInput().Invoke(e);
+	return *this;
+}
+
+WindowAccessor &WindowAccessor::RegisterButtonEvent(int button, int action, int mods) {
+	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
+	Sowa::Window &window = app->GetWindow();
+
+	if (action == GLFW_PRESS)
+		window._ButtonStates[button] = ButtonState::PRESSED;
+	else if (action == GLFW_RELEASE)
+		window._ButtonStates[button] = ButtonState::RELEASED;
+
+	InputEvent e;
+	e._Type = InputEventType::MouseButton;
+
+	e.mouseButton.button = button;
+	e.mouseButton.action = action;
+	e.mouseButton.modifiers = mods;
+
+	app->OnInput().Invoke(e);
+	return *this;
+}
+
+WindowAccessor &WindowAccessor::RegisterMousePosEvent(double xPos, double yPos) {
+	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
+	Sowa::Window &window = app->GetWindow();
+
+	double deltaX = window._MousePosX - xPos;
+	double deltaY = window._MousePosY - yPos;
+	window._MousePosX = xPos;
+	window._MousePosY = yPos;
+
+	InputEvent e;
+	e._Type = InputEventType::MouseMove;
+
+	e.mouseMove.deltaX = deltaX;
+	e.mouseMove.deltaY = deltaY;
+	e.mouseMove.posX = xPos;
+	e.mouseMove.posY = yPos;
+
+	app->OnInput().Invoke(e);
+	return *this;
+}
+
+WindowAccessor &WindowAccessor::RegisterCharEvent(unsigned int codePoint) {
+	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
+	Sowa::Window &window = app->GetWindow();
+
+	InputEvent e;
+	e._Type = InputEventType::Character;
+
+	e.character.codePoint = codePoint;
+
+	app->OnInput().Invoke(e);
 	return *this;
 }
 
@@ -214,6 +313,15 @@ void WindowCallback::KeyCallback(GLFWwindow *window, int key, int scancode, int 
 }
 void WindowCallback::ScrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
 	WindowAccessor(window).RegisterScrollEvent(xOffset, yOffset);
+}
+void WindowCallback::MouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+	WindowAccessor(window).RegisterButtonEvent(button, action, mods);
+}
+void WindowCallback::CursorPosCallback(GLFWwindow *window, double xPos, double yPos) {
+	WindowAccessor(window).RegisterMousePosEvent(xPos, yPos);
+}
+void WindowCallback::CharCallback(GLFWwindow *window, unsigned int codePoint) {
+	WindowAccessor(window).RegisterCharEvent(codePoint);
 }
 
 } // namespace Sowa

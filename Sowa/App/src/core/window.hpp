@@ -8,7 +8,7 @@
 #include "sowa.hpp"
 #include "utils/math.hpp"
 
-#include "resource/texture/texture.hpp"
+#include "resource/texture/image_texture.hpp"
 
 namespace nmGfx {
 class Window;
@@ -27,6 +27,12 @@ enum class KeyState : uint32_t {
 	PRESSED,  // key just pressed
 	RELEASED, // key just released
 };
+enum class ButtonState : uint32_t {
+	UP = 0,
+	DOWN,
+	PRESSED,
+	RELEASED,
+};
 
 class Window {
   public:
@@ -44,6 +50,11 @@ class Window {
 	bool IsKeyJustReleased(int key);
 	bool IsKeyDown(int key);
 	bool IsKeyUp(int key);
+
+	bool IsButtonJustPressed(int button);
+	bool IsButtonJustReleased(int button);
+	bool IsButtonDown(int button);
+	bool IsButtonUp(int button);
 
 	double GetScrollDeltaY();
 	double GetScrollDeltaX();
@@ -102,13 +113,17 @@ class Window {
   private:
 	friend class Application;
 	friend class WindowAccessor;
+	friend class Editor;
 
 	nmGfx::Window *_windowHandle{nullptr};
 	EngineContext *_Ctx{nullptr};
 
 	std::map<int, KeyState> _KeyStates{};
+	std::map<int, ButtonState> _ButtonStates{};
 	double _ScrollDeltaY{0.0};
 	double _ScrollDeltaX{0.0};
+	double _MousePosX{0.0};
+	double _MousePosY{0.0};
 };
 } // namespace Sowa
 

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "resource/texture/texture.hpp"
 #include "resource/font/font.hpp"
+#include "resource/texture/image_texture.hpp"
 #include <glm/glm.hpp>
 
 #include "utils/math.hpp"
