@@ -58,9 +58,9 @@ struct Vec2 {
 	}
 
 	/// @brief returns a vector with same direction with magnitude @param length
-	T Clamp(float length = 1.0f) {
+	Vec2<T> Clamp(float length = 1.0f) {
 		float vecLen = Length();
-		return T((x / vecLen) * length, (y / vecLen) * length);
+		return Vec2<T>((x / vecLen) * length, (y / vecLen) * length);
 	}
 
 	/// @brief returns angle of vector in radians starting from right and rotates clockwise. (1, 0) -> 0 and (0, 1) -> PI / 2
