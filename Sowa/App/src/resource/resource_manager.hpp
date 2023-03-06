@@ -9,7 +9,7 @@
 #include "sowa.hpp"
 
 #include "resource/resource_loader.hpp"
-#include "resource/texture/texture.hpp"
+#include "resource/texture/image_texture.hpp"
 
 #include "utils/random.hpp"
 

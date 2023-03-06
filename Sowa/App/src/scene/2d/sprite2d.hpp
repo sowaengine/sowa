@@ -5,7 +5,7 @@
 #include "utils/math.hpp"
 #include "scene/2d/node2d.hpp"
 
-#include "resource/texture/texture.hpp"
+#include "resource/texture/image_texture.hpp"
 
 namespace Sowa {
 class Sprite2D : public Node2D {

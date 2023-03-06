@@ -1,4 +1,4 @@
-#include "resource/texture/texture.hpp"
+#include "resource/texture/image_texture.hpp"
 #include "resource/resource_loader.hpp"
 
 namespace Sowa {
