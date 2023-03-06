@@ -10,6 +10,8 @@
 #include "debug.hpp"
 #include "scene/node.hpp"
 #include "sowa.hpp"
+#include "utils/event.hpp"
+#include "utils/event/input_event.hpp"
 #include "utils/math.hpp"
 
 #include "resource/font/font.hpp"
@@ -56,6 +58,13 @@ class Application {
 	uint64_t GetFrameCount() { return _FrameCount; }
 
 	std::unique_ptr<nmGfx::Renderer>& RendererHandle() { return _renderer; }
+
+	inline void SetAfterRenderCallback(std::function<void()> callback) { _AfterRenderCallback = callback; }
+
+	inline Event<void(InputEvent)> &OnInput() { return _OnInput; }
+
+	glm::mat4 GetCameraTransform();
+
   private:
 	friend class Window;
 	friend class Renderer;
@@ -68,6 +77,8 @@ class Application {
 	Application();
 	~Application();
 
+	std::function<void()> _AfterRenderCallback{nullptr};
+
 	std::unordered_map<std::string, std::function<void(Node *)>> _NodeTypeDestructors;
 	Reference<Scene> _Scene{nullptr};
 
@@ -78,12 +89,18 @@ class Application {
 
 	void Step();
 
+	Event<void(InputEvent)> _OnInput;
+
 	bool _AppRunning = false;
 	uint64_t _FrameCount{0};
 
 	int _SceneCollectInterval{240};
 
 	std::string _ExecutablePath{""};
+
+	// Editor
+	Vector2 _EditorCameraPos{0.f, 0.f};
+	float _EditorCameraSpeed{5.f};
 
 	struct {
 #ifdef SW_EDITOR

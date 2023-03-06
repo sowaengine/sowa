@@ -7,7 +7,8 @@
 
 #include "resource/resource_loader.hpp"
 #include "resource/resource_manager.hpp"
-#include "resource/texture/texture.hpp"
+#include "resource/texture/image_texture.hpp"
+#include "resource/texture/ninepatch_texture.hpp"
 
 #include "core/engine_context.hpp"
 #include "core/export_generator.hpp"
@@ -15,11 +16,12 @@
 #include "core/renderer.hpp"
 #include "core/window.hpp"
 
+#include "scene/2d/ninepatchrect.hpp"
 #include "scene/2d/node2d.hpp"
 #include "scene/2d/sprite2d.hpp"
+#include "scene/2d/text2d.hpp"
 #include "scene/node.hpp"
 #include "scene/scene.hpp"
-#include "scene/2d/text2d.hpp"
 
 #include "core/input.hpp"
 #include "utils/dialog.hpp"
@@ -51,6 +53,8 @@ Application::Application() {
 Application::~Application() {
 	// Project::Of(ctx).Save();
 }
+
+static Reference<NinePatchTexture> s_NinePatch;
 
 bool Application::Init(const std::vector<std::string>& args) {
 	SW_ENTRY()
@@ -140,6 +144,9 @@ bool Application::Init(const std::vector<std::string>& args) {
 	RegisterNodeDestructor("Text2D", [](Node *node) {
 		Allocator<Text2D>::Get().deallocate(reinterpret_cast<Text2D *>(node), 1);
 	});
+	RegisterNodeDestructor("NinePatchRect", [](Node *node) {
+		Allocator<NinePatchRect>::Get().deallocate(reinterpret_cast<NinePatchRect *>(node), 1);
+	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
 
@@ -151,6 +158,12 @@ bool Application::Init(const std::vector<std::string>& args) {
 	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
 	Text2D *node4 = scene->Create<Text2D>("Node4");
 
+	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://image.png");
+	NinePatchRect *button = scene->Create<NinePatchRect>("Button");
+	button->Texture() = s_NinePatch;
+	button->Position().x = 400;
+	button->Scale() = {.25f, .25f};
+
 	node3->Scale() = {0.25f, 0.25f};
 	node4->Position() = {200.f, 0.f};
 
@@ -158,10 +171,28 @@ bool Application::Init(const std::vector<std::string>& args) {
 	node->AddChild(node2);
 	node->AddChild(node3);
 	node->AddChild(node4);
+	node->AddChild(button);
 	node4->SetText("Sowa Engine");
 
 	scene->SetRoot(node);
 	SetCurrentScene(scene);
+
+	OnInput() += [this](InputEvent e) {
+		if (e.Type() == InputEventType::MouseMove) {
+			Debug::Log("Mouse Pos: ({},{}), delta: ({},{})", e.mouseMove.posX, e.mouseMove.posY, e.mouseMove.deltaX, e.mouseMove.posY);
+		} else if (e.Type() == InputEventType::Key) {
+			Debug::Log("Key Event: key: {}, scancode: {}", e.key.key, e.key.scanCode);
+			if (e.key.key == GLFW_KEY_ESCAPE) {
+				exit(0);
+			}
+		} else if (e.Type() == InputEventType::Scroll) {
+			Debug::Log("Scroll Event: x: {}, y: {}", e.scroll.scrollX, e.scroll.scrollY);
+		} else if (e.Type() == InputEventType::MouseButton) {
+			Debug::Log("Mouse Button Event: button: {}, action: {}, mods: {}", e.mouseButton.button, e.mouseButton.action, e.mouseButton.modifiers);
+		} else if (e.Type() == InputEventType::Character) {
+			Debug::Log("Character Event: codePoint: {}", (char)e.character.codePoint);
+		}
+	};
 
 	return true;
 }
@@ -174,26 +205,60 @@ bool Application::Process() {
 	if (_window.ShouldClose())
 		return false;
 
+	// if not editor
+	Vector2 editorCameraVelocity = {0.f, 0.f};
+	if (_window.IsKeyDown(GLFW_KEY_RIGHT)) {
+		if (_window.IsKeyDown(GLFW_KEY_LEFT_SHIFT)) {
+			_EditorCameraSpeed = MAX(_EditorCameraSpeed + 0.1f, 0.2f);
+		} else {
+			editorCameraVelocity.x += 1.f;
+		}
+	}
+	if (_window.IsKeyDown(GLFW_KEY_LEFT)) {
+		if (_window.IsKeyDown(GLFW_KEY_LEFT_SHIFT)) {
+			_EditorCameraSpeed = MAX(_EditorCameraSpeed - 0.1f, 0.2f);
+		} else {
+			editorCameraVelocity.x -= 1.f;
+		}
+	}
+	if (_window.IsKeyDown(GLFW_KEY_UP)) {
+		editorCameraVelocity.y += 1.f;
+	}
+	if (_window.IsKeyDown(GLFW_KEY_DOWN)) {
+		editorCameraVelocity.y -= 1.f;
+	}
+	if (editorCameraVelocity.Length() > 1.f) {
+		editorCameraVelocity = editorCameraVelocity.Clamp();
+	}
+	_EditorCameraPos.x += editorCameraVelocity.x * _EditorCameraSpeed;
+	_EditorCameraPos.y += editorCameraVelocity.y * _EditorCameraSpeed;
+
 	if (_Scene != nullptr) {
 		_Scene->UpdateLogic();
 	}
 
 	_renderer->Begin2D(
-		nmGfx::CalculateModelMatrix(
-			glm::vec3{0.f, 0.f, 0.f},
-			0.f,
-			glm::vec3{1.f, 1.f, 1.f}),
+		GetCameraTransform(),
 		{0.5f, 0.5f},
 		{0.2f, 0.2f, 0.2f, 1.f});
 
-#ifdef SW_EDITOR
-	if (argParse.editor) {
-		if (!_AppRunning) {
-			Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
-			Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
-		}
+	// #ifdef SW_EDITOR
+	//	if (argParse.editor) {
+	if (!_AppRunning) {
+		// Draw center cursor
+		float centerX, centerY;
+		float cursorSize = 5.f;
+		float cursorThickness = 4.f;
+		centerX = _EditorCameraPos.x;
+		centerY = _EditorCameraPos.y;
+		Renderer::get_singleton().DrawLine({centerX - cursorSize, centerY}, {centerX + cursorSize, centerY}, cursorThickness, {1.f, 1.f, 0.f});
+		Renderer::get_singleton().DrawLine({centerX, centerY - cursorSize}, {centerX, centerY + cursorSize}, cursorThickness, {1.f, 1.f, 0.f});
+
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
 	}
-#endif
+	//	}
+	// #endif
 	if (_Scene != nullptr) {
 		_Scene->UpdateDraw();
 	}
@@ -203,12 +268,22 @@ bool Application::Process() {
 	_renderer->ClearLayers();
 	_renderer->Draw2DLayer();
 
+	if (_AfterRenderCallback != nullptr) {
+		_AfterRenderCallback();
+	}
+
 	_renderer->GetWindow().SwapBuffers();
 
 	Step();
 	return true;
 }
 
+glm::mat4 Application::GetCameraTransform() {
+	return nmGfx::CalculateModelMatrix(
+		glm::vec3{_EditorCameraPos.x, _EditorCameraPos.y, 0.f},
+		0.f,
+		glm::vec3{1.f, 1.f, 1.f});
+}
 void Application::StartGame() {
 	if (_AppRunning)
 		return;
