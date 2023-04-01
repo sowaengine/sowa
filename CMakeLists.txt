@@ -17,6 +17,21 @@ set(SOWA_VER_TAG_REV    1)  # max: 15
 
 # {major}.{minor}.{patch}-{tag}{rev}
 set(CMAKE_PROJECT_VERSION "${SOWA_VER_MAJOR}.${SOWA_VER_MINOR}.${SOWA_VER_PATCH}-${SOWA_VER_TAG}${SOWA_VER_TAG_REV}")
+if("${SOWA_VER_MAJOR}" STREQUAL "") 
+  set(SOWA_VER_MAJOR 0)
+endif()
+if("${SOWA_VER_MINOR}" STREQUAL "") 
+  set(SOWA_VER_MINOR 0)
+endif()
+if("${SOWA_VER_PATCH}" STREQUAL "") 
+  set(SOWA_VER_PATCH 0)
+endif()
+if("${SOWA_VER_TAG}" STREQUAL "") 
+  set(SOWA_VER_TAG 0)
+endif()
+if("${SOWA_VER_TAG_REV}" STREQUAL "") 
+  set(SOWA_VER_TAG_REV 0)
+endif()
 #   MAJOR       MINOR       PATCH      TAG REV
 # 0000'0000   0000'0000   0000'0000   0000'0000
 math(EXPR SOWA_VER_NUMBER "
