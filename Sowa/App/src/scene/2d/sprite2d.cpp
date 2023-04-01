@@ -10,8 +10,6 @@
 namespace Sowa {
 Sprite2D::Sprite2D() {
 	_NodeType = "Sprite2D";
-
-	_Texture = ResourceLoader::get_singleton().LoadResource<ImageTexture>("res://image.png");
 }
 
 void Sprite2D::EnterScene() {

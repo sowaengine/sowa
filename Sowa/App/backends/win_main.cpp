@@ -11,7 +11,9 @@ int main(int argc, char const *argv[]) {
 		args.push_back(argv[i]);
 
 	Sowa::Application &app = Sowa::Application::get_singleton();
-	app.Init(args);
+	if(!app.Init(argc, argv)) {
+		return 0;
+	}
 
 	try {
 		while (app.Process())

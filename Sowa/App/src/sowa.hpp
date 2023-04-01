@@ -3,12 +3,32 @@
 #pragma once
 
 #include "stlpch.hpp"
+#define STR_(x) #x
+#define STR(x) STR_(x)
 
-#define SOWA_VERSION_MAJOR 0
-#define SOWA_VERSION_MINOR 1
-#define SOWA_VERSION_PATCH 1
+#ifndef SOWA_VERSION_MAJOR
+    #define SOWA_VERSION_MAJOR
+#endif
+#ifndef SOWA_VERSION_MINOR
+    #define SOWA_VERSION_MINOR
+#endif
+#ifndef SOWA_VERSION_PATCH
+    #define SOWA_VERSION_PATCH
+#endif
+#ifndef SOWA_VERSION_TAG
+    #define SOWA_VERSION_TAG
+#endif
+#ifndef SOWA_VERSION_TAG_REV
+    #define SOWA_VERSION_TAG_REV
+#endif
 
-#define SOWA_VERSION_STRING "0.1.1"
+#ifndef SOWA_VERSION
+    #define SOWA_VERSION ""
+#endif
+#ifndef SOWA_VERSION_NUMBER
+    #define SOWA_VERSION_NUMBER ""
+#endif
+
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -39,6 +59,9 @@ enum class Server : uint32_t {
 	APPLICATION,
 	PROJECT,
 };
+
+#define FILE_BUFFER_CHAR(f) reinterpret_cast<char *>(f.data()), f.size()
+#define FILE_BUFFER(f) (f.data()), f.size()
 
 } // namespace Sowa
 
