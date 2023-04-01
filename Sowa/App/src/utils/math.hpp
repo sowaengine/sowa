@@ -7,6 +7,27 @@
 
 namespace Sowa {
 
+struct Size {
+	int w;
+	int h;
+
+	Size() : w(0), h(0) {}
+	Size(int w, int h) : w(w), h(h) {}
+	Size &operator=(std::initializer_list<int> rhs) {
+		if (rhs.size() != 2) {
+			assert(false && "Sowa::Size initializer list must have 2 int elements");
+			return *this;
+		}
+
+		auto it = rhs.begin();
+		w = *it;
+		++it;
+		h = *it;
+
+		return *this;
+	}
+};
+
 template <typename T>
 struct Vec2 {
 	T x;
