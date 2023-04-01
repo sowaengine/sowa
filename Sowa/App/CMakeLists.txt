@@ -32,6 +32,7 @@ target_link_libraries(
           fmt
           -static-libgcc
           -static-libstdc++
+          yaml-cpp
           ${LD_FLAG_STATIC}
           ${CMAKE_DL_LIBS})
 target_include_directories(lsowa PRIVATE ${SOWA_INCLUDE_DIRS})
@@ -47,7 +48,8 @@ target_include_directories(
 target_link_libraries(sowa PUBLIC lsowa)
 set_target_properties(sowa
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin/"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../pkg/bin/main/"
+    RUNTIME_OUTPUT_NAME "sowa-${CMAKE_PROJECT_VERSION}-${SOWA_VER_NUMBER}"
 )
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
@@ -56,16 +58,4 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
 elseif(CMAKE_BUILD_TYPE MATCHES Debug)
   target_compile_options(sowa PRIVATE -O0 -g)
   target_compile_options(lsowa PRIVATE -O0 -g)
-endif()
-
-# Platform detection
-if(WIN32)
-  target_compile_definitions(sowa PRIVATE SW_WINDOWS)
-  target_compile_definitions(lsowa PRIVATE SW_WINDOWS)
-elseif(UNIX AND NOT APPLE)
-  target_compile_definitions(sowa PRIVATE SW_LINUX)
-  target_compile_definitions(lsowa PRIVATE SW_LINUX)
-else()
-  message(FATAL_ERROR "Sowa Engine is not supported on target platform "
-                      ${CMAKE_SYSTEM})
 endif()

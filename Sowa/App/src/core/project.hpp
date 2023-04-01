@@ -4,10 +4,10 @@
 
 #include "core/engine_context.hpp"
 #include "utils/math.hpp"
+#include "serialize/serializer.hpp"
 
-namespace pugi {
-class xml_document;
-}
+#include "yaml-cpp/yaml.h"
+
 
 namespace Sowa {
 class Project {
@@ -22,7 +22,7 @@ class Project {
 
 	std::filesystem::path _ProjectPath{""};
 
-	std::unique_ptr<pugi::xml_document> _Doc{};
+	YamlNode m_Doc{};
 
 	struct {
 		struct {
@@ -34,18 +34,17 @@ class Project {
 			} application;
 			struct {
 				bool fullscreen{false};
-				Vector2 windowsize{1280.f, 720.f};
-				Vector2 videosize{1920.f, 1080.f};
+				Size windowsize{1280, 720};
+				Size videosize{1920, 1080};
 			} window;
 		} settings;
 	} proj;
 
   private:
 	friend class Application;
+	friend class Serializer<Project>;
 	Project(EngineContext &ctx);
 	~Project();
-
-	bool v1LoadProject();
 
   public:
 	Project(const Project &) = delete;
@@ -53,6 +52,13 @@ class Project {
 	Project &operator=(const Project &) = delete;
 	Project &operator=(const Project &&) = delete;
 };
+
+template <>
+YamlNode Serializer<Project>::Save(const Project &in);
+template <>
+bool Serializer<Project>::Load(Project &out, const YAML::Node &doc);
+
+
 } // namespace Sowa
 
 #endif // _E_PROJECT_HPP__
