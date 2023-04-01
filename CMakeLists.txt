@@ -77,7 +77,7 @@ endif()
 
 
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty)
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty EXCLUDE_FROM_ALL)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/Sowa)
 add_subdirectory(${CMAKE_SOURCE_DIR}/runner)

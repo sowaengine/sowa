@@ -1,5 +1,6 @@
 .vscode/
 bin/
+pkg/
 
 # Prerequisites
 *.d

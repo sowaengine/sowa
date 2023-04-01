@@ -1,0 +1,9 @@
+ActiveVersion: latest
+Servers:
+  main: https://raw.githubusercontent.com/sowaengine/sowa/data/versions.yml
+AutoUpdate:
+  CheckUpdates: true
+  LastUpdateCheck: 0
+  ActiveBranches:
+    - main
+  CheckFrequency: 86400
