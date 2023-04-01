@@ -1,0 +1,5 @@
+
+
+ActiveVersion: 0.1.1-a1
+Servers:
+- https://raw.githubusercontent.com/sowaengine/sowa/data/versions.yml
