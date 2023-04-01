@@ -34,6 +34,8 @@
 #include "nmGfx/src/Core/nm_Renderer.hpp"
 #include "nmGfx/src/Core/nm_Window.hpp"
 
+#include "argparser/arg_parser.hpp"
+
 #include "res/shaders/default2d.glsl.res.hpp"
 #include "res/shaders/default3d.glsl.res.hpp"
 #include "res/shaders/fullscreen.glsl.res.hpp"
@@ -48,24 +50,25 @@
 
 namespace Sowa {
 Application::Application() {
+	SW_ENTRY()
 }
 
 Application::~Application() {
-	// Project::Of(ctx).Save();
+	SW_ENTRY()
 }
 
 static Reference<NinePatchTexture> s_NinePatch;
 
-bool Application::Init(const std::vector<std::string>& args) {
+bool Application::Init(int argc, char const** argv) {
 	SW_ENTRY()
 	using namespace Debug;
 
-	if (args.size() == 0) {
+	if (argc == 0) {
 		Debug::Log("Application::Init expects at least one argument (argv[0]");
 		return false;
 	}
 
-	_ExecutablePath = args[0];
+	_ExecutablePath = argv[0];
 	ctx = EngineContext::CreateContext();
 
 	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
@@ -73,7 +76,9 @@ bool Application::Init(const std::vector<std::string>& args) {
 	Project *project = new Project(*ctx);
 	ctx->RegisterSingleton<Project>(Sowa::Server::PROJECT, *project);
 
-	ParseArgs(args);
+	if(!ParseArgs(argc, argv)) {
+		return false;
+	}
 
 	Sowa::File::InsertFilepathEndpoint("abs", "./");
 	Sowa::File::InsertFilepathEndpoint("res", argParse.projectPath);
@@ -100,31 +105,33 @@ bool Application::Init(const std::vector<std::string>& args) {
 	streams.Add((uint32_t)LogLevel::Warn, reinterpret_cast<std::ostream *>(&tempStream));
 	streams.Add((uint32_t)LogLevel::Error, reinterpret_cast<std::ostream *>(&tempStream));
 
-	project->Load(argParse.projectPath.c_str());
+	if(!project->Load(argParse.projectPath.c_str())) {
+		return false;
+	}
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
 	unsigned int windowFlags = nmGfx::WindowFlags::NONE;
 	windowFlags = !argParse.window ? windowFlags | nmGfx::WindowFlags::NO_WINDOW : windowFlags;
 	_renderer->Init(
-		project->proj.settings.window.windowsize.x,
-		project->proj.settings.window.windowsize.y,
-		project->proj.settings.window.videosize.x,
-		project->proj.settings.window.videosize.y,
+		project->proj.settings.window.windowsize.w,
+		project->proj.settings.window.windowsize.h,
+		project->proj.settings.window.videosize.w,
+		project->proj.settings.window.videosize.h,
 		project->proj.settings.application.name.c_str(),
 		windowFlags);
 	_window._windowHandle = &_renderer->GetWindow();
 	_window.InitWindow(_renderer->GetWindow(), *ctx);
 
-	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(Res::App_include_res_textures_icon_png_data.data(), Res::App_include_res_textures_icon_png_data.size());
+	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(FILE_BUFFER(Res::App_include_res_textures_icon_png_data));
 	_window.SetWindowIcon(icon);
 
 	_renderer->SetBlending(true);
-	_renderer->GetData2D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_default2d_glsl_data.data()), Res::App_include_res_shaders_default2d_glsl_data.size()));
-	_renderer->GetData3D()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_default3d_glsl_data.data()), Res::App_include_res_shaders_default3d_glsl_data.size()));
-	_renderer->GetDataFullscreen()._shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_fullscreen_glsl_data.data()), Res::App_include_res_shaders_fullscreen_glsl_data.size()));
-	_renderer->GetData3D()._skyboxShader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_skybox_glsl_data.data()), Res::App_include_res_shaders_skybox_glsl_data.size()));
+	_renderer->GetData2D()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_glsl_data)));
+	_renderer->GetData3D()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default3d_glsl_data)));
+	_renderer->GetDataFullscreen()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_glsl_data)));
+	_renderer->GetData3D()._skyboxShader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_skybox_glsl_data)));
 
-	if(!Renderer::get_singleton().LoadFont(_DefaultFont, Res::App_include_res_Roboto_Medium_ttf_data.data(), (unsigned)Res::App_include_res_Roboto_Medium_ttf_data.size())) {
+	if(!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
 		Debug::Error("Failed to load default font");
 		return false;
 	}
@@ -148,7 +155,7 @@ bool Application::Init(const std::vector<std::string>& args) {
 		Allocator<NinePatchRect>::Get().deallocate(reinterpret_cast<NinePatchRect *>(node), 1);
 	});
 
-	Debug::Info("Sowa Engine v{}", SOWA_VERSION_STRING);
+	Debug::Info("Sowa Engine v{}", SOWA_VERSION);
 
 	Reference<Scene> scene = Scene::New();
 	Node2D *node = scene->Create<Node2D>("New Node");
@@ -193,7 +200,9 @@ bool Application::Init(const std::vector<std::string>& args) {
 			// Debug::Log("Character Event: codePoint: {}", (char)e.character.codePoint);
 		}
 	};
-
+	if(argParse.autoStart) {
+		StartGame();
+	}
 	return true;
 }
 
@@ -281,32 +290,38 @@ bool Application::Process() {
 }
 
 glm::mat4 Application::GetCameraTransform() {
+	SW_ENTRY()
 	return nmGfx::CalculateModelMatrix(
 		glm::vec3{_EditorCameraPos.x, _EditorCameraPos.y, 0.f},
 		0.f,
 		glm::vec3{1.f, 1.f, 1.f});
 }
 void Application::StartGame() {
+	SW_ENTRY()
 	if (_AppRunning)
 		return;
 	_AppRunning = true;
 }
 
 void Application::UpdateGame() {
+	SW_ENTRY()
 }
 
 void Application::StopGame() {
+	SW_ENTRY()
 	if (!_AppRunning)
 		return;
 	_AppRunning = false;
 }
 
 Reference<Scene> Application::LoadScene(const char *path) {
+	SW_ENTRY()
 	Debug::Error("Application::LoadScene() not implemented");
 	return nullptr;
 }
 
 void Application::SetCurrentScene(Reference<Scene> scene) {
+	SW_ENTRY()
 	_Scene = scene;
 	if (_Scene != nullptr) {
 		_Scene->Enter();
@@ -314,9 +329,11 @@ void Application::SetCurrentScene(Reference<Scene> scene) {
 }
 
 void Application::RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor) {
+	SW_ENTRY()
 	_NodeTypeDestructors[nodeType] = dtor;
 }
 void Application::DestructNode(Node *node) {
+	SW_ENTRY()
 	Debug::Log("Delete node '{}':'{}'", node->Name(), node->_NodeType);
 
 	for (Node *child : node->GetChildren()) {
@@ -330,6 +347,7 @@ void Application::DestructNode(Node *node) {
 }
 
 void Application::Step() {
+	SW_ENTRY()
 	_FrameCount++;
 
 	if (_FrameCount % _SceneCollectInterval == 0) {
@@ -340,70 +358,34 @@ void Application::Step() {
 }
 
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
+	SW_ENTRY()
 	return _renderer->GetData2D()._frameBuffer.GetAlbedoID();
 }
 
-#if defined(SW_LINUX)
-void Application::LaunchApp(const std::string &projectPath) {
-	_AppRunning = false;
-
-	std::filesystem::path project = projectPath;
-	project = project.parent_path();
-
-	if (execl(_ExecutablePath.c_str(), "--project", project.string().c_str(), "--module", "abs://Editor/Sowa.Editor.lua", (char *)0) == -1) {
-		Debug::Error("Failed to launch project");
+bool Application::ParseArgs(int argc, char const** argv) {
+	SW_ENTRY()
+	auto args = ArgParser(argc - 1, argv + 1);
+	
+	auto openOpt = args.GetOption("project");
+	if(openOpt.value != "") {
+		argParse.projectPath = openOpt.value;
 	}
-}
-#elif defined(SW_WINDOWS)
-void Application::LaunchApp(const std::string &projectPath) {
-	std::filesystem::path project = projectPath;
-	project = project.parent_path();
-
-	std::string appPath = _ExecutablePath;
-	Debug::Log("{} --project {}", appPath, project.string());
-
-	std::string params = Format("--project {} --module abs://Editor/Sowa.Editor.lua", project.string());
-
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	ZeroMemory(&si, sizeof(si));
-	si.cb = sizeof(si);
-	ZeroMemory(&pi, sizeof(pi));
-
-	if (!CreateProcess((LPSTR)appPath.c_str(), (LPSTR)params.c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
-		Debug::Error("Failed to launch project");
+	auto logFileOpt = args.GetOption("log-file");
+	if(logFileOpt.value != "") {
+		argParse.logFile = logFileOpt.value;
 	}
 
-	exit(EXIT_SUCCESS);
-}
-#else
-#error "Sowa::Application::LaunchApp() is not implemented in current platform"
-#endif
-
-void Application::ParseArgs(const std::vector<std::string>& args) {
-	std::string lastArg = "";
-	for (size_t i = 1; i < args.size(); i++) {
-		std::string arg = args[i];
-
-		if (lastArg == "open") {
-			argParse.projectPath = arg;
-		}
-		if (lastArg == "run") {
-			argParse.projectPath = arg;
-			StartGame();
-		}
-		
-		
-		else if (lastArg == "--log-file") {
-			argParse.logFile = arg;
-		}
-		else if (arg == "--no-window") {
-			argParse.window = false;
-		}
-
-		lastArg = args[i];
+	if(args.HasFlag("--version") || args.HasFlag("v")) {
+		std::cout << "Sowa Engine " SOWA_VERSION_TAG << std::endl;
+		return false;
 	}
+	if(args.HasFlag("no-window")) {
+		argParse.window = false;
+	}
+	if(args.HasFlag("run")) {
+		argParse.autoStart = true;
+	}
+	return true;
 }
 
 } // namespace Sowa

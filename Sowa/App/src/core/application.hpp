@@ -31,7 +31,7 @@ class Application {
 		return app;
 	}
 
-	bool Init(const std::vector<std::string>& args);
+	bool Init(int argc, char const** argv);
 	bool Process();
 
 	Window &GetWindow() { return _window; }
@@ -69,7 +69,7 @@ class Application {
 	friend class Window;
 	friend class Renderer;
 
-	void ParseArgs(const std::vector<std::string>& args);
+	bool ParseArgs(int argc, char const** argv);
 	Debug::ScopeTimer _AppTime = Debug::ScopeTimer("Application");
 
 	Sowa::EngineContext *ctx{nullptr};
@@ -103,12 +103,10 @@ class Application {
 	float _EditorCameraSpeed{5.f};
 
 	struct {
-#ifdef SW_EDITOR
-		bool editor = true;
-#endif
 		std::string projectPath{"./"};
 		std::string logFile{""};
 		bool window{true};
+		bool autoStart{false};
 	} argParse;
 };
 } // namespace Sowa
