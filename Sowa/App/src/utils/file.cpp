@@ -66,7 +66,7 @@ std::vector<unsigned char> GetFileContent(const char *path) {
 			ifstream.read((char *)buffer.data(), fileSize);
 			return buffer;
 		} else {
-			throw std::runtime_error(std::string("File not found: ") + path);
+			throw std::runtime_error(std::string("File not found: ") + fullpath.string());
 		}
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << '\n';
