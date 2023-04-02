@@ -75,7 +75,8 @@ else()
                       ${CMAKE_SYSTEM})
 endif()
 
-
+set(BUILD_SHARED_LIBS OFF)
+set(YAML_BUILD_SHARED_LIBS OFF)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty EXCLUDE_FROM_ALL)
 
