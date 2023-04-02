@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <filesystem>
 #include <unordered_map>
 
 struct VersionServer {
@@ -23,7 +24,8 @@ struct RunnerConfig {
     std::vector<std::string> activeBranches;
     uint32_t checkFrequency;
 };
-void LoadConfig();
+// appPath is used if ./runnerconfig.yml does not exitst
+void LoadConfig(std::filesystem::path appPath);
 void SaveConfig();
 
 RunnerConfig& GetConfig();

@@ -11,4 +11,12 @@ std::vector<std::string> GetAllVersions(std::string url);
 
 std::vector<Version> ParseVersions(std::string yamlDoc);
 
+/*
+    1.0  -----------> 1.0.0-stable
+    0.1.1-a1-65809 -> 0.1.1-a1
+*/
+std::string ResolveVersion(std::string version);
+
+void GetVersionsFromServer();
+
 #endif

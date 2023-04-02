@@ -18,13 +18,7 @@ void CommandList(std::filesystem::path appPath, bool isLocal) {
 		std::cout << std::endl;
 	} else {
 		std::cout << "Available sowa versions:\n";
-		for(const VersionServer& s : GetConfig().servers) {
-			std::string content = GetFileHTTP(s.url);
-			std::vector<Version> versions = ParseVersions(content);
-			for(const Version& v : versions) {
-				GetRuntimeConfig().versions[s.name].push_back(v);
-			}
-		}
+		GetVersionsFromServer();
 
 		for(const auto &[server, versions] : GetRuntimeConfig().versions) {
 			std::cout << "Fetched From " << server << ":" << std::endl;

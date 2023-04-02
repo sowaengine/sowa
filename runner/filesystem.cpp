@@ -44,8 +44,8 @@ std::string GetLatestVersion(std::filesystem::path binPath) {
     for(const auto entry : std::filesystem::directory_iterator(binPath)) {
         if(entry.is_directory())
             continue;
-
-        auto tokens = Split(entry.path().filename(), "-");
+        
+        auto tokens = Split(entry.path().filename().string(), "-");
         if(tokens.size() == 0)
             continue;
         

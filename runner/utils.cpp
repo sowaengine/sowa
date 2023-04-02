@@ -18,7 +18,7 @@ std::vector<std::string> Split(std::string text, const std::string &delimiter) {
 }
 
 std::vector<std::string> GetAllVersions(std::string url) {
-	std::string content = GetFileHTTP(url);
+	std::string content = GetContentHTTP(url);
 	std::cout << "Got Content: " << content << std::endl;
 	return {};
 }
@@ -44,4 +44,41 @@ std::vector<Version> ParseVersions(std::string yamlDoc) {
 	}
 
 	return versions;
+}
+
+/*
+    1.0  -----------> 1.0.0-stable
+    0.1.1-a1-65809 -> 0.1.1-a1
+*/
+std::string ResolveVersion(std::string version) {
+    auto tokens = Split(version, ".");
+    if(tokens.size() == 1) {
+        return version + ".0.0-stable";
+    }
+    if(tokens.size() == 2) {
+        return version + ".0-stable";
+    }
+    if(tokens.size() == 3) {
+        auto rhsTokens = Split(tokens[2], "-");
+        if(rhsTokens.size() == 1) {
+            return version + "-stable";
+        }
+        if(rhsTokens.size() == 3) {
+            //       0          .       1         .         1          .       a1
+            return tokens[0] + "." + tokens[1] + "." + rhsTokens[0] + "-" + rhsTokens[1];
+        }
+    }
+    
+    return version;
+}
+
+
+void GetVersionsFromServer() {
+    for(const VersionServer& s : GetConfig().servers) {
+        std::string content = GetContentHTTP(s.url);
+        std::vector<Version> versions = ParseVersions(content);
+        for(const Version& v : versions) {
+            GetRuntimeConfig().versions[s.name].push_back(v);
+        }
+    }
 }

@@ -2,12 +2,23 @@
 #include "yaml-cpp/yaml.h"
 #include <fstream>
 #include <iostream>
+#include "console.hpp"
 
 static RunnerConfig cfg{};
 static RuntimeConfig runtimeCfg{};
 
-void LoadConfig() {
-	YAML::Node config = YAML::LoadFile("./runnerconfig.yml");
+void LoadConfig(std::filesystem::path appPath) {
+	YAML::Node config;
+	try {
+		config = YAML::LoadFile("./runnerconfig.yml");
+	} catch (const std::exception &e) {
+		try {
+			config = YAML::LoadFile((appPath / "runnerconfig.yml").string());
+		} catch (const std::exception &e) {
+			std::cerr << "Failed to load config file!\n" << RED << e.what() << RESET << '\n';
+			exit(0);
+		}
+	}
 
 	cfg.activeVersion = config["ActiveVersion"].as<std::string>("latest");
 
@@ -15,9 +26,9 @@ void LoadConfig() {
 	for (YAML::const_iterator it = servers.begin(); it != servers.end(); ++it) {
 		std::string key = it->first.as<std::string>("");
 		std::string value = it->second.as<std::string>("");
-        cfg.servers.push_back(VersionServer(key, value));
+		cfg.servers.push_back(VersionServer(key, value));
 
-        runtimeCfg.versions[key] = {};
+		runtimeCfg.versions[key] = {};
 	}
 
 	YAML::Node autoUpdate = config["AutoUpdate"];
@@ -31,7 +42,7 @@ void SaveConfig() {
 
 	doc["ActiveVersion"] = cfg.activeVersion;
 	YAML::Node servers;
-	for(auto s : cfg.servers) {
+	for (auto s : cfg.servers) {
 		servers[s.name] = s.url;
 	}
 	doc["Servers"] = servers;

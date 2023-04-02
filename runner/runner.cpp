@@ -16,7 +16,7 @@ std::filesystem::path appPath;
 int main(int argc, char const *argv[]) {
 	auto args = ArgParser(argc - 1, argv + 1);
 	appPath = GetExecutableDir();
-	LoadConfig();
+	LoadConfig(appPath);
 	auto& cfg = GetConfig();
 	if(cfg.checkUpdates) {
 		if(cfg.lastUpdateCheck < time(nullptr) - cfg.checkFrequency) {
@@ -50,6 +50,12 @@ int main(int argc, char const *argv[]) {
 		CommandUpdate();
 		exit(0);
 	}
+
+	if(args.HasFlag("install") && args.GetParameters().size() == 1) {
+		InstallVersion(args.GetParameters()[0]);
+		exit(0);
+	}
+
 	auto autoUpdateOpt = args.GetOption("auto-update");
 	if(autoUpdateOpt.value != "") {
 		GetConfig().checkUpdates = autoUpdateOpt.As<bool>();
