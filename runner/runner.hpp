@@ -6,4 +6,6 @@
 #endif
 #define RUNNER_VERSION "0.1"
 
+#define APP_NAME "sowa"
+
 #endif

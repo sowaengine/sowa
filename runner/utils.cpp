@@ -53,7 +53,13 @@ std::vector<Version> ParseVersions(std::string yamlDoc) {
 std::string ResolveVersion(std::string version) {
     auto tokens = Split(version, ".");
     if(tokens.size() == 1) {
-        return version + ".0.0-stable";
+        if(IsInteger(version)) {
+            return version + ".0.0-stable";
+        } else if(version == "latest") {
+            return version;
+        }
+
+        return "";
     }
     if(tokens.size() == 2) {
         return version + ".0-stable";
@@ -72,6 +78,56 @@ std::string ResolveVersion(std::string version) {
     return version;
 }
 
+BranchVersionPair ResolveFullVersion(std::string version) {
+    std::string branch = "main";
+    std::string versionRight = "latest";
+
+	if (version != "latest") {
+		size_t pos = version.find("/");
+		if (pos == std::string::npos) {
+			versionRight = ResolveVersion(version);
+            if(versionRight == "") {
+                std::cout << "Invalid version '" << version << "'" << std::endl;
+                versionRight = "latest";
+            }
+		} else {
+			branch = version.substr(0, pos);
+			versionRight = version.substr(pos + 1);
+			versionRight = ResolveVersion(versionRight);
+            if(versionRight == "") {
+                std::cout << "Invalid version '" << version << "'" << std::endl;
+                versionRight = "latest";
+            }
+		}
+	}
+    return BranchVersionPair(branch, versionRight);
+}
+
+bool IsInteger(std::string number) {
+    if(number.size() == 0) {
+        return false;
+    }
+    for(char c : number) {
+        if(c < '0' || c > '9') {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+bool StartsWith(std::string text, std::string with) {
+	if (text.size() < with.size()) {
+		return false;
+	}
+	for (size_t i = 0; i < with.size(); i++) {
+		if (text[i] != with[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
 
 void GetVersionsFromServer() {
     for(const VersionServer& s : GetConfig().servers) {

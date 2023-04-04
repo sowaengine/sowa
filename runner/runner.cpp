@@ -52,7 +52,7 @@ int main(int argc, char const *argv[]) {
 	}
 
 	if(args.HasFlag("install") && args.GetParameters().size() == 1) {
-		InstallVersion(args.GetParameters()[0]);
+		InstallVersion(args.GetParameters()[0], appPath);
 		exit(0);
 	}
 

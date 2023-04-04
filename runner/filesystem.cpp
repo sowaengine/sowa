@@ -66,6 +66,18 @@ std::string GetLatestVersion(std::filesystem::path binPath) {
     return latest.path().filename().string();
 }
 
+std::string GetVersionInPath(std::filesystem::path binPath, std::string version) {
+    for(const auto entry : std::filesystem::directory_iterator(binPath)) {
+        if(entry.is_directory())
+            continue;
+        
+        if(StartsWith(entry.path().filename().string(), std::string("sowa-") + ResolveVersion(version) + "-")) {
+            return entry.path().filename().string();
+        }
+    }
+    return "";
+}
+
 std::vector<std::filesystem::directory_entry> GetLocalVersions(std::filesystem::path binPath) {
     std::vector<std::filesystem::directory_entry> versions{};
     for(const auto entry : std::filesystem::recursive_directory_iterator(binPath)) {
