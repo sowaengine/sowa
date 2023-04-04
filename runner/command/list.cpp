@@ -4,6 +4,7 @@
 #include "../config.hpp"
 #include "../utils.hpp"
 #include "../console.hpp"
+#include "../runner.hpp"
 
 void CommandList(std::filesystem::path appPath, bool isLocal) {
 	if(isLocal) {
@@ -13,17 +14,25 @@ void CommandList(std::filesystem::path appPath, bool isLocal) {
 		for (size_t i = 0; i < versions.size(); i++) {
 			std::cout << "\t" << i << ". " << versions[i].path().parent_path().filename().string() << "/" << versions[i].path().filename().string() << "\n";
 		}
-		std::cout << "runner --run {version}\n";
-		std::cout << "runner --activate {version}\n";
+		std::cout << APP_NAME " --run {version}\n";
+		std::cout << APP_NAME " --activate {version}\n";
 		std::cout << std::endl;
 	} else {
 		std::cout << "Available sowa versions:\n";
 		GetVersionsFromServer();
 
 		for(const auto &[server, versions] : GetRuntimeConfig().versions) {
-			std::cout << "Fetched From " << server << ":" << std::endl;
-			for(const auto& ver : versions) {
-				std::cout << "\t[" << GREEN << server << "/" << ver.tag << RESET << "] : " << ver.url << "\n";
+			if(versions.size() > 0) {
+				std::cout << "Fetched From " << server << ":" << std::endl;
+				for(const auto& ver : versions) {
+					std::string path = GetVersionInPath((appPath / "bin" / server), ver.tag);
+					std::cout << "\t[" << GREEN << server << "/" << ver.tag << RESET << "] : ";
+					if(path != "") {
+						std::cout << MAGENTA << "[Installed] " << RESET;
+					}
+					
+					std::cout << ver.url << "\n";
+				}
 			}
 		}
 	}

@@ -10,16 +10,8 @@ void ActivateVersion(std::string version) {
     if(version == "latest") {
         cfg.activeVersion = version;
     } else {
-        size_t pos = version.find("/");
-        if(pos == std::string::npos) {
-            version = ResolveVersion(version);
-            cfg.activeVersion = "main/" + version;
-        } else {
-            std::string branch = version.substr(0, pos);
-            version = version.substr(pos+1);
-            version = ResolveVersion(version);
-            cfg.activeVersion = branch + "/" + version;
-        }
+        std::string ver = ResolveFullVersion(version).Repr();
+        cfg.activeVersion = ver;
     }
     std::cout << "Activated version: " << CYAN << cfg.activeVersion << RESET << std::endl;
     SaveConfig();
