@@ -36,4 +36,6 @@ bool StartsWith(std::string text, std::string with);
 
 void GetVersionsFromServer();
 
+void InstallSowa(std::filesystem::path appPath, std::string url, BranchVersionPair ver);
+
 #endif
