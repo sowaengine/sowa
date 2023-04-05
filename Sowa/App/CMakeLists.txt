@@ -33,6 +33,7 @@ target_link_libraries(
           -static-libgcc
           -static-libstdc++
           yaml-cpp
+          tinyfiledialogs
           ${LD_FLAG_STATIC}
           ${CMAKE_DL_LIBS})
 target_include_directories(lsowa PRIVATE ${SOWA_INCLUDE_DIRS})
@@ -62,6 +63,7 @@ endif()
 
 install(TARGETS sowa RUNTIME DESTINATION bin/main/)
 install(FILES ${CMAKE_SOURCE_DIR}/runnerconfig.default.yml DESTINATION . RENAME runnerconfig.yml)
+install(FILES ${CMAKE_SOURCE_DIR}/cmd/update.sh DESTINATION .)
 
 set(CPACK_PACKAGE_NAME "sowaengine")
 set(CPACK_PACKAGE_VENDOR Lexographics)

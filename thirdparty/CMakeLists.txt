@@ -4,6 +4,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/curl-7.88.1)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.7.0)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libzip-1.9.2)
 
+add_library(tinyfiledialogs "${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs/tinyfiledialogs.c")
+
 set(
     CURL_INCLUDE
     ${CMAKE_CURRENT_SOURCE_DIR}/curl-7.88.1/include
@@ -16,6 +18,12 @@ set(
     YAML_CPP_INCLUDE
     ${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.7.0/include
 
+    PARENT_SCOPE
+)
+
+set(TINYFD_INCLUDE
+    ${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs/
+    
     PARENT_SCOPE
 )
 

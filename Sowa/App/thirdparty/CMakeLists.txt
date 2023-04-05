@@ -5,9 +5,6 @@ set(SOWA_SOURCES
    # lua-5.4.4
    ${LUA_SOURCES}
 
-
-   #tinyfiledialogs
-   ${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs/tinyfiledialogs.c
    PARENT_SCOPE
 )
 
@@ -19,7 +16,8 @@ set(SOWA_INCLUDE_DIRS
    # ${CMAKE_SOURCE_DIR}/Sowa/App/thirdparty/glfw-3.3.8/include/ is included for all targets
    ${CMAKE_SOURCE_DIR}/Sowa/App/thirdparty/fmt-9.1.0/include/
    ${CMAKE_SOURCE_DIR}/Sowa/App/thirdparty/pugixml-1.13/
-   ${CMAKE_SOURCE_DIR}/Sowa/App/include/tinyfiledialogs/
+
+   ${TINYFD_INCLUDE}
 
    PARENT_SCOPE
 )
