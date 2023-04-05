@@ -11,20 +11,22 @@
 #include "utils.hpp"
 #include "config.hpp"
 
+#include "tinyfiledialogs.h"
+
 std::filesystem::path appPath;
 
 int main(int argc, char const *argv[]) {
 	auto args = ArgParser(argc - 1, argv + 1);
 	appPath = GetExecutableDir();
+	TempFileCleanup(appPath);
 	LoadConfig(appPath);
 	auto& cfg = GetConfig();
-	if(cfg.checkUpdates) {
+	if(cfg.checkUpdates && !args.HasFlag("update") && !args.HasFlag("u")) {
 		if(cfg.lastUpdateCheck < time(nullptr) - cfg.checkFrequency) {
-			std::cout << "Checking for updates..." << std::endl;
-
-
 			cfg.lastUpdateCheck = time(nullptr);
 			SaveConfig();
+
+			CommandUpdate(appPath, true);
 		}
 	}
 
@@ -47,7 +49,7 @@ int main(int argc, char const *argv[]) {
 		exit(0);
 	}
 	if (args.HasFlag("update") || args.HasFlag("u")) {
-		CommandUpdate();
+		CommandUpdate(appPath);
 		exit(0);
 	}
 

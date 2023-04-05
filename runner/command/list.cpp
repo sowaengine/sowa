@@ -14,12 +14,13 @@ void CommandList(std::filesystem::path appPath, bool isLocal) {
 		for (size_t i = 0; i < versions.size(); i++) {
 			std::cout << "\t" << i << ". " << versions[i].path().parent_path().filename().string() << "/" << versions[i].path().filename().string() << "\n";
 		}
+		std::cout << "\n";
 		std::cout << APP_NAME " --run {version}\n";
 		std::cout << APP_NAME " --activate {version}\n";
 		std::cout << std::endl;
 	} else {
 		std::cout << "Available sowa versions:\n";
-		GetVersionsFromServer();
+		GetVersionsFromServer(GetConfig().servers);
 
 		for(const auto &[server, versions] : GetRuntimeConfig().versions) {
 			if(versions.size() > 0) {

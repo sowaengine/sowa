@@ -33,9 +33,12 @@ RunnerConfig& GetConfig();
 struct Version {
     std::string tag;
     std::string url;
+    std::string upstream;
 
     Version() {}
     Version(std::string tag, std::string url) : tag(tag), url(url) {}
+
+    bool operator<(const Version&);
 };
 
 struct RuntimeConfig {

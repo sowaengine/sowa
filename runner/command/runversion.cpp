@@ -9,14 +9,14 @@ void RunVersion(std::string version, std::filesystem::path appPath, std::vector<
 	if(ver.version == "latest") {
 		std::string latest = GetLatestVersion((appPath / "bin" / ver.branch).string());
 		if (latest == "") {
-			std::cout << "Application not found" << std::endl;
+			std::cout << "Version " << ver.Repr() << " not found" << std::endl;
 			return;
 		}
 		path = ((appPath / "bin" / ver.branch) / latest).string();
 	} else {
 		std::string filename = GetVersionInPath((appPath / "bin" / ver.branch).string(), ver.version);
 		if(filename == "") {
-			std::cout << "Application not found" << std::endl;
+			std::cout << "Version " << ver.Repr() << " not found" << std::endl;
 			return;
 		}
 		path = ((appPath / "bin" / ver.branch) / filename).string();

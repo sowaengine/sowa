@@ -4,6 +4,8 @@
 #include <iostream>
 #include "console.hpp"
 
+#include "./utils.hpp"
+
 static RunnerConfig cfg{};
 static RuntimeConfig runtimeCfg{};
 
@@ -75,4 +77,8 @@ RunnerConfig &GetConfig() {
 
 RuntimeConfig &GetRuntimeConfig() {
 	return runtimeCfg;
+}
+
+bool Version::operator<(const Version& o) {
+	return VersionName(tag) < VersionName(o.tag);
 }

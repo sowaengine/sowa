@@ -14,6 +14,7 @@ target_link_libraries(
         CURL::libcurl
         yaml-cpp
         zip
+        tinyfiledialogs
     )
 target_include_directories(runner
     PRIVATE
@@ -21,6 +22,7 @@ target_include_directories(runner
         ${CMAKE_SOURCE_DIR}/Sowa/App/src
         ${YAML_CPP_INCLUDE}
         ${LIBZIP_INCLUDE}
+        ${TINYFD_INCLUDE}
 )
 
 install(TARGETS runner RUNTIME DESTINATION .)

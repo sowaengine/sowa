@@ -5,7 +5,7 @@
 #include <vector>
 #include <filesystem>
 
-void CommandUpdate();
+void CommandUpdate(std::filesystem::path appPath, bool showMessagebox=false);
 void CommandVersion();
 void CommandList(std::filesystem::path appPath, bool isLocal);
 void CommandHelp();

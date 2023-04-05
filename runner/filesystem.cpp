@@ -39,26 +39,20 @@ FILE* OpenExecutable(std::string path, std::vector<std::string> args) {
 
 std::string GetLatestVersion(std::filesystem::path binPath) {
     std::filesystem::directory_entry latest{};
-    uint32_t latestVersion = 0;
+    uint32_t latestHash = 0;
 
     for(const auto entry : std::filesystem::directory_iterator(binPath)) {
         if(entry.is_directory())
             continue;
-        
-        auto tokens = Split(entry.path().filename().string(), "-");
-        if(tokens.size() == 0)
-            continue;
-        
-        uint32_t versionNumber = 0;
-        try {
-            versionNumber = static_cast<uint32_t>(std::atoll(tokens[tokens.size()-1].c_str()));
-        }
-        catch(const std::exception& e) {
-            continue;
+        if(entry.path().filename().extension() == ".exe") {
+            entry.path().filename().replace_extension("");
         }
         
-        if(versionNumber > latestVersion) {
-            latestVersion = versionNumber;
+        BranchVersionPair ver = ResolveFullVersion(entry.path().filename().string());
+        uint32_t hash = VersionName(ver.version).Hash();
+        
+        if(hash > latestHash) {
+            latestHash = hash;
             latest = entry;
         }
     }
