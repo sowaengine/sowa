@@ -1,7 +1,12 @@
 set(BUILD_CURL_EXE OFF)
 
-set(ZLIB_LIBRARY ${CMAKE_SOURCE_DIR}/bin/zlib/lib/libzlibstatic.a)
-set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/bin/zlib/include/)
+if(UNIX AND NOT APPLE)
+    set(ZLIB_LIBRARY ${CMAKE_SOURCE_DIR}/bin/zlib/lib/libz.a)
+else()
+    set(ZLIB_LIBRARY ${CMAKE_SOURCE_DIR}/bin/zlib/lib/libzlibstatic.a)
+endif()
+
+set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/bin/zlib/include/ CACHE PATH "zlib include dir")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/curl-7.88.1)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.7.0)
