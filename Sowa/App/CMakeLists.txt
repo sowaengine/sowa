@@ -49,7 +49,7 @@ target_include_directories(
 target_link_libraries(sowa PUBLIC lsowa)
 set_target_properties(sowa
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../pkg/bin/main/"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/pkg/bin/main/"
     RUNTIME_OUTPUT_NAME "sowa-${CMAKE_PROJECT_VERSION}-${SOWA_VER_NUMBER}"
 )
 

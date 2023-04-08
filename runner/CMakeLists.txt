@@ -2,7 +2,7 @@ file(GLOB_RECURSE RUNNER_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 add_executable(runner ${RUNNER_SOURCES})
 set_target_properties(runner
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../pkg/"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/pkg/"
 )
 set_target_properties(runner PROPERTIES OUTPUT_NAME "sowa")
 

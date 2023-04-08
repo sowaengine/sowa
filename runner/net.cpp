@@ -35,7 +35,7 @@ std::string GetContentHTTP(const std::string &url) {
 	CURLcode result = curl_easy_perform(curl);
 	curl_easy_cleanup(curl);
 	if (result != CURLE_OK) {
-		std::cerr << "Failed to download version info: " << curl_easy_strerror(result) << "\n";
+		std::cerr << "Failed to fetch " << url << ", err: " << curl_easy_strerror(result) << "\n";
 		return "";
 	}
 
@@ -57,7 +57,7 @@ std::vector<unsigned char> GetFileHTTP(const std::string &url) {
 	CURLcode result = curl_easy_perform(curl);
 	curl_easy_cleanup(curl);
 	if (result != CURLE_OK) {
-		std::cerr << "Failed to download version info: " << curl_easy_strerror(result) << "\n";
+		std::cerr << "Failed to download " << url << ", err: " << curl_easy_strerror(result) << "\n";
 		return {};
 	}
 

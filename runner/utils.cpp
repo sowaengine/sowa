@@ -220,7 +220,8 @@ void InstallSowa(std::filesystem::path appPath, std::string url, BranchVersionPa
 		std::cout << "Saving file to " << execPath.string() << std::endl;
 
 		if(type == FileType::runner) {
-			int res = std::rename(execPath.string().c_str(), (execPath.parent_path() / ("tmp." + execPath.filename().string())).c_str());
+			std::filesystem::path newPath = execPath.parent_path() / (std::string("tmp.") + execPath.filename().string());
+			int res = std::rename(execPath.string().c_str(), newPath.string().c_str());
 			if (res != 0) {
 				std::cout << "Failed to save file:\n error: " << RED << strerror(errno) << RESET << std::endl;
 			}
@@ -313,7 +314,7 @@ std::string VersionName::Repr() {
 
 void TempFileCleanup(std::filesystem::path appPath) {
 	for(auto entry : std::filesystem::recursive_directory_iterator(appPath)) {
-		if(StartsWith(entry.path().filename(), "tmp.")) {
+		if(StartsWith(entry.path().filename().string(), "tmp.")) {
 			std::filesystem::remove_all(entry);
 		}
 	}

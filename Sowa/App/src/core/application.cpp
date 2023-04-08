@@ -91,7 +91,7 @@ bool Application::Init(int argc, char const** argv) {
 			return false;
 		}
 
-		if(!project->Load(projectPath.c_str())) {
+		if(!project->Load(projectPath.string().c_str())) {
 			Debug::Error("Invalid project file");
 			return false;
 		}
