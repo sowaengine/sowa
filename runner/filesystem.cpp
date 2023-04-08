@@ -21,14 +21,12 @@ std::filesystem::path GetExecutableDir()
 }
 
 FILE* OpenExecutable(std::string path, std::vector<std::string> args) {
-    std::cout << path << std::endl;
-
     FILE* handle = nullptr;
     std::string cmd = "";
     for(const std::string arg : args) {
         cmd += " \"" + arg + "\"";
     }
-    std::cout << ": " << (path + cmd) << std::endl;
+    std::cout << (path + cmd) << std::endl;
     #if defined (SW_LINUX)
         handle = popen((path + cmd).c_str(), "r");
     #elif defined (SW_WINDOWS)
