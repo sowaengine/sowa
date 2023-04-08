@@ -15,3 +15,7 @@
 - Version: 0.7.0
 - License: MIT Copyright (c) 2008-2015 Jesse Beder `thirdparty/yaml-cpp-0.7.0/LICENSE`
 
+## zlib
+- Upstream: https://www.zlib.net/
+- Version: 1.2.13
+- License: zlib (C) 1995-2022 Jean-loup Gailly and Mark Adler `thirdparty/manual/zlib-1.2.13/LICENSE`

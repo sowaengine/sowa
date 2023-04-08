@@ -1,5 +1,8 @@
 set(BUILD_CURL_EXE OFF)
 
+set(ZLIB_LIBRARY ${CMAKE_SOURCE_DIR}/bin/zlib/lib/libzlibstatic.a)
+set(ZLIB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/bin/zlib/include/)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/curl-7.88.1)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.7.0)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libzip-1.9.2)
