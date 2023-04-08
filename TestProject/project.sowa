@@ -1,0 +1,15 @@
+Project:
+  Settings:
+    Application:
+      Name: Test Project - Sowa Engine
+      Desc: ""
+      MainScene: ""
+      Icon: ""
+    Window:
+      FullScreen: false
+      WindowSize:
+        W: 1280
+        H: 720
+      VideoSize:
+        W: 1920
+        H: 1080
