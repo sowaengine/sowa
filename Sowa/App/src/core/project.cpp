@@ -13,9 +13,16 @@ Project &Project::Of(EngineContext *context) {
 
 bool Project::Load(const char *path) {
 	_ProjectPath = path;
-	_ProjectPath = _ProjectPath / "project.sowa";
+	if(_ProjectPath.filename() != "project.sowa")
+		_ProjectPath = _ProjectPath / "project.sowa";
 
-	m_Doc = YAML::LoadFile(_ProjectPath.string());
+	try {
+		m_Doc = YAML::LoadFile(_ProjectPath.string());
+	}
+	catch(const std::exception& e) {
+		return false;
+	}
+	
 	if(!Serializer<Project>().Load(*this, m_Doc)) {
 		Debug::Error("Unable to load project {}", _ProjectPath.string());
 		return false;

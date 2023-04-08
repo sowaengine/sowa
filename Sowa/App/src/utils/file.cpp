@@ -44,7 +44,11 @@ bool InsertFilepathEndpoint(const std::string &endpoint, const std::filesystem::
 	if (!force && File_path_endpoints.count(endpoint) != 0)
 		return false;
 
-	File_path_endpoints[endpoint] = path;
+	if(path.extension() == "") {
+		File_path_endpoints[endpoint] = path;
+	} else {
+		File_path_endpoints[endpoint] = path.parent_path();
+	}
 	return true;
 }
 

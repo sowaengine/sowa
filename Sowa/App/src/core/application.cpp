@@ -49,6 +49,8 @@
 #endif
 
 namespace Sowa {
+static void InitStreams(const std::string logFile);
+
 Application::Application() {
 	SW_ENTRY()
 }
@@ -80,32 +82,25 @@ bool Application::Init(int argc, char const** argv) {
 		return false;
 	}
 
-	Sowa::File::InsertFilepathEndpoint("abs", "./");
-	Sowa::File::InsertFilepathEndpoint("res", argParse.projectPath);
-	if (!Sowa::File::RegisterDataPath()) {
-		Debug::Error("Engine data path not found. exiting");
-		return false;
+	InitStreams(argParse.logFile);
+
+	std::filesystem::path projectPath = argParse.projectPath;
+	if(!project->Load(projectPath.string().c_str())) {
+		projectPath = Dialog::OpenFileDialog("Open project file", "", 1, {"project.sowa"}, false, false);
+		if(projectPath.string() == "") {
+			return false;
+		}
+
+		if(!project->Load(projectPath.c_str())) {
+			Debug::Error("Invalid project file");
+			return false;
+		}
 	}
 
-	auto &streams = Streams::GetInstance();
-	streams.SetLevelText((uint32_t)LogLevel::Log, "LOG");
-	streams.SetLevelText((uint32_t)LogLevel::Info, "INFO");
-	streams.SetLevelText((uint32_t)LogLevel::Warn, "WARN");
-	streams.SetLevelText((uint32_t)LogLevel::Error, "ERR");
-
-	static std::ofstream tempStream;
-	tempStream.open(fmt::format(argParse.logFile != "" ? argParse.logFile : "{}/sowa-{}.log", std::filesystem::temp_directory_path().string(), Sowa::Time::GetTime()), std::ios_base::app);
-
-	streams.Add((uint32_t)LogLevel::Log, &std::cout);
-	streams.Add((uint32_t)LogLevel::Info, &std::cout);
-	streams.Add((uint32_t)LogLevel::Warn, &std::cout);
-	streams.Add((uint32_t)LogLevel::Error, &std::cout);
-
-	streams.Add((uint32_t)LogLevel::Info, reinterpret_cast<std::ostream *>(&tempStream));
-	streams.Add((uint32_t)LogLevel::Warn, reinterpret_cast<std::ostream *>(&tempStream));
-	streams.Add((uint32_t)LogLevel::Error, reinterpret_cast<std::ostream *>(&tempStream));
-
-	if(!project->Load(argParse.projectPath.c_str())) {
+	Sowa::File::InsertFilepathEndpoint("abs", "./");
+	Sowa::File::InsertFilepathEndpoint("res", projectPath);
+	if (!Sowa::File::RegisterDataPath()) {
+		Debug::Error("Engine data path not found. exiting");
 		return false;
 	}
 
@@ -386,6 +381,28 @@ bool Application::ParseArgs(int argc, char const** argv) {
 		argParse.autoStart = true;
 	}
 	return true;
+}
+
+void InitStreams(const std::string logFile) {
+	using namespace Debug;
+
+	auto &streams = Streams::GetInstance();
+	streams.SetLevelText((uint32_t)LogLevel::Log, "LOG");
+	streams.SetLevelText((uint32_t)LogLevel::Info, "INFO");
+	streams.SetLevelText((uint32_t)LogLevel::Warn, "WARN");
+	streams.SetLevelText((uint32_t)LogLevel::Error, "ERR");
+
+	static std::ofstream tempStream;
+	tempStream.open(fmt::format(logFile != "" ? logFile : "{}/sowa-{}.log", std::filesystem::temp_directory_path().string(), Sowa::Time::GetTime()), std::ios_base::app);
+
+	streams.Add((uint32_t)LogLevel::Log, &std::cout);
+	streams.Add((uint32_t)LogLevel::Info, &std::cout);
+	streams.Add((uint32_t)LogLevel::Warn, &std::cout);
+	streams.Add((uint32_t)LogLevel::Error, &std::cout);
+
+	streams.Add((uint32_t)LogLevel::Info, reinterpret_cast<std::ostream *>(&tempStream));
+	streams.Add((uint32_t)LogLevel::Warn, reinterpret_cast<std::ostream *>(&tempStream));
+	streams.Add((uint32_t)LogLevel::Error, reinterpret_cast<std::ostream *>(&tempStream));
 }
 
 } // namespace Sowa
