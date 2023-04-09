@@ -7,6 +7,7 @@
 
 #include "resource/resource_loader.hpp"
 #include "resource/resource_manager.hpp"
+#include "resource/resource_watcher/resource_watcher.hpp"
 #include "resource/texture/image_texture.hpp"
 #include "resource/texture/ninepatch_texture.hpp"
 
@@ -43,7 +44,7 @@
 #include "res/shaders/fullscreen.glsl.res.hpp"
 #include "res/shaders/skybox.glsl.res.hpp"
 
-#include "res/textures/icon.png.res.hpp"
+#include "res/textures/icon_512x.png.res.hpp"
 
 #ifdef SW_WINDOWS
 #include <windows.h>
@@ -62,6 +63,10 @@ Application::~Application() {
 }
 
 static Reference<NinePatchTexture> s_NinePatch;
+
+static float mapLog(float x) {
+	return log10(x);
+}
 
 bool Application::Init(int argc, char const **argv) {
 	SW_ENTRY()
@@ -127,7 +132,7 @@ bool Application::Init(int argc, char const **argv) {
 	_window._windowHandle = &_renderer->GetWindow();
 	_window.InitWindow(_renderer->GetWindow(), *ctx);
 
-	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(FILE_BUFFER(Res::App_include_res_textures_icon_png_data));
+	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(FILE_BUFFER(Res::App_include_res_textures_icon_512x_png_data));
 	_window.SetWindowIcon(icon);
 
 	_renderer->SetBlending(true);
@@ -171,16 +176,19 @@ bool Application::Init(int argc, char const **argv) {
 	Text2D *node4 = scene->Create<Text2D>("Node4");
 
 	Reference<ImageTexture> anotherTexture = std::make_shared<ImageTexture>();
-	Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://image.png"));
-	node3->Texture() = anotherTexture;
+	Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://Saul_Goodman.png"));
+	m_ResourceWatcher->Register("res://Saul_Goodman.png", anotherTexture);
 
 	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://image.png");
+
 	NinePatchRect *button = scene->Create<NinePatchRect>("Button");
 	button->Texture() = s_NinePatch;
 	button->Position().x = 400;
 	button->Scale() = {.25f, .25f};
 
-	node3->Scale() = {0.25f, 0.25f};
+	// node3->Scale() = {0.25f, 0.25f};
+	node3->Texture() = anotherTexture;
+	node3->Position() = {-200, -200};
 	node4->Position() = {200.f, 0.f};
 
 	node->AddChild(node1);
@@ -188,20 +196,44 @@ bool Application::Init(int argc, char const **argv) {
 	node->AddChild(node3);
 	node->AddChild(node4);
 	node->AddChild(button);
-	node4->SetText("Sowa Engine");
+	node4->SetText("Sowa Engine | Lexographics");
 
 	scene->SetRoot(node);
 	SetCurrentScene(scene);
 
 	OnInput() += [this](InputEvent e) {
 		if (e.Type() == InputEventType::MouseMove) {
+			if (!IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
+				_EditorCameraPos.x += e.mouseMove.deltaX * mapLog(_EditorCameraZoom);
+				_EditorCameraPos.y -= e.mouseMove.deltaY * mapLog(_EditorCameraZoom);
+			}
 			// Debug::Log("Mouse Pos: ({},{}), delta: ({},{})", e.mouseMove.posX, e.mouseMove.posY, e.mouseMove.deltaX, e.mouseMove.posY);
 		} else if (e.Type() == InputEventType::Key) {
+			if (e.key.action == GLFW_PRESS && e.key.key == GLFW_KEY_F5) {
+				if (IsRunning())
+					StopGame();
+				else
+					StartGame();
+			}
 			// Debug::Log("Key Event: key: {}, scancode: {}", e.key.key, e.key.scanCode);
 			if (e.key.key == GLFW_KEY_ESCAPE) {
 				exit(0);
 			}
 		} else if (e.Type() == InputEventType::Scroll) {
+			if (!IsRunning()) {
+				float oldZoom = _EditorCameraZoom;
+
+				_EditorCameraZoom -= e.scroll.scrollY * _EditorCameraZoom * 0.5;
+				_EditorCameraZoom = MAX(_EditorCameraZoom, 1.1);
+
+				Vector2 midPoint;
+				midPoint.x = GetWindow().GetVideoWidth() / 2.f;
+				midPoint.y = GetWindow().GetVideoHeight() / 2.f;
+
+				_EditorCameraPos.x += (GetWindow().GetGameMousePosition().x - midPoint.x) * (mapLog(oldZoom) - mapLog(_EditorCameraZoom));
+				_EditorCameraPos.y -= (GetWindow().GetGameMousePosition().y - midPoint.y) * (mapLog(oldZoom) - mapLog(_EditorCameraZoom));
+			}
+
 			// Debug::Log("Scroll Event: x: {}, y: {}", e.scroll.scrollX, e.scroll.scrollY);
 		} else if (e.Type() == InputEventType::MouseButton) {
 			// Debug::Log("Mouse Button Event: button: {}, action: {}, mods: {}", e.mouseButton.button, e.mouseButton.action, e.mouseButton.modifiers);
@@ -223,34 +255,6 @@ bool Application::Process() {
 	if (_window.ShouldClose())
 		return false;
 
-	// if not editor
-	Vector2 editorCameraVelocity = {0.f, 0.f};
-	if (_window.IsKeyDown(GLFW_KEY_RIGHT)) {
-		if (_window.IsKeyDown(GLFW_KEY_LEFT_SHIFT)) {
-			_EditorCameraSpeed = MAX(_EditorCameraSpeed + 0.1f, 0.2f);
-		} else {
-			editorCameraVelocity.x += 1.f;
-		}
-	}
-	if (_window.IsKeyDown(GLFW_KEY_LEFT)) {
-		if (_window.IsKeyDown(GLFW_KEY_LEFT_SHIFT)) {
-			_EditorCameraSpeed = MAX(_EditorCameraSpeed - 0.1f, 0.2f);
-		} else {
-			editorCameraVelocity.x -= 1.f;
-		}
-	}
-	if (_window.IsKeyDown(GLFW_KEY_UP)) {
-		editorCameraVelocity.y += 1.f;
-	}
-	if (_window.IsKeyDown(GLFW_KEY_DOWN)) {
-		editorCameraVelocity.y -= 1.f;
-	}
-	if (editorCameraVelocity.Length() > 1.f) {
-		editorCameraVelocity = editorCameraVelocity.Clamp();
-	}
-	_EditorCameraPos.x += editorCameraVelocity.x * _EditorCameraSpeed;
-	_EditorCameraPos.y += editorCameraVelocity.y * _EditorCameraSpeed;
-
 	if (_Scene != nullptr) {
 		_Scene->UpdateLogic();
 	}
@@ -260,8 +264,6 @@ bool Application::Process() {
 		{0.5f, 0.5f},
 		{0.2f, 0.2f, 0.2f, 1.f});
 
-	// #ifdef SW_EDITOR
-	//	if (argParse.editor) {
 	if (!_AppRunning) {
 		// Draw center cursor
 		float centerX, centerY;
@@ -272,15 +274,35 @@ bool Application::Process() {
 		Renderer::get_singleton().DrawLine({centerX - cursorSize, centerY}, {centerX + cursorSize, centerY}, cursorThickness, {1.f, 1.f, 0.f});
 		Renderer::get_singleton().DrawLine({centerX, centerY - cursorSize}, {centerX, centerY + cursorSize}, cursorThickness, {1.f, 1.f, 0.f});
 
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 2.f * mapLog(_EditorCameraZoom), {1.f, 0.f, 0.f, .6f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 2.f * mapLog(_EditorCameraZoom), {0.f, 1.f, 0.f, .6f});
+
+		float viewportThickness = 3.f;
+		Renderer::get_singleton().DrawLine({0, 0}, {_window.GetVideoWidth(), 0}, viewportThickness * mapLog(_EditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({_window.GetVideoWidth(), 0}, {_window.GetVideoWidth(), _window.GetVideoHeight()}, viewportThickness * mapLog(_EditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({_window.GetVideoWidth(), _window.GetVideoHeight()}, {0, _window.GetVideoHeight()}, viewportThickness * mapLog(_EditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({0, _window.GetVideoHeight()}, {0, 0}, viewportThickness * mapLog(_EditorCameraZoom), {.0f, .2f, .7f});
+
 	} else {
-		((Node2D *)_Scene->GetRoot()->GetChild("Node4"))->Rotation() += 0.2f;
+		static float f = 0.f;
+		f += 0.02f;
+		((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position() = {std::sin(f) * 200, std::cos(f) * 200};
+		((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Rotation() += 0.4f;
 	}
-	//	}
-	// #endif
+
 	if (_Scene != nullptr) {
 		_Scene->UpdateDraw();
+	}
+
+	if (!_AppRunning) {
+		float spacing = 512.f;
+		int lineCount = 256;
+		for (int i = -lineCount; i <= lineCount; i++) {
+			Renderer::get_singleton().DrawLine({i * spacing, -10000}, {i * spacing, 10000}, 2 * mapLog(_EditorCameraZoom), {.7f, .7f, .7f, .3f});
+		}
+		for (int i = -lineCount; i <= lineCount; i++) {
+			Renderer::get_singleton().DrawLine({10000, i * spacing}, {-10000, i * spacing}, 2 * mapLog(_EditorCameraZoom), {.7f, .7f, .7f, .3f});
+		}
 	}
 
 	_renderer->End2D();
@@ -300,10 +322,14 @@ bool Application::Process() {
 
 glm::mat4 Application::GetCameraTransform() {
 	SW_ENTRY()
-	return nmGfx::CalculateModelMatrix(
-		glm::vec3{_EditorCameraPos.x, _EditorCameraPos.y, 0.f},
-		0.f,
-		glm::vec3{1.f, 1.f, 1.f});
+	if (IsRunning())
+		return nmGfx::CalculateModelMatrix(
+			{.0f, .0f}, .0f, {1.f, 1.f});
+	else
+		return nmGfx::CalculateModelMatrix(
+			glm::vec3{_EditorCameraPos.x, _EditorCameraPos.y, 0.f},
+			0.f,
+			glm::vec3{mapLog(_EditorCameraZoom), mapLog(_EditorCameraZoom), 1.f});
 }
 void Application::StartGame() {
 	SW_ENTRY()

@@ -104,7 +104,7 @@ class Application {
 
 	// Editor
 	Vector2 _EditorCameraPos{0.f, 0.f};
-	float _EditorCameraSpeed{5.f};
+	float _EditorCameraZoom{10.f};
 
 	struct {
 		std::string projectPath{"./"};
