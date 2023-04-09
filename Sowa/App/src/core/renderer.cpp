@@ -87,7 +87,7 @@ void Renderer::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thicknes
 }
 
 
-bool Renderer::LoadFont(Sowa::Font& font, unsigned char* data, unsigned size) {
+bool Renderer::LoadFont(Sowa::Font& font, const unsigned char* data, unsigned size) {
 	return Application::get_singleton().RendererHandle()->LoadFont(&font._Font, data, size);
 }
 

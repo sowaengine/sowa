@@ -86,6 +86,7 @@ bool Application::Init(int argc, char const **argv) {
 
 	Serializer::get_singleton().RegisterSerializer(Project::Typename(), SerializeImpl(Project::SaveImpl, Project::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(Size::Typename(), SerializeImpl(Size::SaveImpl, Size::LoadImpl));
+	Serializer::get_singleton().RegisterSerializer(ImageTexture::Typename(), SerializeImpl(ImageTexture::SaveImpl, ImageTexture::LoadImpl));
 
 	InitStreams(argParse.logFile);
 
@@ -168,6 +169,10 @@ bool Application::Init(int argc, char const **argv) {
 	Node2D *node2 = scene->Create<Node2D>("Node2");
 	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
 	Text2D *node4 = scene->Create<Text2D>("Node4");
+
+	Reference<ImageTexture> anotherTexture = std::make_shared<ImageTexture>();
+	Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://image.png"));
+	node3->Texture() = anotherTexture;
 
 	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://image.png");
 	NinePatchRect *button = scene->Create<NinePatchRect>("Button");

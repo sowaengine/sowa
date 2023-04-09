@@ -19,7 +19,7 @@ bool Project::Load(const char *path) {
 		_ProjectPath = _ProjectPath / "project.sowa";
 
 	try {
-		m_Doc = File::LoadFile(_ProjectPath);;
+		m_Doc = File::LoadFile(_ProjectPath);
 	}
 	catch(const std::exception& e) {
 		return false;

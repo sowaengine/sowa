@@ -30,7 +30,7 @@ class Renderer {
   private:
 	friend class Application;
   // Called from Application
-	bool LoadFont(Sowa::Font& font, unsigned char* data, unsigned size);
+	bool LoadFont(Sowa::Font& font, const unsigned char* data, unsigned size);
 
 	Renderer();
 	~Renderer();

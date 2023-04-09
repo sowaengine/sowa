@@ -45,8 +45,19 @@ class FileBuffer {
         }
     }
 
+    // Same as Yaml() but throws exception on error
+    YAML::Node YamlThrow() const {
+        try {
+            YAML::Node node = YAML::Load(String());
+            return node;
+        } catch(const std::exception& e) {
+            throw e;
+        }
+    }
+
 
     FileBufferData& Data() { return buffer; }
+    const FileBufferData& Data() const { return buffer; }
 
     private:
         FileBufferData buffer;

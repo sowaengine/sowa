@@ -17,6 +17,8 @@ class Sprite2D : public Node2D {
 	void UpdateLogic() override;
 	void UpdateDraw() override;
 
+	inline Reference<ImageTexture>& Texture() { return _Texture; }
+
   private:
 	friend class Application;
 	Reference<ImageTexture> _Texture;

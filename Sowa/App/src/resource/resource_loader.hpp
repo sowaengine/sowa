@@ -11,7 +11,7 @@
 namespace Sowa {
 template <typename T>
 struct ResourceLoaderImpl {
-	Reference<T> Load(unsigned char *data, size_t size);
+	Reference<T> Load(const unsigned char *data, size_t size);
 	Reference<T> LoadFromFile(const char *path); // Should only be available on necessary resource types.
 	bool Unload(Reference<T> resource);
 };
@@ -24,7 +24,7 @@ class ResourceLoader {
 	}
 
 	template <typename T>
-	Reference<T> LoadResourceFromMemory(unsigned char *data, size_t size) {
+	Reference<T> LoadResourceFromMemory(const unsigned char *data, size_t size) {
 		if (size > 0) {
 			ResourceLoaderImpl<T> loader;
 			return loader.Load(data, size);
