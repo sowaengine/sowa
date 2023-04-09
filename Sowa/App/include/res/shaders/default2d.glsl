@@ -27,12 +27,12 @@ layout(location = 1) out int gDrawID;
 in vec2 vTexCoords;
 
 uniform sampler2D uTexture;
-uniform vec3 uTint;
+uniform vec4 uTint;
 uniform int uDrawID;
 
 void main()
 {
-	gAlbedo = texture(uTexture, vTexCoords) * vec4(uTint, 1.0);
+	gAlbedo = texture(uTexture, vTexCoords) * uTint;
 	gDrawID = uDrawID;
 
     if(gAlbedo.a < 0.1)
