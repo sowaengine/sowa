@@ -44,7 +44,7 @@ bool InsertFilepathEndpoint(const std::string &endpoint, const std::filesystem::
 	if (!force && File_path_endpoints.count(endpoint) != 0)
 		return false;
 
-	if(path.extension() == "") {
+	if (path.extension() == "") {
 		File_path_endpoints[endpoint] = path;
 	} else {
 		File_path_endpoints[endpoint] = path.parent_path();
@@ -53,11 +53,16 @@ bool InsertFilepathEndpoint(const std::string &endpoint, const std::filesystem::
 }
 
 // todo: load from archive
-std::vector<unsigned char> GetFileContent(const char *path) {
-	try {
-		std::filesystem::path fullpath = File::Path(path);
+FileBufferData GetFileContent(const char *path) {
 
-		std::ifstream ifstream(fullpath, std::ifstream::binary);
+	std::filesystem::path fullpath = File::Path(path);
+
+	return LoadFile(fullpath).Data();
+}
+
+FileBuffer LoadFile(std::filesystem::path path) {
+	try {
+		std::ifstream ifstream(path, std::ifstream::binary);
 		ifstream.unsetf(std::ios::skipws);
 
 		std::streampos fileSize;
@@ -66,15 +71,16 @@ std::vector<unsigned char> GetFileContent(const char *path) {
 		ifstream.seekg(0, std::ios::beg);
 
 		if (fileSize > 0) {
-			std::vector<unsigned char> buffer(fileSize);
-			ifstream.read((char *)buffer.data(), fileSize);
+			FileBuffer buffer;
+			buffer.Data().resize(fileSize);
+			ifstream.read((char *)buffer.Data().data(), fileSize);
 			return buffer;
 		} else {
-			throw std::runtime_error(std::string("File not found: ") + fullpath.string());
+			throw std::runtime_error(std::string("File not found: ") + path.string());
 		}
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << '\n';
-		return std::vector<unsigned char>({'\0'});
+		return FileBuffer(FileBufferData({'\0'}));
 	}
 }
 

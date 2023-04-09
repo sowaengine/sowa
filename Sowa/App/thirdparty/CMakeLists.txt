@@ -18,6 +18,7 @@ set(SOWA_INCLUDE_DIRS
    ${CMAKE_SOURCE_DIR}/Sowa/App/thirdparty/pugixml-1.13/
 
    ${TINYFD_INCLUDE}
+   ${YAML_CPP_INCLUDE}
 
    PARENT_SCOPE
 )

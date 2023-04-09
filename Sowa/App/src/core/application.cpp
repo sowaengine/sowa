@@ -24,6 +24,7 @@
 #include "scene/scene.hpp"
 
 #include "core/input.hpp"
+#include "utils/algorithm.hpp"
 #include "utils/dialog.hpp"
 #include "utils/file.hpp"
 #include "utils/memory.hpp"
@@ -36,11 +37,11 @@
 
 #include "argparser/arg_parser.hpp"
 
+#include "res/Roboto-Medium.ttf.res.hpp"
 #include "res/shaders/default2d.glsl.res.hpp"
 #include "res/shaders/default3d.glsl.res.hpp"
 #include "res/shaders/fullscreen.glsl.res.hpp"
 #include "res/shaders/skybox.glsl.res.hpp"
-#include "res/Roboto-Medium.ttf.res.hpp"
 
 #include "res/textures/icon.png.res.hpp"
 
@@ -51,8 +52,9 @@
 namespace Sowa {
 static void InitStreams(const std::string logFile);
 
-Application::Application() {
+Application::Application(){
 	SW_ENTRY()
+
 }
 
 Application::~Application() {
@@ -61,7 +63,7 @@ Application::~Application() {
 
 static Reference<NinePatchTexture> s_NinePatch;
 
-bool Application::Init(int argc, char const** argv) {
+bool Application::Init(int argc, char const **argv) {
 	SW_ENTRY()
 	using namespace Debug;
 
@@ -78,24 +80,31 @@ bool Application::Init(int argc, char const** argv) {
 	Project *project = new Project(*ctx);
 	ctx->RegisterSingleton<Project>(Sowa::Server::PROJECT, *project);
 
-	if(!ParseArgs(argc, argv)) {
+	if (!ParseArgs(argc, argv)) {
 		return false;
 	}
+
+	Serializer::get_singleton().RegisterSerializer(Project::Typename(), SerializeImpl(Project::SaveImpl, Project::LoadImpl));
+	Serializer::get_singleton().RegisterSerializer(Size::Typename(), SerializeImpl(Size::SaveImpl, Size::LoadImpl));
 
 	InitStreams(argParse.logFile);
 
 	std::filesystem::path projectPath = argParse.projectPath;
-	if(!project->Load(projectPath.string().c_str())) {
+	if (!project->Load(projectPath.string().c_str())) {
 		projectPath = Dialog::OpenFileDialog("Open project file", "", 1, {"project.sowa"}, false, false);
-		if(projectPath.string() == "") {
+		if (projectPath.string() == "") {
 			return false;
 		}
 
-		if(!project->Load(projectPath.string().c_str())) {
+		if (!project->Load(projectPath.string().c_str())) {
 			Debug::Error("Invalid project file");
 			return false;
 		}
 	}
+	if (projectPath.filename() == "project.sowa") {
+		projectPath = projectPath.parent_path();
+	}
+	m_ResourceWatcher = std::make_unique<ResourceWatcher>(projectPath.string());
 
 	Sowa::File::InsertFilepathEndpoint("abs", "./");
 	Sowa::File::InsertFilepathEndpoint("res", projectPath);
@@ -108,10 +117,10 @@ bool Application::Init(int argc, char const** argv) {
 	unsigned int windowFlags = nmGfx::WindowFlags::NONE;
 	windowFlags = !argParse.window ? windowFlags | nmGfx::WindowFlags::NO_WINDOW : windowFlags;
 	_renderer->Init(
-		project->proj.settings.window.windowsize.w,
-		project->proj.settings.window.windowsize.h,
-		project->proj.settings.window.videosize.w,
-		project->proj.settings.window.videosize.h,
+		NotZero(project->proj.settings.window.windowsize.w, 1280),
+		NotZero(project->proj.settings.window.windowsize.h, 720),
+		NotZero(project->proj.settings.window.videosize.w, 1920),
+		NotZero(project->proj.settings.window.videosize.h, 1080),
 		project->proj.settings.application.name.c_str(),
 		windowFlags);
 	_window._windowHandle = &_renderer->GetWindow();
@@ -126,7 +135,7 @@ bool Application::Init(int argc, char const** argv) {
 	_renderer->GetDataFullscreen()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_glsl_data)));
 	_renderer->GetData3D()._skyboxShader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_skybox_glsl_data)));
 
-	if(!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
+	if (!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
 		Debug::Error("Failed to load default font");
 		return false;
 	}
@@ -195,7 +204,7 @@ bool Application::Init(int argc, char const** argv) {
 			// Debug::Log("Character Event: codePoint: {}", (char)e.character.codePoint);
 		}
 	};
-	if(argParse.autoStart) {
+	if (argParse.autoStart) {
 		StartGame();
 	}
 	return true;
@@ -261,7 +270,7 @@ bool Application::Process() {
 		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 5.f, {1.f, 0.f, 0.f});
 		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, -1080.f * 100}, 5.f, {0.f, 1.f, 0.f});
 	} else {
-		((Node2D*)_Scene->GetRoot()->GetChild("Node4"))->Rotation() += 0.2f;
+		((Node2D *)_Scene->GetRoot()->GetChild("Node4"))->Rotation() += 0.2f;
 	}
 	//	}
 	// #endif
@@ -350,6 +359,9 @@ void Application::Step() {
 			_Scene->CollectNodes();
 		}
 	}
+	if (_FrameCount % _ResourcePollInterval == 0) {
+		m_ResourceWatcher->Poll();
+	}
 }
 
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
@@ -357,27 +369,27 @@ uint32_t Application::Renderer_GetAlbedoFramebufferID() {
 	return _renderer->GetData2D()._frameBuffer.GetAlbedoID();
 }
 
-bool Application::ParseArgs(int argc, char const** argv) {
+bool Application::ParseArgs(int argc, char const **argv) {
 	SW_ENTRY()
 	auto args = ArgParser(argc - 1, argv + 1);
-	
+
 	auto openOpt = args.GetOption("project");
-	if(openOpt.value != "") {
+	if (openOpt.value != "") {
 		argParse.projectPath = openOpt.value;
 	}
 	auto logFileOpt = args.GetOption("log-file");
-	if(logFileOpt.value != "") {
+	if (logFileOpt.value != "") {
 		argParse.logFile = logFileOpt.value;
 	}
 
-	if(args.HasFlag("--version") || args.HasFlag("v")) {
+	if (args.HasFlag("--version") || args.HasFlag("v")) {
 		std::cout << "Sowa Engine " SOWA_VERSION_TAG << std::endl;
 		return false;
 	}
-	if(args.HasFlag("no-window")) {
+	if (args.HasFlag("no-window")) {
 		argParse.window = false;
 	}
-	if(args.HasFlag("run")) {
+	if (args.HasFlag("run")) {
 		argParse.autoStart = true;
 	}
 	return true;

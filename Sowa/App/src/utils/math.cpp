@@ -2,20 +2,25 @@
 #include <cmath>
 
 #include "serialize/serializer.hpp"
+#include "debug.hpp"
 
 namespace Sowa {
-    template<>
-    YamlNode Serializer<Size>::Save(const Size& in) {
-        YamlNode doc;
-        doc["W"] = in.w;
-        doc["H"] = in.h;
-        return doc;
-    }
 
-    template<>
-    bool Serializer<Size>::Load(Size& out, const YamlNode& doc) {
-        out.w = doc["W"].as<int>(0);
-        out.h = doc["H"].as<int>(0);
-        return true;
-    }
+FileBuffer Size::SaveImpl(ObjectType *obj) {
+	YamlNode doc;
+	Size* o = reinterpret_cast<Size*>(obj);
+	doc["W"] = o->w;
+	doc["H"] = o->h;
+	return FileBuffer(doc);
+}
+
+bool Size::LoadImpl(ObjectType *out, const FileBuffer &buf) {
+	YAML::Node doc = buf.Yaml();
+	
+	Size* o = reinterpret_cast<Size*>(out);
+	o->w = doc["W"].as<int>(0);
+	o->h = doc["H"].as<int>(0);
+	return true;
+}
+
 } // namespace Sowa

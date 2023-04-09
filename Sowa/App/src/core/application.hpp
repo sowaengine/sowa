@@ -15,6 +15,7 @@
 #include "utils/math.hpp"
 
 #include "resource/font/font.hpp"
+#include "resource/resource_watcher/resource_watcher.hpp"
 
 namespace nmGfx {
 class Renderer;
@@ -86,6 +87,9 @@ class Application {
 
 	std::unique_ptr<nmGfx::Renderer> _renderer;
 	Window _window;
+
+	int _ResourcePollInterval{60};
+	std::unique_ptr<ResourceWatcher> m_ResourceWatcher;
 
 	void Step();
 

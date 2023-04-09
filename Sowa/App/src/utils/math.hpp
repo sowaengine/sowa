@@ -4,16 +4,21 @@
 
 #include "stlpch.hpp"
 #include <glm/glm.hpp>
+#include "serialize/serializer.hpp"
+#include "object_type.hpp"
 
 namespace Sowa {
 
-struct Size {
+struct Size : public ObjectType {
 	int w;
 	int h;
 
-	Size() : w(0), h(0) {}
-	Size(int w, int h) : w(w), h(h) {}
+	static std::string Typename() { return "Sowa::Size"; }
+
+	Size() : w(0), h(0) { m_Type = Typename(); }
+	Size(int w, int h) : w(w), h(h) { m_Type = Typename(); }
 	Size &operator=(std::initializer_list<int> rhs) {
+		m_Type = Typename();
 		if (rhs.size() != 2) {
 			assert(false && "Sowa::Size initializer list must have 2 int elements");
 			return *this;
@@ -26,6 +31,9 @@ struct Size {
 
 		return *this;
 	}
+
+	static FileBuffer SaveImpl(ObjectType *);
+	static bool LoadImpl(ObjectType* out, const FileBuffer& doc);
 };
 
 template <typename T>

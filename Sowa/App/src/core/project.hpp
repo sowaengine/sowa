@@ -3,26 +3,21 @@
 #pragma once
 
 #include "core/engine_context.hpp"
-#include "utils/math.hpp"
 #include "serialize/serializer.hpp"
+#include "utils/math.hpp"
 
+#include "object_type.hpp"
 #include "yaml-cpp/yaml.h"
 
-
 namespace Sowa {
-class Project {
+class Project : public ObjectType {
   public:
 	static Project &Of(EngineContext *context);
 
 	bool Load(const char *path);
 	bool Save();
 
-  private:
-	EngineContext &_Context;
-
-	std::filesystem::path _ProjectPath{""};
-
-	YamlNode m_Doc{};
+	static std::string Typename() { return "Sowa::Project"; }
 
 	struct {
 		struct {
@@ -41,8 +36,17 @@ class Project {
 	} proj;
 
   private:
+	EngineContext &_Context;
+
+	std::filesystem::path _ProjectPath{""};
+
+	FileBuffer m_Doc{};
+
+	static FileBuffer SaveImpl(ObjectType *);
+	static bool LoadImpl(ObjectType* out, const FileBuffer& doc);
+
+  private:
 	friend class Application;
-	friend class Serializer<Project>;
 	Project(EngineContext &ctx);
 	~Project();
 
@@ -52,12 +56,6 @@ class Project {
 	Project &operator=(const Project &) = delete;
 	Project &operator=(const Project &&) = delete;
 };
-
-template <>
-YamlNode Serializer<Project>::Save(const Project &in);
-template <>
-bool Serializer<Project>::Load(Project &out, const YAML::Node &doc);
-
 
 } // namespace Sowa
 

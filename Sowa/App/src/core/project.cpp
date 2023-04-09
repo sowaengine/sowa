@@ -1,9 +1,11 @@
 #include "project.hpp"
 #include "serialize/serializer.hpp"
+#include "utils/file.hpp"
 
 namespace Sowa {
 Project::Project(EngineContext &ctx)
 	: _Context(ctx) {
+		m_Type = Typename();
 }
 Project::~Project() {}
 
@@ -17,13 +19,13 @@ bool Project::Load(const char *path) {
 		_ProjectPath = _ProjectPath / "project.sowa";
 
 	try {
-		m_Doc = YAML::LoadFile(_ProjectPath.string());
+		m_Doc = File::LoadFile(_ProjectPath);;
 	}
 	catch(const std::exception& e) {
 		return false;
 	}
 	
-	if(!Serializer<Project>().Load(*this, m_Doc)) {
+	if(!Serializer::get_singleton().Load(this, m_Doc)) {
 		Debug::Error("Unable to load project {}", _ProjectPath.string());
 		return false;
 	}
@@ -31,7 +33,7 @@ bool Project::Load(const char *path) {
 }
 
 bool Project::Save() {
-	YamlNode project = Serializer<Project>().Save(*this);
+	YamlNode project = Serializer::get_singleton().Save(this).Yaml();
 
 	YAML::Emitter emitter;
 	emitter << project;
@@ -43,20 +45,20 @@ bool Project::Save() {
 
 
 
-template<>
-YamlNode Serializer<Project>::Save(const Project& in) {
+FileBuffer Project::SaveImpl(ObjectType* out) {
 	YamlNode doc;
+	Project* o = reinterpret_cast<Project*>(out);
 
 	YamlNode application = YamlNode();
-	application["Name"] = in.proj.settings.application.name;
-	application["Desc"] = in.proj.settings.application.desc;
-	application["MainScene"] = in.proj.settings.application.mainscene;
-	application["Icon"] = in.proj.settings.application.icon;
+	application["Name"] = o->proj.settings.application.name;
+	application["Desc"] = o->proj.settings.application.desc;
+	application["MainScene"] = o->proj.settings.application.mainscene;
+	application["Icon"] = o->proj.settings.application.icon;
 
 	YamlNode window = YamlNode();
-	window["FullScreen"] = in.proj.settings.window.fullscreen;
-	window["WindowSize"] = Serializer<Size>().Save(in.proj.settings.window.windowsize);
-	window["VideoSize"] = Serializer<Size>().Save(in.proj.settings.window.videosize);
+	window["FullScreen"] = o->proj.settings.window.fullscreen;
+	window["WindowSize"] = Size::SaveImpl(&o->proj.settings.window.windowsize).Yaml();
+	window["VideoSize"] = Size::SaveImpl(&o->proj.settings.window.videosize).Yaml();
 
 	YamlNode settings = YamlNode();
 	settings["Application"] = application;
@@ -64,11 +66,14 @@ YamlNode Serializer<Project>::Save(const Project& in) {
 
 	doc["Project"] = YamlNode();
 	doc["Project"]["Settings"] = settings;
-	return doc;
+
+	return FileBuffer(doc);
 }
 
-template<>
-bool Serializer<Project>::Load(Project& out, const YamlNode& doc) {
+bool Project::LoadImpl(ObjectType* out, const FileBuffer& buf) {
+	YAML::Node doc = buf.Yaml();
+
+	Project* obj = reinterpret_cast<Project*>(out);
 	YamlNode project = doc["Project"];
 	if(!project) {
 		Debug::Error("Project file missing project attribute");
@@ -79,16 +84,16 @@ bool Serializer<Project>::Load(Project& out, const YamlNode& doc) {
 	if(settings) {
 		YamlNode application = settings["Application"];
 		if(application) {
-			SERIALIZE_GETATTR(std::string, out.proj.settings.application.name, application["Name"]);
-			SERIALIZE_GETATTR(std::string, out.proj.settings.application.desc, application["Desc"]);
-			SERIALIZE_GETATTR(std::string, out.proj.settings.application.mainscene, application["MainScene"]);
-			SERIALIZE_GETATTR(std::string, out.proj.settings.application.icon, application["Icon"]);
+			SERIALIZE_GETATTR(std::string, obj->proj.settings.application.name, application["Name"]);
+			SERIALIZE_GETATTR(std::string, obj->proj.settings.application.desc, application["Desc"]);
+			SERIALIZE_GETATTR(std::string, obj->proj.settings.application.mainscene, application["MainScene"]);
+			SERIALIZE_GETATTR(std::string, obj->proj.settings.application.icon, application["Icon"]);
 		}
 		YamlNode window = settings["Window"];
 		if(window) {
-			SERIALIZE_GETATTR(bool, out.proj.settings.window.fullscreen, window["FullScreen"]);
-			Serializer<Size>().Load(out.proj.settings.window.windowsize, window["WindowSize"]);
-			Serializer<Size>().Load(out.proj.settings.window.videosize, window["VideoSize"]);
+			SERIALIZE_GETATTR(bool, obj->proj.settings.window.fullscreen, window["FullScreen"]);
+			Size::LoadImpl(&obj->proj.settings.window.windowsize, FileBuffer(window["WindowSize"]));
+			Size::LoadImpl(&obj->proj.settings.window.videosize, FileBuffer(window["VideoSize"]));
 		}
 	}
 

@@ -5,6 +5,8 @@
 #include "sowa.hpp"
 #include "stlpch.hpp"
 #include "utils/file.hpp"
+#include "resource.hpp"
+#include "serialize/serializer.hpp"
 
 namespace Sowa {
 template <typename T>
@@ -17,8 +19,8 @@ struct ResourceLoaderImpl {
 class ResourceLoader {
   public:
 	static ResourceLoader &get_singleton() {
-		static ResourceLoader app;
-		return app;
+		static ResourceLoader l;
+		return l;
 	}
 
 	template <typename T>

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "stlpch.hpp"
+#include "core/file_buffer.hpp"
 
 namespace Sowa {
 namespace File {
@@ -44,6 +45,8 @@ bool RegisterDataPath();
  * @return std::vector<unsigned char> file content
  */
 std::vector<unsigned char> GetFileContent(const char *path);
+
+FileBuffer LoadFile(std::filesystem::path path);
 
 /**
  * @brief Creates temp file with given data
