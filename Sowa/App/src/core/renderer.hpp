@@ -25,6 +25,7 @@ class Renderer {
 	void DrawText(const glm::vec2& position, float scale, float rotation, const std::string& text, Sowa::Font& font);
 	void DrawText(const glm::mat4& transform, const std::string& text, Sowa::Font& font);
 
+	void DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, glm::vec4 color = {1.f, 1.f, 1.f, 1.f});
 	void DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, glm::vec3 color = {1.f, 1.f, 1.f});
 
   private:

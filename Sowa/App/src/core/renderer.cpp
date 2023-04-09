@@ -18,11 +18,11 @@ Renderer::~Renderer() {
 }
 
 void Renderer::DrawTexture(const glm::vec2 &position, const glm::vec2 &scale, float zIndex, float rotation, Sowa::ImageTexture &texture, uint32_t id /*= 0*/) {
-	Application::get_singleton()._renderer->DrawTexture(&texture._texture, nmGfx::CalculateModelMatrix({position.x, -position.y, zIndex}, {0.f, 0.f, rotation}, {scale.x, scale.y, 1.f}), {1.f, 1.f, 1.f}, id);
+	Application::get_singleton()._renderer->DrawTexture(&texture._texture, nmGfx::CalculateModelMatrix({position.x, -position.y, zIndex}, {0.f, 0.f, rotation}, {scale.x, scale.y, 1.f}), {1.f, 1.f, 1.f, 1.f}, id);
 }
 void Renderer::DrawTexture(const glm::mat4 &transform, Sowa::ImageTexture &texture, const Vector2& scale, uint32_t id /*= 0*/) {
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {scale.x, scale.y});
-	Application::get_singleton()._renderer->DrawTexture(&texture._texture, transform, {1.f, 1.f, 1.f}, id);
+	Application::get_singleton()._renderer->DrawTexture(&texture._texture, transform, {1.f, 1.f, 1.f, 1.f}, id);
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {1.f, 1.f});
 }
 
@@ -67,6 +67,9 @@ void Renderer::DrawText(const glm::mat4 &transform, const std::string &text, Sow
 }
 
 void Renderer::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, glm::vec3 color) {
+	DrawLine(p1, p2, thickness, {color.x, color.y, color.z, 1.f});
+}
+void Renderer::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, glm::vec4 color) {
 	static nmGfx::Texture texture;
 	static bool loaded = false;
 	if (!loaded) {

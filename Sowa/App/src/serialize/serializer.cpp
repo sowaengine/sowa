@@ -18,6 +18,10 @@ namespace Sowa
     }
 
     FileBuffer Serializer::Save(ObjectType* obj) {
+        if(obj == nullptr) {
+            return FileBuffer();
+        }
+
         auto it = m_Impls.find(obj->GetType());
         if(it == m_Impls.end()) {
             Debug::Error("Failed to save: Object type '{}' serializer doesnt exist", obj->GetType());
@@ -30,6 +34,9 @@ namespace Sowa
         return out;
     }
     bool Serializer::Load(ObjectType* obj, const FileBuffer& in) {
+        if(obj == nullptr) {
+            return false;
+        }
         auto it = m_Impls.find(obj->GetType());
         if(it == m_Impls.end()) {
             Debug::Error("Failed to load: Object type '{}' serializer doesnt exist", obj->GetType());
