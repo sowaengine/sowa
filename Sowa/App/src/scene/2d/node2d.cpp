@@ -7,6 +7,7 @@
 namespace Sowa {
 Node2D::Node2D() {
 	_NodeType = "Node2D";
+	m_Type = Typename();
 }
 
 void Node2D::EnterScene() {
@@ -43,4 +44,20 @@ const glm::mat4& Node2D::CalculateTransform() {
 	_LatestTransform = nmGfx::CalculateModelMatrix(_Position, _Rotation, {_Scale.x, _Scale.y}, {0.f, 0.f}, baseTransform);
 	return _LatestTransform;
 }
+
+FileBuffer Node2D::SaveImpl(ObjectType *out) {
+	Node2D *o = reinterpret_cast<Node2D *>(out);
+
+	YAML::Node doc = Serializer::get_singleton().SaveWithType<Node>(out).Yaml();
+	doc["Position"] = Serializer::get_singleton().Save(&o->Position()).Yaml();
+	doc["Rotation"] = o->Rotation();
+	doc["Scale"] = Serializer::get_singleton().Save(&o->Scale()).Yaml();
+	return FileBuffer(doc);
+}
+
+bool Node2D::LoadImpl(ObjectType *out, const FileBuffer &buf) {
+	Debug::Error("Node2D::LoadImpl is not implemented");
+	return false;
+}
+
 } // namespace Sowa

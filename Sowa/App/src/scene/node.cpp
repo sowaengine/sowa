@@ -1,8 +1,11 @@
 #include "node.hpp"
 #include "scene.hpp"
+#include "serialize/serializer.hpp"
 
 namespace Sowa {
-Node::Node() : _Name("Node") {}
+Node::Node() : _Name("Node") {
+	m_Type = Typename();
+}
 Node::Node(const std::string &name) : _Name(name) {}
 Node::~Node() {
 	if (IsValid()) {
@@ -48,6 +51,23 @@ void Node::SetParent(Node *node) {
 	_Parent = node;
 	if (_Parent != nullptr && _Parent != node)
 		node->RemoveNode(this);
+}
+
+FileBuffer Node::SaveImpl(ObjectType *out) {
+	YamlNode doc;
+	Node *o = reinterpret_cast<Node *>(out);
+
+	doc["Name"] = o->Name();
+	doc["Children"] = YAML::Node();
+	for (Node *node : o->GetChildren()) {
+		doc["Children"].push_back(Serializer::get_singleton().Save(node).Yaml());
+	}
+	return FileBuffer(doc);
+}
+
+bool Node::LoadImpl(ObjectType *out, const FileBuffer &buf) {
+	Debug::Error("Node::LoadImpl is not implemented");
+	return false;
 }
 
 } // namespace Sowa

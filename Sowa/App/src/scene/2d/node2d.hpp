@@ -11,6 +11,8 @@ class Node2D : public Node {
   public:
 	Node2D();
 
+	static std::string Typename() { return "Sowa::Node2D"; }
+
 	void EnterScene() override;
 	void ExitScene() override;
 	void UpdateLogic() override;
@@ -19,6 +21,9 @@ class Node2D : public Node {
 	inline Vector2& Position() { return _Position; }
 	inline double& Rotation() { return _Rotation; }
 	inline Vector2& Scale() { return _Scale; }
+
+	static FileBuffer SaveImpl(ObjectType* out);
+	static bool LoadImpl(ObjectType* out, const FileBuffer& buf);
 
   protected:
 	Vector2 _Position{0.f, 0.f};

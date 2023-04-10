@@ -12,12 +12,17 @@ class Sprite2D : public Node2D {
   public:
 	Sprite2D();
 
+	static std::string Typename() { return "Sowa::Sprite2D"; }
+
 	void EnterScene() override;
 	void ExitScene() override;
 	void UpdateLogic() override;
 	void UpdateDraw() override;
 
 	inline Reference<ImageTexture>& Texture() { return _Texture; }
+
+	static FileBuffer SaveImpl(ObjectType* out);
+	static bool LoadImpl(ObjectType* out, const FileBuffer& buf);
 
   private:
 	friend class Application;

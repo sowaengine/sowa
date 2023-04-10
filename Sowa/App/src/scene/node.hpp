@@ -3,6 +3,8 @@
 
 #include "sowa.hpp"
 #include "stlpch.hpp"
+#include "object_type.hpp"
+#include "core/file_buffer.hpp"
 
 namespace Sowa {
 class Scene;
@@ -14,11 +16,13 @@ enum class PauseMode {
 	Stop,
 };
 
-class Node {
+class Node : public ObjectType {
   public:
 	Node();
 	Node(const std::string &name);
 	virtual ~Node();
+
+	static std::string Typename() { return "Sowa::Node"; }
 
 	inline std::string &Name() { return _Name; }
 	inline bool IsValid() { return _pScene.lock() != nullptr; }
@@ -47,6 +51,10 @@ class Node {
 	void SetParent(Node *node);
 
 	const std::string& GetNodeType() { return _NodeType; }
+
+	static FileBuffer SaveImpl(ObjectType* out);
+	static bool LoadImpl(ObjectType* out, const FileBuffer& buf);
+
   private:
 	friend class Scene;
 	friend class Application;

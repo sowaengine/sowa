@@ -12,6 +12,8 @@ class Text2D : public Node2D {
   public:
 	Text2D();
 
+	static std::string Typename() { return "Sowa::Text2D"; }
+
 	void EnterScene() override;
 	void ExitScene() override;
 	void UpdateLogic() override;
@@ -19,6 +21,9 @@ class Text2D : public Node2D {
 
     void SetText(const std::string& text) { _Text = text; }
     const std::string& GetText() { return _Text; }
+
+	static FileBuffer SaveImpl(ObjectType* out);
+	static bool LoadImpl(ObjectType* out, const FileBuffer& buf);
   private:
 
     std::string _Text{""};
