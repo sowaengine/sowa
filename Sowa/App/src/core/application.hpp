@@ -106,6 +106,10 @@ class Application {
 	Vector2 _EditorCameraPos{0.f, 0.f};
 	float _EditorCameraZoom{10.f};
 
+	// Used for lerping
+	Vector2 _CurrentEditorCameraPos{0.f, 0.f};
+	float _CurrentEditorCameraZoom{10.f};
+
 	struct {
 		std::string projectPath{"./"};
 		std::string logFile{""};

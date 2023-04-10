@@ -67,6 +67,9 @@ static Reference<NinePatchTexture> s_NinePatch;
 static float mapLog(float x) {
 	return log10(x);
 }
+static float lerp(float from, float to, float t) {
+	return from + ((to - from) * (t * t));
+} 
 
 bool Application::Init(int argc, char const **argv) {
 	SW_ENTRY()
@@ -92,6 +95,14 @@ bool Application::Init(int argc, char const **argv) {
 	Serializer::get_singleton().RegisterSerializer(Project::Typename(), SerializeImpl(Project::SaveImpl, Project::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(Size::Typename(), SerializeImpl(Size::SaveImpl, Size::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(ImageTexture::Typename(), SerializeImpl(ImageTexture::SaveImpl, ImageTexture::LoadImpl));
+
+	Serializer::get_singleton().RegisterSerializer(Vector2::Typename(), SerializeImpl(Vector2::SaveImpl, Vector2::LoadImpl));
+
+	Serializer::get_singleton().RegisterSerializer(Scene::Typename(), SerializeImpl(Scene::SaveImpl, Scene::LoadImpl));
+	Serializer::get_singleton().RegisterSerializer(Node::Typename(), SerializeImpl(Node::SaveImpl, Node::LoadImpl));
+	Serializer::get_singleton().RegisterSerializer(Node2D::Typename(), SerializeImpl(Node2D::SaveImpl, Node2D::LoadImpl));
+	Serializer::get_singleton().RegisterSerializer(Sprite2D::Typename(), SerializeImpl(Sprite2D::SaveImpl, Sprite2D::LoadImpl));
+	Serializer::get_singleton().RegisterSerializer(Text2D::Typename(), SerializeImpl(Text2D::SaveImpl, Text2D::LoadImpl));
 
 	InitStreams(argParse.logFile);
 
@@ -223,7 +234,7 @@ bool Application::Init(int argc, char const **argv) {
 			if (!IsRunning()) {
 				float oldZoom = _EditorCameraZoom;
 
-				_EditorCameraZoom -= e.scroll.scrollY * _EditorCameraZoom * 0.5;
+				_EditorCameraZoom -= e.scroll.scrollY * _EditorCameraZoom * 0.4;
 				_EditorCameraZoom = MAX(_EditorCameraZoom, 1.1);
 
 				Vector2 midPoint;
@@ -269,19 +280,19 @@ bool Application::Process() {
 		float centerX, centerY;
 		float cursorSize = 5.f;
 		float cursorThickness = 4.f;
-		centerX = _EditorCameraPos.x;
-		centerY = _EditorCameraPos.y;
-		Renderer::get_singleton().DrawLine({centerX - cursorSize, centerY}, {centerX + cursorSize, centerY}, cursorThickness, {1.f, 1.f, 0.f});
-		Renderer::get_singleton().DrawLine({centerX, centerY - cursorSize}, {centerX, centerY + cursorSize}, cursorThickness, {1.f, 1.f, 0.f});
+		centerX = _CurrentEditorCameraPos.x;
+		centerY = _CurrentEditorCameraPos.y;
+		Renderer::get_singleton().DrawLine({centerX - cursorSize, centerY}, {centerX + cursorSize, centerY}, cursorThickness * mapLog(_CurrentEditorCameraZoom), {1.f, 1.f, 0.f});
+		Renderer::get_singleton().DrawLine({centerX, centerY - cursorSize}, {centerX, centerY + cursorSize}, cursorThickness * mapLog(_CurrentEditorCameraZoom), {1.f, 1.f, 0.f});
 
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 2.f * mapLog(_EditorCameraZoom), {1.f, 0.f, 0.f, .6f});
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 2.f * mapLog(_EditorCameraZoom), {0.f, 1.f, 0.f, .6f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 2.f * mapLog(_CurrentEditorCameraZoom), {1.f, 0.f, 0.f, .6f});
+		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 2.f * mapLog(_CurrentEditorCameraZoom), {0.f, 1.f, 0.f, .6f});
 
 		float viewportThickness = 3.f;
-		Renderer::get_singleton().DrawLine({0, 0}, {_window.GetVideoWidth(), 0}, viewportThickness * mapLog(_EditorCameraZoom), {.0f, .2f, .7f});
-		Renderer::get_singleton().DrawLine({_window.GetVideoWidth(), 0}, {_window.GetVideoWidth(), _window.GetVideoHeight()}, viewportThickness * mapLog(_EditorCameraZoom), {.0f, .2f, .7f});
-		Renderer::get_singleton().DrawLine({_window.GetVideoWidth(), _window.GetVideoHeight()}, {0, _window.GetVideoHeight()}, viewportThickness * mapLog(_EditorCameraZoom), {.0f, .2f, .7f});
-		Renderer::get_singleton().DrawLine({0, _window.GetVideoHeight()}, {0, 0}, viewportThickness * mapLog(_EditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({0, 0}, {_window.GetVideoWidth(), 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({_window.GetVideoWidth(), 0}, {_window.GetVideoWidth(), _window.GetVideoHeight()}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({_window.GetVideoWidth(), _window.GetVideoHeight()}, {0, _window.GetVideoHeight()}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({0, _window.GetVideoHeight()}, {0, 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
 
 	} else {
 		static float f = 0.f;
@@ -322,14 +333,17 @@ bool Application::Process() {
 
 glm::mat4 Application::GetCameraTransform() {
 	SW_ENTRY()
+	_CurrentEditorCameraZoom = lerp(_CurrentEditorCameraZoom, _EditorCameraZoom, 0.5f);
+	_CurrentEditorCameraPos.x = lerp(_CurrentEditorCameraPos.x, _EditorCameraPos.x, 0.5f);
+	_CurrentEditorCameraPos.y = lerp(_CurrentEditorCameraPos.y, _EditorCameraPos.y, 0.5f);
 	if (IsRunning())
 		return nmGfx::CalculateModelMatrix(
 			{.0f, .0f}, .0f, {1.f, 1.f});
 	else
 		return nmGfx::CalculateModelMatrix(
-			glm::vec3{_EditorCameraPos.x, _EditorCameraPos.y, 0.f},
+			glm::vec3{_CurrentEditorCameraPos.x, _CurrentEditorCameraPos.y, 0.f},
 			0.f,
-			glm::vec3{mapLog(_EditorCameraZoom), mapLog(_EditorCameraZoom), 1.f});
+			glm::vec3{mapLog(_CurrentEditorCameraZoom), mapLog(_CurrentEditorCameraZoom), 1.f});
 }
 void Application::StartGame() {
 	SW_ENTRY()
