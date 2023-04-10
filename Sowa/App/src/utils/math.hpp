@@ -2,10 +2,10 @@
 #define _E_MATH_HPP__
 #pragma once
 
+#include "object_type.hpp"
+#include "serialize/serializer.hpp"
 #include "stlpch.hpp"
 #include <glm/glm.hpp>
-#include "serialize/serializer.hpp"
-#include "object_type.hpp"
 
 namespace Sowa {
 
@@ -33,20 +33,24 @@ struct Size : public ObjectType {
 	}
 
 	static FileBuffer SaveImpl(ObjectType *);
-	static bool LoadImpl(ObjectType* out, const FileBuffer& doc);
+	static bool LoadImpl(ObjectType *out, const FileBuffer &doc);
 };
 
 template <typename T>
-struct Vec2 {
+struct Vec2 : public ObjectType {
 	T x;
 	T y;
 
+	static std::string Typename() { return "Sowa::Vec2"; }
+
 	Vec2(T _x, T _y)
 		: x(_x), y(_y) {
+		m_Type = Typename();
 	}
 
 	Vec2()
 		: x(0.f), y(0.f) {
+		m_Type = Typename();
 	}
 
 	Vec2 &operator=(const Vec2 &rhs) {
@@ -65,6 +69,23 @@ struct Vec2 {
 
 	operator glm::vec2() {
 		return glm::vec2(x, y);
+	}
+
+	static FileBuffer SaveImpl(ObjectType *obj) {
+		YamlNode doc;
+		Vec2<T> *o = reinterpret_cast<Vec2<T> *>(obj);
+		doc["x"] = o->x;
+		doc["y"] = o->y;
+		return FileBuffer(doc);
+	}
+
+	static bool LoadImpl(ObjectType *out, const FileBuffer &buf) {
+		YAML::Node doc = buf.Yaml();
+
+		Vec2<T> *o = reinterpret_cast<Vec2<T> *>(out);
+		o->x = doc["x"].as<int>(0);
+		o->y = doc["x"].as<int>(0);
+		return true;
 	}
 
 	Vec2 &operator=(std::initializer_list<T> rhs) {

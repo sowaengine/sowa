@@ -6,7 +6,9 @@
 #include "utils/random.hpp"
 
 namespace Sowa {
-Scene::Scene() {}
+Scene::Scene() {
+	m_Type = Typename();
+}
 Scene::~Scene() {
 	Exit();
 	for (Node *node : _RegisteredNodes) {
@@ -91,6 +93,30 @@ void Scene::CollectNodes() {
 
 		i++;
 	}
+}
+
+
+FileBuffer Scene::SaveImpl(ObjectType* out) {
+	YamlNode doc;
+	Scene* o = reinterpret_cast<Scene*>(out);
+
+
+	YAML::Node nodes;
+	if(o->GetRoot() != nullptr) {
+		nodes = Serializer::get_singleton().Save(o->GetRoot()).Yaml();
+	}
+	if(!nodes) {
+		nodes = "";
+	}
+
+	doc["Name"] = "mainscene";
+	doc["Nodes"] = nodes;
+	return FileBuffer(doc);
+}
+
+bool Scene::LoadImpl(ObjectType* out, const FileBuffer& buf) {
+	Debug::Error("Scene::LoadImpl is not implemented");
+	return false;
 }
 
 } // namespace Sowa

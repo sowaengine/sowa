@@ -40,6 +40,12 @@ class Serializer {
 	}
     void RegisterSerializer(std::string type, SerializeImpl impl);
 
+	template<typename T>
+	FileBuffer SaveWithType(ObjectType* o) {
+		return SaveWithTypename(T::Typename(), o);
+	}
+	FileBuffer SaveWithTypename(std::string type, ObjectType*);
+
 	FileBuffer Save(ObjectType *);
 	bool Load(ObjectType *, const FileBuffer &);
 

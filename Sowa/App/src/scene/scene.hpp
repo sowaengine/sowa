@@ -6,12 +6,15 @@
 
 #include "node.hpp"
 #include "utils/memory.hpp"
+#include "object_type.hpp"
 
 namespace Sowa {
 
-class Scene {
+class Scene : public ObjectType {
   public:
 	~Scene();
+
+	static std::string Typename() { return "Sowa::Scene"; }
 
 	void Enter();
 	void Exit();
@@ -47,6 +50,9 @@ class Scene {
 
 	// Deallocates parentless entities
 	void CollectNodes();
+
+	static FileBuffer SaveImpl(ObjectType* out);
+	static bool LoadImpl(ObjectType* out, const FileBuffer& buf);
 
   private:
 	Scene();

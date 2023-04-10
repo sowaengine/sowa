@@ -17,21 +17,31 @@ namespace Sowa
         m_Impls[type] = impl;
     }
 
+    FileBuffer Serializer::SaveWithTypename(std::string type, ObjectType* obj) {
+        if(obj == nullptr) {
+            return FileBuffer();
+        }
+
+        auto it = m_Impls.find(type);
+        if(it == m_Impls.end()) {
+            Debug::Error("Failed to save: Object type '{}' serializer doesnt exist", obj->GetType());
+            return FileBuffer();
+        }
+        if((*it).second.save == nullptr) {
+            Debug::Error("Failed to save: Object type '{}' Save function doesnt exist", obj->GetType());
+            return FileBuffer();
+        }
+
+        FileBuffer out = (*it).second.save(obj);
+        return out;
+    }
+
     FileBuffer Serializer::Save(ObjectType* obj) {
         if(obj == nullptr) {
             return FileBuffer();
         }
 
-        auto it = m_Impls.find(obj->GetType());
-        if(it == m_Impls.end()) {
-            Debug::Error("Failed to save: Object type '{}' serializer doesnt exist", obj->GetType());
-        }
-        if((*it).second.save == nullptr) {
-            Debug::Error("Failed to save: Object type '{}' Save function doesnt exist", obj->GetType());
-        }
-
-        FileBuffer out = (*it).second.save(obj);
-        return out;
+        return SaveWithTypename(obj->GetType(), obj);
     }
     bool Serializer::Load(ObjectType* obj, const FileBuffer& in) {
         if(obj == nullptr) {
