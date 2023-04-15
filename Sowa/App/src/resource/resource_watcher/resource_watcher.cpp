@@ -33,7 +33,7 @@ void ResourceWatcher::Poll() {
 		}
 
 		time_t modifyTime = GetModifyTime(path.c_str());
-		if (o.lastModify < modifyTime) {
+		if (o.lastModify != modifyTime) {
 
 			std::cout << File::GetFileContent(path.c_str()).size() << std::endl;
 

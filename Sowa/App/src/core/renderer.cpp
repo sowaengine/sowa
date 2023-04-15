@@ -24,7 +24,7 @@ void Renderer::DrawTexture(const glm::vec2 &position, const glm::vec2 &scale, fl
 }
 
 void Renderer::DrawTextureWithUV(const glm::mat4 &transform, Sowa::ImageTexture &texture, const Vector2& uv1, const Vector2& uv2, const Vector2& scale, uint32_t id) {
-	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {uv1.x, 1.f - uv1.y, uv2.x, 1.f - uv2.y});
+	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {uv1.x, uv1.y, uv2.x, uv2.y});
 	DrawTexture(transform, texture, scale, id);
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {0.f, 0.f, 1.f, 1.f});
 }

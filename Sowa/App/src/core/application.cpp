@@ -17,7 +17,7 @@
 #include "core/renderer.hpp"
 #include "core/window.hpp"
 
-#include "scene/2d/ninepatchrect.hpp"
+#include "scene/2d/nine_slice_panel.hpp"
 #include "scene/2d/node2d.hpp"
 #include "scene/2d/sprite2d.hpp"
 #include "scene/2d/text2d.hpp"
@@ -172,8 +172,8 @@ bool Application::Init(int argc, char const **argv) {
 	RegisterNodeDestructor("Text2D", [](Node *node) {
 		Allocator<Text2D>::Get().deallocate(reinterpret_cast<Text2D *>(node), 1);
 	});
-	RegisterNodeDestructor("NinePatchRect", [](Node *node) {
-		Allocator<NinePatchRect>::Get().deallocate(reinterpret_cast<NinePatchRect *>(node), 1);
+	RegisterNodeDestructor("NineSlicePanel", [](Node *node) {
+		Allocator<NineSlicePanel>::Get().deallocate(reinterpret_cast<NineSlicePanel *>(node), 1);
 	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION);
@@ -190,17 +190,19 @@ bool Application::Init(int argc, char const **argv) {
 	Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://Saul_Goodman.png"));
 	m_ResourceWatcher->Register("res://Saul_Goodman.png", anotherTexture);
 
-	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://image.png");
+	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://uv.jpg");
 
-	NinePatchRect *button = scene->Create<NinePatchRect>("Button");
+	NineSlicePanel *button = scene->Create<NineSlicePanel>("Button");
 	button->Texture() = s_NinePatch;
-	button->Position().x = 400;
+	button->Position().x = 600;
 	button->Scale() = {.25f, .25f};
+	button->Rotation() = 9.f;
+	button->Size() = {3000.f, 2000.f};
 
 	// node3->Scale() = {0.25f, 0.25f};
 	node3->Texture() = anotherTexture;
-	node3->Position() = {-200, -200};
-	node4->Position() = {200.f, 0.f};
+	node3->Position() = {-600, -200};
+	node4->Position() = {200.f, -200.f};
 
 	node->AddChild(node1);
 	node->AddChild(node2);
@@ -300,6 +302,11 @@ bool Application::Process() {
 		((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position() = {std::sin(f) * 200, std::cos(f) * 200};
 		((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Rotation() += 0.4f;
 	}
+
+	static float g;
+	g += 0.02f;
+	((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().x = 3000 + (std::sin(g) * 100);
+	((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().y = 2000 + (std::cos(g) * 100);
 
 	if (_Scene != nullptr) {
 		_Scene->UpdateDraw();
