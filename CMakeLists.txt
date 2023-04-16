@@ -91,5 +91,20 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty EXCLUDE_FROM_ALL)
 
+include_directories(${CMAKE_SOURCE_DIR}/libsw/include)
 add_subdirectory(${CMAKE_SOURCE_DIR}/Sowa)
 add_subdirectory(${CMAKE_SOURCE_DIR}/runner)
+
+# libsw tests
+file(GLOB_RECURSE TEST_SOURCES ${CMAKE_SOURCE_DIR}/libsw/tests/*.cpp)
+
+add_subdirectory(googletest)
+enable_testing()
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+add_executable(sw_test ${TEST_SOURCES})
+target_link_libraries(sw_test gtest)
+add_test(sw_test sw_test)
+add_custom_target(run_unit_test ALL
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    DEPENDS sw_test)
