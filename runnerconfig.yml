@@ -1,6 +1,6 @@
 ActiveVersion: latest
 Servers:
-  main: https://raw.githubusercontent.com/sowaengine/sowa/data/versions.yml
+  main: https://raw.githubusercontent.com/sowaengine/sowa-data/main/versions.yml
 AutoUpdate:
   CheckUpdates: true
   LastUpdateCheck: 0
