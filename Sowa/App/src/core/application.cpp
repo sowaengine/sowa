@@ -187,8 +187,8 @@ bool Application::Init(int argc, char const **argv) {
 	Text2D *node4 = scene->Create<Text2D>("Node4");
 
 	Reference<ImageTexture> anotherTexture = std::make_shared<ImageTexture>();
-	Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://Saul_Goodman.png"));
-	m_ResourceWatcher->Register("res://Saul_Goodman.png", anotherTexture);
+	Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://kenney.png"));
+	m_ResourceWatcher->Register("res://kenney.png", anotherTexture);
 
 	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://uv.jpg");
 
