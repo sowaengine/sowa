@@ -13,6 +13,7 @@
 
 #include "core/engine_context.hpp"
 #include "core/export_generator.hpp"
+#include "core/script_server.hpp"
 #include "core/project.hpp"
 #include "core/renderer.hpp"
 #include "core/window.hpp"
@@ -88,6 +89,9 @@ bool Application::Init(int argc, char const **argv) {
 	Project *project = new Project(*ctx);
 	ctx->RegisterSingleton<Project>(Sowa::Server::PROJECT, *project);
 
+	sowa::script_server *scriptServer = new sowa::script_server(*ctx);
+	ctx->RegisterSingleton<sowa::script_server>(Sowa::Server::SCRIPT_SERVER, *scriptServer);
+
 	if (!ParseArgs(argc, argv)) {
 		return false;
 	}
@@ -129,6 +133,8 @@ bool Application::Init(int argc, char const **argv) {
 		Debug::Error("Engine data path not found. exiting");
 		return false;
 	}
+	// initialize servers before renderer
+	scriptServer->init();
 
 	_renderer = std::make_unique<nmGfx::Renderer>();
 	unsigned int windowFlags = nmGfx::WindowFlags::NONE;
