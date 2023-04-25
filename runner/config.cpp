@@ -79,6 +79,6 @@ RuntimeConfig &GetRuntimeConfig() {
 	return runtimeCfg;
 }
 
-bool Version::operator<(const Version& o) {
+bool Version::operator<(const Version& o) const {
 	return VersionName(tag) < VersionName(o.tag);
 }

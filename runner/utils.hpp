@@ -1,5 +1,5 @@
 #ifndef SW_RUNNER_UTILS_HPP_
-#define SW_RUNNER_UTILS_HPP
+#define SW_RUNNER_UTILS_HPP_
 
 #include "config.hpp"
 #include <string>

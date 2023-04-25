@@ -38,7 +38,7 @@ struct Version {
     Version() {}
     Version(std::string tag, std::string url) : tag(tag), url(url) {}
 
-    bool operator<(const Version&);
+    bool operator<(const Version&) const;
 };
 
 struct RuntimeConfig {

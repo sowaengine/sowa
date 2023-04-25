@@ -24,7 +24,10 @@ bool Project::Load(const char *path) {
 	catch(const std::exception& e) {
 		return false;
 	}
-	
+	if(m_Doc.Data().size() == 0) {
+		return false;
+	}
+
 	if(!Serializer::get_singleton().Load(this, m_Doc)) {
 		Debug::Error("Unable to load project {}", _ProjectPath.string());
 		return false;

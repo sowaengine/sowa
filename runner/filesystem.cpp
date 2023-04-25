@@ -18,6 +18,7 @@ std::filesystem::path GetExecutableDir()
         GetModuleFileNameW(nullptr, path, FILENAME_MAX);
         return std::filesystem::path(path).parent_path().string();
     #endif
+    return "";
 }
 
 FILE* OpenExecutable(std::string path, std::vector<std::string> args) {

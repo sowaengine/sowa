@@ -5,7 +5,7 @@
 namespace Sowa {
 
 uint64_t Random::GenerateID() {
-	size_t id = 0;
+	uint64_t id = 0;
 
 	RandomNumberGenerator gen{};
 	gen.Generate(id);
