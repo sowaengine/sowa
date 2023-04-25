@@ -34,6 +34,7 @@ target_link_libraries(
           -static-libstdc++
           yaml-cpp
           tinyfiledialogs
+          angelscript
           ${LD_FLAG_STATIC}
           ${CMAKE_DL_LIBS})
 target_include_directories(lsowa PRIVATE ${SOWA_INCLUDE_DIRS})

@@ -2,8 +2,8 @@
 set(SOWA_SOURCES
    ${SOWA_SOURCES}
 
-   # lua-5.4.4
-   ${LUA_SOURCES}
+   ${CMAKE_SOURCE_DIR}/thirdparty/angelscript_2.36.0/sdk/add_on/scriptbuilder/scriptbuilder.cpp
+   ${CMAKE_SOURCE_DIR}/thirdparty/angelscript_2.36.0/sdk/add_on/scriptstdstring/scriptstdstring.cpp
 
    PARENT_SCOPE
 )
@@ -19,6 +19,7 @@ set(SOWA_INCLUDE_DIRS
 
    ${TINYFD_INCLUDE}
    ${YAML_CPP_INCLUDE}
+   ${ANGELSCRIPT_INCLUDE}
 
    PARENT_SCOPE
 )

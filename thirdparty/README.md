@@ -19,3 +19,8 @@
 - Upstream: https://www.zlib.net/
 - Version: 1.2.13
 - License: zlib (C) 1995-2022 Jean-loup Gailly and Mark Adler `thirdparty/manual/zlib-1.2.13/LICENSE`
+
+## angelscript
+- Upstream: https://www.angelcode.com/angelscript/
+- Version: 2.36.0
+- License Copyright © 2003-2022 Andreas Jönsson `thirdparty/angelscript_2.36.0/LICENSE`
