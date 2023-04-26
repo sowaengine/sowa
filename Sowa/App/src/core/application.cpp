@@ -222,9 +222,23 @@ bool Application::Init(int argc, char const **argv) {
 
 	OnInput() += [this](InputEvent e) {
 		if (e.Type() == InputEventType::MouseMove) {
+			float ratioX = (float)GetWindow().GetVideoWidth() / GetWindow().GetWindowWidth();
+			float ratioY = (float)GetWindow().GetVideoHeight() / GetWindow().GetWindowHeight();
+
 			if (!IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
-				_EditorCameraPos.x += e.mouseMove.deltaX * mapLog(_EditorCameraZoom);
-				_EditorCameraPos.y -= e.mouseMove.deltaY * mapLog(_EditorCameraZoom);
+
+				_EditorCameraPos.x += e.mouseMove.deltaX * mapLog(_EditorCameraZoom) * ratioX;
+				_EditorCameraPos.y -= e.mouseMove.deltaY * mapLog(_EditorCameraZoom) * ratioY;
+			}
+			if (m_is_node_dragging && !IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_LEFT) && PickedNode() != 0 && GetCurrentScene() != nullptr) {
+				Node *node = GetCurrentScene()->GetNodeByID(PickedNode());
+				if (node != nullptr) {
+					Node2D *node2d = dynamic_cast<Node2D *>(node);
+					if (node2d != nullptr) {
+						node2d->Position().x -= e.mouseMove.deltaX * mapLog(_EditorCameraZoom) * ratioX;
+						node2d->Position().y += e.mouseMove.deltaY * mapLog(_EditorCameraZoom) * ratioY;
+					}
+				}
 			}
 			// Debug::Log("Mouse Pos: ({},{}), delta: ({},{})", e.mouseMove.posX, e.mouseMove.posY, e.mouseMove.deltaX, e.mouseMove.posY);
 		} else if (e.Type() == InputEventType::Key) {
@@ -256,8 +270,13 @@ bool Application::Init(int argc, char const **argv) {
 			// Debug::Log("Scroll Event: x: {}, y: {}", e.scroll.scrollX, e.scroll.scrollY);
 		} else if (e.Type() == InputEventType::MouseButton) {
 			// Debug::Log("Mouse Button Event: button: {}, action: {}, mods: {}", e.mouseButton.button, e.mouseButton.action, e.mouseButton.modifiers);
+			if (e.mouseButton.button == 0 && e.mouseButton.action == 0) {
+				m_is_node_dragging = false;
+			}
+		} else if (e.Type() == InputEventType::MouseClick) {
+			Debug::Log("Mouse Click Event: button: {}, single: {}, mods: {}", e.mouseClick.button, e.mouseClick.single, e.mouseClick.modifiers);
 			// if modifiers & ctrl, multi select
-			if(e.mouseButton.button == 0 && e.mouseButton.action == 1) {
+			if (e.mouseClick.button == 0 && e.mouseClick.single) {
 				this->m_picked_node = this->m_hovering_node;
 			}
 		} else if (e.Type() == InputEventType::Character) {
@@ -280,6 +299,10 @@ bool Application::Process() {
 
 	if (_Scene != nullptr) {
 		_Scene->UpdateLogic();
+	}
+
+	if (HoveringNode() != 0 && HoveringNode() == PickedNode() && GetWindow().IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+		m_is_node_dragging = true;
 	}
 
 	_renderer->Begin2D(
@@ -318,6 +341,19 @@ bool Application::Process() {
 	((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().x = 3000 + (std::sin(g) * 100);
 	((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().y = 2000 + (std::cos(g) * 100);
 
+	// Draw node selection
+	if (!IsRunning() && PickedNode() != 0 && GetCurrentScene() != nullptr) {
+		Node *node = GetCurrentScene()->GetNodeByID(PickedNode());
+		if (node != nullptr) {
+			Node2D *node2d = dynamic_cast<Node2D *>(node);
+			if (node2d != nullptr) {
+				float selectionThickness = 5.f;
+				Renderer::get_singleton().DrawLine({node2d->Position().x - 30, node2d->Position().y}, {node2d->Position().x + 30, node2d->Position().y}, selectionThickness * mapLog(_CurrentEditorCameraZoom), {.1f, .4f, .6f, 3.f});
+				Renderer::get_singleton().DrawLine({node2d->Position().x, node2d->Position().y - 30}, {node2d->Position().x, node2d->Position().y + 30}, selectionThickness * mapLog(_CurrentEditorCameraZoom), {.1f, .4f, .6f, 3.f});
+			}
+		}
+	}
+
 	if (_Scene != nullptr) {
 		_Scene->UpdateDraw();
 	}
@@ -341,11 +377,11 @@ bool Application::Process() {
 		if (GetCurrentScene()->GetNodeByID(id) != nullptr) {
 			m_hovering_node = static_cast<uint32_t>(id);
 		} else {
-			// look for entity clickables
+			// look for editor clickables
 			m_hovering_node = 0;
 		}
 	}
-	Debug::Log("Picked {}", m_picked_node);
+
 	_renderer->End2D();
 
 	_renderer->ClearLayers();

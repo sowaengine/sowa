@@ -1,6 +1,8 @@
 #include "core/window.hpp"
 #include "sowa.hpp"
 
+#include <chrono>
+
 #include "GLFW/glfw3.h"
 #include "stlpch.hpp"
 
@@ -32,6 +34,7 @@ class WindowAccessor {
 	WindowAccessor &RegisterKeyEvent(int key, int scancode, int action, int mods);
 	WindowAccessor &RegisterScrollEvent(double xOffset, double yOffset);
 	WindowAccessor &RegisterButtonEvent(int button, int action, int mods);
+	WindowAccessor &RegisterClickEvent(int button, bool single, int mods);
 	WindowAccessor &RegisterMousePosEvent(double xPos, double yPos);
 	WindowAccessor &RegisterCharEvent(unsigned int codePoint);
 
@@ -271,6 +274,21 @@ WindowAccessor &WindowAccessor::RegisterButtonEvent(int button, int action, int 
 	return *this;
 }
 
+WindowAccessor &WindowAccessor::RegisterClickEvent(int button, bool single, int mods) {
+	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
+	sowa::Window &window = app->GetWindow();
+
+	InputEvent e;
+	e._Type = InputEventType::MouseClick;
+
+	e.mouseClick.button = button;
+	e.mouseClick.single = single;
+	e.mouseClick.modifiers = mods;
+
+	app->OnInput().Invoke(e);
+	return *this;
+}
+
 WindowAccessor &WindowAccessor::RegisterMousePosEvent(double xPos, double yPos) {
 	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
 	sowa::Window &window = app->GetWindow();
@@ -316,6 +334,34 @@ void WindowCallback::ScrollCallback(GLFWwindow *window, double xOffset, double y
 }
 void WindowCallback::MouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 	WindowAccessor(window).RegisterButtonEvent(button, action, mods);
+
+	static std::chrono::milliseconds::rep last_press = 0;
+	static std::chrono::milliseconds::rep last_release = 0;
+
+	const int single_click_interval = 230; // ms
+	const int double_click_interval = 500; // ms
+
+	if (action == GLFW_PRESS) {
+		std::chrono::milliseconds::rep milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+		if (milliseconds < last_press + double_click_interval) {
+			// Double click
+			WindowAccessor(window).RegisterClickEvent(button, false, mods);
+		}
+
+		last_press = milliseconds;
+	}
+
+	if (action == GLFW_RELEASE) {
+		std::chrono::milliseconds::rep milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
+		if (milliseconds < last_press + single_click_interval) {
+			// Single click
+			WindowAccessor(window).RegisterClickEvent(button, true, mods);
+		}
+
+		last_release = milliseconds;
+	}
 }
 void WindowCallback::CursorPosCallback(GLFWwindow *window, double xPos, double yPos) {
 	WindowAccessor(window).RegisterMousePosEvent(xPos, yPos);

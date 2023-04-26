@@ -110,6 +110,7 @@ class Application {
 	float _EditorCameraZoom{10.f};
 	uint32_t m_picked_node;
 	uint32_t m_hovering_node;
+	bool m_is_node_dragging{false};
 
 	// Used for lerping
 	vec2 _CurrentEditorCameraPos{0.f, 0.f};

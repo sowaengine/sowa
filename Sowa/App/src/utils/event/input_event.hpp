@@ -9,6 +9,7 @@ enum class InputEventType {
 	Scroll,
 	MouseMove,
 	MouseButton,
+	MouseClick,
 	Key,
 	Character,
 };
@@ -34,6 +35,12 @@ struct InputEvent {
 		int action;
 		int modifiers;
 	} mouseButton;
+
+	struct {
+		int button;
+		bool single;
+		int modifiers;
+	} mouseClick;
 
 	struct {
 		int key;
