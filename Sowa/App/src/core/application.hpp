@@ -111,6 +111,7 @@ class Application {
 	uint32_t m_picked_node;
 	uint32_t m_hovering_node;
 	bool m_is_node_dragging{false};
+	bool m_on_drag_mode{false}; // on press G
 
 	// Used for lerping
 	vec2 _CurrentEditorCameraPos{0.f, 0.f};

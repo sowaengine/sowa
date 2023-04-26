@@ -226,11 +226,23 @@ bool Application::Init(int argc, char const **argv) {
 			float ratioY = (float)GetWindow().GetVideoHeight() / GetWindow().GetWindowHeight();
 
 			if (!IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
-
 				_EditorCameraPos.x += e.mouseMove.deltaX * mapLog(_EditorCameraZoom) * ratioX;
 				_EditorCameraPos.y -= e.mouseMove.deltaY * mapLog(_EditorCameraZoom) * ratioY;
+
+				if (m_is_node_dragging && PickedNode() != 0) {
+					Node *node = GetCurrentScene()->GetNodeByID(PickedNode());
+					if (node != nullptr) {
+						Node2D *node2d = dynamic_cast<Node2D *>(node);
+						if (node2d != nullptr) {
+							node2d->Position().x += e.mouseMove.deltaX * mapLog(_EditorCameraZoom) * ratioX;
+							node2d->Position().y -= e.mouseMove.deltaY * mapLog(_EditorCameraZoom) * ratioY;
+						}
+					}
+				}
 			}
-			if (m_is_node_dragging && !IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_LEFT) && PickedNode() != 0 && GetCurrentScene() != nullptr) {
+			if (
+				(m_is_node_dragging && !IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_LEFT) && PickedNode() != 0 && GetCurrentScene() != nullptr) ||
+				m_on_drag_mode && !IsRunning() && PickedNode() != 0 && GetWindow().IsButtonUp(GLFW_MOUSE_BUTTON_RIGHT)) {
 				Node *node = GetCurrentScene()->GetNodeByID(PickedNode());
 				if (node != nullptr) {
 					Node2D *node2d = dynamic_cast<Node2D *>(node);
@@ -276,9 +288,15 @@ bool Application::Init(int argc, char const **argv) {
 		} else if (e.Type() == InputEventType::MouseClick) {
 			Debug::Log("Mouse Click Event: button: {}, single: {}, mods: {}", e.mouseClick.button, e.mouseClick.single, e.mouseClick.modifiers);
 			// if modifiers & ctrl, multi select
-			if (e.mouseClick.button == 0 && e.mouseClick.single) {
+			if (!m_on_drag_mode && e.mouseClick.button == 0 && e.mouseClick.single) {
 				this->m_picked_node = this->m_hovering_node;
 			}
+
+			if (m_on_drag_mode && e.mouseClick.button == 0 && e.mouseClick.single) {
+				// set window mode to visible
+				m_on_drag_mode = false;
+			}
+
 		} else if (e.Type() == InputEventType::Character) {
 			// Debug::Log("Character Event: codePoint: {}", (char)e.character.codePoint);
 		}
@@ -303,6 +321,10 @@ bool Application::Process() {
 
 	if (HoveringNode() != 0 && HoveringNode() == PickedNode() && GetWindow().IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 		m_is_node_dragging = true;
+	}
+	if (PickedNode() != 0 && GetWindow().IsKeyJustPressed(GLFW_KEY_G)) {
+		// set window mode to hidden
+		m_on_drag_mode = true;
 	}
 
 	_renderer->Begin2D(
