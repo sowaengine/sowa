@@ -63,23 +63,23 @@ void NineSlicePanel::UpdateDraw() {
 		static float g = 0.f;
 		g += 1.f;
 		// top left
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{-width / 2 + m_MarginLeft / 2, height / 2 - m_MarginTop / 2, 0.f}), *_Texture.get(), {0.f, 1.f - top}, {left, 1.f}, {m_MarginLeft, m_MarginBottom}, 0);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{-width / 2 + m_MarginLeft / 2, height / 2 - m_MarginTop / 2, 0.f}), *_Texture.get(), {0.f, 1.f - top}, {left, 1.f}, {m_MarginLeft, m_MarginBottom}, ID());
 		// top edge
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{0.f, height / 2 - m_MarginTop / 2, 0.f}), *_Texture.get(), {left, 1.f - top}, {1.f - right, 1.f}, {width - m_MarginLeft - m_MarginRight, m_MarginBottom}, 0);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{0.f, height / 2 - m_MarginTop / 2, 0.f}), *_Texture.get(), {left, 1.f - top}, {1.f - right, 1.f}, {width - m_MarginLeft - m_MarginRight, m_MarginBottom}, ID());
 		// top right
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{width / 2 - m_MarginLeft / 2, height / 2 - m_MarginTop / 2, 0.f}), *_Texture.get(), {1.f - right, 1.f - top}, {1.f, 1.f}, {m_MarginRight, m_MarginBottom}, 0);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{width / 2 - m_MarginLeft / 2, height / 2 - m_MarginTop / 2, 0.f}), *_Texture.get(), {1.f - right, 1.f - top}, {1.f, 1.f}, {m_MarginRight, m_MarginBottom}, ID());
 		// right edge
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{width / 2 - m_MarginLeft / 2, 0.f, 0.f}), *_Texture.get(), {1.f - right, bottom}, {1.f, 1.f - top}, {m_MarginRight, height - m_MarginTop - m_MarginBottom}, 0);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{width / 2 - m_MarginLeft / 2, 0.f, 0.f}), *_Texture.get(), {1.f - right, bottom}, {1.f, 1.f - top}, {m_MarginRight, height - m_MarginTop - m_MarginBottom}, ID());
 		// bottom right
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{width / 2 - m_MarginLeft / 2, -height / 2 + m_MarginBottom / 2, 0.f}), *_Texture.get(), {1.f - right, 0.f}, {1.f, bottom}, {m_MarginRight, m_MarginBottom}, 0);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{width / 2 - m_MarginLeft / 2, -height / 2 + m_MarginBottom / 2, 0.f}), *_Texture.get(), {1.f - right, 0.f}, {1.f, bottom}, {m_MarginRight, m_MarginBottom}, ID());
 		// bottom edge
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{0.f, -height / 2 + m_MarginTop / 2, 0.f}), *_Texture.get(), {left, 0.f}, {1.f - right, bottom}, {width - m_MarginLeft - m_MarginRight, m_MarginBottom}, 0);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{0.f, -height / 2 + m_MarginTop / 2, 0.f}), *_Texture.get(), {left, 0.f}, {1.f - right, bottom}, {width - m_MarginLeft - m_MarginRight, m_MarginBottom}, ID());
 		// bottom left
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{-width / 2 + m_MarginLeft / 2, -height / 2 + m_MarginTop / 2, 0.f}), *_Texture.get(), {0.f, 0.f}, {left, bottom}, {m_MarginLeft, m_MarginBottom}, 0);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{-width / 2 + m_MarginLeft / 2, -height / 2 + m_MarginTop / 2, 0.f}), *_Texture.get(), {0.f, 0.f}, {left, bottom}, {m_MarginLeft, m_MarginBottom}, ID());
 		// left edge
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{-width / 2 + m_MarginLeft / 2, 0.f, 0.f}), *_Texture.get(), {0.f, bottom}, {right, 1.f - top}, {m_MarginRight, height - m_MarginTop - m_MarginBottom}, 0);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{-width / 2 + m_MarginLeft / 2, 0.f, 0.f}), *_Texture.get(), {0.f, bottom}, {right, 1.f - top}, {m_MarginRight, height - m_MarginTop - m_MarginBottom}, ID());
 		// center
-		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{0.f, 0.f, 0.f}), *_Texture.get(), uv1, uv2, {width - m_MarginLeft - m_MarginRight, height - m_MarginTop - m_MarginBottom}, 0.f);
+		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{0.f, 0.f, 0.f}), *_Texture.get(), uv1, uv2, {width - m_MarginLeft - m_MarginRight, height - m_MarginTop - m_MarginBottom}, ID());
 	}
 }
 FileBuffer NineSlicePanel::SaveImpl(object_type *out) {

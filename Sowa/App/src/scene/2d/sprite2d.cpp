@@ -20,7 +20,7 @@ void Sprite2D::UpdateLogic() {
 }
 void Sprite2D::UpdateDraw() {
 	if (_Texture != nullptr)
-		Renderer::get_singleton().DrawTexture(CalculateTransform(), *_Texture.get(), {(float)_Texture->Width(), (float)_Texture->Height()}, 0);
+		Renderer::get_singleton().DrawTexture(CalculateTransform(), *_Texture.get(), {(float)_Texture->Width(), (float)_Texture->Height()}, ID());
 }
 
 FileBuffer Sprite2D::SaveImpl(object_type *out) {

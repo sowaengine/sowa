@@ -6,6 +6,7 @@
 
 #include "node.hpp"
 #include "utils/memory.hpp"
+#include "utils/random.hpp"
 #include "object_type.hpp"
 
 namespace sowa {
@@ -23,16 +24,20 @@ class Scene : public object_type {
 	void UpdateDraw();
 
 	template <typename T>
-	T *Create(const std::string &name) {
+	T *Create(const std::string &name, uint32_t id = 0) {
 		std::allocator<T> allocator = Allocator<T>::Get();
 		T *node = allocator.allocate(1);
 		new (node) T;
 		node->_pScene = _SelfRef;
+		// maybe lookup by id later
+		node->m_id = id == 0 ? Random::GenerateID32() : id;
 		node->Name() = name;
 		Register(node);
 
 		return node;
 	}
+
+	Node* GetNodeByID(uint32_t id);
 
 	static Reference<Scene> New();
 

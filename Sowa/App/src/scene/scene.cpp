@@ -68,6 +68,15 @@ Reference<Scene> Scene::New() {
 	return scene;
 }
 
+Node *Scene::GetNodeByID(uint32_t id) {
+	for (Node *node : _RegisteredNodes) {
+		if (node->ID() == id) {
+			return node;
+		}
+	}
+	return nullptr;
+}
+
 void Scene::Register(Node *node) {
 	_RegisteredNodes.push_back(node);
 }
@@ -95,17 +104,15 @@ void Scene::CollectNodes() {
 	}
 }
 
-
-FileBuffer Scene::SaveImpl(object_type* out) {
+FileBuffer Scene::SaveImpl(object_type *out) {
 	YamlNode doc;
-	Scene* o = reinterpret_cast<Scene*>(out);
-
+	Scene *o = reinterpret_cast<Scene *>(out);
 
 	YAML::Node nodes;
-	if(o->GetRoot() != nullptr) {
+	if (o->GetRoot() != nullptr) {
 		nodes = Serializer::get_singleton().Save(o->GetRoot()).Yaml();
 	}
-	if(!nodes) {
+	if (!nodes) {
 		nodes = "";
 	}
 
@@ -114,7 +121,7 @@ FileBuffer Scene::SaveImpl(object_type* out) {
 	return FileBuffer(doc);
 }
 
-bool Scene::LoadImpl(object_type* out, const FileBuffer& buf) {
+bool Scene::LoadImpl(object_type *out, const FileBuffer &buf) {
 	Debug::Error("Scene::LoadImpl is not implemented");
 	return false;
 }

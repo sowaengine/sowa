@@ -25,6 +25,7 @@ class Node : public object_type {
 	static std::string Typename() { return "sowa::Node"; }
 
 	inline std::string &Name() { return _Name; }
+	inline const uint32_t ID() { return m_id; }
 	inline bool IsValid() { return _pScene.lock() != nullptr; }
 
 	// Called when entity joins / exits scene tree
@@ -59,6 +60,8 @@ class Node : public object_type {
 	friend class Scene;
 	friend class Application;
 	std::string _Name;
+
+	uint32_t m_id;
 
 	bool _Locked{false};
 
