@@ -66,6 +66,9 @@ class Application {
 
 	glm::mat4 GetCameraTransform();
 
+	inline uint32_t PickedNode() { return m_picked_node; }
+	inline uint32_t HoveringNode() { return m_hovering_node; }
+
   private:
 	friend class Window;
 	friend class Renderer;
@@ -105,6 +108,8 @@ class Application {
 	// Editor
 	vec2 _EditorCameraPos{0.f, 0.f};
 	float _EditorCameraZoom{10.f};
+	uint32_t m_picked_node;
+	uint32_t m_hovering_node;
 
 	// Used for lerping
 	vec2 _CurrentEditorCameraPos{0.f, 0.f};

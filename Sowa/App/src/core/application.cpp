@@ -13,9 +13,9 @@
 
 #include "core/engine_context.hpp"
 #include "core/export_generator.hpp"
-#include "core/script_server.hpp"
 #include "core/project.hpp"
 #include "core/renderer.hpp"
+#include "core/script_server.hpp"
 #include "core/window.hpp"
 
 #include "scene/2d/nine_slice_panel.hpp"
@@ -70,7 +70,7 @@ static float mapLog(float x) {
 }
 static float lerp(float from, float to, float t) {
 	return from + ((to - from) * (t * t));
-} 
+}
 
 bool Application::Init(int argc, char const **argv) {
 	SW_ENTRY()
@@ -198,7 +198,7 @@ bool Application::Init(int argc, char const **argv) {
 
 	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://uv.jpg");
 
-	NineSlicePanel *button = scene->Create<NineSlicePanel>("Button");
+	NineSlicePanel *button = scene->Create<NineSlicePanel>("Button", 12);
 	button->Texture() = s_NinePatch;
 	button->Position().x = 600;
 	button->Scale() = {.25f, .25f};
@@ -256,6 +256,10 @@ bool Application::Init(int argc, char const **argv) {
 			// Debug::Log("Scroll Event: x: {}, y: {}", e.scroll.scrollX, e.scroll.scrollY);
 		} else if (e.Type() == InputEventType::MouseButton) {
 			// Debug::Log("Mouse Button Event: button: {}, action: {}, mods: {}", e.mouseButton.button, e.mouseButton.action, e.mouseButton.modifiers);
+			// if modifiers & ctrl, multi select
+			if(e.mouseButton.button == 0 && e.mouseButton.action == 1) {
+				this->m_picked_node = this->m_hovering_node;
+			}
 		} else if (e.Type() == InputEventType::Character) {
 			// Debug::Log("Character Event: codePoint: {}", (char)e.character.codePoint);
 		}
@@ -329,6 +333,19 @@ bool Application::Process() {
 		}
 	}
 
+	vec2 mousePos = GetWindow().GetGameMousePosition();
+	// mousePos.x += (_EditorCameraPos.x * mapLog(_EditorCameraZoom)) - (GetWindow().GetVideoWidth() / 2);
+	// mousePos.y -= (_EditorCameraPos.y * mapLog(_EditorCameraZoom)) - (GetWindow().GetVideoHeight() / 2);
+	int id = _renderer->Get2DPickID(mousePos.x, GetWindow().GetVideoHeight() - mousePos.y);
+	if (GetCurrentScene() != nullptr) {
+		if (GetCurrentScene()->GetNodeByID(id) != nullptr) {
+			m_hovering_node = static_cast<uint32_t>(id);
+		} else {
+			// look for entity clickables
+			m_hovering_node = 0;
+		}
+	}
+	Debug::Log("Picked {}", m_picked_node);
 	_renderer->End2D();
 
 	_renderer->ClearLayers();
