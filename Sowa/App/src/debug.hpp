@@ -66,7 +66,7 @@ class Streams {
  */
 template <typename... Args>
 void Print(uint32_t level, const std::string &format, Args... args) {
-	std::string time = Sowa::Time::GetTime("%Y-%m-%d %H:%M:%S");
+	std::string time = sowa::Time::GetTime("%Y-%m-%d %H:%M:%S");
 	std::string msg = fmt::format("[{}] [{}]: {}\n", time, Streams::GetInstance().GetLevelText(level), fmt::format(format, args...));
 	auto &streams = Streams::GetInstance().Get(level);
 	for (size_t i = 0; i < streams.size(); i++) {

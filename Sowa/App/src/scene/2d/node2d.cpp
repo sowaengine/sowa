@@ -4,10 +4,10 @@
 #include "core/application.hpp"
 #include "Core/nm_Matrix.hpp"
 
-namespace Sowa {
+namespace sowa {
 Node2D::Node2D() {
 	_NodeType = "Node2D";
-	m_Type = Typename();
+	m_type = Typename();
 }
 
 void Node2D::EnterScene() {
@@ -45,7 +45,7 @@ const glm::mat4& Node2D::CalculateTransform() {
 	return _LatestTransform;
 }
 
-FileBuffer Node2D::SaveImpl(ObjectType *out) {
+FileBuffer Node2D::SaveImpl(object_type *out) {
 	Node2D *o = reinterpret_cast<Node2D *>(out);
 
 	YAML::Node doc = Serializer::get_singleton().SaveWithType<Node>(out).Yaml();
@@ -55,9 +55,9 @@ FileBuffer Node2D::SaveImpl(ObjectType *out) {
 	return FileBuffer(doc);
 }
 
-bool Node2D::LoadImpl(ObjectType *out, const FileBuffer &buf) {
+bool Node2D::LoadImpl(object_type *out, const FileBuffer &buf) {
 	Debug::Error("Node2D::LoadImpl is not implemented");
 	return false;
 }
 
-} // namespace Sowa
+} // namespace sowa

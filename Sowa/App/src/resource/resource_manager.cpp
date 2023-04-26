@@ -5,6 +5,6 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 
-} // namespace Sowa
+} // namespace sowa

@@ -3,20 +3,20 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 
 /**
  * Base object type
  */
-class ObjectType {
+class object_type {
   public:
-	virtual ~ObjectType();
-	const std::string GetType() const { return m_Type; }
+	virtual ~object_type();
+	const std::string get_type() const { return m_type; }
 
   protected:
-	ObjectType();
-	std::string m_Type{"Object"};
+	object_type();
+	std::string m_type{"Object"};
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif // SW_OBJECT_TYPE_HPP_

@@ -4,21 +4,21 @@
 #include "core/engine_context.hpp"
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
     class Application;
 }
 
 namespace sowa {
 class script_server {
   public:
-	static script_server &Of(Sowa::EngineContext *context);
+	static script_server &Of(sowa::EngineContext *context);
 
   private:
-	Sowa::EngineContext &_Context;
+	sowa::EngineContext &_Context;
 
   private:
-	friend class Sowa::Application;
-	script_server(Sowa::EngineContext &ctx);
+	friend class sowa::Application;
+	script_server(sowa::EngineContext &ctx);
 	~script_server();
 
     void init();

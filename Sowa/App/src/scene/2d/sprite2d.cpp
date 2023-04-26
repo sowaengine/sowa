@@ -7,7 +7,7 @@
 #include "scene/scene.hpp"
 #include "resource/resource_loader.hpp"
 
-namespace Sowa {
+namespace sowa {
 Sprite2D::Sprite2D() {
 	_NodeType = "Sprite2D";
 }
@@ -23,7 +23,7 @@ void Sprite2D::UpdateDraw() {
 		Renderer::get_singleton().DrawTexture(CalculateTransform(), *_Texture.get(), {(float)_Texture->Width(), (float)_Texture->Height()}, 0);
 }
 
-FileBuffer Sprite2D::SaveImpl(ObjectType *out) {
+FileBuffer Sprite2D::SaveImpl(object_type *out) {
 	Sprite2D *o = reinterpret_cast<Sprite2D *>(out);
 
 	YAML::Node doc = Serializer::get_singleton().SaveWithType<Node2D>(out).Yaml();
@@ -31,8 +31,8 @@ FileBuffer Sprite2D::SaveImpl(ObjectType *out) {
 	return FileBuffer(doc);
 }
 
-bool Sprite2D::LoadImpl(ObjectType *out, const FileBuffer &buf) {
+bool Sprite2D::LoadImpl(object_type *out, const FileBuffer &buf) {
 	Debug::Error("Sprite2D::LoadImpl is not implemented");
 	return false;
 }
-} // namespace Sowa
+} // namespace sowa

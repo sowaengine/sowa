@@ -3,7 +3,7 @@
 
 #include "sowa.hpp"
 
-namespace Sowa
+namespace sowa
 {
     template<typename T>
     T NotZero(T value, T fallback) {
@@ -26,7 +26,7 @@ namespace Sowa
         b = a;
         a = t;
     }
-} // namespace Sowa
+} // namespace sowa
 
 
 #endif // SW_ALGORITHM_HPP_

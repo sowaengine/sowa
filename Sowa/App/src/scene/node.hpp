@@ -6,7 +6,7 @@
 #include "object_type.hpp"
 #include "core/file_buffer.hpp"
 
-namespace Sowa {
+namespace sowa {
 class Scene;
 class Application;
 
@@ -16,13 +16,13 @@ enum class PauseMode {
 	Stop,
 };
 
-class Node : public ObjectType {
+class Node : public object_type {
   public:
 	Node();
 	Node(const std::string &name);
 	virtual ~Node();
 
-	static std::string Typename() { return "Sowa::Node"; }
+	static std::string Typename() { return "sowa::Node"; }
 
 	inline std::string &Name() { return _Name; }
 	inline bool IsValid() { return _pScene.lock() != nullptr; }
@@ -52,8 +52,8 @@ class Node : public ObjectType {
 
 	const std::string& GetNodeType() { return _NodeType; }
 
-	static FileBuffer SaveImpl(ObjectType* out);
-	static bool LoadImpl(ObjectType* out, const FileBuffer& buf);
+	static FileBuffer SaveImpl(object_type* out);
+	static bool LoadImpl(object_type* out, const FileBuffer& buf);
 
   private:
 	friend class Scene;
@@ -71,6 +71,6 @@ class Node : public ObjectType {
   protected:
 	std::string _NodeType{"Node"};
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_NODE_HPP__

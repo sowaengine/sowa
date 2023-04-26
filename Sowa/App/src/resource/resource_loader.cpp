@@ -1,5 +1,5 @@
 #include "resource/resource_loader.hpp"
 
-namespace Sowa {
+namespace sowa {
 
-} // namespace Sowa
+} // namespace sowa

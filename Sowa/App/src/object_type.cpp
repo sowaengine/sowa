@@ -1,7 +1,7 @@
 #include "object_type.hpp"
 
-namespace Sowa
+namespace sowa
 {
-    ObjectType::ObjectType() {}
-    ObjectType::~ObjectType() {}
-} // namespace Sowa
+    object_type::object_type() {}
+    object_type::~object_type() {}
+} // namespace sowa

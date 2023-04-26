@@ -1,9 +1,9 @@
 #include "core/engine_context.hpp"
 
-namespace Sowa {
+namespace sowa {
 EngineContext::EngineContext() {
 }
 
 EngineContext::~EngineContext() {
 }
-} // namespace Sowa
+} // namespace sowa

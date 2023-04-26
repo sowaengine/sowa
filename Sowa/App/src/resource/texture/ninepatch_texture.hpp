@@ -11,7 +11,7 @@
 #include "image_texture.hpp"
 #include "sowa.hpp"
 
-namespace Sowa {
+namespace sowa {
 
 class NinePatchTexture : public ImageTexture {
   public:
@@ -36,5 +36,5 @@ class NinePatchTexture : public ImageTexture {
 	float _Right{0.f};
 };
 
-} // namespace Sowa
+} // namespace sowa
 #endif

@@ -12,7 +12,7 @@
 
 #include "Core/nm_Window.hpp"
 
-namespace Sowa {
+namespace sowa {
 Window::Window() {}
 Window::~Window() {}
 
@@ -73,7 +73,7 @@ void Window::UpdateEvents() {
 }
 
 /* -- Input -- */
-Vector2 Window::GetMousePosition() {
+vec2 Window::GetMousePosition() {
 	double x, y;
 	glfwGetCursorPos(_windowHandle->GetGLFWwindow(), &x, &y);
 
@@ -84,7 +84,7 @@ Vector2 Window::GetMousePosition() {
 	x -= GetBlackbarWidth();
 	y -= GetBlackbarHeight();
 #else
-	Vector2 scale;
+	vec2 scale;
 	scale.x = (float)GetWindowWidth() / (float)Editor_GetWindowWidth();
 	scale.y = (float)GetWindowHeight() / (float)Editor_GetWindowHeight();
 
@@ -94,12 +94,12 @@ Vector2 Window::GetMousePosition() {
 	y *= scale.y;
 #endif
 
-	return Vector2(x, y);
+	return vec2(x, y);
 }
 
-Vector2 Window::GetGameMousePosition() {
+vec2 Window::GetGameMousePosition() {
 
-	Vector2 scale;
+	vec2 scale;
 #ifndef SW_EDITOR
 	scale.x = (float)GetVideoWidth() / ((float)GetWindowWidth() - (GetBlackbarWidth() * 2));
 	scale.y = (float)GetVideoHeight() / ((float)GetWindowHeight() - (GetBlackbarHeight() * 2));
@@ -109,7 +109,7 @@ Vector2 Window::GetGameMousePosition() {
 	scale.y = (float)GetVideoHeight() / (float)GetWindowHeight();
 #endif
 
-	Vector2 mousePos = GetMousePosition();
+	vec2 mousePos = GetMousePosition();
 	mousePos.x *= scale.x;
 	mousePos.y *= scale.y;
 
@@ -217,8 +217,8 @@ void WindowAccessor::LoadContext() {
 }
 
 WindowAccessor &WindowAccessor::RegisterKeyEvent(int key, int scancode, int action, int mods) {
-	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
-	Sowa::Window &window = app->GetWindow();
+	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
+	sowa::Window &window = app->GetWindow();
 
 	if (action == GLFW_PRESS)
 		window._KeyStates[key] = KeyState::PRESSED;
@@ -236,8 +236,8 @@ WindowAccessor &WindowAccessor::RegisterKeyEvent(int key, int scancode, int acti
 	return *this;
 }
 WindowAccessor &WindowAccessor::RegisterScrollEvent(double xOffset, double yOffset) {
-	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
-	Sowa::Window &window = app->GetWindow();
+	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
+	sowa::Window &window = app->GetWindow();
 
 	window._ScrollDeltaY += yOffset;
 	window._ScrollDeltaX += xOffset;
@@ -252,8 +252,8 @@ WindowAccessor &WindowAccessor::RegisterScrollEvent(double xOffset, double yOffs
 }
 
 WindowAccessor &WindowAccessor::RegisterButtonEvent(int button, int action, int mods) {
-	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
-	Sowa::Window &window = app->GetWindow();
+	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
+	sowa::Window &window = app->GetWindow();
 
 	if (action == GLFW_PRESS)
 		window._ButtonStates[button] = ButtonState::PRESSED;
@@ -272,8 +272,8 @@ WindowAccessor &WindowAccessor::RegisterButtonEvent(int button, int action, int 
 }
 
 WindowAccessor &WindowAccessor::RegisterMousePosEvent(double xPos, double yPos) {
-	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
-	Sowa::Window &window = app->GetWindow();
+	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
+	sowa::Window &window = app->GetWindow();
 
 	double deltaX = window._MousePosX - xPos;
 	double deltaY = window._MousePosY - yPos;
@@ -293,8 +293,8 @@ WindowAccessor &WindowAccessor::RegisterMousePosEvent(double xPos, double yPos) 
 }
 
 WindowAccessor &WindowAccessor::RegisterCharEvent(unsigned int codePoint) {
-	auto *app = _Ctx->GetSingleton<Application>(Sowa::Server::APPLICATION);
-	Sowa::Window &window = app->GetWindow();
+	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
+	sowa::Window &window = app->GetWindow();
 
 	InputEvent e;
 	e._Type = InputEventType::Character;
@@ -324,4 +324,4 @@ void WindowCallback::CharCallback(GLFWwindow *window, unsigned int codePoint) {
 	WindowAccessor(window).RegisterCharEvent(codePoint);
 }
 
-} // namespace Sowa
+} // namespace sowa

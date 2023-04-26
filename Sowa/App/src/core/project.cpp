@@ -2,15 +2,15 @@
 #include "serialize/serializer.hpp"
 #include "utils/file.hpp"
 
-namespace Sowa {
+namespace sowa {
 Project::Project(EngineContext &ctx)
 	: _Context(ctx) {
-		m_Type = Typename();
+		m_type = Typename();
 }
 Project::~Project() {}
 
 Project &Project::Of(EngineContext *context) {
-	return *context->GetSingleton<Project>(Sowa::Server::PROJECT);
+	return *context->GetSingleton<Project>(sowa::Server::PROJECT);
 }
 
 bool Project::Load(const char *path) {
@@ -48,7 +48,7 @@ bool Project::Save() {
 
 
 
-FileBuffer Project::SaveImpl(ObjectType* out) {
+FileBuffer Project::SaveImpl(object_type* out) {
 	YamlNode doc;
 	Project* o = reinterpret_cast<Project*>(out);
 
@@ -60,8 +60,8 @@ FileBuffer Project::SaveImpl(ObjectType* out) {
 
 	YamlNode window = YamlNode();
 	window["FullScreen"] = o->proj.settings.window.fullscreen;
-	window["WindowSize"] = Size::SaveImpl(&o->proj.settings.window.windowsize).Yaml();
-	window["VideoSize"] = Size::SaveImpl(&o->proj.settings.window.videosize).Yaml();
+	window["WindowSize"] = size::SaveImpl(&o->proj.settings.window.windowsize).Yaml();
+	window["VideoSize"] = size::SaveImpl(&o->proj.settings.window.videosize).Yaml();
 
 	YamlNode settings = YamlNode();
 	settings["Application"] = application;
@@ -73,7 +73,7 @@ FileBuffer Project::SaveImpl(ObjectType* out) {
 	return FileBuffer(doc);
 }
 
-bool Project::LoadImpl(ObjectType* out, const FileBuffer& buf) {
+bool Project::LoadImpl(object_type* out, const FileBuffer& buf) {
 	YAML::Node doc = buf.Yaml();
 
 	Project* obj = reinterpret_cast<Project*>(out);
@@ -95,8 +95,8 @@ bool Project::LoadImpl(ObjectType* out, const FileBuffer& buf) {
 		YamlNode window = settings["Window"];
 		if(window) {
 			SERIALIZE_GETATTR(bool, obj->proj.settings.window.fullscreen, window["FullScreen"]);
-			Size::LoadImpl(&obj->proj.settings.window.windowsize, FileBuffer(window["WindowSize"]));
-			Size::LoadImpl(&obj->proj.settings.window.videosize, FileBuffer(window["VideoSize"]));
+			size::LoadImpl(&obj->proj.settings.window.windowsize, FileBuffer(window["WindowSize"]));
+			size::LoadImpl(&obj->proj.settings.window.videosize, FileBuffer(window["VideoSize"]));
 		}
 	}
 
@@ -104,4 +104,4 @@ bool Project::LoadImpl(ObjectType* out, const FileBuffer& buf) {
 }
 
 
-} // namespace Sowa
+} // namespace sowa

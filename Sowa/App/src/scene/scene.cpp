@@ -5,9 +5,9 @@
 #include "core/application.hpp"
 #include "utils/random.hpp"
 
-namespace Sowa {
+namespace sowa {
 Scene::Scene() {
-	m_Type = Typename();
+	m_type = Typename();
 }
 Scene::~Scene() {
 	Exit();
@@ -96,7 +96,7 @@ void Scene::CollectNodes() {
 }
 
 
-FileBuffer Scene::SaveImpl(ObjectType* out) {
+FileBuffer Scene::SaveImpl(object_type* out) {
 	YamlNode doc;
 	Scene* o = reinterpret_cast<Scene*>(out);
 
@@ -114,9 +114,9 @@ FileBuffer Scene::SaveImpl(ObjectType* out) {
 	return FileBuffer(doc);
 }
 
-bool Scene::LoadImpl(ObjectType* out, const FileBuffer& buf) {
+bool Scene::LoadImpl(object_type* out, const FileBuffer& buf) {
 	Debug::Error("Scene::LoadImpl is not implemented");
 	return false;
 }
 
-} // namespace Sowa
+} // namespace sowa

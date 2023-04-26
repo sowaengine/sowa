@@ -3,7 +3,7 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 namespace Dialog {
 
 std::string OpenFileDialog(
@@ -40,4 +40,4 @@ std::string OpenFileDialog(
 	}
 }
 } // namespace Dialog
-} // namespace Sowa
+} // namespace sowa

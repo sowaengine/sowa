@@ -10,10 +10,10 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 
-namespace Sowa {
+namespace sowa {
 NineSlicePanel::NineSlicePanel() {
 	_NodeType = "NineSlicePanel";
-	m_Type = Typename();
+	m_type = Typename();
 
 	m_MarginLeft = 256;
 	m_MarginRight = 256;
@@ -57,8 +57,8 @@ void NineSlicePanel::UpdateDraw() {
 			bottom = 0.f;
 		}
 
-		Vector2 uv1 = {left, top};
-		Vector2 uv2 = {1.f - right, 1.f - bottom};
+		vec2 uv1 = {left, top};
+		vec2 uv2 = {1.f - right, 1.f - bottom};
 
 		static float g = 0.f;
 		g += 1.f;
@@ -82,7 +82,7 @@ void NineSlicePanel::UpdateDraw() {
 		Renderer::get_singleton().DrawTextureWithUV(glm::translate(CalculateTransform(), glm::vec3{0.f, 0.f, 0.f}), *_Texture.get(), uv1, uv2, {width - m_MarginLeft - m_MarginRight, height - m_MarginTop - m_MarginBottom}, 0.f);
 	}
 }
-FileBuffer NineSlicePanel::SaveImpl(ObjectType *out) {
+FileBuffer NineSlicePanel::SaveImpl(object_type *out) {
 	NineSlicePanel *o = reinterpret_cast<NineSlicePanel *>(out);
 
 	YAML::Node doc = Serializer::get_singleton().SaveWithType<Node2D>(out).Yaml();
@@ -90,8 +90,8 @@ FileBuffer NineSlicePanel::SaveImpl(ObjectType *out) {
 	return FileBuffer(doc);
 }
 
-bool NineSlicePanel::LoadImpl(ObjectType *out, const FileBuffer &buf) {
+bool NineSlicePanel::LoadImpl(object_type *out, const FileBuffer &buf) {
 	Debug::Error("NineSlicePanel::LoadImpl is not implemented");
 	return false;
 }
-} // namespace Sowa
+} // namespace sowa

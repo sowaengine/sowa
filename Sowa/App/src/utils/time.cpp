@@ -2,7 +2,7 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 namespace Time {
 std::string GetTime(const std::string &format /*= "%Y-%m-%d"*/) {
 	std::stringstream date;
@@ -13,4 +13,4 @@ std::string GetTime(const std::string &format /*= "%Y-%m-%d"*/) {
 }
 } // namespace Time
 
-} // namespace Sowa
+} // namespace sowa

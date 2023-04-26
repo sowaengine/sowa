@@ -12,7 +12,7 @@
 #include "sowa.hpp"
 #include "utils/event.hpp"
 #include "utils/event/input_event.hpp"
-#include "utils/math.hpp"
+#include "math/math.hpp"
 
 #include "resource/font/font.hpp"
 #include "resource/resource_watcher/resource_watcher.hpp"
@@ -21,7 +21,7 @@ namespace nmGfx {
 class Renderer;
 }
 
-namespace Sowa {
+namespace sowa {
 class EngineContext;
 class Scene;
 
@@ -73,7 +73,7 @@ class Application {
 	bool ParseArgs(int argc, char const** argv);
 	Debug::ScopeTimer _AppTime = Debug::ScopeTimer("Application");
 
-	Sowa::EngineContext *ctx{nullptr};
+	sowa::EngineContext *ctx{nullptr};
 
 	Application();
 	~Application();
@@ -103,11 +103,11 @@ class Application {
 	std::string _ExecutablePath{""};
 
 	// Editor
-	Vector2 _EditorCameraPos{0.f, 0.f};
+	vec2 _EditorCameraPos{0.f, 0.f};
 	float _EditorCameraZoom{10.f};
 
 	// Used for lerping
-	Vector2 _CurrentEditorCameraPos{0.f, 0.f};
+	vec2 _CurrentEditorCameraPos{0.f, 0.f};
 	float _CurrentEditorCameraZoom{10.f};
 
 	struct {
@@ -117,6 +117,6 @@ class Application {
 		bool autoStart{false};
 	} argParse;
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif

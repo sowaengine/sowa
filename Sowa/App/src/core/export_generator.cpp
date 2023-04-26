@@ -2,7 +2,7 @@
 #include "stlpch.hpp"
 #include "utils/file.hpp"
 
-namespace Sowa {
+namespace sowa {
 ExportGenerator::ExportGenerator(EngineContext &ctx) : _Ctx(ctx) {}
 ExportGenerator::~ExportGenerator() {}
 
@@ -17,7 +17,7 @@ bool ExportGenerator::BeginExport(ExportPlatform platform) {
 	}
 	_platform = platform;
 
-	_buildDir = Sowa::File::Path("res://build/");
+	_buildDir = sowa::File::Path("res://build/");
 	_buildDir /= GetPlatformString();
 
 	if (!std::filesystem::is_directory(_buildDir)) {
@@ -48,7 +48,7 @@ bool ExportGenerator::BeginExport(ExportPlatform platform) {
 	}
 
 	std::cout << "Begin exporting to " << _buildDir << std::endl;
-	// Sowa::ProjectSettings &projectSettings = *_Ctx.GetSingleton<Sowa::ProjectSettings>(Sowa::Server::PROJECTSETTINGS);
+	// sowa::ProjectSettings &projectSettings = *_Ctx.GetSingleton<sowa::ProjectSettings>(sowa::Server::PROJECTSETTINGS);
 
 	// add export template to root directory
 	std::filesystem::path exportTemplatePath = "abs://build/Sowa Engine";
@@ -80,14 +80,14 @@ bool ExportGenerator::EndExport() {
 }
 
 bool ExportGenerator::AddFile(const std::filesystem::path &filepath, bool useGamePack /*= true*/) {
-	Sowa::File::FilePathData pathData{};
-	Sowa::File::Path(filepath, &pathData);
+	sowa::File::FilePathData pathData{};
+	sowa::File::Path(filepath, &pathData);
 
 	return AddFileTo(filepath, pathData.relativePath, useGamePack);
 }
 
 bool ExportGenerator::AddFileTo(const std::filesystem::path &in_srcPath, const std::filesystem::path &in_dstPath, bool useGamePack /*= true*/) {
-	std::filesystem::path srcPath = Sowa::File::Path(in_srcPath);
+	std::filesystem::path srcPath = sowa::File::Path(in_srcPath);
 	std::filesystem::path dstPath = _buildDir / in_dstPath;
 
 	if (std::filesystem::is_regular_file(srcPath)) {
@@ -113,4 +113,4 @@ std::string ExportGenerator::GetPlatformString() {
 		return "linux";
 	return "unknown";
 }
-} // namespace Sowa
+} // namespace sowa

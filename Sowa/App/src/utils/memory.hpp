@@ -4,7 +4,7 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 
 template <typename T>
 class Allocator {
@@ -15,5 +15,5 @@ class Allocator {
 	}
 };
 
-} // namespace Sowa
+} // namespace sowa
 #endif // _E_MEMORY_HPP__

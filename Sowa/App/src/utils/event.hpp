@@ -4,7 +4,7 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 
 typedef uint32_t EventRegister;
 
@@ -33,6 +33,6 @@ class Event {
 
 	EventRegister m_IDCounter = 0;
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_EVENT_HPP__

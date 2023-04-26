@@ -6,7 +6,7 @@
 #include "sys/stat.h"
 #include "utils/file.hpp"
 
-namespace Sowa {
+namespace sowa {
 ResourceWatcher::ResourceWatcher(const std::filesystem::path &rootPath) : m_RootPath(rootPath) {
 	std::cout << "ResourceWatcher initialized " << rootPath.string() << std::endl;
 }
@@ -17,7 +17,7 @@ static time_t GetModifyTime(const char *path) {
 	return st.st_mtim.tv_sec;
 }
 
-void ResourceWatcher::Register(const std::string &path, const std::weak_ptr<ObjectType> &o) {
+void ResourceWatcher::Register(const std::string &path, const std::weak_ptr<object_type> &o) {
 	m_RegisteredResources[path].o = o;
 	m_RegisteredResources[path].lastModify = GetModifyTime(path.c_str());
 }
@@ -46,4 +46,4 @@ void ResourceWatcher::Poll() {
 		}
 	}
 }
-} // namespace Sowa
+} // namespace sowa

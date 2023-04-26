@@ -5,7 +5,7 @@
 #include "stlpch.hpp"
 #include "core/file_buffer.hpp"
 
-namespace Sowa {
+namespace sowa {
 namespace File {
 
 struct FilePathData {
@@ -57,5 +57,5 @@ FileBuffer LoadFile(std::filesystem::path path);
  */
 std::filesystem::path CreateTempFile(unsigned char *data, size_t size);
 } // namespace File
-} // namespace Sowa
+} // namespace sowa
 #endif // _E_FILE_HPP__

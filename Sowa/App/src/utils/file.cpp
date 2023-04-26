@@ -14,13 +14,13 @@
 #include <windows.h>
 #endif
 
-namespace Sowa {
+namespace sowa {
 namespace File {
 // res:// -> res
 std::unordered_map<std::string, std::filesystem::path> File_path_endpoints;
 
 std::filesystem::path Path(const std::filesystem::path &path, FilePathData *pathdata) {
-	std::vector<std::string> tokens = Sowa::Split(path.string(), "://");
+	std::vector<std::string> tokens = sowa::Split(path.string(), "://");
 	if (tokens.size() != 2) {
 		std::cout << "Invalid Path: " << path << std::endl;
 		return "";
@@ -213,8 +213,8 @@ bool RegisterDataPath() {
 	return false;
 }
 #else
-#error "Sowa::File::RegisterDataPath() is not implemented in current platform"
+#error "sowa::File::RegisterDataPath() is not implemented in current platform"
 #endif
 
 } // namespace File
-} // namespace Sowa
+} // namespace sowa

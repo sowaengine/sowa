@@ -4,7 +4,7 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 namespace Random {
 
 uint64_t GenerateID();
@@ -32,6 +32,6 @@ class RandomNumberGenerator {
 	std::default_random_engine _Engine{};
 };
 } // namespace Random
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_DIALOG_HPP__

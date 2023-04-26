@@ -4,7 +4,7 @@
 
 #include "GLFW/glfw3.h"
 
-namespace Sowa {
+namespace sowa {
 
 enum class Key : int {
 
@@ -136,6 +136,6 @@ enum class Key : int {
 	KEY_MENU = GLFW_KEY_MENU
 };
 
-} // namespace Sowa
+} // namespace sowa
 
 #endif

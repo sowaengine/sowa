@@ -5,7 +5,7 @@
 #include "angelscript.h"
 
 #include "utils/file.hpp"
-#include "utils/math.hpp"
+#include "math/math.hpp"
 #include "utils/string.hpp"
 
 #include "fmt/args.h"
@@ -29,13 +29,13 @@
 	} while (false)
 
 namespace sowa {
-script_server::script_server(Sowa::EngineContext &ctx)
+script_server::script_server(sowa::EngineContext &ctx)
 	: _Context(ctx) {
 }
 script_server::~script_server() {}
 
-script_server &script_server::Of(Sowa::EngineContext *context) {
-	return *context->GetSingleton<script_server>(Sowa::Server::PROJECT);
+script_server &script_server::Of(sowa::EngineContext *context) {
+	return *context->GetSingleton<script_server>(sowa::Server::PROJECT);
 }
 
 void MessageCallback(const asSMessageInfo *msg, void *param) {
@@ -169,18 +169,20 @@ void script_server::init() {
 	genericDecl += ")";
 	std::string printDecl = "void" + genericDecl;
 
-	AS_CALL(engine->RegisterGlobalFunction(Sowa::Format(printDecl, "Log").c_str(), asFUNCTION(Print_Log), asCALL_GENERIC));
-	AS_CALL(engine->RegisterGlobalFunction(Sowa::Format(printDecl, "Info").c_str(), asFUNCTION(Print_Info), asCALL_GENERIC));
-	AS_CALL(engine->RegisterGlobalFunction(Sowa::Format(printDecl, "Error").c_str(), asFUNCTION(Print_Error), asCALL_GENERIC));
-	AS_CALL(engine->RegisterGlobalFunction(Sowa::Format(printDecl, "Warn").c_str(), asFUNCTION(Print_Warn), asCALL_GENERIC));
+	AS_CALL(engine->RegisterGlobalFunction(sowa::Format(printDecl, "Log").c_str(), asFUNCTION(Print_Log), asCALL_GENERIC));
+	AS_CALL(engine->RegisterGlobalFunction(sowa::Format(printDecl, "Info").c_str(), asFUNCTION(Print_Info), asCALL_GENERIC));
+	AS_CALL(engine->RegisterGlobalFunction(sowa::Format(printDecl, "Error").c_str(), asFUNCTION(Print_Error), asCALL_GENERIC));
+	AS_CALL(engine->RegisterGlobalFunction(sowa::Format(printDecl, "Warn").c_str(), asFUNCTION(Print_Warn), asCALL_GENERIC));
 	AS_CALL(engine->SetDefaultNamespace(""));
 
 	std::string fmtDecl = "string" + genericDecl;
-	AS_CALL(engine->RegisterGlobalFunction(Sowa::Format(fmtDecl, "Format").c_str(), asFUNCTION(Format_Generic_AS), asCALL_GENERIC));
+	AS_CALL(engine->RegisterGlobalFunction(sowa::Format(fmtDecl, "Format").c_str(), asFUNCTION(Format_Generic_AS), asCALL_GENERIC));
 
-	AS_CALL(engine->RegisterObjectType("vec2", sizeof(Sowa::Vector2), asOBJ_VALUE));
-	AS_CALL(engine->RegisterObjectBehaviour("vec2", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Generic_Constructor<Sowa::Vector2>), asCALL_CDECL_OBJLAST));
-	AS_CALL(engine->RegisterObjectBehaviour("vec2", asBEHAVE_DESTRUCT, "void f()", asFUNCTION(Generic_Destructor<Sowa::Vector2>), asCALL_CDECL_OBJLAST));
+	AS_CALL(engine->RegisterObjectType("vec2", sizeof(sowa::vec2), asOBJ_VALUE));
+	AS_CALL(engine->RegisterObjectBehaviour("vec2", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Generic_Constructor<sowa::vec2>), asCALL_CDECL_OBJLAST));
+	AS_CALL(engine->RegisterObjectBehaviour("vec2", asBEHAVE_DESTRUCT, "void f()", asFUNCTION(Generic_Destructor<sowa::vec2>), asCALL_CDECL_OBJLAST));
+	AS_CALL(engine->RegisterObjectProperty("vec2", "float x", asOFFSET(sowa::vec2, x)));
+	AS_CALL(engine->RegisterObjectProperty("vec2", "float y", asOFFSET(sowa::vec2, y)));
 
 	int r;
 	CScriptBuilder builder;
@@ -189,7 +191,7 @@ void script_server::init() {
 		throw std::runtime_error("Failed to initalize script module");
 	}
 
-	auto f = Sowa::File::GetFileContent("res://src/main.as");
+	auto f = sowa::File::GetFileContent("res://src/main.as");
 	r = builder.AddSectionFromMemory("file.as", reinterpret_cast<const char *>(f.data()), f.size());
 	if (r < 0) {
 		throw std::runtime_error("Failed to add script section");

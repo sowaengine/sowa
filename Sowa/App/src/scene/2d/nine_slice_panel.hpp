@@ -3,15 +3,15 @@
 
 #include "scene/2d/node2d.hpp"
 #include "scene/node.hpp"
-#include "utils/math.hpp"
+#include "math/math.hpp"
 
 #include "resource/texture/image_texture.hpp"
-namespace Sowa {
+namespace sowa {
 class NineSlicePanel : public Node2D {
   public:
 	NineSlicePanel();
 
-	static std::string Typename() { return "Sowa::NineSlicePanel"; }
+	static std::string Typename() { return "sowa::NineSlicePanel"; }
 
 	void EnterScene() override;
 	void ExitScene() override;
@@ -23,12 +23,12 @@ class NineSlicePanel : public Node2D {
 	inline float& MarginTop() { return m_MarginTop; }
 	inline float& MarginBottom() { return m_MarginBottom; }
 
-	inline Vector2& Size() { return m_Size; }
+	inline vec2& Size() { return m_Size; }
 
 	inline Reference<ImageTexture>& Texture() { return _Texture; }
 
-	static FileBuffer SaveImpl(ObjectType* out);
-	static bool LoadImpl(ObjectType* out, const FileBuffer& buf);
+	static FileBuffer SaveImpl(object_type* out);
+	static bool LoadImpl(object_type* out, const FileBuffer& buf);
 
   private:
 	friend class Application;
@@ -42,8 +42,8 @@ class NineSlicePanel : public Node2D {
 	float m_MarginTop;
 	float m_MarginBottom;
 
-	Vector2 m_Size;
+	vec2 m_Size;
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_SPRITE2D_HPP__

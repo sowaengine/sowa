@@ -12,14 +12,14 @@
 #include "object_type.hpp"
 #include "core/file_buffer.hpp"
 
-namespace Sowa {
+namespace sowa {
 
-class ImageTexture : public BaseResource, public ObjectType {
+class ImageTexture : public BaseResource, public object_type {
   public:
 	ImageTexture();
 	~ImageTexture();
 
-	static std::string Typename() { return "Sowa::ImageTexture"; }
+	static std::string Typename() { return "sowa::ImageTexture"; }
 
 	inline int Width() { return _texture.GetWidth(); }
 	inline int Height() { return _texture.GetHeight(); }
@@ -28,8 +28,8 @@ class ImageTexture : public BaseResource, public ObjectType {
 
 	size_t TextureID() { return _texture.ID(); }
 
-	static FileBuffer SaveImpl(ObjectType *);
-	static bool LoadImpl(ObjectType* out, const FileBuffer& doc);
+	static FileBuffer SaveImpl(object_type *);
+	static bool LoadImpl(object_type* out, const FileBuffer& doc);
 
   private:
 	template <typename>
@@ -41,5 +41,5 @@ class ImageTexture : public BaseResource, public ObjectType {
 	nmGfx::Texture _texture{};
 };
 
-} // namespace Sowa
+} // namespace sowa
 #endif

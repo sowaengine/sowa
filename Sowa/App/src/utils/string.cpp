@@ -1,6 +1,6 @@
 #include "utils/string.hpp"
 
-namespace Sowa {
+namespace sowa {
 std::vector<std::string> Split(const std::string &text, const std::string &delimiter) {
 	std::vector<std::string> tokens;
 
@@ -15,4 +15,4 @@ std::vector<std::string> Split(const std::string &text, const std::string &delim
 
 	return tokens;
 }
-} // namespace Sowa
+} // namespace sowa

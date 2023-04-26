@@ -8,13 +8,13 @@
 #include "utils/memory.hpp"
 #include "object_type.hpp"
 
-namespace Sowa {
+namespace sowa {
 
-class Scene : public ObjectType {
+class Scene : public object_type {
   public:
 	~Scene();
 
-	static std::string Typename() { return "Sowa::Scene"; }
+	static std::string Typename() { return "sowa::Scene"; }
 
 	void Enter();
 	void Exit();
@@ -51,8 +51,8 @@ class Scene : public ObjectType {
 	// Deallocates parentless entities
 	void CollectNodes();
 
-	static FileBuffer SaveImpl(ObjectType* out);
-	static bool LoadImpl(ObjectType* out, const FileBuffer& buf);
+	static FileBuffer SaveImpl(object_type* out);
+	static bool LoadImpl(object_type* out, const FileBuffer& buf);
 
   private:
 	Scene();
@@ -63,6 +63,6 @@ class Scene : public ObjectType {
 	std::weak_ptr<Scene> _SelfRef{};
 	Node *_Root{nullptr};
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_SCENE_HPP__

@@ -10,7 +10,7 @@
 #include "../resource.hpp"
 #include "sowa.hpp"
 
-namespace Sowa {
+namespace sowa {
 
 class Font : public BaseResource {
   public:
@@ -28,5 +28,5 @@ class Font : public BaseResource {
 	nmGfx::Font _Font{};
 };
 
-} // namespace Sowa
+} // namespace sowa
 #endif

@@ -13,7 +13,7 @@
 
 #include "utils/random.hpp"
 
-namespace Sowa {
+namespace sowa {
 template <typename T>
 class ResourceManager {
   public:
@@ -69,6 +69,6 @@ class ResourceManager {
 	}
 };
 
-} // namespace Sowa
+} // namespace sowa
 
 #endif

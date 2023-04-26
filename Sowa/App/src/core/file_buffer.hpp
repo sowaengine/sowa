@@ -5,7 +5,7 @@
 #include "yaml-cpp/yaml.h"
 #include "debug.hpp"
 
-namespace Sowa {
+namespace sowa {
 typedef std::vector<unsigned char> FileBufferData;
 
 class FileBuffer {
@@ -62,6 +62,6 @@ class FileBuffer {
     private:
         FileBufferData buffer;
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif

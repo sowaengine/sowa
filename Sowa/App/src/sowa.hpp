@@ -51,7 +51,7 @@ using Reference = std::shared_ptr<T>;
 
 typedef uint64_t ResourceID;
 
-namespace Sowa {
+namespace sowa {
 
 // Singleton Servers
 enum class Server : uint32_t {
@@ -64,6 +64,6 @@ enum class Server : uint32_t {
 #define FILE_BUFFER_CHAR(f) reinterpret_cast<char *>(f.data()), f.size()
 #define FILE_BUFFER(f) (f.data()), f.size()
 
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_SOWA_HPP__

@@ -5,16 +5,16 @@
 #include "sowa.hpp"
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 class EngineContext {
   public:
 	template <typename T>
-	void RegisterSingleton(Sowa::Server id, T &singleton) {
+	void RegisterSingleton(sowa::Server id, T &singleton) {
 		_singletons[id] = reinterpret_cast<void *>(&singleton);
 	}
 
 	template <typename T>
-	T *GetSingleton(Sowa::Server id) {
+	T *GetSingleton(sowa::Server id) {
 		if (_singletons.count(id) != 1) {
 			Debug::Error("Singleton '{}' doesn't exists", (uint32_t)id);
 			return nullptr;
@@ -29,7 +29,7 @@ class EngineContext {
 	}
 
   private:
-	std::unordered_map<Sowa::Server, void *> _singletons{};
+	std::unordered_map<sowa::Server, void *> _singletons{};
 
   private:
 	EngineContext();
@@ -40,6 +40,6 @@ class EngineContext {
 	EngineContext &operator=(const EngineContext &) = delete;
 	EngineContext &operator=(const EngineContext &&) = delete;
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_ENGINECONTEXT_HPP__

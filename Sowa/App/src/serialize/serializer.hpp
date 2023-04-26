@@ -8,16 +8,16 @@
 
 #define SERIALIZE_GETATTR(t, attr, node) attr = node.as<t>(attr)
 
-namespace Sowa {
+namespace sowa {
 typedef YAML::Node YamlNode;
 
 class Serializer;
 
 // returns yml, png, project.sowa file
-typedef std::function<FileBuffer(ObjectType *)> SaveFunc;
+typedef std::function<FileBuffer(object_type *)> SaveFunc;
 
 // expects resource file content
-typedef std::function<bool(ObjectType *, const FileBuffer &)> LoadFunc;
+typedef std::function<bool(object_type *, const FileBuffer &)> LoadFunc;
 
 struct SerializeImpl {
   public:
@@ -41,17 +41,17 @@ class Serializer {
     void RegisterSerializer(std::string type, SerializeImpl impl);
 
 	template<typename T>
-	FileBuffer SaveWithType(ObjectType* o) {
+	FileBuffer SaveWithType(object_type* o) {
 		return SaveWithTypename(T::Typename(), o);
 	}
-	FileBuffer SaveWithTypename(std::string type, ObjectType*);
+	FileBuffer SaveWithTypename(std::string type, object_type*);
 
-	FileBuffer Save(ObjectType *);
-	bool Load(ObjectType *, const FileBuffer &);
+	FileBuffer Save(object_type *);
+	bool Load(object_type *, const FileBuffer &);
 
   private:
 	std::unordered_map<std::string, SerializeImpl> m_Impls;
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif // SW_SERIALIZER_HPP_

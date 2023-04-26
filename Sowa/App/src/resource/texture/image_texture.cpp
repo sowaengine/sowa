@@ -1,16 +1,16 @@
 #include "resource/texture/image_texture.hpp"
 #include "resource/resource_loader.hpp"
 
-namespace Sowa {
+namespace sowa {
 template <>
-std::shared_ptr<Sowa::ImageTexture> ResourceLoaderImpl<Sowa::ImageTexture>::Load(const unsigned char *data, size_t size) {
-	std::shared_ptr<Sowa::ImageTexture> tex = std::make_shared<Sowa::ImageTexture>();
+std::shared_ptr<sowa::ImageTexture> ResourceLoaderImpl<sowa::ImageTexture>::Load(const unsigned char *data, size_t size) {
+	std::shared_ptr<sowa::ImageTexture> tex = std::make_shared<sowa::ImageTexture>();
 	if (!tex->_texture.Load2DFromMemory(data, size))
 		return nullptr;
 	return tex;
 }
 
-FileBuffer ImageTexture::SaveImpl(ObjectType * o) {
+FileBuffer ImageTexture::SaveImpl(object_type * o) {
 	Debug::Error("ImageTexture::SaveImpl not implemented");
 
 	/*
@@ -18,7 +18,7 @@ FileBuffer ImageTexture::SaveImpl(ObjectType * o) {
 	*/
 	return FileBuffer();
 }
-bool ImageTexture::LoadImpl(ObjectType* out, const FileBuffer& doc) {
+bool ImageTexture::LoadImpl(object_type* out, const FileBuffer& doc) {
 	ImageTexture* obj = reinterpret_cast<ImageTexture*>(out);
 
 	bool success = obj->_texture.Load2DFromMemory(doc.Data().data(), doc.Data().size());
@@ -26,9 +26,9 @@ bool ImageTexture::LoadImpl(ObjectType* out, const FileBuffer& doc) {
 }
 
 ImageTexture::ImageTexture() {
-	m_Type = Typename();
+	m_type = Typename();
 }
 
 ImageTexture::~ImageTexture() {
 }
-} // namespace Sowa
+} // namespace sowa

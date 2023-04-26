@@ -7,7 +7,7 @@
 
 #include "sowa.hpp"
 
-namespace Sowa {
+namespace sowa {
 
 class BaseResource {
   public:
@@ -30,6 +30,6 @@ enum Resource_ : uint32_t {
 	Resource_ImageTexture
 };
 
-} // namespace Sowa
+} // namespace sowa
 
 #endif

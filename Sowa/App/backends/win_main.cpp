@@ -10,7 +10,7 @@ int main(int argc, char const *argv[]) {
 	for (int i = 0; i < argc; i++)
 		args.push_back(argv[i]);
 
-	Sowa::Application &app = Sowa::Application::get_singleton();
+	sowa::Application &app = sowa::Application::get_singleton();
 	if(!app.Init(argc, argv)) {
 		return 0;
 	}

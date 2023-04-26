@@ -10,7 +10,7 @@
 
 #include "res/shaders/text.glsl.res.hpp"
 
-namespace Sowa {
+namespace sowa {
 Renderer::Renderer() {
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {0.f, 0.f, 1.f, 1.f});
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {1.f, 1.f});
@@ -19,23 +19,23 @@ Renderer::Renderer() {
 Renderer::~Renderer() {
 }
 
-void Renderer::DrawTexture(const glm::vec2 &position, const glm::vec2 &scale, float zIndex, float rotation, Sowa::ImageTexture &texture, uint32_t id /*= 0*/) {
+void Renderer::DrawTexture(const glm::vec2 &position, const glm::vec2 &scale, float zIndex, float rotation, sowa::ImageTexture &texture, uint32_t id /*= 0*/) {
 	Application::get_singleton()._renderer->DrawTexture(&texture._texture, nmGfx::CalculateModelMatrix({position.x, -position.y, zIndex}, {0.f, 0.f, rotation}, {scale.x, scale.y, 1.f}), {1.f, 1.f, 1.f, 1.f}, id);
 }
 
-void Renderer::DrawTextureWithUV(const glm::mat4 &transform, Sowa::ImageTexture &texture, const Vector2& uv1, const Vector2& uv2, const Vector2& scale, uint32_t id) {
+void Renderer::DrawTextureWithUV(const glm::mat4 &transform, sowa::ImageTexture &texture, const vec2& uv1, const vec2& uv2, const vec2& scale, uint32_t id) {
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {uv1.x, uv1.y, uv2.x, uv2.y});
 	DrawTexture(transform, texture, scale, id);
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {0.f, 0.f, 1.f, 1.f});
 }
 
-void Renderer::DrawTexture(const glm::mat4 &transform, Sowa::ImageTexture &texture, const Vector2& scale, uint32_t id /*= 0*/) {
+void Renderer::DrawTexture(const glm::mat4 &transform, sowa::ImageTexture &texture, const vec2& scale, uint32_t id /*= 0*/) {
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {scale.x, scale.y});
 	Application::get_singleton()._renderer->DrawTexture(&texture._texture, transform, {1.f, 1.f, 1.f, 1.f}, id);
 	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {1.f, 1.f});
 }
 
-void Renderer::DrawText(const glm::vec2 &position, float scale, float rotation, const std::string &text, Sowa::Font &font) {
+void Renderer::DrawText(const glm::vec2 &position, float scale, float rotation, const std::string &text, sowa::Font &font) {
 	static nmGfx::Shader shader;
 	static bool loaded = false;
 	if (!loaded) {
@@ -52,7 +52,7 @@ void Renderer::DrawText(const glm::vec2 &position, float scale, float rotation, 
 	Application::get_singleton()._renderer->DrawText(shader, font._Font, text, scale);
 }
 
-void Renderer::DrawText(const glm::mat4 &transform, const std::string &text, Sowa::Font &font) {
+void Renderer::DrawText(const glm::mat4 &transform, const std::string &text, sowa::Font &font) {
 	static nmGfx::Shader shader;
 	static bool loaded = false;
 	if (!loaded) {
@@ -99,8 +99,8 @@ void Renderer::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thicknes
 }
 
 
-bool Renderer::LoadFont(Sowa::Font& font, const unsigned char* data, unsigned size) {
+bool Renderer::LoadFont(sowa::Font& font, const unsigned char* data, unsigned size) {
 	return Application::get_singleton().RendererHandle()->LoadFont(&font._Font, data, size);
 }
 
-} // namespace Sowa
+} // namespace sowa

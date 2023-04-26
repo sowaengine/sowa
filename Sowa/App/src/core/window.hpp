@@ -6,7 +6,7 @@
 
 #include "core/input.hpp"
 #include "sowa.hpp"
-#include "utils/math.hpp"
+#include "math/math.hpp"
 
 #include "resource/texture/image_texture.hpp"
 
@@ -14,7 +14,7 @@ namespace nmGfx {
 class Window;
 }
 
-namespace Sowa {
+namespace sowa {
 
 class EngineContext;
 
@@ -43,8 +43,8 @@ class Window {
 	void UpdateEvents(); // call before polling glfw events
 
 	/* -- Input -- */
-	Vector2 GetMousePosition();
-	Vector2 GetGameMousePosition();
+	vec2 GetMousePosition();
+	vec2 GetGameMousePosition();
 
 	bool IsKeyJustPressed(int key);
 	bool IsKeyJustReleased(int key);
@@ -125,6 +125,6 @@ class Window {
 	double _MousePosX{0.0};
 	double _MousePosY{0.0};
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif

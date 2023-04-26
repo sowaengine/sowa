@@ -51,7 +51,7 @@
 #include <windows.h>
 #endif
 
-namespace Sowa {
+namespace sowa {
 static void InitStreams(const std::string logFile);
 
 Application::Application(){
@@ -84,23 +84,23 @@ bool Application::Init(int argc, char const **argv) {
 	_ExecutablePath = argv[0];
 	ctx = EngineContext::CreateContext();
 
-	ctx->RegisterSingleton<Application>(Sowa::Server::APPLICATION, *this);
+	ctx->RegisterSingleton<Application>(sowa::Server::APPLICATION, *this);
 
 	Project *project = new Project(*ctx);
-	ctx->RegisterSingleton<Project>(Sowa::Server::PROJECT, *project);
+	ctx->RegisterSingleton<Project>(sowa::Server::PROJECT, *project);
 
 	sowa::script_server *scriptServer = new sowa::script_server(*ctx);
-	ctx->RegisterSingleton<sowa::script_server>(Sowa::Server::SCRIPT_SERVER, *scriptServer);
+	ctx->RegisterSingleton<sowa::script_server>(sowa::Server::SCRIPT_SERVER, *scriptServer);
 
 	if (!ParseArgs(argc, argv)) {
 		return false;
 	}
 
 	Serializer::get_singleton().RegisterSerializer(Project::Typename(), SerializeImpl(Project::SaveImpl, Project::LoadImpl));
-	Serializer::get_singleton().RegisterSerializer(Size::Typename(), SerializeImpl(Size::SaveImpl, Size::LoadImpl));
+	Serializer::get_singleton().RegisterSerializer(size::Typename(), SerializeImpl(size::SaveImpl, size::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(ImageTexture::Typename(), SerializeImpl(ImageTexture::SaveImpl, ImageTexture::LoadImpl));
 
-	Serializer::get_singleton().RegisterSerializer(Vector2::Typename(), SerializeImpl(Vector2::SaveImpl, Vector2::LoadImpl));
+	Serializer::get_singleton().RegisterSerializer(vec2::Typename(), SerializeImpl(vec2::SaveImpl, vec2::LoadImpl));
 
 	Serializer::get_singleton().RegisterSerializer(Scene::Typename(), SerializeImpl(Scene::SaveImpl, Scene::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(Node::Typename(), SerializeImpl(Node::SaveImpl, Node::LoadImpl));
@@ -127,9 +127,9 @@ bool Application::Init(int argc, char const **argv) {
 	}
 	m_ResourceWatcher = std::make_unique<ResourceWatcher>(projectPath.string());
 
-	Sowa::File::InsertFilepathEndpoint("abs", "./");
-	Sowa::File::InsertFilepathEndpoint("res", projectPath);
-	if (!Sowa::File::RegisterDataPath()) {
+	sowa::File::InsertFilepathEndpoint("abs", "./");
+	sowa::File::InsertFilepathEndpoint("res", projectPath);
+	if (!sowa::File::RegisterDataPath()) {
 		Debug::Error("Engine data path not found. exiting");
 		return false;
 	}
@@ -245,7 +245,7 @@ bool Application::Init(int argc, char const **argv) {
 				_EditorCameraZoom -= e.scroll.scrollY * _EditorCameraZoom * 0.4;
 				_EditorCameraZoom = MAX(_EditorCameraZoom, 1.1);
 
-				Vector2 midPoint;
+				vec2 midPoint;
 				midPoint.x = GetWindow().GetVideoWidth() / 2.f;
 				midPoint.y = GetWindow().GetVideoHeight() / 2.f;
 
@@ -463,7 +463,7 @@ void InitStreams(const std::string logFile) {
 	streams.SetLevelText((uint32_t)LogLevel::Error, "ERR");
 
 	static std::ofstream tempStream;
-	tempStream.open(fmt::format(logFile != "" ? logFile : "{}/sowa-{}.log", std::filesystem::temp_directory_path().string(), Sowa::Time::GetTime()), std::ios_base::app);
+	tempStream.open(fmt::format(logFile != "" ? logFile : "{}/sowa-{}.log", std::filesystem::temp_directory_path().string(), sowa::Time::GetTime()), std::ios_base::app);
 
 	streams.Add((uint32_t)LogLevel::Log, &std::cout);
 	streams.Add((uint32_t)LogLevel::Info, &std::cout);
@@ -475,4 +475,4 @@ void InitStreams(const std::string logFile) {
 	streams.Add((uint32_t)LogLevel::Error, reinterpret_cast<std::ostream *>(&tempStream));
 }
 
-} // namespace Sowa
+} // namespace sowa

@@ -8,7 +8,7 @@
 #include "resource.hpp"
 #include "serialize/serializer.hpp"
 
-namespace Sowa {
+namespace sowa {
 template <typename T>
 struct ResourceLoaderImpl {
 	Reference<T> Load(const unsigned char *data, size_t size);
@@ -34,7 +34,7 @@ class ResourceLoader {
 
 	template <typename T>
 	Reference<T> LoadResource(const std::string &path) {
-		std::vector<unsigned char> data = Sowa::File::GetFileContent(path.c_str());
+		std::vector<unsigned char> data = sowa::File::GetFileContent(path.c_str());
 		if (data.size() > 0) {
 			ResourceLoaderImpl<T> loader;
 			return loader.Load(data.data(), data.size());
@@ -48,6 +48,6 @@ class ResourceLoader {
 	ResourceLoader() = default;
 	~ResourceLoader() = default;
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif

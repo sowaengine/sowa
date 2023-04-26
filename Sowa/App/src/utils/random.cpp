@@ -2,7 +2,7 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 
 uint64_t Random::GenerateID() {
 	uint64_t id = 0;
@@ -57,4 +57,4 @@ void Random::RandomNumberGenerator::Generate(double &number, double begin /*= 0.
 	std::uniform_real_distribution<double> dist(begin, end);
 	number = dist(_Engine);
 }
-} // namespace Sowa
+} // namespace sowa

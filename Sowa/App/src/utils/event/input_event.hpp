@@ -1,7 +1,7 @@
 #ifndef _E_INPUT_EVENT_HPP__
 #define _E_INPUT_EVENT_HPP__
 
-namespace Sowa {
+namespace sowa {
 class WindowAccessor;
 
 enum class InputEventType {
@@ -51,6 +51,6 @@ struct InputEvent {
 	InputEventType _Type;
 };
 
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_INPUT_EVENT_HPP__

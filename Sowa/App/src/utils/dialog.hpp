@@ -4,7 +4,7 @@
 
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 namespace Dialog {
 /**
  * @brief Displays 'OpenFileDialog' popup
@@ -27,6 +27,6 @@ std::string OpenFileDialog(const std::string &title,
 						   bool *isInDirectory = nullptr);
 
 } // namespace Dialog
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_DIALOG_HPP__

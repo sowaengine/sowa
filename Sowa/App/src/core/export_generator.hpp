@@ -4,7 +4,7 @@
 #include "core/engine_context.hpp"
 #include "stlpch.hpp"
 
-namespace Sowa {
+namespace sowa {
 enum class ExportPlatform {
 	NONE = 0,
 	LINUX,
@@ -48,6 +48,6 @@ class ExportGenerator {
 	bool _canExport = false;
 	int _warningCount = 0;
 };
-} // namespace Sowa
+} // namespace sowa
 
 #endif // _E_EXPORTGENERATOR_HPP__
