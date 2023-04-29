@@ -34,6 +34,7 @@
 #include "utils/string.hpp"
 #include "utils/time.hpp"
 
+#include "gfx/gl/graphics_gl.hpp"
 #include "gfx/gl/texture_gl.hpp"
 #include "gfx/graphics.hpp"
 #include "gfx/window.hpp"
@@ -46,10 +47,8 @@
 #include "argparser/arg_parser.hpp"
 
 #include "res/Roboto-Medium.ttf.res.hpp"
-#include "res/shaders/default2d.glsl.res.hpp"
-#include "res/shaders/default3d.glsl.res.hpp"
-#include "res/shaders/fullscreen.glsl.res.hpp"
-#include "res/shaders/skybox.glsl.res.hpp"
+#include "res/shaders/default2d.vert.res.hpp"
+#include "res/shaders/default2d.frag.res.hpp"
 
 #include "res/textures/icon_512x.png.res.hpp"
 
@@ -159,20 +158,15 @@ bool Application::Init(int argc, char const **argv) {
 		m_window->InitWindow(args);
 	}
 
-	gfx::IGraphics *graphics = new gfx::IGraphics();
+	gfx::IGraphics *graphics = new gfx::GraphicsGL();
 	gfx::IGraphics::SetInstance(graphics);
-	
-	
 
 	gfx::GLTexture icon;
 	icon.Load2D(FILE_BUFFER(Res::App_include_res_textures_icon_512x_png_data));
 	m_window->SetWindowIcon(icon);
 
-	// _renderer->SetBlending(true);
-	// _renderer->GetData2D()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_glsl_data)));
-	// _renderer->GetData3D()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default3d_glsl_data)));
-	// _renderer->GetDataFullscreen()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_glsl_data)));
-	// _renderer->GetData3D()._skyboxShader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_skybox_glsl_data)));
+	Graphics().SetDepthTest(true);
+	Graphics().Default2DShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_frag_data)));
 
 	// if (!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
 	// 	Debug::Error("Failed to load default font");

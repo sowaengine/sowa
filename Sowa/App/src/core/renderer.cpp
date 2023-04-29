@@ -8,7 +8,7 @@
 
 #include "stlpch.hpp"
 
-#include "res/shaders/text.glsl.res.hpp"
+// #include "res/shaders/text.glsl.res.hpp"
 
 namespace sowa {
 Renderer::Renderer() {
