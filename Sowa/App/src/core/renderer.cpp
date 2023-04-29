@@ -12,95 +12,97 @@
 
 namespace sowa {
 Renderer::Renderer() {
-	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {0.f, 0.f, 1.f, 1.f});
-	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {1.f, 1.f});
+	// Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {0.f, 0.f, 1.f, 1.f});
+	// Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {1.f, 1.f});
 }
 
 Renderer::~Renderer() {
 }
 
 void Renderer::DrawTexture(const glm::vec2 &position, const glm::vec2 &scale, float zIndex, float rotation, sowa::ImageTexture &texture, uint32_t id /*= 0*/) {
-	Application::get_singleton()._renderer->DrawTexture(&texture._texture, nmGfx::CalculateModelMatrix({position.x, -position.y, zIndex}, {0.f, 0.f, rotation}, {scale.x, scale.y, 1.f}), {1.f, 1.f, 1.f, 1.f}, id);
+	// Application::get_singleton()._renderer->DrawTexture(&texture._texture, nmGfx::CalculateModelMatrix({position.x, -position.y, zIndex}, {0.f, 0.f, rotation}, {scale.x, scale.y, 1.f}), {1.f, 1.f, 1.f, 1.f}, id);
 }
 
 void Renderer::DrawTextureWithUV(const glm::mat4 &transform, sowa::ImageTexture &texture, const vec2& uv1, const vec2& uv2, const vec2& scale, uint32_t id) {
-	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {uv1.x, uv1.y, uv2.x, uv2.y});
-	DrawTexture(transform, texture, scale, id);
-	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {0.f, 0.f, 1.f, 1.f});
+	// Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {uv1.x, uv1.y, uv2.x, uv2.y});
+	// DrawTexture(transform, texture, scale, id);
+	// Application::get_singleton()._renderer->GetData2D()._shader.UniformVec4("uTexCrop", {0.f, 0.f, 1.f, 1.f});
 }
 
 void Renderer::DrawTexture(const glm::mat4 &transform, sowa::ImageTexture &texture, const vec2& scale, uint32_t id /*= 0*/) {
-	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {scale.x, scale.y});
-	Application::get_singleton()._renderer->DrawTexture(&texture._texture, transform, {1.f, 1.f, 1.f, 1.f}, id);
-	Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {1.f, 1.f});
+	// Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {scale.x, scale.y});
+	// Application::get_singleton()._renderer->DrawTexture(&texture._texture, transform, {1.f, 1.f, 1.f, 1.f}, id);
+	// Application::get_singleton()._renderer->GetData2D()._shader.UniformVec2("uBaseScale", {1.f, 1.f});
 }
 
 void Renderer::DrawText(const glm::vec2 &position, float scale, float rotation, const std::string &text, sowa::Font &font) {
-	static nmGfx::Shader shader;
-	static bool loaded = false;
-	if (!loaded) {
-		shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_text_glsl_data.data()), Res::App_include_res_shaders_text_glsl_data.size()));
-
-		glm::mat4 projection = nmGfx::CalculateProjectionMatrix(1920, 1080, .5f, .5f, 0.f, 10.f);
-		shader.UniformMat4("projection", projection);
-		shader.UniformVec3("textColor", {1.f, 1.f, 1.f});
-
-		loaded = true;
-	}
-
-	shader.UniformMat4("model", nmGfx::CalculateModelMatrix({position.x, -position.y}, rotation, {scale, scale}, {0.f, 0.f}));
-	Application::get_singleton()._renderer->DrawText(shader, font._Font, text, scale);
+	// static nmGfx::Shader shader;
+	// static bool loaded = false;
+	// if (!loaded) {
+	// 	shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_text_glsl_data.data()), Res::App_include_res_shaders_text_glsl_data.size()));
+// 
+	// 	glm::mat4 projection = nmGfx::CalculateProjectionMatrix(1920, 1080, .5f, .5f, 0.f, 10.f);
+	// 	shader.UniformMat4("projection", projection);
+	// 	shader.UniformVec3("textColor", {1.f, 1.f, 1.f});
+// 
+	// 	loaded = true;
+	// }
+// 
+	// shader.UniformMat4("model", nmGfx::CalculateModelMatrix({position.x, -position.y}, rotation, {scale, scale}, {0.f, 0.f}));
+	// Application::get_singleton()._renderer->DrawText(shader, font._Font, text, scale);
 }
 
 void Renderer::DrawText(const glm::mat4 &transform, const std::string &text, sowa::Font &font) {
-	static nmGfx::Shader shader;
-	static bool loaded = false;
-	if (!loaded) {
-		shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_text_glsl_data.data()), Res::App_include_res_shaders_text_glsl_data.size()));
-
-		shader.UniformVec3("textColor", {1.f, 1.f, 1.f});
-
-		loaded = true;
-	}
-	Application &app = Application::get_singleton();
-
-	glm::mat4 projection = nmGfx::CalculateProjectionMatrix(app.GetWindow().GetVideoWidth(), app.GetWindow().GetVideoHeight(), .5f, .5f, 0.f, 10.f);
-	glm::mat4 camera = app.GetCameraTransform();
-	camera = glm::inverse(camera);
-
-	glm::mat4 view_projection = projection * camera;
-	shader.UniformMat4("projection", view_projection);
-
-	shader.UniformMat4("model", transform);
-	Application::get_singleton()._renderer->DrawText(shader, font._Font, text, 1.f);
+	// static nmGfx::Shader shader;
+	// static bool loaded = false;
+	// if (!loaded) {
+	// 	shader.LoadText(std::string(reinterpret_cast<char *>(Res::App_include_res_shaders_text_glsl_data.data()), Res::App_include_res_shaders_text_glsl_data.size()));
+// 
+	// 	shader.UniformVec3("textColor", {1.f, 1.f, 1.f});
+// 
+	// 	loaded = true;
+	// }
+	// Application &app = Application::get_singleton();
+// 
+	// glm::mat4 projection = nmGfx::CalculateProjectionMatrix(app.GetWindow().GetVideoWidth(), app.GetWindow().GetVideoHeight(), .5f, .5f, 0.f, 10.f);
+	// glm::mat4 camera = app.GetCameraTransform();
+	// camera = glm::inverse(camera);
+// 
+	// glm::mat4 view_projection = projection * camera;
+	// shader.UniformMat4("projection", view_projection);
+// 
+	// shader.UniformMat4("model", transform);
+	// shader.UniformVec2("uBaseScale", {1.f, 1.f});
+	// Application::get_singleton()._renderer->DrawText(shader, font._Font, text, 1.f);
 }
 
 void Renderer::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, glm::vec3 color) {
-	DrawLine(p1, p2, thickness, {color.x, color.y, color.z, 1.f});
+	// DrawLine(p1, p2, thickness, {color.x, color.y, color.z, 1.f});
 }
 void Renderer::DrawLine(const glm::vec2 &p1, const glm::vec2 &p2, float thickness, glm::vec4 color) {
-	static nmGfx::Texture texture;
-	static bool loaded = false;
-	if (!loaded) {
-		unsigned char texture_data[] = {255, 255, 255};
-		texture.LoadFromData(texture_data, 1, 1, 3, nmGfx::TextureType::TEXTURE2D);
-
-		loaded = true;
-	}
-
-	float rot = atan2(p1.y - p2.y, p1.x - p2.x) * 180 / PI;
-
-	glm::vec2 sub = {p2.x - p1.x, p2.y - p1.y};
-	float len = sqrt((sub.x * sub.x) + (sub.y * sub.y));
-
-	auto mat = nmGfx::CalculateModelMatrix({p1.x, p1.y}, rot, {len, thickness}, {-len / 2.f, 0.f});
-
-	Application::get_singleton()._renderer->DrawTexture(&texture, mat, color);
+	// static nmGfx::Texture texture;
+	// static bool loaded = false;
+	// if (!loaded) {
+	// 	unsigned char texture_data[] = {255, 255, 255};
+	// 	texture.LoadFromData(texture_data, 1, 1, 3, nmGfx::TextureType::TEXTURE2D);
+// 
+	// 	loaded = true;
+	// }
+// 
+	// float rot = atan2(p1.y - p2.y, p1.x - p2.x) * 180 / PI;
+// 
+	// glm::vec2 sub = {p2.x - p1.x, p2.y - p1.y};
+	// float len = sqrt((sub.x * sub.x) + (sub.y * sub.y));
+// 
+	// auto mat = nmGfx::CalculateModelMatrix({p1.x, p1.y}, rot, {len, thickness}, {-len / 2.f, 0.f});
+// 
+	// Application::get_singleton()._renderer->DrawTexture(&texture, mat, color);
 }
 
 
 bool Renderer::LoadFont(sowa::Font& font, const unsigned char* data, unsigned size) {
-	return Application::get_singleton().RendererHandle()->LoadFont(&font._Font, data, size);
+	// return Application::get_singleton().RendererHandle()->LoadFont(&font._Font, data, size);
+	return true;
 }
 
 } // namespace sowa
