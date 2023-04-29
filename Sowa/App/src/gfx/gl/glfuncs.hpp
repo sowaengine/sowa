@@ -86,10 +86,16 @@ class GLManager {
 	void setUnpackAlignment(int);
 	void setDepthTest(bool);
 
+	void clearColor(float r, float g, float b, float a);
+	void clearColorBit();
+	void clearDepthBit();
+
+	GLManager();
   private:
 	std::map<BufferType, uint32_t> m_boundBuffers{};
 	uint32_t m_boundVertexArray = 0;
 	uint32_t m_boundShader = 0;
+
 };
 
 GLManager &GL();
