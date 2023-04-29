@@ -2,6 +2,12 @@
 #define _E_INPUT_EVENT_HPP__
 
 namespace sowa {
+namespace gfx {
+class Window;
+}
+} // namespace sowa
+
+namespace sowa {
 class WindowAccessor;
 
 enum class InputEventType {
@@ -55,6 +61,8 @@ struct InputEvent {
 
   private:
 	friend class WindowAccessor;
+	friend class sowa::gfx::Window;
+
 	InputEventType _Type;
 };
 
