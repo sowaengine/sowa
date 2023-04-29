@@ -84,6 +84,7 @@ class GLManager {
 	bool checkFramebufferStatus();
 
 	void setUnpackAlignment(int);
+	void setDepthTest(bool);
 
   private:
 	std::map<BufferType, uint32_t> m_boundBuffers{};

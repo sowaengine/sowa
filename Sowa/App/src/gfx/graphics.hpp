@@ -1,6 +1,8 @@
 #ifndef SW_GRAPHICS_HPP_
 #define SW_GRAPHICS_HPP_
 
+#include "shader.hpp"
+
 namespace sowa {
 class Application;
 
@@ -8,9 +10,11 @@ namespace gfx {
 class IGraphics {
     public:
 
-    
+    virtual void SetDepthTest(bool) = 0;
+	
+	virtual IShader& Default2DShader() = 0;
 
-  private:
+  protected:
 	friend class sowa::Application;
 
 	IGraphics();

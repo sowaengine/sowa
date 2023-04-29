@@ -42,6 +42,13 @@ void GLShader::Build() {
     GL().attachShader(m_id, fragmentShader);
     GL().linkProgram(m_id);
 }
+
+void GLShader::New(const std::string &vsource, const std::string& fsource) {
+    SetVertexSource(vsource);
+    SetFragmentSource(fsource);
+    Build();
+}
+
 void GLShader::Delete() {
     if(m_id != 0) {
         GL().deleteProgram(m_id);

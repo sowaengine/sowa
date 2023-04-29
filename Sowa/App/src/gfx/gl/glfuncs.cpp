@@ -270,6 +270,13 @@ bool GLManager::checkFramebufferStatus() {
 void GLManager::setUnpackAlignment(int v) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, v);
 }
+void GLManager::setDepthTest(bool v) {
+	if(v) {
+		glEnable(GL_BLEND);
+	} else {
+		glDisable(GL_BLEND);
+	}
+}
 
 GLManager &GL() {
 	static GLManager gl;
