@@ -28,6 +28,8 @@ struct vec2f : public object_type {
 	static bool LoadImpl(object_type *out, const FileBuffer &buf);
 
 	vec2f &operator=(std::initializer_list<float> rhs);
+	vec2f &operator=(std::initializer_list<double> rhs);
+	vec2f &operator=(std::initializer_list<int> rhs);
 
 	/// @brief Returns magnitude of vector
 	float length();

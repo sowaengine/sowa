@@ -59,6 +59,32 @@ vec2f &vec2f::operator=(std::initializer_list<float> rhs) {
 	return *this;
 }
 
+vec2f &vec2f::operator=(std::initializer_list<double> rhs) {
+	if (rhs.size() != 2) {
+		return *this;
+	}
+
+	auto it = rhs.begin();
+	x = *it;
+	++it;
+	y = *it;
+
+	return *this;
+}
+
+vec2f &vec2f::operator=(std::initializer_list<int> rhs) {
+	if (rhs.size() != 2) {
+		return *this;
+	}
+
+	auto it = rhs.begin();
+	x = *it;
+	++it;
+	y = *it;
+
+	return *this;
+}
+
 /// @brief Returns magnitude of vector
 float vec2f::length() {
 	return sqrt(x * x + y * y);
