@@ -14,6 +14,9 @@ class IGraphics {
 	
 	virtual IShader& Default2DShader() = 0;
 
+	virtual void DrawQuad() = 0;
+	virtual void Clear() = 0;
+
   protected:
 	friend class sowa::Application;
 

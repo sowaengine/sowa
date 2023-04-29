@@ -18,6 +18,7 @@ class GLMesh {
 	void SetIndexData(const std::vector<uint32_t>& data);
 	void ResetAttributes();
 	void SetAttribute(uint32_t slot, GLAttributeType type);
+	void UploadAttributes();
 
 	void New();
     void Delete();

@@ -5,6 +5,7 @@
 #include "gfx/gl/glfuncs.hpp"
 #include "glad/glad.h"
 
+#include "debug.hpp"
 
 namespace sowa
 {
@@ -87,6 +88,7 @@ namespace gfx
 
             usedBytes += GetGLAttributeSize(attribute.type);
         }
+        Unbind();
     }
 } // namespace gfx
 } // namespace sowa

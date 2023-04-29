@@ -202,30 +202,30 @@ bool Application::Init(int argc, char const **argv) {
 	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
 	Text2D *node4 = scene->Create<Text2D>("Node4");
 
-	Reference<ImageTexture> anotherTexture = std::make_shared<ImageTexture>();
-	Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://kenney.png"));
-	m_ResourceWatcher->Register("res://kenney.png", anotherTexture);
+	// Reference<ImageTexture> anotherTexture = std::make_shared<ImageTexture>();
+	// Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://kenney.png"));
+	// m_ResourceWatcher->Register("res://kenney.png", anotherTexture);
 
-	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://uv.jpg");
+	// s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://uv.jpg");
 
-	Button *button = scene->Create<Button>("Button", 12);
-	button->Texture() = s_NinePatch;
-	button->Position() = {600, 200};
-	button->Scale() = {.25f, .25f};
-	button->Rotation() = 9.f;
-	button->Size() = {3000.f, 2000.f};
-	button->Text() = "Click me";
+	// Button *button = scene->Create<Button>("Button", 12);
+	// button->Texture() = s_NinePatch;
+	// button->Position() = {600, 200};
+	// button->Scale() = {.25f, .25f};
+	// button->Rotation() = 9.f;
+	// button->Size() = {3000.f, 2000.f};
+	// button->Text() = "Click me";
 
 	// node3->Scale() = {0.25f, 0.25f};
-	node3->Texture() = anotherTexture;
-	node3->Position() = {-600, -200};
-	node4->Position() = {200.f, -200.f};
+	// node3->Texture() = anotherTexture;
+	// node3->Position() = {-600, -200};
+	// node4->Position() = {200.f, -200.f};
 
 	node->AddChild(node1);
 	node->AddChild(node2);
 	node->AddChild(node3);
 	node->AddChild(node4);
-	node->AddChild(button);
+	// node->AddChild(button);
 	node4->SetText("Sowa Engine | Lexographics");
 
 	scene->SetRoot(node);
@@ -370,8 +370,8 @@ bool Application::Process() {
 
 	static float g;
 	g += 0.02f;
-	((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().x = 3000 + (std::sin(g) * 100);
-	((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().y = 2000 + (std::cos(g) * 100);
+	// ((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().x = 3000 + (std::sin(g) * 100);
+	// ((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().y = 2000 + (std::cos(g) * 100);
 
 	// Draw node selection
 	if (!IsRunning() && PickedNode() != 0 && GetCurrentScene() != nullptr) {
@@ -415,7 +415,10 @@ bool Application::Process() {
 	// }
 
 	// _renderer->End2D();
-
+	
+	Graphics().Clear();
+	Graphics().Default2DShader().Bind();
+	Graphics().DrawQuad();
 	// _renderer->ClearLayers();
 	// _renderer->Draw2DLayer();
 

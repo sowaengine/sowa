@@ -43,7 +43,7 @@ class GLVertexArray {
 	void UploadAttributes();
 
   private:
-	uint32_t m_id;
+	uint32_t m_id = 0;
 
     uint32_t m_attributeSizeInBytes = 0;
     std::vector<GLAttribute> m_usedAttributes;

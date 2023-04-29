@@ -1,6 +1,7 @@
 #include "buffer_gl.hpp"
 
 #include "gfx/gl/glfuncs.hpp"
+#include "debug.hpp"
 
 namespace sowa {
 namespace gfx {
