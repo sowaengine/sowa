@@ -8,14 +8,17 @@
 #include "core/window.hpp"
 
 #include "debug.hpp"
+#include "math/math.hpp"
 #include "scene/node.hpp"
 #include "sowa.hpp"
 #include "utils/event.hpp"
 #include "utils/event/input_event.hpp"
-#include "math/math.hpp"
 
 #include "resource/font/font.hpp"
 #include "resource/resource_watcher/resource_watcher.hpp"
+
+#include "gfx/window.hpp"
+#include "gfx/window_manager.hpp"
 
 namespace nmGfx {
 class Renderer;
@@ -32,10 +35,10 @@ class Application {
 		return app;
 	}
 
-	bool Init(int argc, char const** argv);
+	bool Init(int argc, char const **argv);
 	bool Process();
 
-	Window &GetWindow() { return _window; }
+	gfx::Window &GetWindow() { return *m_window; }
 
 	void StartGame();
 	void UpdateGame();
@@ -51,14 +54,14 @@ class Application {
 	inline const Reference<Scene> GetCurrentScene() { return _Scene; }
 	void SetCurrentScene(Reference<Scene> scene);
 
-	Font& GetDefaultFont() { return _DefaultFont; }
+	Font &GetDefaultFont() { return _DefaultFont; }
 
 	void RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor);
 	void DestructNode(Node *node);
-	
+
 	uint64_t GetFrameCount() { return _FrameCount; }
 
-	std::unique_ptr<nmGfx::Renderer>& RendererHandle() { return _renderer; }
+	// std::unique_ptr<nmGfx::Renderer> &RendererHandle() { return _renderer; }
 
 	inline void SetAfterRenderCallback(std::function<void()> callback) { _AfterRenderCallback = callback; }
 
@@ -73,7 +76,7 @@ class Application {
 	friend class Window;
 	friend class Renderer;
 
-	bool ParseArgs(int argc, char const** argv);
+	bool ParseArgs(int argc, char const **argv);
 	Debug::ScopeTimer _AppTime = Debug::ScopeTimer("Application");
 
 	sowa::EngineContext *ctx{nullptr};
@@ -88,8 +91,9 @@ class Application {
 
 	Font _DefaultFont{};
 
-	std::unique_ptr<nmGfx::Renderer> _renderer;
-	Window _window;
+	// std::unique_ptr<nmGfx::Renderer> _renderer;
+	gfx::Window* m_window;
+	gfx::WindowManager m_windowManager;
 
 	int _ResourcePollInterval{60};
 	std::unique_ptr<ResourceWatcher> m_ResourceWatcher;

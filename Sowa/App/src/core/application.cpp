@@ -18,6 +18,7 @@
 #include "core/script_server.hpp"
 #include "core/window.hpp"
 
+#include "scene/2d/button.hpp"
 #include "scene/2d/nine_slice_panel.hpp"
 #include "scene/2d/node2d.hpp"
 #include "scene/2d/sprite2d.hpp"
@@ -32,6 +33,11 @@
 #include "utils/memory.hpp"
 #include "utils/string.hpp"
 #include "utils/time.hpp"
+
+#include "gfx/gl/texture_gl.hpp"
+#include "gfx/graphics.hpp"
+#include "gfx/window.hpp"
+#include "gfx/window_manager.hpp"
 
 #include "nmGfx/src/Core/nm_Matrix.hpp"
 #include "nmGfx/src/Core/nm_Renderer.hpp"
@@ -136,32 +142,42 @@ bool Application::Init(int argc, char const **argv) {
 	// initialize servers before renderer
 	scriptServer->init();
 
-	_renderer = std::make_unique<nmGfx::Renderer>();
-	unsigned int windowFlags = nmGfx::WindowFlags::NONE;
-	windowFlags = !argParse.window ? windowFlags | nmGfx::WindowFlags::NO_WINDOW : windowFlags;
-	_renderer->Init(
-		NotZero(project->proj.settings.window.windowsize.w, 1280),
-		NotZero(project->proj.settings.window.windowsize.h, 720),
-		NotZero(project->proj.settings.window.videosize.w, 1920),
-		NotZero(project->proj.settings.window.videosize.h, 1080),
-		project->proj.settings.application.name.c_str(),
-		windowFlags);
-	_window._windowHandle = &_renderer->GetWindow();
-	_window.InitWindow(_renderer->GetWindow(), *ctx);
+	m_windowManager.m_ctx = ctx;
+	m_window = &m_windowManager.CreateWindow();
+	{
+		gfx::WindowFlags windowFlags = gfx::WindowFlags_::None;
+		windowFlags = !argParse.window ? windowFlags | gfx::WindowFlags_::Hidden : windowFlags;
 
-	auto icon = ResourceLoader::get_singleton().LoadResourceFromMemory<ImageTexture>(FILE_BUFFER(Res::App_include_res_textures_icon_512x_png_data));
-	_window.SetWindowIcon(icon);
+		sowa::gfx::InitWindowArgs args;
+		args.windowWidth = NotZero(project->proj.settings.window.windowsize.w, 1280);
+		args.windowHeight = NotZero(project->proj.settings.window.windowsize.h, 720);
+		args.videoWidth = NotZero(project->proj.settings.window.videosize.w, 1920);
+		args.videoHeight = NotZero(project->proj.settings.window.videosize.h, 1080);
+		args.title = project->proj.settings.application.name;
+		args.flags = windowFlags;
 
-	_renderer->SetBlending(true);
-	_renderer->GetData2D()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_glsl_data)));
-	_renderer->GetData3D()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default3d_glsl_data)));
-	_renderer->GetDataFullscreen()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_glsl_data)));
-	_renderer->GetData3D()._skyboxShader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_skybox_glsl_data)));
-
-	if (!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
-		Debug::Error("Failed to load default font");
-		return false;
+		m_window->InitWindow(args);
 	}
+
+	gfx::IGraphics *graphics = new gfx::IGraphics();
+	gfx::IGraphics::SetInstance(graphics);
+	
+	
+
+	gfx::GLTexture icon;
+	icon.Load2D(FILE_BUFFER(Res::App_include_res_textures_icon_512x_png_data));
+	m_window->SetWindowIcon(icon);
+
+	// _renderer->SetBlending(true);
+	// _renderer->GetData2D()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_glsl_data)));
+	// _renderer->GetData3D()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default3d_glsl_data)));
+	// _renderer->GetDataFullscreen()._shader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_glsl_data)));
+	// _renderer->GetData3D()._skyboxShader.LoadText(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_skybox_glsl_data)));
+
+	// if (!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
+	// 	Debug::Error("Failed to load default font");
+	// 	return false;
+	// }
 
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
@@ -198,12 +214,13 @@ bool Application::Init(int argc, char const **argv) {
 
 	s_NinePatch = ResourceLoader::get_singleton().LoadResource<NinePatchTexture>("res://uv.jpg");
 
-	NineSlicePanel *button = scene->Create<NineSlicePanel>("Button", 12);
+	Button *button = scene->Create<Button>("Button", 12);
 	button->Texture() = s_NinePatch;
-	button->Position().x = 600;
+	button->Position() = {600, 200};
 	button->Scale() = {.25f, .25f};
 	button->Rotation() = 9.f;
 	button->Size() = {3000.f, 2000.f};
+	button->Text() = "Click me";
 
 	// node3->Scale() = {0.25f, 0.25f};
 	node3->Texture() = anotherTexture;
@@ -222,8 +239,8 @@ bool Application::Init(int argc, char const **argv) {
 
 	OnInput() += [this](InputEvent e) {
 		if (e.Type() == InputEventType::MouseMove) {
-			float ratioX = (float)GetWindow().GetVideoWidth() / GetWindow().GetWindowWidth();
-			float ratioY = (float)GetWindow().GetVideoHeight() / GetWindow().GetWindowHeight();
+			float ratioX = (float)GetWindow().GetVideoSize().x / GetWindow().GetWindowSize().x;
+			float ratioY = (float)GetWindow().GetVideoSize().x / GetWindow().GetWindowSize().y;
 
 			if (!IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
 				_EditorCameraPos.x += e.mouseMove.deltaX * mapLog(_EditorCameraZoom) * ratioX;
@@ -242,7 +259,7 @@ bool Application::Init(int argc, char const **argv) {
 			}
 			if (
 				(m_is_node_dragging && !IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_LEFT) && PickedNode() != 0 && GetCurrentScene() != nullptr) ||
-				m_on_drag_mode && !IsRunning() && PickedNode() != 0 && GetWindow().IsButtonUp(GLFW_MOUSE_BUTTON_RIGHT)) {
+				m_on_drag_mode && !IsRunning() && PickedNode() != 0 && !GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
 				Node *node = GetCurrentScene()->GetNodeByID(PickedNode());
 				if (node != nullptr) {
 					Node2D *node2d = dynamic_cast<Node2D *>(node);
@@ -272,11 +289,11 @@ bool Application::Init(int argc, char const **argv) {
 				_EditorCameraZoom = MAX(_EditorCameraZoom, 1.1);
 
 				vec2 midPoint;
-				midPoint.x = GetWindow().GetVideoWidth() / 2.f;
-				midPoint.y = GetWindow().GetVideoHeight() / 2.f;
+				midPoint.x = GetWindow().GetVideoSize().x / 2.f;
+				midPoint.y = GetWindow().GetVideoSize().y / 2.f;
 
-				_EditorCameraPos.x += (GetWindow().GetGameMousePosition().x - midPoint.x) * (mapLog(oldZoom) - mapLog(_EditorCameraZoom));
-				_EditorCameraPos.y -= (GetWindow().GetGameMousePosition().y - midPoint.y) * (mapLog(oldZoom) - mapLog(_EditorCameraZoom));
+				_EditorCameraPos.x += (GetWindow().GetVideoMousePosition().x - midPoint.x) * (mapLog(oldZoom) - mapLog(_EditorCameraZoom));
+				_EditorCameraPos.y -= (GetWindow().GetVideoMousePosition().y - midPoint.y) * (mapLog(oldZoom) - mapLog(_EditorCameraZoom));
 			}
 
 			// Debug::Log("Scroll Event: x: {}, y: {}", e.scroll.scrollX, e.scroll.scrollY);
@@ -286,7 +303,7 @@ bool Application::Init(int argc, char const **argv) {
 				m_is_node_dragging = false;
 			}
 		} else if (e.Type() == InputEventType::MouseClick) {
-			Debug::Log("Mouse Click Event: button: {}, single: {}, mods: {}", e.mouseClick.button, e.mouseClick.single, e.mouseClick.modifiers);
+			// Debug::Log("Mouse Click Event: button: {}, single: {}, mods: {}", e.mouseClick.button, e.mouseClick.single, e.mouseClick.modifiers);
 			// if modifiers & ctrl, multi select
 			if (!m_on_drag_mode && e.mouseClick.button == 0 && e.mouseClick.single) {
 				this->m_picked_node = this->m_hovering_node;
@@ -310,9 +327,8 @@ bool Application::Init(int argc, char const **argv) {
 bool Application::Process() {
 	SW_ENTRY()
 
-	_window.UpdateEvents();
-	_renderer->GetWindow().PollEvents();
-	if (_window.ShouldClose())
+	m_window->PollEvents();
+	if (m_window->ShouldClose())
 		return false;
 
 	if (_Scene != nullptr) {
@@ -327,10 +343,10 @@ bool Application::Process() {
 		m_on_drag_mode = true;
 	}
 
-	_renderer->Begin2D(
-		GetCameraTransform(),
-		{0.5f, 0.5f},
-		{0.2f, 0.2f, 0.2f, 1.f});
+	// _renderer->Begin2D(
+	// 	GetCameraTransform(),
+	// 	{0.5f, 0.5f},
+	// 	{0.2f, 0.2f, 0.2f, 1.f});
 
 	if (!_AppRunning) {
 		// Draw center cursor
@@ -346,10 +362,10 @@ bool Application::Process() {
 		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 2.f * mapLog(_CurrentEditorCameraZoom), {0.f, 1.f, 0.f, .6f});
 
 		float viewportThickness = 3.f;
-		Renderer::get_singleton().DrawLine({0, 0}, {_window.GetVideoWidth(), 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
-		Renderer::get_singleton().DrawLine({_window.GetVideoWidth(), 0}, {_window.GetVideoWidth(), _window.GetVideoHeight()}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
-		Renderer::get_singleton().DrawLine({_window.GetVideoWidth(), _window.GetVideoHeight()}, {0, _window.GetVideoHeight()}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
-		Renderer::get_singleton().DrawLine({0, _window.GetVideoHeight()}, {0, 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({0, 0}, {m_window->GetVideoSize().x, 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({m_window->GetVideoSize().x, 0}, {m_window->GetVideoSize().x, m_window->GetVideoSize().y}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({m_window->GetVideoSize().x, m_window->GetVideoSize().y}, {0, m_window->GetVideoSize().y}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
+		Renderer::get_singleton().DrawLine({0, m_window->GetVideoSize().y}, {0, 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
 
 	} else {
 		static float f = 0.f;
@@ -391,29 +407,29 @@ bool Application::Process() {
 		}
 	}
 
-	vec2 mousePos = GetWindow().GetGameMousePosition();
-	// mousePos.x += (_EditorCameraPos.x * mapLog(_EditorCameraZoom)) - (GetWindow().GetVideoWidth() / 2);
-	// mousePos.y -= (_EditorCameraPos.y * mapLog(_EditorCameraZoom)) - (GetWindow().GetVideoHeight() / 2);
-	int id = _renderer->Get2DPickID(mousePos.x, GetWindow().GetVideoHeight() - mousePos.y);
-	if (GetCurrentScene() != nullptr) {
-		if (GetCurrentScene()->GetNodeByID(id) != nullptr) {
-			m_hovering_node = static_cast<uint32_t>(id);
-		} else {
-			// look for editor clickables
-			m_hovering_node = 0;
-		}
-	}
+	vec2 mousePos = GetWindow().GetVideoMousePosition();
+	// mousePos.x += (_EditorCameraPos.x * mapLog(_EditorCameraZoom)) - (GetWindow().GetVideoSize().x / 2);
+	// mousePos.y -= (_EditorCameraPos.y * mapLog(_EditorCameraZoom)) - (GetWindow().GetVideoSize().y / 2);
+	// int id = _renderer->Get2DPickID(mousePos.x, GetWindow().GetVideoSize().y - mousePos.y);
+	// if (GetCurrentScene() != nullptr) {
+	// 	if (GetCurrentScene()->GetNodeByID(id) != nullptr) {
+	// 		m_hovering_node = static_cast<uint32_t>(id);
+	// 	} else {
+	// look for editor clickables
+	// 		m_hovering_node = 0;
+	// 	}
+	// }
 
-	_renderer->End2D();
+	// _renderer->End2D();
 
-	_renderer->ClearLayers();
-	_renderer->Draw2DLayer();
+	// _renderer->ClearLayers();
+	// _renderer->Draw2DLayer();
 
 	if (_AfterRenderCallback != nullptr) {
 		_AfterRenderCallback();
 	}
 
-	_renderer->GetWindow().SwapBuffers();
+	m_window->SwapBuffers();
 
 	Step();
 	return true;
@@ -499,7 +515,8 @@ void Application::Step() {
 
 uint32_t Application::Renderer_GetAlbedoFramebufferID() {
 	SW_ENTRY()
-	return _renderer->GetData2D()._frameBuffer.GetAlbedoID();
+	// return _renderer->GetData2D()._frameBuffer.GetAlbedoID();
+	return 0;
 }
 
 bool Application::ParseArgs(int argc, char const **argv) {

@@ -221,12 +221,12 @@ void WindowAccessor::LoadContext() {
 
 WindowAccessor &WindowAccessor::RegisterKeyEvent(int key, int scancode, int action, int mods) {
 	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
-	sowa::Window &window = app->GetWindow();
+	sowa::gfx::Window &window = app->GetWindow();
 
-	if (action == GLFW_PRESS)
-		window._KeyStates[key] = KeyState::PRESSED;
-	else if (action == GLFW_RELEASE)
-		window._KeyStates[key] = KeyState::RELEASED;
+	// if (action == GLFW_PRESS)
+	// 	window._KeyStates[key] = KeyState::PRESSED;
+	// else if (action == GLFW_RELEASE)
+	// 	window._KeyStates[key] = KeyState::RELEASED;
 
 	InputEvent e;
 	e._Type = InputEventType::Key;
@@ -240,10 +240,10 @@ WindowAccessor &WindowAccessor::RegisterKeyEvent(int key, int scancode, int acti
 }
 WindowAccessor &WindowAccessor::RegisterScrollEvent(double xOffset, double yOffset) {
 	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
-	sowa::Window &window = app->GetWindow();
+	sowa::gfx::Window &window = app->GetWindow();
 
-	window._ScrollDeltaY += yOffset;
-	window._ScrollDeltaX += xOffset;
+	//window._ScrollDeltaY += yOffset;
+	//window._ScrollDeltaX += xOffset;
 
 	InputEvent e;
 	e._Type = InputEventType::Scroll;
@@ -256,12 +256,12 @@ WindowAccessor &WindowAccessor::RegisterScrollEvent(double xOffset, double yOffs
 
 WindowAccessor &WindowAccessor::RegisterButtonEvent(int button, int action, int mods) {
 	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
-	sowa::Window &window = app->GetWindow();
+	sowa::gfx::Window &window = app->GetWindow();
 
-	if (action == GLFW_PRESS)
-		window._ButtonStates[button] = ButtonState::PRESSED;
-	else if (action == GLFW_RELEASE)
-		window._ButtonStates[button] = ButtonState::RELEASED;
+	// if (action == GLFW_PRESS)
+	// 	window._ButtonStates[button] = ButtonState::PRESSED;
+	// else if (action == GLFW_RELEASE)
+	// 	window._ButtonStates[button] = ButtonState::RELEASED;
 
 	InputEvent e;
 	e._Type = InputEventType::MouseButton;
@@ -276,7 +276,7 @@ WindowAccessor &WindowAccessor::RegisterButtonEvent(int button, int action, int 
 
 WindowAccessor &WindowAccessor::RegisterClickEvent(int button, bool single, int mods) {
 	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
-	sowa::Window &window = app->GetWindow();
+	sowa::gfx::Window &window = app->GetWindow();
 
 	InputEvent e;
 	e._Type = InputEventType::MouseClick;
@@ -291,18 +291,18 @@ WindowAccessor &WindowAccessor::RegisterClickEvent(int button, bool single, int 
 
 WindowAccessor &WindowAccessor::RegisterMousePosEvent(double xPos, double yPos) {
 	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
-	sowa::Window &window = app->GetWindow();
+	sowa::gfx::Window &window = app->GetWindow();
 
-	double deltaX = window._MousePosX - xPos;
-	double deltaY = window._MousePosY - yPos;
-	window._MousePosX = xPos;
-	window._MousePosY = yPos;
+	// double deltaX = window._MousePosX - xPos;
+	// double deltaY = window._MousePosY - yPos;
+	// window._MousePosX = xPos;
+	// window._MousePosY = yPos;
 
 	InputEvent e;
 	e._Type = InputEventType::MouseMove;
 
-	e.mouseMove.deltaX = deltaX;
-	e.mouseMove.deltaY = deltaY;
+	// e.mouseMove.deltaX = deltaX;
+	// e.mouseMove.deltaY = deltaY;
 	e.mouseMove.posX = xPos;
 	e.mouseMove.posY = yPos;
 
@@ -312,7 +312,7 @@ WindowAccessor &WindowAccessor::RegisterMousePosEvent(double xPos, double yPos) 
 
 WindowAccessor &WindowAccessor::RegisterCharEvent(unsigned int codePoint) {
 	auto *app = _Ctx->GetSingleton<Application>(sowa::Server::APPLICATION);
-	sowa::Window &window = app->GetWindow();
+	sowa::gfx::Window &window = app->GetWindow();
 
 	InputEvent e;
 	e._Type = InputEventType::Character;
