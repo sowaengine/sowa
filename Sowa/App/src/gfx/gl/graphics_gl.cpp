@@ -114,5 +114,63 @@ void GraphicsGL::Clear() {
 	GL().clearDepthBit();
 }
 
+void GraphicsGL::SetViewportStyle(SetViewportStyleArgs args) {
+	if(args.mode == ViewportDrawMode_Stretch) {
+		GL().viewport(0, 0, args.windowWidth, args.windowHeight);
+	} else if(args.mode == ViewportDrawMode_KeepRatio) {
+		float windowRatio = (float)args.windowWidth / args.windowHeight;
+		float videoRatio = (float)args.videoWidth / args.videoHeight;
+
+		if(windowRatio > videoRatio) {
+			float width = args.windowHeight * videoRatio;
+			float height = args.windowHeight;
+			float gap = args.windowWidth - width;
+
+			GL().viewport(gap / 2, 0, width, height);
+		} else {
+			float width = args.windowWidth;
+			float height = args.windowWidth / videoRatio;
+			float gap = args.windowHeight - height;
+
+			GL().viewport(0, gap / 2, width, height);
+		}
+	} else if(args.mode == ViewportDrawMode_KeepWidth) {
+		float windowRatio = (float)args.windowWidth / args.windowHeight;
+		float videoRatio = (float)args.videoWidth / args.videoHeight;
+
+		float width = args.windowWidth;
+		float height = args.windowWidth / videoRatio;
+		float gap = args.windowHeight - height;
+
+		GL().viewport(0, gap / 2, width, height);
+	} else if(args.mode == ViewportDrawMode_KeepHeight) {
+		float windowRatio = (float)args.windowWidth / args.windowHeight;
+		float videoRatio = (float)args.videoWidth / args.videoHeight;
+
+		float height = args.windowHeight;
+		float width = args.windowHeight * videoRatio;
+		float gap = args.windowWidth - width;
+
+		GL().viewport(gap / 2, 0, width, height);
+	} else if(args.mode == ViewportDrawMode_Contain) {
+		float windowRatio = (float)args.windowWidth / args.windowHeight;
+		float videoRatio = (float)args.videoWidth / args.videoHeight;
+
+		if(windowRatio < videoRatio) {
+			float width = args.windowHeight * videoRatio;
+			float height = args.windowHeight;
+			float gap = args.windowWidth - width;
+
+			GL().viewport(gap / 2, 0, width, height);
+		} else {
+			float width = args.windowWidth;
+			float height = args.windowWidth / videoRatio;
+			float gap = args.windowHeight - height;
+
+			GL().viewport(0, gap / 2, width, height);
+		}
+	}
+}
+
 } // namespace gfx
 } // namespace sowa

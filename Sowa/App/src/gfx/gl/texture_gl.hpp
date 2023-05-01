@@ -42,6 +42,8 @@ class GLTexture {
 	bool Load2DFromData(unsigned char *data, int width, int height, GLDataType dataType, GLTextureFormat format, GLTextureInternalFormat internalFormat = GLTextureInternalFormat::Rgba);
 	void Delete();
 
+	inline const uint32_t ID() const { return m_id; }
+	
 	inline const int Width() const { return m_width; }
 	inline const int Height() const { return m_height; }
 	inline const int Channels() const { return m_channels; }

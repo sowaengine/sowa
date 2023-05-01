@@ -22,6 +22,8 @@ class GraphicsGL : public IGraphics {
 	void DrawFullscreenQuad() override;
 	void Clear() override;
 
+	void SetViewportStyle(SetViewportStyleArgs args) override;
+
   private:
 	GLShader m_default2dshader;
 	GLShader m_defaultFullscreenShader;

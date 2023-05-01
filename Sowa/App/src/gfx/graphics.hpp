@@ -7,6 +7,27 @@ namespace sowa {
 class Application;
 
 namespace gfx {
+
+enum ViewportDrawMode {
+	ViewportDrawMode_None = 0,
+	ViewportDrawMode_KeepRatio,
+	ViewportDrawMode_KeepWidth,
+	ViewportDrawMode_KeepHeight,
+	ViewportDrawMode_Stretch,
+	ViewportDrawMode_Contain,
+};
+
+struct SetViewportStyleArgs {
+	// Any ViewportDrawMode other than none will call glviewport
+	ViewportDrawMode mode;
+	
+	int windowWidth;
+	int windowHeight;
+
+	int videoWidth;
+	int videoHeight;
+};
+	
 class IGraphics {
     public:
 
@@ -17,6 +38,7 @@ class IGraphics {
 
 	virtual void DrawQuad() = 0;
 	virtual void DrawFullscreenQuad() = 0;
+	virtual void SetViewportStyle(SetViewportStyleArgs args) = 0;
 	virtual void Clear() = 0;
 
   protected:

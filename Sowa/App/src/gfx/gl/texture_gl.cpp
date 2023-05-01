@@ -1,5 +1,7 @@
 #include "texture_gl.hpp"
+
 #include "stb_image.h"
+#include "glad/glad.h"
 
 #include "gfx/gl/glfuncs.hpp"
 #include "debug.hpp"
@@ -61,15 +63,15 @@ bool GLTexture::Load2DFromData(unsigned char* data, int width, int height, GLDat
     m_height = height;
     m_channels = 0;
 
-    GL().genTextures(m_id);
-    GL().bindTexture(m_type, m_id);
-    GL().texParameteri(m_type, GLTextureWrapParam::WrapS, GLTextureWrap::Repeat);
-    GL().texParameteri(m_type, GLTextureWrapParam::WrapT, GLTextureWrap::Repeat);
-    GL().texParameteri(m_type, GLTextureFilterParam::MinFilter, GLTextureFilter::Linear);
-    GL().texParameteri(m_type, GLTextureFilterParam::MagFilter, GLTextureFilter::Linear);
+    glGenTextures(1, &m_id);
+    glBindTexture(GL_TEXTURE_2D, m_id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 
-    GL().texImage2D(m_type, 0, internalFormat, m_width, m_height, 0, dataType, m_pixels, format);
-    GL().generateMipmap(m_type);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
+    // GL().generateMipmap(m_type);
 
     return true;
 }
