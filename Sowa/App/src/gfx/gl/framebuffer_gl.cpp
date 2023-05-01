@@ -3,6 +3,8 @@
 #include "gfx/gl/glfuncs.hpp"
 #include "debug.hpp"
 
+#include "glad/glad.h"
+
 namespace sowa {
 namespace gfx {
 
@@ -24,10 +26,19 @@ void GLFramebuffer::Create(int width, int height) {
 	for (auto &[slot, target] : m_targets) {
         if(target.type == GLFramebufferTargetType::Vec4) {
 		    target.texture.Load2DFromData(nullptr, width, height, GLDataType::Float, GLTextureFormat::Rgba, GLTextureInternalFormat::Rgba16F);
+            // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, target.texture.ID(), 0);
+            
         } else if(target.type == GLFramebufferTargetType::Uint32) {
             target.texture.Load2DFromData(nullptr, width, height, GLDataType::Int, GLTextureFormat::RedInteger, GLTextureInternalFormat::R32I);
         }
+        GL().framebufferTexture2D(slot, target.texture.ID());
 	}
+
+    glGenRenderbuffers(1, &m_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+
 
     std::vector<int> attachments;
     for (auto &[slot, target] : m_targets) {
@@ -40,12 +51,13 @@ void GLFramebuffer::Create(int width, int height) {
     if(!GL().checkFramebufferStatus()) {
         Debug::Error("Failed to create framebuffer");
     }
+
+    GL().bindFramebuffer(0);
 }
 void GLFramebuffer::Delete() {
 	if (m_id != 0) {
         GL().deleteFramebuffer(m_id);
 	}
-    m_targets.clear();
 	m_id = 0;
 }
 
@@ -62,6 +74,14 @@ void GLFramebuffer::Bind() {
 }
 void GLFramebuffer::Unbind() {
     GL().bindFramebuffer(0);
+}
+
+int GLFramebuffer::GetTargetTextureID(int slot) {
+    if(m_targets.count(slot) != 0) {
+        return m_targets[slot].texture.ID();
+    }
+
+    return 0;
 }
 
 } // namespace gfx

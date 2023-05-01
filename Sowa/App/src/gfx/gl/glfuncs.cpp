@@ -65,6 +65,7 @@ static GLenum ToGL(GLTextureFilterParam filter) {
 
 static GLenum ToGL(GLTextureFilter filter) {
 	return filter == GLTextureFilter::Linear			   ? GL_LINEAR
+		   : filter == GLTextureFilter::Nearest			   ? GL_NEAREST
 		   : filter == GLTextureFilter::LinearMipmapLinear ? GL_LINEAR_MIPMAP_LINEAR
 														   : GL_NONE;
 }
@@ -291,11 +292,11 @@ void GLManager::deleteFramebuffer(uint32_t id) {
 }
 void GLManager::framebufferTexture2D(uint32_t attachmentSlot, uint32_t textureId) {
 	LOG_FUNC("{}, {}", attachmentSlot, textureId);
-	glFramebufferTexture2D(GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0 + attachmentSlot, GL_TEXTURE_2D, textureId, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentSlot, GL_TEXTURE_2D, textureId, 0);
 }
 void GLManager::drawBuffers(const std::vector<int> &attachments) {
 	LOG_FUNC("{}", attachments.size());
-	std::vector<GLenum> buffers(attachments.size());
+	std::vector<GLenum> buffers;
 	for (const auto &attachment : attachments) {
 		buffers.push_back(GL_COLOR_ATTACHMENT0 + attachment);
 	}
@@ -331,6 +332,14 @@ void GLManager::clearColorBit() {
 void GLManager::clearDepthBit() {
 	LOG_FUNC("", "");
 	glClear(GL_DEPTH_BUFFER_BIT);
+}
+int GLManager::getUniformLocation(uint32_t programID, const std::string &name) {
+	LOG_FUNC("{}, {}", programID, name);
+	return glGetUniformLocation(programID, name.c_str());
+}
+void GLManager::uniform1i(int location, int i) {
+	LOG_FUNC("{}, {}", location, i);
+	glUniform1i(location, i);
 }
 
 GLManager::GLManager() {

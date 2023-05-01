@@ -31,6 +31,8 @@ class GLFramebuffer {
 
         void Bind();
         void Unbind();
+
+        int GetTargetTextureID(int slot);
     private:
         // slot, target
         std::map<uint32_t, GLFramebufferTarget> m_targets;
@@ -38,6 +40,7 @@ class GLFramebuffer {
         int m_height = 0;
 
         uint32_t m_id = 0;
+        uint32_t m_rbo = 0;
 };
 } // namespace gfx
 } // namespace sowa

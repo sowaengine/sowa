@@ -32,6 +32,7 @@ enum class GLTextureWrap {
 
 enum class GLTextureFilter {
 	Linear = 0,
+	Nearest,
 	LinearMipmapLinear,
 };
 
@@ -89,6 +90,9 @@ class GLManager {
 	void clearColor(float r, float g, float b, float a);
 	void clearColorBit();
 	void clearDepthBit();
+
+	int getUniformLocation(uint32_t programID, const std::string& name);
+	void uniform1i(int location, int i);
 
 	GLManager();
   private:
