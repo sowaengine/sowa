@@ -440,9 +440,25 @@ bool Application::Process() {
 	m_drawpass2d.Bind();
 	Graphics().Clear();
 
+	static float rot = 0.f;
+	rot += 0.2f;
+	sowa::mat4 modelMatrix = CalculateModelMatrix({std::sin(rot * 0.1) * 200, std::cos(rot * 0.1) * 200, -200.f}, {0.f, 0.f, rot}, {640.f, 480.f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
+
+	sowa::mat4 projectionMatrix;
+	{
+		CalculateOrthoArgs args;
+		args.width = videoSize.x;
+		args.height = videoSize.y;
+		args.near = 0.f;
+		args.far = 1000.f;
+		projectionMatrix = CalculateOrtho(args);
+	}
+
 	Graphics().Default2DShader().Bind();
 	Graphics().Default2DShader().UniformTexture("uTexture", tex.ID(), 0);
-	Graphics().DrawFullscreenQuad();
+	Graphics().Default2DShader().UniformMat4("uModel", modelMatrix);
+	Graphics().Default2DShader().UniformMat4("uProj", projectionMatrix);
+	Graphics().DrawQuad();
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();

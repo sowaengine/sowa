@@ -80,5 +80,15 @@ void GLShader::UniformTexture(const std::string& name, uint32_t textureID, int s
 	// GL().uniform1i(loc, slot);
 }
 
+void GLShader::UniformMat4(const std::string& name, const mat4& value) {
+	Bind();
+	int loc = GL().getUniformLocation(m_id, name);
+	if(loc < 0) {
+		Debug::Error("Failed to get uniform location {}", name);
+	}
+
+	glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
+}
+
 } // namespace gfx
 } // namespace sowa

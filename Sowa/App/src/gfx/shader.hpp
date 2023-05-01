@@ -4,6 +4,8 @@
 #include <string>
 #include <cstdint>
 
+#include "math/math.hpp"
+
 namespace sowa {
 namespace gfx {
 class IShader {
@@ -15,6 +17,7 @@ class IShader {
         virtual void Unbind() = 0;
 
         virtual void UniformTexture(const std::string& name, uint32_t textureID, int slot) = 0;
+        virtual void UniformMat4(const std::string& name, const mat4& value) = 0;
 };
 } // namespace gfx
 } // namespace sowa
