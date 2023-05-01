@@ -22,11 +22,14 @@ void GLTexture::Unbind() {
     GL().bindTexture(m_type, 0);
 }
 
+void GLTexture::SetFlip(bool v) {
+    stbi_set_flip_vertically_on_load(v ? 0 : 1);
+}
+
 bool GLTexture::Load2D(const unsigned char* data, size_t size, GLTextureInternalFormat internalFormat) {
     Delete();
     m_type = GLTextureType::Texture2D;
 
-    stbi_set_flip_vertically_on_load(true);
     m_pixels = stbi_load_from_memory(data, size, &m_width, &m_height, &m_channels, 0);
     if(!m_pixels) {
         Delete();

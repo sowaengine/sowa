@@ -38,6 +38,8 @@ class GLTexture {
 	void Bind(int slot = 0);
 	void Unbind();
 
+	static void SetFlip(bool v);
+	
 	bool Load2D(const unsigned char *data, size_t size, GLTextureInternalFormat internalFormat = GLTextureInternalFormat::Rgba);
 	bool Load2DFromData(unsigned char *data, int width, int height, GLDataType dataType, GLTextureFormat format, GLTextureInternalFormat internalFormat = GLTextureInternalFormat::Rgba);
 	void Delete();

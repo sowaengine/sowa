@@ -62,6 +62,21 @@ bool Window::InitWindow(InitWindowArgs args) {
 	glfwSetCharCallback(p_window, &CharCallback);
 	glfwSetFramebufferSizeCallback(p_window, &FramebufferSizeCallback);
 
+	static gfx::GLTexture cursorTex;
+	auto cursorData = File::GetFileContent("res://cursor.png");
+	GLTexture::SetFlip(true);
+	cursorTex.Load2D(cursorData.data(), cursorData.size());
+	GLTexture::SetFlip(false);
+
+	static GLFWimage cursorImage;
+	cursorImage.width = cursorTex.Width();
+	cursorImage.height = cursorTex.Height();
+	cursorImage.pixels = cursorTex.Pixels();
+
+
+	GLFWcursor* cursor = glfwCreateCursor(&cursorImage, 0, 0);
+	glfwSetCursor(p_window, cursor);
+
 	return true;
 }
 
