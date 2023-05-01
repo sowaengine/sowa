@@ -430,7 +430,7 @@ bool Application::Process() {
 	static bool loaded = false;
 	if(!loaded) {
 		loaded = true;
-		auto data = File::GetFileContent("res://uv.jpg");
+		auto data = File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_blue.png");
 		tex.Load2D(data.data(), data.size());
 	}
 
@@ -440,15 +440,46 @@ bool Application::Process() {
 	m_drawpass2d.Bind();
 	Graphics().Clear();
 
-	static float rot = 0.f;
-	rot += 0.2f;
-	sowa::mat4 modelMatrix = CalculateModelMatrix({std::sin(rot * 0.1) * 200, std::cos(rot * 0.1) * 200, -200.f}, {0.f, 0.f, rot}, {640.f, 480.f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
+	static vec2 position{1920.f / 2, 1080.f / 2};
+	const float speed = 200 * (1.0f / 60);
+
+	vec2 velocity{0.f, 0.f};
+	if(m_window->IsKeyDown(GLFW_KEY_W)) {
+		velocity.y += 1;
+	}
+	if(m_window->IsKeyDown(GLFW_KEY_S)) {
+		velocity.y -= 1;
+	}
+	if(m_window->IsKeyDown(GLFW_KEY_D)) {
+		velocity.x += 1;
+	}
+	if(m_window->IsKeyDown(GLFW_KEY_A)) {
+		velocity.x -= 1;
+	}
+	if(velocity.length() > 0.1) {
+		velocity = velocity.clamp();
+		velocity.x *= speed;
+		velocity.y *= speed;
+	} else {
+		velocity = {0.f, 0.f};
+	}
+
+	position.x += velocity.x;
+	position.y += velocity.y;
+
+	vec2 pos = m_window->GetVideoMousePosition();
+	pos.y = m_window->GetVideoSize().y - pos.y;
+	float rot = atan2(pos.y - position.y, pos.x - position.x) + (3.14 / 2);
+
+	sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f, 75.f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
 
 	sowa::mat4 projectionMatrix;
 	{
 		CalculateOrthoArgs args;
 		args.width = videoSize.x;
 		args.height = videoSize.y;
+		args.centerX = 0.0f;
+		args.centerY = 0.0f;
 		args.near = 0.f;
 		args.far = 1000.f;
 		projectionMatrix = CalculateOrtho(args);
@@ -485,10 +516,10 @@ bool Application::Process() {
 		mode = gfx::ViewportDrawMode_Contain;
 	}
 
-	if(m_window->IsKeyDown(GLFW_KEY_Q)) {
+	if(m_window->IsKeyDown(GLFW_KEY_F1)) {
 		gfx::GL().setPolygonMode(gfx::GLPolygonMode::Fill);
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_W)) {
+	if(m_window->IsKeyDown(GLFW_KEY_F2)) {
 		gfx::GL().setPolygonMode(gfx::GLPolygonMode::Line);
 	}
 
