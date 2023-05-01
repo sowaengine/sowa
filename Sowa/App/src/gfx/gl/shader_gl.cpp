@@ -1,5 +1,7 @@
 #include "shader_gl.hpp"
 
+#include "glad/glad.h"
+
 #include "debug.hpp"
 #include "gfx/gl/glfuncs.hpp"
 
@@ -59,6 +61,23 @@ void GLShader::Bind() {
 }
 void GLShader::Unbind() {
 	GL().useProgram(0);
+}
+
+void GLShader::UniformTexture(const std::string& name, uint32_t textureID, int slot) {
+	Bind();
+	int loc = GL().getUniformLocation(m_id, name);
+	if(loc < 0) {
+		Debug::Error("Failed to get uniform location {}", name);
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	// glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glUniform1i(loc, slot);
+
+	// GL().activeTexture(slot);
+	// GL().bindTexture(GLTextureType::Texture2D, textureID);
+	// GL().uniform1i(loc, slot);
 }
 
 } // namespace gfx

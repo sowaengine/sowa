@@ -2,6 +2,7 @@
 #define SW_SHADER_HPP_
 
 #include <string>
+#include <cstdint>
 
 namespace sowa {
 namespace gfx {
@@ -12,6 +13,8 @@ class IShader {
 
         virtual void Bind() = 0;
         virtual void Unbind() = 0;
+
+        virtual void UniformTexture(const std::string& name, uint32_t textureID, int slot) = 0;
 };
 } // namespace gfx
 } // namespace sowa

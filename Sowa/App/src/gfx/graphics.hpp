@@ -13,8 +13,10 @@ class IGraphics {
     virtual void SetDepthTest(bool) = 0;
 	
 	virtual IShader& Default2DShader() = 0;
+	virtual IShader& DefaultFullscreenShader() = 0;
 
 	virtual void DrawQuad() = 0;
+	virtual void DrawFullscreenQuad() = 0;
 	virtual void Clear() = 0;
 
   protected:

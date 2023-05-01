@@ -10,28 +10,33 @@ namespace sowa {
 namespace gfx {
 
 GraphicsGL::GraphicsGL() {
+	int maxTextureSize = 0;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+	Debug::Log("Max texture size: {}", maxTextureSize);
 
-	std::vector<float> quad_data(16);
-	// vec2 position, vec2 uv
-	quad_data[0] = -0.5f;
-	quad_data[1] = 0.5f;
-	quad_data[2] = 0.0f;
-	quad_data[3] = 1.0f;
+	// 2d quad
+	const std::vector<float> quad_data = {
+		// vec2 position, vec2 uv
+		-0.5f,
+		0.5f,
+		0.0f,
+		1.0f,
 
-	quad_data[4] = -0.5f;
-	quad_data[5] = -0.5f;
-	quad_data[6] = 0.0f;
-	quad_data[7] = 0.0f;
+		-0.5f,
+		-0.5f,
+		0.0f,
+		0.0f,
 
-	quad_data[8] = 0.5f;
-	quad_data[9] = -0.5f;
-	quad_data[10] = 1.0f;
-	quad_data[11] = 0.0f;
+		0.5f,
+		-0.5f,
+		1.0f,
+		0.0f,
 
-	quad_data[12] = 0.5f;
-	quad_data[13] = 0.5f;
-	quad_data[14] = 1.0f;
-	quad_data[15] = 1.0f;
+		0.5f,
+		0.5f,
+		1.0f,
+		1.0f,
+	};
 
 	const std::vector<uint32_t> quad_indices = {
 		0, 1, 2,
@@ -44,6 +49,42 @@ GraphicsGL::GraphicsGL() {
 	m_default2dmesh.SetAttribute(0, GLAttributeType::Vec2);
 	m_default2dmesh.SetAttribute(1, GLAttributeType::Vec2);
 	m_default2dmesh.UploadAttributes();
+
+	// Fullscreen quad
+	const std::vector<float> fullscreen_quad_data = {
+		// vec2 position, vec2 uv
+		-1.0f,
+		1.0f,
+		0.0f,
+		1.0f,
+
+		-1.0f,
+		-1.0f,
+		0.0f,
+		0.0f,
+
+		1.0f,
+		-1.0f,
+		1.0f,
+		0.0f,
+
+		1.0f,
+		1.0f,
+		1.0f,
+		1.0f,
+	};
+
+	const std::vector<uint32_t> fullscreen_quad_indices = {
+		0, 1, 2,
+		0, 2, 3};
+
+	m_defaultFullscreenMesh.New();
+	m_defaultFullscreenMesh.ResetAttributes();
+	m_defaultFullscreenMesh.SetModelData(fullscreen_quad_data);
+	m_defaultFullscreenMesh.SetIndexData(fullscreen_quad_indices);
+	m_defaultFullscreenMesh.SetAttribute(0, GLAttributeType::Vec2);
+	m_defaultFullscreenMesh.SetAttribute(1, GLAttributeType::Vec2);
+	m_defaultFullscreenMesh.UploadAttributes();
 }
 GraphicsGL::~GraphicsGL() {
 }
@@ -56,16 +97,21 @@ IShader &GraphicsGL::Default2DShader() {
 	return m_default2dshader;
 }
 
+IShader &GraphicsGL::DefaultFullscreenShader() {
+	return m_defaultFullscreenShader;
+}
+
 void GraphicsGL::DrawQuad() {
-	GL().viewport(0, 0, 1280, 720);
 	m_default2dmesh.Draw();
+}
+void GraphicsGL::DrawFullscreenQuad() {
+	m_defaultFullscreenMesh.Draw();
 }
 
 void GraphicsGL::Clear() {
-	GL().bindFramebuffer(0);
-	GL().clearColor(0.02f, 0.04f, 0.07f, 1.f);
-	GL().setDepthTest(false);
+	GL().clearColor(0.02f, 0.04f, 0.07f, 0.f);
 	GL().clearColorBit();
+	GL().clearDepthBit();
 }
 
 } // namespace gfx
