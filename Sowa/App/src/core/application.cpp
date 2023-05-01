@@ -34,6 +34,7 @@
 #include "utils/string.hpp"
 #include "utils/time.hpp"
 
+#include "gfx/gl/glfuncs.hpp"
 #include "gfx/gl/graphics_gl.hpp"
 #include "gfx/gl/texture_gl.hpp"
 #include "gfx/graphics.hpp"
@@ -47,8 +48,10 @@
 #include "argparser/arg_parser.hpp"
 
 #include "res/Roboto-Medium.ttf.res.hpp"
-#include "res/shaders/default2d.vert.res.hpp"
 #include "res/shaders/default2d.frag.res.hpp"
+#include "res/shaders/default2d.vert.res.hpp"
+#include "res/shaders/fullscreen.vert.res.hpp"
+#include "res/shaders/fullscreen.frag.res.hpp"
 
 #include "res/textures/icon_512x.png.res.hpp"
 
@@ -161,12 +164,17 @@ bool Application::Init(int argc, char const **argv) {
 	gfx::IGraphics *graphics = new gfx::GraphicsGL();
 	gfx::IGraphics::SetInstance(graphics);
 
+	const sowa::vec2 videoSize = m_window->GetVideoSize();
+	m_drawpass2d.SetTarget(0, gfx::GLFramebufferTargetType::Vec4);
+	m_drawpass2d.Create(videoSize.x, videoSize.y);
+
 	gfx::GLTexture icon;
 	icon.Load2D(FILE_BUFFER(Res::App_include_res_textures_icon_512x_png_data));
 	m_window->SetWindowIcon(icon);
 
 	Graphics().SetDepthTest(true);
 	Graphics().Default2DShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_frag_data)));
+	Graphics().DefaultFullscreenShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_frag_data)));
 
 	// if (!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
 	// 	Debug::Error("Failed to load default font");
@@ -337,6 +345,7 @@ bool Application::Process() {
 		m_on_drag_mode = true;
 	}
 
+	
 	// _renderer->Begin2D(
 	// 	GetCameraTransform(),
 	// 	{0.5f, 0.5f},
@@ -414,17 +423,67 @@ bool Application::Process() {
 	// 	}
 	// }
 
-	// _renderer->End2D();
-	
-	Graphics().Clear();
-	Graphics().Default2DShader().Bind();
-	Graphics().DrawQuad();
-	// _renderer->ClearLayers();
-	// _renderer->Draw2DLayer();
+	const sowa::vec2 windowSize = m_window->GetWindowSize();
+	const sowa::vec2 videoSize = m_window->GetVideoSize();
 
-	if (_AfterRenderCallback != nullptr) {
-		_AfterRenderCallback();
+	static gfx::GLTexture tex;
+	static bool loaded = false;
+	if(!loaded) {
+		loaded = true;
+		auto data = File::GetFileContent("res://uv.jpg");
+		tex.Load2D(data.data(), data.size());
 	}
+
+
+	Graphics().SetDepthTest(true);
+
+	m_drawpass2d.Bind();
+	Graphics().Clear();
+
+	Graphics().Default2DShader().Bind();
+	Graphics().Default2DShader().UniformTexture("uTexture", tex.ID(), 0);
+	Graphics().DrawFullscreenQuad();
+
+	m_drawpass2d.Unbind();
+	Graphics().Clear();
+
+
+	Graphics().DefaultFullscreenShader().Bind();
+	Graphics().DefaultFullscreenShader().UniformTexture("gAlbedo", m_drawpass2d.GetTargetTextureID(0), 0);
+
+
+	static gfx::ViewportDrawMode mode = gfx::ViewportDrawMode_KeepRatio;
+	if(m_window->IsKeyDown(GLFW_KEY_1)) {
+		mode = gfx::ViewportDrawMode_KeepRatio;
+	}
+	if(m_window->IsKeyDown(GLFW_KEY_2)) {
+		mode = gfx::ViewportDrawMode_KeepWidth;
+	}
+	if(m_window->IsKeyDown(GLFW_KEY_3)) {
+		mode = gfx::ViewportDrawMode_KeepHeight;
+	}
+	if(m_window->IsKeyDown(GLFW_KEY_4)) {
+		mode = gfx::ViewportDrawMode_Stretch;
+	}
+	if(m_window->IsKeyDown(GLFW_KEY_5)) {
+		mode = gfx::ViewportDrawMode_Contain;
+	}
+
+	{
+		gfx::SetViewportStyleArgs args;
+		args.mode = mode;
+		args.windowWidth = windowSize.x;
+		args.windowHeight = windowSize.y;
+		args.videoWidth = videoSize.x;
+		args.videoHeight = videoSize.y;
+		Graphics().SetViewportStyle(args);
+		Graphics().DrawFullscreenQuad();
+	}
+
+
+	// if (_AfterRenderCallback != nullptr) {
+	// 	_AfterRenderCallback();
+	// }
 
 	m_window->SwapBuffers();
 

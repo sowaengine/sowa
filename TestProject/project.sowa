@@ -8,8 +8,8 @@ Project:
     Window:
       FullScreen: false
       WindowSize:
-        W: 1280
-        H: 720
+        W: 1920
+        H: 1080
       VideoSize:
         W: 1920
         H: 1080

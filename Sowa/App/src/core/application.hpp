@@ -19,6 +19,7 @@
 
 #include "gfx/window.hpp"
 #include "gfx/window_manager.hpp"
+#include "gfx/gl/framebuffer_gl.hpp"
 
 namespace nmGfx {
 class Renderer;
@@ -108,6 +109,8 @@ class Application {
 	int _SceneCollectInterval{240};
 
 	std::string _ExecutablePath{""};
+
+	gfx::GLFramebuffer m_drawpass2d;
 
 	// Editor
 	vec2 _EditorCameraPos{0.f, 0.f};
