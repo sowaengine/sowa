@@ -92,6 +92,12 @@ static GLenum ToGL(GLDataType type) {
 									   : GL_NONE;
 }
 
+static GLenum ToGL(GLPolygonMode mode) {
+	return mode == GLPolygonMode::Fill	 ? GL_FILL
+		   : mode == GLPolygonMode::Line ? GL_LINE
+										 : GL_FILL;
+}
+
 int GetChannelCount(GLTextureFormat format) {
 	return format == GLTextureFormat::Rgb	 ? 3
 		   : format == GLTextureFormat::Rgba ? 4
@@ -340,6 +346,11 @@ int GLManager::getUniformLocation(uint32_t programID, const std::string &name) {
 void GLManager::uniform1i(int location, int i) {
 	LOG_FUNC("{}, {}", location, i);
 	glUniform1i(location, i);
+}
+void GLManager::setPolygonMode(GLPolygonMode mode) {
+	LOG_FUNC("{}", (int)mode);
+	// todo: separate front and back
+	glPolygonMode(GL_FRONT_AND_BACK, ToGL(mode));
 }
 
 GLManager::GLManager() {

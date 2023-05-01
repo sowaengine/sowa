@@ -36,6 +36,11 @@ enum class GLTextureFilter {
 	LinearMipmapLinear,
 };
 
+enum class GLPolygonMode {
+	Fill = 0,
+	Line,
+};
+
 int GetChannelCount(GLTextureFormat format);
 
 class GLManager {
@@ -93,6 +98,8 @@ class GLManager {
 
 	int getUniformLocation(uint32_t programID, const std::string& name);
 	void uniform1i(int location, int i);
+
+	void setPolygonMode(GLPolygonMode mode);
 
 	GLManager();
   private:

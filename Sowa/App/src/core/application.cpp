@@ -469,6 +469,14 @@ bool Application::Process() {
 		mode = gfx::ViewportDrawMode_Contain;
 	}
 
+	if(m_window->IsKeyDown(GLFW_KEY_Q)) {
+		gfx::GL().setPolygonMode(gfx::GLPolygonMode::Fill);
+	}
+	if(m_window->IsKeyDown(GLFW_KEY_W)) {
+		gfx::GL().setPolygonMode(gfx::GLPolygonMode::Line);
+	}
+
+
 	{
 		gfx::SetViewportStyleArgs args;
 		args.mode = mode;
