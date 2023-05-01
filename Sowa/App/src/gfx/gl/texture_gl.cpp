@@ -26,6 +26,7 @@ bool GLTexture::Load2D(const unsigned char* data, size_t size, GLTextureInternal
     Delete();
     m_type = GLTextureType::Texture2D;
 
+    stbi_set_flip_vertically_on_load(true);
     m_pixels = stbi_load_from_memory(data, size, &m_width, &m_height, &m_channels, 0);
     if(!m_pixels) {
         Delete();
@@ -36,8 +37,8 @@ bool GLTexture::Load2D(const unsigned char* data, size_t size, GLTextureInternal
     GL().bindTexture(m_type, m_id);
     GL().texParameteri(m_type, GLTextureWrapParam::WrapS, GLTextureWrap::Repeat);
     GL().texParameteri(m_type, GLTextureWrapParam::WrapT, GLTextureWrap::Repeat);
-    GL().texParameteri(m_type, GLTextureFilterParam::MinFilter, GLTextureFilter::Linear);
-    GL().texParameteri(m_type, GLTextureFilterParam::MagFilter, GLTextureFilter::Linear);
+    GL().texParameteri(m_type, GLTextureFilterParam::MinFilter, GLTextureFilter::Nearest);
+    GL().texParameteri(m_type, GLTextureFilterParam::MagFilter, GLTextureFilter::Nearest);
 
     GLTextureFormat format = GLTextureFormat::Rgba;
     if(m_channels == 4) {

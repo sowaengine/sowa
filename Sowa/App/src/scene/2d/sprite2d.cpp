@@ -2,6 +2,9 @@
 
 #include "debug.hpp"
 
+#include "glm/gtc/matrix_transform.hpp"
+
+#include "gfx/graphics.hpp"
 #include "core/renderer.hpp"
 #include "core/application.hpp"
 #include "scene/scene.hpp"
@@ -19,8 +22,17 @@ void Sprite2D::ExitScene() {
 void Sprite2D::UpdateLogic() {
 }
 void Sprite2D::UpdateDraw() {
-	if (_Texture != nullptr)
-		Renderer::get_singleton().DrawTexture(CalculateTransform(), *_Texture.get(), {(float)_Texture->Width(), (float)_Texture->Height()}, ID());
+	if (m_texture != nullptr) {
+		Graphics().Default2DShader().Bind();
+		Graphics().Default2DShader().UniformTexture("uTexture", m_texture->TextureID(), 0);
+
+		mat4 transform = CalculateTransform();
+		transform = glm::scale(transform, {m_texture->Width(), m_texture->Height(), 1.f});
+		Graphics().Default2DShader().UniformMat4("uModel", transform);
+
+		Graphics().DrawQuad();
+	}
+	// Renderer::get_singleton().DrawTexture(CalculateTransform(), *_Texture.get(), {(float)_Texture->Width(), (float)_Texture->Height()}, ID());
 }
 
 FileBuffer Sprite2D::SaveImpl(object_type *out) {

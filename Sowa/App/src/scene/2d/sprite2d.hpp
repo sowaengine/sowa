@@ -19,14 +19,14 @@ class Sprite2D : public Node2D {
 	void UpdateLogic() override;
 	void UpdateDraw() override;
 
-	inline Reference<ImageTexture>& Texture() { return _Texture; }
+	inline Reference<ImageTexture>& Texture() { return m_texture; }
 
 	static FileBuffer SaveImpl(object_type* out);
 	static bool LoadImpl(object_type* out, const FileBuffer& buf);
 
   private:
 	friend class Application;
-	Reference<ImageTexture> _Texture;
+	Reference<ImageTexture> m_texture;
 };
 } // namespace sowa
 

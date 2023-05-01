@@ -79,6 +79,11 @@ static float mapLog(float x) {
 static float lerp(float from, float to, float t) {
 	return from + ((to - from) * (t * t));
 }
+static float lerpAngle(float from, float to, float t) {
+	float diff = fmod(to - from, 3.141592653589 * 2);
+	float dist = fmod(2.0 * diff, 3.141592653589 * 2) - diff;
+	return from + dist * t;
+}
 
 bool Application::Init(int argc, char const **argv) {
 	SW_ENTRY()
@@ -224,10 +229,14 @@ bool Application::Init(int argc, char const **argv) {
 	// button->Size() = {3000.f, 2000.f};
 	// button->Text() = "Click me";
 
-	// node3->Scale() = {0.25f, 0.25f};
-	// node3->Texture() = anotherTexture;
-	// node3->Position() = {-600, -200};
-	// node4->Position() = {200.f, -200.f};
+	Reference<ImageTexture> texture = std::make_shared<ImageTexture>();
+	Serializer::get_singleton().Load(texture.get(), File::GetFileContent("res://kenney.png"));
+	
+	node3->Scale() = {1.f, 1.f};
+	node3->Rotation() = 45.f;
+	node3->Texture() = texture;
+	node3->Position() = {600, 300};
+	node4->Position() = {200.f, -200.f};
 
 	node->AddChild(node1);
 	node->AddChild(node2);
@@ -346,6 +355,10 @@ bool Application::Process() {
 	}
 
 	
+	Graphics().SetDepthTest(true);
+
+	m_drawpass2d.Bind();
+	Graphics().Clear();
 	// _renderer->Begin2D(
 	// 	GetCameraTransform(),
 	// 	{0.5f, 0.5f},
@@ -435,13 +448,35 @@ bool Application::Process() {
 	}
 
 
-	Graphics().SetDepthTest(true);
-
-	m_drawpass2d.Bind();
-	Graphics().Clear();
-
 	static vec2 position{1920.f / 2, 1080.f / 2};
 	const float speed = 200 * (1.0f / 60);
+
+	vec2 pos = m_window->GetVideoMousePosition();
+	pos.y = m_window->GetVideoSize().y - pos.y;
+
+	float targetRot = atan2(pos.y - position.y, pos.x - position.x) - (3.141592653589 / 2);
+	static float rot = targetRot;
+	rot = lerpAngle(rot, targetRot, 0.25f);
+
+	sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f * 1.5f, 75.f * 1.5f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
+
+	sowa::mat4 projectionMatrix;
+	{
+		CalculateOrthoArgs args;
+		args.width = videoSize.x;
+		args.height = videoSize.y;
+		args.centerX = 0.0f;
+		args.centerY = 0.0f;
+		args.near = 0.f;
+		args.far = 1000.f;
+		projectionMatrix = CalculateOrtho(args);
+	}
+
+	Graphics().Default2DShader().Bind();
+	Graphics().Default2DShader().UniformTexture("uTexture", tex.ID(), 0);
+	Graphics().Default2DShader().UniformMat4("uModel", modelMatrix);
+	Graphics().Default2DShader().UniformMat4("uProj", projectionMatrix);
+	Graphics().DrawQuad();
 
 	vec2 velocity{0.f, 0.f};
 	if(m_window->IsKeyDown(GLFW_KEY_W)) {
@@ -466,30 +501,6 @@ bool Application::Process() {
 
 	position.x += velocity.x;
 	position.y += velocity.y;
-
-	vec2 pos = m_window->GetVideoMousePosition();
-	pos.y = m_window->GetVideoSize().y - pos.y;
-	float rot = atan2(pos.y - position.y, pos.x - position.x) + (3.14 / 2);
-
-	sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f, 75.f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
-
-	sowa::mat4 projectionMatrix;
-	{
-		CalculateOrthoArgs args;
-		args.width = videoSize.x;
-		args.height = videoSize.y;
-		args.centerX = 0.0f;
-		args.centerY = 0.0f;
-		args.near = 0.f;
-		args.far = 1000.f;
-		projectionMatrix = CalculateOrtho(args);
-	}
-
-	Graphics().Default2DShader().Bind();
-	Graphics().Default2DShader().UniformTexture("uTexture", tex.ID(), 0);
-	Graphics().Default2DShader().UniformMat4("uModel", modelMatrix);
-	Graphics().Default2DShader().UniformMat4("uProj", projectionMatrix);
-	Graphics().DrawQuad();
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();

@@ -5,7 +5,7 @@ namespace sowa {
 template <>
 std::shared_ptr<sowa::ImageTexture> ResourceLoaderImpl<sowa::ImageTexture>::Load(const unsigned char *data, size_t size) {
 	std::shared_ptr<sowa::ImageTexture> tex = std::make_shared<sowa::ImageTexture>();
-	if (!tex->_texture.Load2DFromMemory(data, size))
+	if (!tex->m_texture.Load2D(data, size))
 		return nullptr;
 	return tex;
 }
@@ -21,7 +21,7 @@ FileBuffer ImageTexture::SaveImpl(object_type * o) {
 bool ImageTexture::LoadImpl(object_type* out, const FileBuffer& doc) {
 	ImageTexture* obj = reinterpret_cast<ImageTexture*>(out);
 
-	bool success = obj->_texture.Load2DFromMemory(doc.Data().data(), doc.Data().size());
+	bool success = obj->m_texture.Load2D(doc.Data().data(), doc.Data().size());
 	return success;
 }
 

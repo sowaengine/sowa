@@ -5,7 +5,7 @@
 
 #include "stlpch.hpp"
 
-#include "Core/GL/nm_Texture.hpp"
+#include "gfx/gl/texture_gl.hpp"
 
 #include "../resource.hpp"
 #include "sowa.hpp"
@@ -21,12 +21,12 @@ class ImageTexture : public BaseResource, public object_type {
 
 	static std::string Typename() { return "sowa::ImageTexture"; }
 
-	inline int Width() { return _texture.GetWidth(); }
-	inline int Height() { return _texture.GetHeight(); }
-	inline int Channels() { return _texture.GetChannels(); }
-	inline unsigned char *Pixels() { return _texture.GetPixels(); }
+	inline int Width() { return m_texture.Width(); }
+	inline int Height() { return m_texture.Height(); }
+	inline int Channels() { return m_texture.Channels(); }
+	inline unsigned char *Pixels() { return m_texture.Pixels(); }
 
-	size_t TextureID() { return _texture.ID(); }
+	size_t TextureID() { return m_texture.ID(); }
 
 	static FileBuffer SaveImpl(object_type *);
 	static bool LoadImpl(object_type* out, const FileBuffer& doc);
@@ -38,7 +38,7 @@ class ImageTexture : public BaseResource, public object_type {
 	friend class ResourceLoaderImpl;
 	friend class Renderer;
 
-	nmGfx::Texture _texture{};
+	gfx::GLTexture m_texture{};
 };
 
 } // namespace sowa
