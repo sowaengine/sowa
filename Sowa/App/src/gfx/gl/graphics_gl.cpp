@@ -97,6 +97,10 @@ IShader &GraphicsGL::Default2DShader() {
 	return m_default2dshader;
 }
 
+IShader &GraphicsGL::DefaultSolidColorShader() {
+	return m_defaultSolidColorShader;
+}
+
 IShader &GraphicsGL::DefaultFullscreenShader() {
 	return m_defaultFullscreenShader;
 }
@@ -115,13 +119,13 @@ void GraphicsGL::Clear() {
 }
 
 void GraphicsGL::SetViewportStyle(SetViewportStyleArgs args) {
-	if(args.mode == ViewportDrawMode_Stretch) {
+	if (args.mode == ViewportDrawMode_Stretch) {
 		GL().viewport(0, 0, args.windowWidth, args.windowHeight);
-	} else if(args.mode == ViewportDrawMode_KeepRatio) {
+	} else if (args.mode == ViewportDrawMode_KeepRatio) {
 		float windowRatio = (float)args.windowWidth / args.windowHeight;
 		float videoRatio = (float)args.videoWidth / args.videoHeight;
 
-		if(windowRatio > videoRatio) {
+		if (windowRatio > videoRatio) {
 			float width = args.windowHeight * videoRatio;
 			float height = args.windowHeight;
 			float gap = args.windowWidth - width;
@@ -134,7 +138,7 @@ void GraphicsGL::SetViewportStyle(SetViewportStyleArgs args) {
 
 			GL().viewport(0, gap / 2, width, height);
 		}
-	} else if(args.mode == ViewportDrawMode_KeepWidth) {
+	} else if (args.mode == ViewportDrawMode_KeepWidth) {
 		float windowRatio = (float)args.windowWidth / args.windowHeight;
 		float videoRatio = (float)args.videoWidth / args.videoHeight;
 
@@ -143,7 +147,7 @@ void GraphicsGL::SetViewportStyle(SetViewportStyleArgs args) {
 		float gap = args.windowHeight - height;
 
 		GL().viewport(0, gap / 2, width, height);
-	} else if(args.mode == ViewportDrawMode_KeepHeight) {
+	} else if (args.mode == ViewportDrawMode_KeepHeight) {
 		float windowRatio = (float)args.windowWidth / args.windowHeight;
 		float videoRatio = (float)args.videoWidth / args.videoHeight;
 
@@ -152,11 +156,11 @@ void GraphicsGL::SetViewportStyle(SetViewportStyleArgs args) {
 		float gap = args.windowWidth - width;
 
 		GL().viewport(gap / 2, 0, width, height);
-	} else if(args.mode == ViewportDrawMode_Contain) {
+	} else if (args.mode == ViewportDrawMode_Contain) {
 		float windowRatio = (float)args.windowWidth / args.windowHeight;
 		float videoRatio = (float)args.videoWidth / args.videoHeight;
 
-		if(windowRatio < videoRatio) {
+		if (windowRatio < videoRatio) {
 			float width = args.windowHeight * videoRatio;
 			float height = args.windowHeight;
 			float gap = args.windowWidth - width;

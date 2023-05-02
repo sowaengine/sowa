@@ -3,6 +3,7 @@
 #include "debug.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/rotate_vector.hpp"
 
 #include "gfx/graphics.hpp"
 #include "core/renderer.hpp"
@@ -23,11 +24,28 @@ void Sprite2D::UpdateLogic() {
 }
 void Sprite2D::UpdateDraw() {
 	if (m_texture != nullptr) {
-		Graphics().Default2DShader().Bind();
-		Graphics().Default2DShader().UniformTexture("uTexture", m_texture->TextureID(), 0);
-
+		const float outlineWidth = 3.f;
 		mat4 transform = CalculateTransform();
 		transform = glm::scale(transform, {m_texture->Width(), m_texture->Height(), 1.f});
+
+		Graphics().DefaultSolidColorShader().Bind();
+		Application::get_singleton().BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
+		Graphics().DefaultSolidColorShader().UniformTexture("uTexture", m_texture->TextureID(), 0);
+		Graphics().DefaultSolidColorShader().UniformVec4("uColor", {0.2f, 0.68f, 0.81f, 1.0f});
+		for(int i=0; i<8; i++) {
+			glm::vec3 offset = glm::rotateZ(glm::vec3{outlineWidth, 0.f, 0.f}, glm::radians(i * 45.f));
+			mat4 newTransform = glm::translate(CalculateTransform(), offset);
+			newTransform = glm::scale(newTransform, {m_texture->Width(), m_texture->Height(), 1.f});
+
+			Graphics().DefaultSolidColorShader().UniformMat4("uModel", newTransform);
+
+			Graphics().DrawQuad();
+		}
+
+		Graphics().Default2DShader().Bind();
+		Graphics().Default2DShader().UniformTexture("uTexture", m_texture->TextureID(), 0);
+		Application::get_singleton().BindProjectionUniform(Graphics().Default2DShader(), "uProj");
+
 		Graphics().Default2DShader().UniformMat4("uModel", transform);
 
 		Graphics().DrawQuad();

@@ -20,21 +20,21 @@ enum ViewportDrawMode {
 struct SetViewportStyleArgs {
 	// Any ViewportDrawMode other than none will call glviewport
 	ViewportDrawMode mode;
-	
+
 	int windowWidth;
 	int windowHeight;
 
 	int videoWidth;
 	int videoHeight;
 };
-	
-class IGraphics {
-    public:
 
-    virtual void SetDepthTest(bool) = 0;
-	
-	virtual IShader& Default2DShader() = 0;
-	virtual IShader& DefaultFullscreenShader() = 0;
+class IGraphics {
+  public:
+	virtual void SetDepthTest(bool) = 0;
+
+	virtual IShader &Default2DShader() = 0;
+	virtual IShader &DefaultSolidColorShader() = 0;
+	virtual IShader &DefaultFullscreenShader() = 0;
 
 	virtual void DrawQuad() = 0;
 	virtual void DrawFullscreenQuad() = 0;

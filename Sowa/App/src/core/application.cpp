@@ -50,8 +50,10 @@
 #include "res/Roboto-Medium.ttf.res.hpp"
 #include "res/shaders/default2d.frag.res.hpp"
 #include "res/shaders/default2d.vert.res.hpp"
-#include "res/shaders/fullscreen.vert.res.hpp"
 #include "res/shaders/fullscreen.frag.res.hpp"
+#include "res/shaders/fullscreen.vert.res.hpp"
+#include "res/shaders/solid_color.frag.res.hpp"
+#include "res/shaders/solid_color.vert.res.hpp"
 
 #include "res/textures/icon_512x.png.res.hpp"
 
@@ -179,6 +181,7 @@ bool Application::Init(int argc, char const **argv) {
 
 	Graphics().SetDepthTest(true);
 	Graphics().Default2DShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_frag_data)));
+	Graphics().DefaultSolidColorShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_frag_data)));
 	Graphics().DefaultFullscreenShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_frag_data)));
 
 	// if (!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
@@ -230,8 +233,8 @@ bool Application::Init(int argc, char const **argv) {
 	// button->Text() = "Click me";
 
 	Reference<ImageTexture> texture = std::make_shared<ImageTexture>();
-	Serializer::get_singleton().Load(texture.get(), File::GetFileContent("res://kenney.png"));
-	
+	Serializer::get_singleton().Load(texture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_red.png"));
+
 	node3->Scale() = {1.f, 1.f};
 	node3->Rotation() = 45.f;
 	node3->Texture() = texture;
@@ -354,7 +357,6 @@ bool Application::Process() {
 		m_on_drag_mode = true;
 	}
 
-	
 	Graphics().SetDepthTest(true);
 
 	m_drawpass2d.Bind();
@@ -441,12 +443,11 @@ bool Application::Process() {
 
 	static gfx::GLTexture tex;
 	static bool loaded = false;
-	if(!loaded) {
+	if (!loaded) {
 		loaded = true;
 		auto data = File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_blue.png");
 		tex.Load2D(data.data(), data.size());
 	}
-
 
 	static vec2 position{1920.f / 2, 1080.f / 2};
 	const float speed = 200 * (1.0f / 60);
@@ -460,38 +461,28 @@ bool Application::Process() {
 
 	sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f * 1.5f, 75.f * 1.5f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
 
-	sowa::mat4 projectionMatrix;
-	{
-		CalculateOrthoArgs args;
-		args.width = videoSize.x;
-		args.height = videoSize.y;
-		args.centerX = 0.0f;
-		args.centerY = 0.0f;
-		args.near = 0.f;
-		args.far = 1000.f;
-		projectionMatrix = CalculateOrtho(args);
-	}
+	BindProjectionUniform(Graphics().Default2DShader(), "uProj");
+	BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
 
 	Graphics().Default2DShader().Bind();
 	Graphics().Default2DShader().UniformTexture("uTexture", tex.ID(), 0);
 	Graphics().Default2DShader().UniformMat4("uModel", modelMatrix);
-	Graphics().Default2DShader().UniformMat4("uProj", projectionMatrix);
 	Graphics().DrawQuad();
 
 	vec2 velocity{0.f, 0.f};
-	if(m_window->IsKeyDown(GLFW_KEY_W)) {
+	if (m_window->IsKeyDown(GLFW_KEY_W)) {
 		velocity.y += 1;
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_S)) {
+	if (m_window->IsKeyDown(GLFW_KEY_S)) {
 		velocity.y -= 1;
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_D)) {
+	if (m_window->IsKeyDown(GLFW_KEY_D)) {
 		velocity.x += 1;
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_A)) {
+	if (m_window->IsKeyDown(GLFW_KEY_A)) {
 		velocity.x -= 1;
 	}
-	if(velocity.length() > 0.1) {
+	if (velocity.length() > 0.1) {
 		velocity = velocity.clamp();
 		velocity.x *= speed;
 		velocity.y *= speed;
@@ -505,35 +496,32 @@ bool Application::Process() {
 	m_drawpass2d.Unbind();
 	Graphics().Clear();
 
-
 	Graphics().DefaultFullscreenShader().Bind();
 	Graphics().DefaultFullscreenShader().UniformTexture("gAlbedo", m_drawpass2d.GetTargetTextureID(0), 0);
 
-
 	static gfx::ViewportDrawMode mode = gfx::ViewportDrawMode_KeepRatio;
-	if(m_window->IsKeyDown(GLFW_KEY_1)) {
+	if (m_window->IsKeyDown(GLFW_KEY_1)) {
 		mode = gfx::ViewportDrawMode_KeepRatio;
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_2)) {
+	if (m_window->IsKeyDown(GLFW_KEY_2)) {
 		mode = gfx::ViewportDrawMode_KeepWidth;
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_3)) {
+	if (m_window->IsKeyDown(GLFW_KEY_3)) {
 		mode = gfx::ViewportDrawMode_KeepHeight;
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_4)) {
+	if (m_window->IsKeyDown(GLFW_KEY_4)) {
 		mode = gfx::ViewportDrawMode_Stretch;
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_5)) {
+	if (m_window->IsKeyDown(GLFW_KEY_5)) {
 		mode = gfx::ViewportDrawMode_Contain;
 	}
 
-	if(m_window->IsKeyDown(GLFW_KEY_F1)) {
+	if (m_window->IsKeyDown(GLFW_KEY_F1)) {
 		gfx::GL().setPolygonMode(gfx::GLPolygonMode::Fill);
 	}
-	if(m_window->IsKeyDown(GLFW_KEY_F2)) {
+	if (m_window->IsKeyDown(GLFW_KEY_F2)) {
 		gfx::GL().setPolygonMode(gfx::GLPolygonMode::Line);
 	}
-
 
 	{
 		gfx::SetViewportStyleArgs args;
@@ -546,7 +534,6 @@ bool Application::Process() {
 		Graphics().DrawFullscreenQuad();
 	}
 
-
 	// if (_AfterRenderCallback != nullptr) {
 	// 	_AfterRenderCallback();
 	// }
@@ -555,6 +542,23 @@ bool Application::Process() {
 
 	Step();
 	return true;
+}
+
+void Application::BindProjectionUniform(gfx::IShader &shader, const std::string &uniformName) {
+	const sowa::vec2 &videoSize = m_window->GetVideoSize();
+	sowa::mat4 projectionMatrix;
+	{
+		CalculateOrthoArgs args;
+		args.width = videoSize.x;
+		args.height = videoSize.y;
+		args.centerX = 0.0f;
+		args.centerY = 0.0f;
+		args.near = 0.f;
+		args.far = 1000.f;
+		projectionMatrix = CalculateOrtho(args);
+	}
+
+	shader.UniformMat4(uniformName, projectionMatrix);
 }
 
 glm::mat4 Application::GetCameraTransform() {

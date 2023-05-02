@@ -16,8 +16,11 @@ class IShader {
         virtual void Bind() = 0;
         virtual void Unbind() = 0;
 
+        virtual const uint32_t ID() = 0;
+
         virtual void UniformTexture(const std::string& name, uint32_t textureID, int slot) = 0;
         virtual void UniformMat4(const std::string& name, const mat4& value) = 0;
+        virtual void UniformVec4(const std::string& name, const glm::vec4& value) = 0;
 };
 } // namespace gfx
 } // namespace sowa

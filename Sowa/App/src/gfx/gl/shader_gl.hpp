@@ -28,8 +28,11 @@ class GLShader : public IShader {
 	void Bind() override;
 	void Unbind() override;
 
+	const uint32_t ID() override { return m_id; }
+
 	void UniformTexture(const std::string& name, uint32_t textureID, int slot) override;
 	void UniformMat4(const std::string& name, const mat4& value) override;
+	void UniformVec4(const std::string& name, const glm::vec4& value) override;
 
   private:
 	std::string m_vertexSource = "";

@@ -16,6 +16,7 @@ class GraphicsGL : public IGraphics {
 	void SetDepthTest(bool) override;
 
 	IShader &Default2DShader() override;
+	IShader &DefaultSolidColorShader() override;
 	IShader &DefaultFullscreenShader() override;
 
 	void DrawQuad() override;
@@ -26,6 +27,7 @@ class GraphicsGL : public IGraphics {
 
   private:
 	GLShader m_default2dshader;
+	GLShader m_defaultSolidColorShader;
 	GLShader m_defaultFullscreenShader;
 
 	GLMesh m_default2dmesh;

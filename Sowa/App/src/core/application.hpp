@@ -17,9 +17,10 @@
 #include "resource/font/font.hpp"
 #include "resource/resource_watcher/resource_watcher.hpp"
 
+#include "gfx/gl/framebuffer_gl.hpp"
+#include "gfx/shader.hpp"
 #include "gfx/window.hpp"
 #include "gfx/window_manager.hpp"
-#include "gfx/gl/framebuffer_gl.hpp"
 
 namespace nmGfx {
 class Renderer;
@@ -73,6 +74,8 @@ class Application {
 	inline uint32_t PickedNode() { return m_picked_node; }
 	inline uint32_t HoveringNode() { return m_hovering_node; }
 
+	void BindProjectionUniform(gfx::IShader &shader, const std::string &uniformName);
+
   private:
 	friend class Window;
 	friend class Renderer;
@@ -93,7 +96,7 @@ class Application {
 	Font _DefaultFont{};
 
 	// std::unique_ptr<nmGfx::Renderer> _renderer;
-	gfx::Window* m_window;
+	gfx::Window *m_window;
 	gfx::WindowManager m_windowManager;
 
 	int _ResourcePollInterval{60};
