@@ -23,4 +23,9 @@
 ## angelscript
 - Upstream: https://www.angelcode.com/angelscript/
 - Version: 2.36.0
-- License Copyright © 2003-2022 Andreas Jönsson `thirdparty/angelscript_2.36.0/LICENSE`
+- License: Copyright © 2003-2022 Andreas Jönsson `thirdparty/angelscript_2.36.0/LICENSE`
+
+## openal-soft
+- Upstream: https://github.com/kcat/openal-soft
+- Version: 1.23.1
+- License: `thirdparty/openal-soft-1.23.1/COPYING`

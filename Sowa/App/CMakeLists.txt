@@ -35,6 +35,8 @@ target_link_libraries(
           yaml-cpp
           tinyfiledialogs
           angelscript
+          OpenAL
+          sndfile
           ${LD_FLAG_STATIC}
           ${CMAKE_DL_LIBS})
 target_include_directories(lsowa PRIVATE ${SOWA_INCLUDE_DIRS})
