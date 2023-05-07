@@ -12,19 +12,20 @@
 #include "resource/texture/ninepatch_texture.hpp"
 
 #include "core/audio_server.hpp"
+#include "core/audio_stream.hpp"
 #include "core/engine_context.hpp"
 #include "core/export_generator.hpp"
 #include "core/project.hpp"
 #include "core/renderer.hpp"
 #include "core/script_server.hpp"
 #include "core/window.hpp"
-#include "core/audio_stream.hpp"
 
 #include "scene/2d/button.hpp"
 #include "scene/2d/nine_slice_panel.hpp"
 #include "scene/2d/node2d.hpp"
 #include "scene/2d/sprite2d.hpp"
 #include "scene/2d/text2d.hpp"
+#include "scene/audio_stream_player.hpp"
 #include "scene/node.hpp"
 #include "scene/scene.hpp"
 
@@ -211,6 +212,9 @@ bool Application::Init(int argc, char const **argv) {
 	});
 	RegisterNodeDestructor("NineSlicePanel", [](Node *node) {
 		Allocator<NineSlicePanel>::Get().deallocate(reinterpret_cast<NineSlicePanel *>(node), 1);
+	});
+	RegisterNodeDestructor("AudioStreamPlayer", [](Node *node) {
+		Allocator<AudioStreamPlayer>::Get().deallocate(reinterpret_cast<AudioStreamPlayer *>(node), 1);
 	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION);
@@ -545,18 +549,31 @@ bool Application::Process() {
 
 	m_window->SwapBuffers();
 
-
-	static AudioStream stream;
+	static Reference<AudioStream> stream;
 	static bool audioFirst = true;
-	if(audioFirst) {
+	if (audioFirst) {
+		stream = std::make_shared<AudioStream>();
 		audioFirst = false;
 
 		FileBufferData data = File::GetFileContent("res://laserShoot.wav");
-		stream.Load(data.data(), data.size());
+		stream->Load(data.data(), data.size());
+
+		AudioStreamPlayer *player = GetCurrentScene()->Create<AudioStreamPlayer>("My Player");
+		GetCurrentScene()->GetRoot()->AddChild(player);
+		player->Stream() = stream;
 	}
 
-	if(m_window->IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-		stream.Play();
+	if (m_window->IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+		if (!((AudioStreamPlayer *)GetCurrentScene()->GetRoot()->GetChild("My Player"))->IsPlaying()) {
+			((AudioStreamPlayer *)GetCurrentScene()->GetRoot()->GetChild("My Player"))->Play();
+		}
+	}
+
+	if (m_window->IsKeyJustPressed(GLFW_KEY_Q)) {
+		((AudioStreamPlayer *)GetCurrentScene()->GetRoot()->GetChild("My Player"))->Pause();
+	}
+	if (m_window->IsKeyJustPressed(GLFW_KEY_R)) {
+		((AudioStreamPlayer *)GetCurrentScene()->GetRoot()->GetChild("My Player"))->Stop();
 	}
 
 	Step();

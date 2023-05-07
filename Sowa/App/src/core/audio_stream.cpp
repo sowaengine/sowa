@@ -143,28 +143,13 @@ void AudioStream::Load(unsigned char *data, size_t length) {
 		Debug::Error("AL ERROR: {}", alGetString(err));
 		Delete();
 	}
-
-	alGenSources(1, &m_sourceId);
-	alSourcef(m_sourceId, AL_PITCH, pitch);
-	alSourcef(m_sourceId, AL_GAIN, gain);
-	alSource3f(m_sourceId, AL_POSITION, position[0], position[1], position[2]);
-	alSource3f(m_sourceId, AL_VELOCITY, velocity[0], velocity[1], velocity[2]);
-	alSourcei(m_sourceId, AL_LOOPING, loop);
-	alSourcei(m_sourceId, AL_BUFFER, m_bufferId);
 }
 
-void AudioStream::Play() {
-	alSourcePlay(m_sourceId);
-}
 void AudioStream::Delete() {
 	if (m_bufferId != 0) {
 		alDeleteBuffers(1, &m_bufferId);
 	}
-	if (m_sourceId != 0) {
-		alDeleteSources(1, &m_sourceId);
-	}
 
 	m_bufferId = 0;
-	m_sourceId = 0;
 }
 } // namespace sowa
