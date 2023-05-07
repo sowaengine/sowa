@@ -59,6 +59,7 @@ enum class Server : uint32_t {
 	APPLICATION,
 	PROJECT,
     SCRIPT_SERVER,
+    AUDIO_SERVER
 };
 
 #define FILE_BUFFER_CHAR(f) reinterpret_cast<char *>(f.data()), f.size()
