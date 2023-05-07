@@ -59,9 +59,13 @@ class Scene : public object_type {
 	static FileBuffer SaveImpl(object_type* out);
 	static bool LoadImpl(object_type* out, const FileBuffer& buf);
 
+	inline const uint32_t GetCurrentCamera2D() const { return m_CurrentCamera2D; }
+	void SetCurrentCamera2D(uint32_t id) { m_CurrentCamera2D = id; }
+	
   private:
 	Scene();
 	bool _Paused{false};
+	uint32_t m_CurrentCamera2D = 0;
 
 	std::vector<Node *> _RegisteredNodes{};
 

@@ -28,6 +28,9 @@ void Sprite2D::UpdateDraw() {
 		mat4 transform = CalculateTransform();
 		transform = glm::scale(transform, {m_texture->Width(), m_texture->Height(), 1.f});
 
+		Application::get_singleton().BindViewUniform(Graphics().DefaultSolidColorShader(), "uProj");
+		Application::get_singleton().BindViewUniform(Graphics().Default2DShader(), "uView");
+
 		Graphics().DefaultSolidColorShader().Bind();
 		Application::get_singleton().BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
 		Graphics().DefaultSolidColorShader().UniformTexture("uTexture", m_texture->TextureID(), 0);

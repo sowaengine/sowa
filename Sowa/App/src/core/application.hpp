@@ -75,6 +75,7 @@ class Application {
 	inline uint32_t HoveringNode() { return m_hovering_node; }
 
 	void BindProjectionUniform(gfx::IShader &shader, const std::string &uniformName);
+	void BindViewUniform(gfx::IShader &shader, const std::string &uniformName);
 
   private:
 	friend class Window;
@@ -89,6 +90,8 @@ class Application {
 	~Application();
 
 	std::function<void()> _AfterRenderCallback{nullptr};
+
+	mat4 m_Latest2DViewMatrix = mat4(1.f);
 
 	std::unordered_map<std::string, std::function<void(Node *)>> _NodeTypeDestructors;
 	Reference<Scene> _Scene{nullptr};

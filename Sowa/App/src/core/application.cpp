@@ -21,6 +21,7 @@
 #include "core/window.hpp"
 
 #include "scene/2d/button.hpp"
+#include "scene/2d/camera_2d.hpp"
 #include "scene/2d/nine_slice_panel.hpp"
 #include "scene/2d/node2d.hpp"
 #include "scene/2d/sprite2d.hpp"
@@ -216,16 +217,41 @@ bool Application::Init(int argc, char const **argv) {
 	RegisterNodeDestructor("AudioStreamPlayer", [](Node *node) {
 		Allocator<AudioStreamPlayer>::Get().deallocate(reinterpret_cast<AudioStreamPlayer *>(node), 1);
 	});
+	RegisterNodeDestructor("Camera2D", [](Node *node) {
+		Allocator<Camera2D>::Get().deallocate(reinterpret_cast<Camera2D *>(node), 1);
+	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION);
 
 	Reference<Scene> scene = Scene::New();
 	Node2D *node = scene->Create<Node2D>("New Node");
 
+	Reference<ImageTexture> meteorTexture = std::make_shared<ImageTexture>();
+	Serializer::get_singleton().Load(meteorTexture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/Meteors/meteorGrey_big4.png"));
+	Random::RandomNumberGenerator rnd;
+	for(int y = -10; y < 10; y++) {
+		for(int x = -10; x < 10; x++) {
+			int num;
+			rnd.Generate(num, 200, 400);
+
+			Sprite2D* sprite = scene->Create<Sprite2D>("Some Sprite");
+			sprite->Texture() = meteorTexture;
+			sprite->Position() = {x * num, y * num};
+
+			rnd.Generate(num, 0, 360);
+			sprite->Rotation() = num;
+
+			node->AddChild(sprite);
+		}
+	}
+
 	Node2D *node1 = scene->Create<Node2D>("Node1");
 	Node2D *node2 = scene->Create<Node2D>("Node2");
 	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
 	Text2D *node4 = scene->Create<Text2D>("Node4");
+
+	Camera2D *camera = scene->Create<Camera2D>("Main Camera");
+	scene->SetCurrentCamera2D(camera->ID());
 
 	// Reference<ImageTexture> anotherTexture = std::make_shared<ImageTexture>();
 	// Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://kenney.png"));
@@ -254,6 +280,7 @@ bool Application::Init(int argc, char const **argv) {
 	node->AddChild(node2);
 	node->AddChild(node3);
 	node->AddChild(node4);
+	node3->AddChild(camera);
 	// node->AddChild(button);
 	node4->SetText("Sowa Engine | Lexographics");
 
@@ -366,6 +393,35 @@ bool Application::Process() {
 		m_on_drag_mode = true;
 	}
 
+	m_Latest2DViewMatrix = mat4(1.f);
+
+	if (GetCurrentScene() != nullptr) {
+		Node *currentCamera2DNode = nullptr;
+		currentCamera2DNode = GetCurrentScene()->GetNodeByID(GetCurrentScene()->GetCurrentCamera2D());
+
+		if (currentCamera2DNode != nullptr) {
+
+			Camera2D *currentCamera2D = dynamic_cast<Camera2D *>(currentCamera2DNode);
+			if (currentCamera2D != nullptr) {
+				if (currentCamera2D->GetNodeType() == "Camera2D") {
+
+					mat4 mat = currentCamera2D->CalculateTransform();
+
+					glm::vec3 translation, rotation, scale;
+					if (nmGfx::DecomposeMatrix(mat, translation, rotation, scale)) {
+						m_Latest2DViewMatrix = CalculateModelMatrix(
+							translation, {0.f, 0.f, 0.f}, scale, {0.f, 0.f, 0.f}, mat4(1.f));
+						m_Latest2DViewMatrix = glm::inverse(m_Latest2DViewMatrix);
+					}
+					/* CalculateModelMatrix(glm::vec3{currentCamera2D->Position().x, currentCamera2D->Position().y, 0.f},
+												  glm::vec3{0.f, 0.f, currentCamera2D->Rotation()},
+												  glm::vec3{currentCamera2D->Zoom().x, currentCamera2D->Zoom().y, 1.f},
+												  glm::vec3{0.f, 0.f, 0.f}, mat4(1.f)); */
+				}
+			}
+		}
+	}
+
 	Graphics().SetDepthTest(true);
 
 	m_drawpass2d.Bind();
@@ -464,19 +520,22 @@ bool Application::Process() {
 	vec2 pos = m_window->GetVideoMousePosition();
 	pos.y = m_window->GetVideoSize().y - pos.y;
 
-	float targetRot = atan2(pos.y - position.y, pos.x - position.x) - (3.141592653589 / 2);
+	float targetRot = atan2(pos.y - videoSize.y * 0.5, pos.x - videoSize.x * 0.5) - (3.141592653589 / 2);
 	static float rot = targetRot;
 	rot = lerpAngle(rot, targetRot, 0.25f);
 
-	sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f * 1.5f, 75.f * 1.5f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
+	// sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f * 1.5f, 75.f * 1.5f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
 
-	BindProjectionUniform(Graphics().Default2DShader(), "uProj");
-	BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
+	// BindProjectionUniform(Graphics().Default2DShader(), "uProj");
+	// BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
 
-	Graphics().Default2DShader().Bind();
-	Graphics().Default2DShader().UniformTexture("uTexture", tex.ID(), 0);
-	Graphics().Default2DShader().UniformMat4("uModel", modelMatrix);
-	Graphics().DrawQuad();
+	// BindViewUniform(Graphics().Default2DShader(), "uView");
+	// BindViewUniform(Graphics().DefaultSolidColorShader(), "uView");
+
+	// Graphics().Default2DShader().Bind();
+	// Graphics().Default2DShader().UniformTexture("uTexture", tex.ID(), 0);
+	// Graphics().Default2DShader().UniformMat4("uModel", modelMatrix);
+	// Graphics().DrawQuad();
 
 	vec2 velocity{0.f, 0.f};
 	if (m_window->IsKeyDown(GLFW_KEY_W)) {
@@ -501,6 +560,10 @@ bool Application::Process() {
 
 	position.x += velocity.x;
 	position.y += velocity.y;
+
+	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position().x += velocity.x;
+	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position().y += velocity.y;
+	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Rotation() = glm::degrees(rot);
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();
@@ -587,14 +650,18 @@ void Application::BindProjectionUniform(gfx::IShader &shader, const std::string 
 		CalculateOrthoArgs args;
 		args.width = videoSize.x;
 		args.height = videoSize.y;
-		args.centerX = 0.0f;
-		args.centerY = 0.0f;
+		args.centerX = 0.5f;
+		args.centerY = 0.5f;
 		args.near = 0.f;
 		args.far = 1000.f;
 		projectionMatrix = CalculateOrtho(args);
 	}
 
 	shader.UniformMat4(uniformName, projectionMatrix);
+}
+
+void Application::BindViewUniform(gfx::IShader &shader, const std::string &uniformName) {
+	shader.UniformMat4(uniformName, m_Latest2DViewMatrix);
 }
 
 glm::mat4 Application::GetCameraTransform() {
