@@ -11,12 +11,14 @@
 #include "resource/texture/image_texture.hpp"
 #include "resource/texture/ninepatch_texture.hpp"
 
+#include "core/audio_server.hpp"
 #include "core/engine_context.hpp"
 #include "core/export_generator.hpp"
 #include "core/project.hpp"
 #include "core/renderer.hpp"
 #include "core/script_server.hpp"
 #include "core/window.hpp"
+#include "core/audio_stream.hpp"
 
 #include "scene/2d/button.hpp"
 #include "scene/2d/nine_slice_panel.hpp"
@@ -106,6 +108,9 @@ bool Application::Init(int argc, char const **argv) {
 
 	sowa::script_server *scriptServer = new sowa::script_server(*ctx);
 	ctx->RegisterSingleton<sowa::script_server>(sowa::Server::SCRIPT_SERVER, *scriptServer);
+
+	sowa::AudioServer *audioServer = new sowa::AudioServer();
+	ctx->RegisterSingleton<sowa::AudioServer>(sowa::Server::AUDIO_SERVER, *audioServer);
 
 	if (!ParseArgs(argc, argv)) {
 		return false;
@@ -539,6 +544,20 @@ bool Application::Process() {
 	// }
 
 	m_window->SwapBuffers();
+
+
+	static AudioStream stream;
+	static bool audioFirst = true;
+	if(audioFirst) {
+		audioFirst = false;
+
+		FileBufferData data = File::GetFileContent("res://laserShoot.wav");
+		stream.Load(data.data(), data.size());
+	}
+
+	if(m_window->IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+		stream.Play();
+	}
 
 	Step();
 	return true;
