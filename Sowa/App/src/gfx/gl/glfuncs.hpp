@@ -28,6 +28,7 @@ enum class GLTextureFilterParam {
 
 enum class GLTextureWrap {
 	Repeat = 0,
+	ClampToEdge,
 };
 
 enum class GLTextureFilter {

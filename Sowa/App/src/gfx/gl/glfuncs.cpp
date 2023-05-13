@@ -53,8 +53,9 @@ static GLenum ToGL(GLTextureWrapParam param) {
 }
 
 static GLenum ToGL(GLTextureWrap param) {
-	return param == GLTextureWrap::Repeat ? GL_REPEAT
-										  : GL_NONE;
+	return param == GLTextureWrap::Repeat		 ? GL_REPEAT
+		   : param == GLTextureWrap::ClampToEdge ? GL_CLAMP_TO_EDGE
+												 : GL_NONE;
 }
 
 static GLenum ToGL(GLTextureFilterParam filter) {
@@ -74,6 +75,7 @@ static GLenum ToGL(GLTextureFormat format) {
 	return format == GLTextureFormat::Rgba		   ? GL_RGBA
 		   : format == GLTextureFormat::Rgb		   ? GL_RGB
 		   : format == GLTextureFormat::RedInteger ? GL_RED_INTEGER
+		   : format == GLTextureFormat::Red		   ? GL_RED
 												   : GL_NONE;
 }
 
@@ -81,6 +83,7 @@ static GLenum ToGL(GLTextureInternalFormat format) {
 	return format == GLTextureInternalFormat::Rgba		? GL_RGBA
 		   : format == GLTextureInternalFormat::Rgba16F ? GL_RGBA16F
 		   : format == GLTextureInternalFormat::R32I	? GL_R32I
+		   : format == GLTextureInternalFormat::Red		? GL_RED
 														: GL_NONE;
 }
 
@@ -318,6 +321,7 @@ void GLManager::setUnpackAlignment(int v) {
 	LOG_FUNC("{}", v);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, v);
 }
+
 void GLManager::setDepthTest(bool v) {
 	LOG_FUNC("{}", v);
 	if (v) {
@@ -355,6 +359,7 @@ void GLManager::setPolygonMode(GLPolygonMode mode) {
 
 GLManager::GLManager() {
 	LOG_FUNC("", "");
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 

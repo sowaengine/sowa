@@ -8,6 +8,8 @@ class Application;
 
 namespace gfx {
 
+class IFont;
+
 enum ViewportDrawMode {
 	ViewportDrawMode_None = 0,
 	ViewportDrawMode_KeepRatio,
@@ -35,11 +37,15 @@ class IGraphics {
 	virtual IShader &Default2DShader() = 0;
 	virtual IShader &DefaultSolidColorShader() = 0;
 	virtual IShader &DefaultFullscreenShader() = 0;
+	virtual IShader &DefaultUITextShader() = 0;
 
 	virtual void DrawQuad() = 0;
 	virtual void DrawFullscreenQuad() = 0;
+	virtual void DrawText(const std::string& text, IFont* font) = 0;
+
 	virtual void SetViewportStyle(SetViewportStyleArgs args) = 0;
 	virtual void Clear() = 0;
+	
 
   protected:
 	friend class sowa::Application;

@@ -22,6 +22,8 @@
 #include "gfx/window.hpp"
 #include "gfx/window_manager.hpp"
 
+class FT_LibraryRec_;
+
 namespace nmGfx {
 class Renderer;
 }
@@ -77,6 +79,8 @@ class Application {
 	void BindProjectionUniform(gfx::IShader &shader, const std::string &uniformName);
 	void BindViewUniform(gfx::IShader &shader, const std::string &uniformName);
 
+	FT_LibraryRec_* GetFTInstance();
+
   private:
 	friend class Window;
 	friend class Renderer;
@@ -117,6 +121,8 @@ class Application {
 	std::string _ExecutablePath{""};
 
 	gfx::GLFramebuffer m_drawpass2d;
+
+	FT_LibraryRec_* m_ftInstance = nullptr;
 
 	// Editor
 	vec2 _EditorCameraPos{0.f, 0.f};

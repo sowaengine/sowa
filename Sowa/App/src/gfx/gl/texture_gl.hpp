@@ -14,6 +14,7 @@ enum class GLTextureFormat {
 	Rgba = 0,
 	Rgb,
 	RedInteger,
+	Red,
 };
 
 // Data stored in gpu
@@ -21,6 +22,7 @@ enum class GLTextureInternalFormat {
 	Rgba = 0,
 	Rgba16F,
 	R32I,
+	Red,
 };
 
 enum class GLDataType {

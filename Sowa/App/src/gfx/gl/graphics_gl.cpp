@@ -6,6 +6,8 @@
 #include "gfx/gl/glfuncs.hpp"
 #include "glad/glad.h"
 
+#include "./font_gl.hpp"
+
 namespace sowa {
 namespace gfx {
 
@@ -85,6 +87,22 @@ GraphicsGL::GraphicsGL() {
 	m_defaultFullscreenMesh.SetAttribute(0, GLAttributeType::Vec2);
 	m_defaultFullscreenMesh.SetAttribute(1, GLAttributeType::Vec2);
 	m_defaultFullscreenMesh.UploadAttributes();
+
+
+	m_UITextArray.New();
+	m_UITextBuffer.New(BufferType::VertexBuffer);
+
+	m_UITextArray.Bind();
+	m_UITextBuffer.Bind();
+
+	m_UITextBuffer.BufferData(nullptr, sizeof(float) * 6 * 4, BufferUsage::DynamicDraw);
+
+	m_UITextArray.ResetAttributes();
+	m_UITextArray.SetAttribute(0, GLAttributeType::Vec2);
+	m_UITextArray.SetAttribute(1, GLAttributeType::Vec2);
+	m_UITextArray.UploadAttributes();
+
+	m_UITextArray.Unbind();
 }
 GraphicsGL::~GraphicsGL() {
 }
@@ -105,11 +123,59 @@ IShader &GraphicsGL::DefaultFullscreenShader() {
 	return m_defaultFullscreenShader;
 }
 
+IShader &GraphicsGL::DefaultUITextShader() {
+	return m_defaultUITextShader;
+}
+
 void GraphicsGL::DrawQuad() {
 	m_default2dmesh.Draw();
 }
 void GraphicsGL::DrawFullscreenQuad() {
 	m_defaultFullscreenMesh.Draw();
+}
+
+void GraphicsGL::DrawText(const std::string& text, IFont* font) {
+	DefaultUITextShader().Bind();
+	m_UITextArray.Bind();
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+
+	std::string::const_iterator c;
+	float x = 0.f;
+	float y = 0.f;
+	float scale = 1.f;
+	for(c = text.begin(); c != text.end(); c++) {
+		GLFont::Character ch = reinterpret_cast<GLFont*>(font)->m_characters[*c];
+	
+		float xpos = x + ch.bearing.x * scale;
+		float ypos = y - (ch.size.y - ch.bearing.y) * scale;
+
+		float w = ch.size.x * scale;
+		float h = ch.size.y * scale;
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,     0.f, 0.f },
+			{ xpos,     ypos,         0.f, 1.f },
+			{ xpos + w, ypos,         1.f, 1.f },
+
+			{ xpos,      ypos + h,    0.f, 0.f },
+			{ xpos + w,  ypos,        1.f, 1.f },
+			{ xpos + w,  ypos + h,    1.f, 0.f }
+		};
+
+		DefaultUITextShader().UniformTexture("uTexture", ch.textureId, 0);
+
+		m_UITextBuffer.Bind();
+		m_UITextBuffer.BufferSubdata(vertices, sizeof(vertices), 0);
+		m_UITextBuffer.Unbind();
+
+		if (ch.textureId != 0) {
+			GL().drawArrays(GLDrawMode::Triangles, 0, 6);
+		}
+
+		x += (ch.advance >> 6) * scale;
+	}
+	m_UITextArray.Unbind();
 }
 
 void GraphicsGL::Clear() {

@@ -1,5 +1,8 @@
 #include "core/application.hpp"
 
+#include "ft2build.h"
+#include FT_FREETYPE_H
+
 #include "debug.hpp"
 #include "sowa.hpp"
 
@@ -38,6 +41,8 @@
 #include "utils/string.hpp"
 #include "utils/time.hpp"
 
+#include "gfx/font.hpp"
+#include "gfx/gl/font_gl.hpp"
 #include "gfx/gl/glfuncs.hpp"
 #include "gfx/gl/graphics_gl.hpp"
 #include "gfx/gl/texture_gl.hpp"
@@ -58,6 +63,8 @@
 #include "res/shaders/fullscreen.vert.res.hpp"
 #include "res/shaders/solid_color.frag.res.hpp"
 #include "res/shaders/solid_color.vert.res.hpp"
+#include "res/shaders/text.frag.res.hpp"
+#include "res/shaders/text.vert.res.hpp"
 
 #include "res/textures/icon_512x.png.res.hpp"
 
@@ -75,6 +82,8 @@ Application::Application(){
 
 Application::~Application() {
 	SW_ENTRY()
+
+	FT_Done_FreeType(m_ftInstance);
 }
 
 static Reference<NinePatchTexture> s_NinePatch;
@@ -175,6 +184,8 @@ bool Application::Init(int argc, char const **argv) {
 		m_window->InitWindow(args);
 	}
 
+	FT_Init_FreeType(&m_ftInstance);
+
 	gfx::IGraphics *graphics = new gfx::GraphicsGL();
 	gfx::IGraphics::SetInstance(graphics);
 
@@ -190,6 +201,7 @@ bool Application::Init(int argc, char const **argv) {
 	Graphics().Default2DShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_default2d_frag_data)));
 	Graphics().DefaultSolidColorShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_frag_data)));
 	Graphics().DefaultFullscreenShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_frag_data)));
+	Graphics().DefaultUITextShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_frag_data)));
 
 	// if (!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
 	// 	Debug::Error("Failed to load default font");
@@ -229,12 +241,12 @@ bool Application::Init(int argc, char const **argv) {
 	Reference<ImageTexture> meteorTexture = std::make_shared<ImageTexture>();
 	Serializer::get_singleton().Load(meteorTexture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/Meteors/meteorGrey_big4.png"));
 	Random::RandomNumberGenerator rnd;
-	for(int y = -10; y < 10; y++) {
-		for(int x = -10; x < 10; x++) {
+	for (int y = -10; y < 10; y++) {
+		for (int x = -10; x < 10; x++) {
 			int num;
 			rnd.Generate(num, 200, 400);
 
-			Sprite2D* sprite = scene->Create<Sprite2D>("Some Sprite");
+			Sprite2D *sprite = scene->Create<Sprite2D>("Some Sprite");
 			sprite->Texture() = meteorTexture;
 			sprite->Position() = {x * num, y * num};
 
@@ -526,6 +538,7 @@ bool Application::Process() {
 
 	// sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f * 1.5f, 75.f * 1.5f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
 
+	BindProjectionUniform(Graphics().DefaultUITextShader(), "uProj");
 	// BindProjectionUniform(Graphics().Default2DShader(), "uProj");
 	// BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
 
@@ -564,6 +577,17 @@ bool Application::Process() {
 	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position().x += velocity.x;
 	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position().y += velocity.y;
 	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Rotation() = glm::degrees(rot);
+
+	static Reference<gfx::IFont> font = nullptr;
+	if (font == nullptr) {
+		font = std::make_shared<gfx::GLFont>();
+
+		auto data = File::GetFileContent("res://Roboto-Medium.ttf");
+
+		font->LoadTTF(data.data(), data.size());
+	}
+
+	Graphics().DrawText("Sowa Engine | Lexographics", font.get());
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();
@@ -794,6 +818,10 @@ void InitStreams(const std::string logFile) {
 	streams.Add((uint32_t)LogLevel::Info, reinterpret_cast<std::ostream *>(&tempStream));
 	streams.Add((uint32_t)LogLevel::Warn, reinterpret_cast<std::ostream *>(&tempStream));
 	streams.Add((uint32_t)LogLevel::Error, reinterpret_cast<std::ostream *>(&tempStream));
+}
+
+FT_LibraryRec_ *Application::GetFTInstance() {
+	return m_ftInstance;
 }
 
 } // namespace sowa
