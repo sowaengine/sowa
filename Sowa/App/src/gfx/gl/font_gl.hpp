@@ -19,6 +19,8 @@ class GLFont : public IFont {
 
 	uint32_t GetGlyphTextureID(int glyph) override;
 
+	vec2f CalcTextSize(const std::string& text) override;
+
   private:
 	friend class GraphicsGL;
 

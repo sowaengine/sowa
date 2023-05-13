@@ -56,6 +56,23 @@ uint32_t GLFont::GetGlyphTextureID(int glyph) {
 	return m_characters[glyph].textureId;
 }
 
+vec2f GLFont::CalcTextSize(const std::string& text) {
+	vec2f size{0.f, 0.f};
+
+	float scale = 1.f;
+	std::string::const_iterator c;
+	for(c = text.begin(); c != text.end(); c++) {
+		GLFont::Character ch = m_characters[*c];
+		size.x += (ch.advance >> 6) * scale;
+
+		if(ch.size.y > size.y) {
+			size.y = ch.size.y;
+		}
+	}
+
+	return size;
+}
+
 } // namespace gfx
 
 } // namespace sowa

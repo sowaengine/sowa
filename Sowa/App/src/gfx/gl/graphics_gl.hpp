@@ -24,7 +24,10 @@ class GraphicsGL : public IGraphics {
 
 	void DrawQuad() override;
 	void DrawFullscreenQuad() override;
-	void DrawText(const std::string& text, IFont* font) override;
+	void DrawText(const std::string& text, IFont* font, float x, float y, mat4 transform, float scale) override;
+	void DrawTextBlank(const std::string& text, IFont* font) override;
+	void DrawTextWithTransform(const std::string& text, IFont* font, mat4 modelTransform) override;
+	void DrawTextUI(const std::string& text, IFont* font, DrawTextUIArgs args) override;
 
 	void SetViewportStyle(SetViewportStyleArgs args) override;
 	void Clear() override;

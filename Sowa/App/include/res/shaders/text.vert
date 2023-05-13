@@ -9,7 +9,7 @@ uniform mat4 uProj;
 
 void main()
 {
-    gl_Position = uProj * /** uModel*/ vec4(aPos.x, aPos.y, 0.0, 1.0);
+    gl_Position = uProj * vec4(aPos.x, aPos.y, 0.0, 1.0);
 
     vTexCoords = aTexCoords;
 }

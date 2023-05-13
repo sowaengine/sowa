@@ -3,6 +3,8 @@
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
+#include "glm/gtc/matrix_transform.hpp"
+
 #include "debug.hpp"
 #include "sowa.hpp"
 
@@ -587,7 +589,14 @@ bool Application::Process() {
 		font->LoadTTF(data.data(), data.size());
 	}
 
-	Graphics().DrawText("Sowa Engine | Lexographics", font.get());
+	{
+		gfx::DrawTextUIArgs args;
+		args.targetWidth = 500.f;
+		args.drawMode = gfx::TextDrawMode::WordWrap;
+		args.align = gfx::TextAlign::Center;
+
+		Graphics().DrawTextUI("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vulputate est nunc, quis laoreet metus malesuada ac. Suspendisse posuere fringilla pharetra.", font.get(), args);
+	}
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();

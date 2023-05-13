@@ -2,6 +2,7 @@
 #define SW_GRAPHICS_HPP_
 
 #include "shader.hpp"
+#include "math/math.hpp"
 
 namespace sowa {
 class Application;
@@ -30,6 +31,25 @@ struct SetViewportStyleArgs {
 	int videoHeight;
 };
 
+enum class TextAlign {
+	Center = 0,
+	Left,
+	Right
+};
+
+enum class TextDrawMode {
+	WordWrap = 0,
+	LetterWrap,
+	Stretch
+};
+
+struct DrawTextUIArgs {
+	float targetWidth;
+	TextDrawMode drawMode;
+	TextAlign align;
+	mat4 transform = mat4(1.f);
+};
+
 class IGraphics {
   public:
 	virtual void SetDepthTest(bool) = 0;
@@ -41,7 +61,10 @@ class IGraphics {
 
 	virtual void DrawQuad() = 0;
 	virtual void DrawFullscreenQuad() = 0;
-	virtual void DrawText(const std::string& text, IFont* font) = 0;
+	virtual void DrawText(const std::string& text, IFont* font, float x, float y, mat4 transform, float scale) = 0;
+	virtual void DrawTextBlank(const std::string& text, IFont* font) = 0;
+	virtual void DrawTextWithTransform(const std::string& text, IFont* font, mat4 modelTransform) = 0;
+	virtual void DrawTextUI(const std::string& text, IFont* font, DrawTextUIArgs args) = 0;
 
 	virtual void SetViewportStyle(SetViewportStyleArgs args) = 0;
 	virtual void Clear() = 0;

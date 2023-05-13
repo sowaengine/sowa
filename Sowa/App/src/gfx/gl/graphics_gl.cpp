@@ -6,6 +6,8 @@
 #include "gfx/gl/glfuncs.hpp"
 #include "glad/glad.h"
 
+#include "glm/gtc/matrix_transform.hpp"
+
 #include "./font_gl.hpp"
 
 namespace sowa {
@@ -134,17 +136,11 @@ void GraphicsGL::DrawFullscreenQuad() {
 	m_defaultFullscreenMesh.Draw();
 }
 
-void GraphicsGL::DrawText(const std::string& text, IFont* font) {
+void GraphicsGL::DrawText(const std::string& text, IFont* font, float x, float y, mat4 transform, float scale) {
 	DefaultUITextShader().Bind();
 	m_UITextArray.Bind();
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
-
 	std::string::const_iterator c;
-	float x = 0.f;
-	float y = 0.f;
-	float scale = 1.f;
 	for(c = text.begin(); c != text.end(); c++) {
 		GLFont::Character ch = reinterpret_cast<GLFont*>(font)->m_characters[*c];
 	
@@ -153,14 +149,20 @@ void GraphicsGL::DrawText(const std::string& text, IFont* font) {
 
 		float w = ch.size.x * scale;
 		float h = ch.size.y * scale;
-		float vertices[6][4] = {
-			{ xpos,     ypos + h,     0.f, 0.f },
-			{ xpos,     ypos,         0.f, 1.f },
-			{ xpos + w, ypos,         1.f, 1.f },
+		
+		glm::vec4 pos1 = transform * glm::vec4{xpos, ypos + h,     0.f, 1.f};
+		glm::vec4 pos2 = transform * glm::vec4{xpos, ypos,         0.f, 1.f};
+		glm::vec4 pos3 = transform * glm::vec4{xpos + w, ypos,     0.f, 1.f};
+		glm::vec4 pos4 = transform * glm::vec4{xpos + w, ypos + h, 0.f, 1.f};
 
-			{ xpos,      ypos + h,    0.f, 0.f },
-			{ xpos + w,  ypos,        1.f, 1.f },
-			{ xpos + w,  ypos + h,    1.f, 0.f }
+		float vertices[6][4] = {
+			{ pos1.x, pos1.y,      0.f, 0.f },
+			{ pos2.x, pos2.y,      0.f, 1.f },
+			{ pos3.x, pos3.y,      1.f, 1.f },
+
+			{ pos1.x,  pos1.y,     0.f, 0.f },
+			{ pos3.x,  pos3.y,     1.f, 1.f },
+			{ pos4.x,  pos4.y,     1.f, 0.f }
 		};
 
 		DefaultUITextShader().UniformTexture("uTexture", ch.textureId, 0);
@@ -176,6 +178,113 @@ void GraphicsGL::DrawText(const std::string& text, IFont* font) {
 		x += (ch.advance >> 6) * scale;
 	}
 	m_UITextArray.Unbind();
+}
+
+void GraphicsGL::DrawTextBlank(const std::string& text, IFont* font) {
+	DrawText(text, font, 0.f, 0.f, mat4(1.f), 1.f);
+}
+
+void GraphicsGL::DrawTextWithTransform(const std::string& text, IFont* font, mat4 modelTransform) {
+	DrawText(text, font, 0.f, 0.f, modelTransform, 1.f);
+}
+
+void GraphicsGL::DrawTextUI(const std::string& text, IFont* font, DrawTextUIArgs args) {
+	
+	std::string::const_iterator c;
+	float x = 0.f;
+	float y = 0.f;
+
+	std::string currentText = "";
+	if(args.drawMode == TextDrawMode::LetterWrap) {		
+		float width = 0.f;
+		float tallestInLine = 0.f;
+
+		for(c = text.begin(); c != text.end(); c++) {
+			GLFont::Character ch = reinterpret_cast<GLFont*>(font)->m_characters[*c];
+			if(ch.size.y > tallestInLine) {
+				tallestInLine = ch.size.y;
+			}
+
+			currentText += *c;
+			width += (ch.advance >> 6);
+
+			if(args.align == TextAlign::Left) {
+				x = 0.f;
+			} else if(args.align == TextAlign::Center) {
+				x = (args.targetWidth - width) * 0.5f;
+			} else if(args.align == TextAlign::Right) {
+				x = args.targetWidth - width;
+			}
+
+			if(width >= args.targetWidth) {
+				y -= tallestInLine;
+				width = 0.f;
+				tallestInLine = 0.f;
+
+				DrawText(currentText, font, x, y, args.transform, 1.f);
+				currentText = "";
+			}
+
+			if(c == text.end() - 1) {
+				y -= tallestInLine;
+				width = 0.f;
+				tallestInLine = 0.f;
+
+				if(currentText != "") {
+					DrawText(currentText, font, x, y, args.transform, 1.f);
+				}
+			}
+		}
+	} else if(args.drawMode == TextDrawMode::WordWrap) {
+		float width = 0.f;
+		float tallestInLine = 0.f;
+
+		for(c = text.begin(); c != text.end(); c++) {
+			GLFont::Character ch = reinterpret_cast<GLFont*>(font)->m_characters[*c];
+			if(ch.size.y > tallestInLine) {
+				tallestInLine = ch.size.y;
+			}
+
+			currentText += *c;
+			width += (ch.advance >> 6);
+			
+
+			if(args.align == TextAlign::Left) {
+				x = 0.f;
+			} else if(args.align == TextAlign::Center) {
+				x = (args.targetWidth - width) * 0.5f;
+			} else if(args.align == TextAlign::Right) {
+				x = args.targetWidth - width;
+			}
+			
+
+			if(*c == ' ' && width >= args.targetWidth) {
+				y -= tallestInLine;
+				width = 0.f;
+				tallestInLine = 0.f;
+
+
+				DrawText(currentText, font, x, y, args.transform, 1.f);
+				currentText = "";
+			}
+
+			if(c == text.end() - 1) {
+				y -= tallestInLine;
+				width = 0.f;
+				tallestInLine = 0.f;
+				x -= (ch.advance >> 6) * 0.5f;
+
+				if(currentText != "") {
+					DrawText(currentText, font, x, y, args.transform, 1.f);
+				}
+			}
+		}
+	} else if(args.drawMode == TextDrawMode::Stretch) {
+		sowa::vec2f size = font->CalcTextSize(text);
+		float scale = args.targetWidth / size.x;
+
+		DrawText(text, font, 0.f, 0.f, args.transform, scale);
+	}
 }
 
 void GraphicsGL::Clear() {
