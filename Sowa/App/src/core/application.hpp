@@ -21,6 +21,7 @@
 #include "gfx/shader.hpp"
 #include "gfx/window.hpp"
 #include "gfx/window_manager.hpp"
+#include "gfx/font.hpp"
 
 class FT_LibraryRec_;
 
@@ -58,7 +59,7 @@ class Application {
 	inline const Reference<Scene> GetCurrentScene() { return _Scene; }
 	void SetCurrentScene(Reference<Scene> scene);
 
-	Font &GetDefaultFont() { return _DefaultFont; }
+	gfx::IFont *GetDefaultFont() { return m_defaultFont; }
 
 	void RegisterNodeDestructor(const std::string &nodeType, std::function<void(Node *)> dtor);
 	void DestructNode(Node *node);
@@ -100,7 +101,7 @@ class Application {
 	std::unordered_map<std::string, std::function<void(Node *)>> _NodeTypeDestructors;
 	Reference<Scene> _Scene{nullptr};
 
-	Font _DefaultFont{};
+	gfx::IFont* m_defaultFont = nullptr;
 
 	// std::unique_ptr<nmGfx::Renderer> _renderer;
 	gfx::Window *m_window;

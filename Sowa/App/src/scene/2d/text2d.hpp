@@ -6,6 +6,7 @@
 #include "scene/2d/node2d.hpp"
 
 #include "resource/font/font.hpp"
+#include "gfx/font.hpp"
 
 namespace sowa {
 class Text2D : public Node2D {
@@ -19,15 +20,15 @@ class Text2D : public Node2D {
 	void UpdateLogic() override;
 	void UpdateDraw() override;
 
-    void SetText(const std::string& text) { _Text = text; }
-    const std::string& GetText() { return _Text; }
+    void SetText(const std::string& text) { m_text = text; }
+    const std::string& GetText() { return m_text; }
 
 	static FileBuffer SaveImpl(object_type* out);
 	static bool LoadImpl(object_type* out, const FileBuffer& buf);
   private:
 
-    std::string _Text{""};
-	Reference<Font> _Font;
+    std::string m_text{""};
+	Reference<gfx::IFont> m_font;
 };
 } // namespace sowa
 

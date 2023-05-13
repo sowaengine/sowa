@@ -216,7 +216,7 @@ void GraphicsGL::DrawTextUI(const std::string& text, IFont* font, DrawTextUIArgs
 				x = args.targetWidth - width;
 			}
 
-			if(width >= args.targetWidth) {
+			if(args.targetWidth > 0.f && width >= args.targetWidth) {
 				y -= tallestInLine;
 				width = 0.f;
 				tallestInLine = 0.f;
@@ -258,7 +258,7 @@ void GraphicsGL::DrawTextUI(const std::string& text, IFont* font, DrawTextUIArgs
 			}
 			
 
-			if(*c == ' ' && width >= args.targetWidth) {
+			if(args.targetWidth > 0.f && *c == ' ' && width >= args.targetWidth) {
 				y -= tallestInLine;
 				width = 0.f;
 				tallestInLine = 0.f;
@@ -281,7 +281,10 @@ void GraphicsGL::DrawTextUI(const std::string& text, IFont* font, DrawTextUIArgs
 		}
 	} else if(args.drawMode == TextDrawMode::Stretch) {
 		sowa::vec2f size = font->CalcTextSize(text);
-		float scale = args.targetWidth / size.x;
+		float scale = 1.f;
+		if(args.targetWidth > 0.f) {
+			scale = args.targetWidth / size.x;
+		}
 
 		DrawText(text, font, 0.f, 0.f, args.transform, scale);
 	}

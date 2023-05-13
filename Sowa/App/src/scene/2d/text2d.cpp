@@ -6,6 +6,8 @@
 #include "core/renderer.hpp"
 #include "resource/resource_loader.hpp"
 
+#include "gfx/graphics.hpp"
+
 namespace sowa {
 Text2D::Text2D() {
 	_NodeType = "Text2D";
@@ -19,8 +21,16 @@ void Text2D::ExitScene() {
 void Text2D::UpdateLogic() {
 }
 void Text2D::UpdateDraw() {
-	Font& fontHandle = _Font != nullptr ? *_Font.get() : Application::get_singleton().GetDefaultFont();
-	Renderer::get_singleton().DrawText(CalculateTransform(), _Text, fontHandle);
+	gfx::IFont* fontHandle = m_font != nullptr ? m_font.get() : Application::get_singleton().GetDefaultFont();
+
+	{
+		gfx::DrawTextUIArgs args;
+		args.drawMode = gfx::TextDrawMode::WordWrap;
+		args.targetWidth = -1.f;
+		args.transform = CalculateTransform();
+
+		Graphics().DrawTextUI(m_text, fontHandle, args);
+	}
 }
 
 FileBuffer Text2D::SaveImpl(object_type *out) {

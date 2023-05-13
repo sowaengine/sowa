@@ -24,7 +24,7 @@ void Button::UpdateDraw() {
     textTransform = glm::scale(textTransform, {1.f / Scale().x, 1.f / Scale().y, 1.f});
     textTransform = glm::scale(textTransform, {10.f, 10.f, 1.f});
     // textTransform = glm::scale(textTransform, {Size().x, Size().y, 1.f});
-    Renderer::get_singleton().DrawText(textTransform, m_text, Application::get_singleton().GetDefaultFont());
+    // Renderer::get_singleton().DrawText(textTransform, m_text, Application::get_singleton().GetDefaultFont());
     NineSlicePanel::UpdateDraw();
 }
 FileBuffer Button::SaveImpl(object_type *out) {

@@ -205,10 +205,8 @@ bool Application::Init(int argc, char const **argv) {
 	Graphics().DefaultFullscreenShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_frag_data)));
 	Graphics().DefaultUITextShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_frag_data)));
 
-	// if (!Renderer::get_singleton().LoadFont(_DefaultFont, FILE_BUFFER(Res::App_include_res_Roboto_Medium_ttf_data))) {
-	// 	Debug::Error("Failed to load default font");
-	// 	return false;
-	// }
+	m_defaultFont = new gfx::GLFont;
+	m_defaultFont->LoadTTF(Res::App_include_res_Roboto_Medium_ttf_data.data(), Res::App_include_res_Roboto_Medium_ttf_data.size());
 
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
@@ -243,10 +241,10 @@ bool Application::Init(int argc, char const **argv) {
 	Reference<ImageTexture> meteorTexture = std::make_shared<ImageTexture>();
 	Serializer::get_singleton().Load(meteorTexture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/Meteors/meteorGrey_big4.png"));
 	Random::RandomNumberGenerator rnd;
-	for (int y = -10; y < 10; y++) {
-		for (int x = -10; x < 10; x++) {
+	for (int y = -5; y < 5; y++) {
+		for (int x = -5; x < 5; x++) {
 			int num;
-			rnd.Generate(num, 200, 400);
+			rnd.Generate(num, 400, 500);
 
 			Sprite2D *sprite = scene->Create<Sprite2D>("Some Sprite");
 			sprite->Texture() = meteorTexture;
@@ -445,6 +443,9 @@ bool Application::Process() {
 	// 	{0.5f, 0.5f},
 	// 	{0.2f, 0.2f, 0.2f, 1.f});
 
+	BindProjectionUniform(Graphics().DefaultUITextShader(), "uProj");
+	BindViewUniform(Graphics().DefaultUITextShader(), "uView");
+
 	if (!_AppRunning) {
 		// Draw center cursor
 		float centerX, centerY;
@@ -540,7 +541,6 @@ bool Application::Process() {
 
 	// sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f * 1.5f, 75.f * 1.5f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
 
-	BindProjectionUniform(Graphics().DefaultUITextShader(), "uProj");
 	// BindProjectionUniform(Graphics().Default2DShader(), "uProj");
 	// BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
 
@@ -590,10 +590,24 @@ bool Application::Process() {
 	}
 
 	{
+		static float f = 0.f;
+		f += 0.025f;
+
+		mat4 transform = glm::translate(mat4(1.f), glm::vec3{-600.f, 300.f, 0.f});
+
 		gfx::DrawTextUIArgs args;
-		args.targetWidth = 500.f;
+		args.targetWidth = 500.f + std::sin(f) * 200;
 		args.drawMode = gfx::TextDrawMode::WordWrap;
-		args.align = gfx::TextAlign::Center;
+		args.align = gfx::TextAlign::Left;
+		args.transform = transform;
+
+		Graphics().DrawTextUI("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vulputate est nunc, quis laoreet metus malesuada ac. Suspendisse posuere fringilla pharetra.", font.get(), args);
+
+		transform = glm::translate(mat4(1.f), glm::vec3{300.f, 300.f, 0.f});
+		args.transform = transform;
+		args.align = gfx::TextAlign::Left;
+		args.drawMode = gfx::TextDrawMode::LetterWrap;
+		args.targetWidth = 500.f + std::sin(f) * 200;
 
 		Graphics().DrawTextUI("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vulputate est nunc, quis laoreet metus malesuada ac. Suspendisse posuere fringilla pharetra.", font.get(), args);
 	}
@@ -657,6 +671,18 @@ bool Application::Process() {
 		AudioStreamPlayer *player = GetCurrentScene()->Create<AudioStreamPlayer>("My Player");
 		GetCurrentScene()->GetRoot()->AddChild(player);
 		player->Stream() = stream;
+
+		Reference<AudioStream> music = std::make_shared<AudioStream>();
+		FileBufferData musicdata = File::GetFileContent("res://music.ogg");
+		music->Load(musicdata.data(), musicdata.size());
+
+		AudioStreamPlayer *musicplayer = GetCurrentScene()->Create<AudioStreamPlayer>("Music");
+		GetCurrentScene()->GetRoot()->AddChild(musicplayer);
+		musicplayer->Stream() = music;
+		musicplayer->Loop() = true;
+		musicplayer->Gain() = -100.f;
+
+		musicplayer->Play();
 	}
 
 	if (m_window->IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
