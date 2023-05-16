@@ -22,6 +22,8 @@ class Node : public object_type {
 	Node(const std::string &name);
 	virtual ~Node();
 
+	static void Bind();
+
 	static std::string Typename() { return "sowa::Node"; }
 
 	inline std::string &Name() { return _Name; }

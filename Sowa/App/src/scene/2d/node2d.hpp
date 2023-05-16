@@ -12,6 +12,7 @@ class Node2D : public Node {
 	Node2D();
 
 	static std::string Typename() { return "sowa::Node2D"; }
+	static void Bind();
 
 	void EnterScene() override;
 	void ExitScene() override;

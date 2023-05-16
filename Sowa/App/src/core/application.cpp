@@ -24,6 +24,7 @@
 #include "core/renderer.hpp"
 #include "core/script_server.hpp"
 #include "core/window.hpp"
+#include "core/node_db.hpp"
 
 #include "scene/2d/button.hpp"
 #include "scene/2d/camera_2d.hpp"
@@ -129,6 +130,11 @@ bool Application::Init(int argc, char const **argv) {
 		return false;
 	}
 
+	Node::Bind();
+	Node2D::Bind();
+	Camera2D::Bind();
+	
+
 	Serializer::get_singleton().RegisterSerializer(Project::Typename(), SerializeImpl(Project::SaveImpl, Project::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(size::Typename(), SerializeImpl(size::SaveImpl, size::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(ImageTexture::Typename(), SerializeImpl(ImageTexture::SaveImpl, ImageTexture::LoadImpl));
@@ -136,8 +142,6 @@ bool Application::Init(int argc, char const **argv) {
 	Serializer::get_singleton().RegisterSerializer(vec2::Typename(), SerializeImpl(vec2::SaveImpl, vec2::LoadImpl));
 
 	Serializer::get_singleton().RegisterSerializer(Scene::Typename(), SerializeImpl(Scene::SaveImpl, Scene::LoadImpl));
-	Serializer::get_singleton().RegisterSerializer(Node::Typename(), SerializeImpl(Node::SaveImpl, Node::LoadImpl));
-	Serializer::get_singleton().RegisterSerializer(Node2D::Typename(), SerializeImpl(Node2D::SaveImpl, Node2D::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(Sprite2D::Typename(), SerializeImpl(Sprite2D::SaveImpl, Sprite2D::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(Text2D::Typename(), SerializeImpl(Text2D::SaveImpl, Text2D::LoadImpl));
 
@@ -211,12 +215,6 @@ bool Application::Init(int argc, char const **argv) {
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
-	RegisterNodeDestructor("Node", [](Node *node) {
-		Allocator<Node>::Get().deallocate(reinterpret_cast<Node *>(node), 1);
-	});
-	RegisterNodeDestructor("Node2D", [](Node *node) {
-		Allocator<Node2D>::Get().deallocate(reinterpret_cast<Node2D *>(node), 1);
-	});
 	RegisterNodeDestructor("Sprite2D", [](Node *node) {
 		Allocator<Sprite2D>::Get().deallocate(reinterpret_cast<Sprite2D *>(node), 1);
 	});
@@ -228,9 +226,6 @@ bool Application::Init(int argc, char const **argv) {
 	});
 	RegisterNodeDestructor("AudioStreamPlayer", [](Node *node) {
 		Allocator<AudioStreamPlayer>::Get().deallocate(reinterpret_cast<AudioStreamPlayer *>(node), 1);
-	});
-	RegisterNodeDestructor("Camera2D", [](Node *node) {
-		Allocator<Camera2D>::Get().deallocate(reinterpret_cast<Camera2D *>(node), 1);
 	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION);
@@ -383,6 +378,13 @@ bool Application::Init(int argc, char const **argv) {
 	if (argParse.autoStart) {
 		StartGame();
 	}
+
+	FileBuffer scn = Serializer::get_singleton().Save(scene.get());
+	// Debug::Log("{}", scn.String());
+
+	std::ofstream ofstream(File::Path("res://scene.scn"));
+	ofstream << scn.String();
+
 	return true;
 }
 
@@ -775,7 +777,7 @@ void Application::RegisterNodeDestructor(const std::string &nodeType, std::funct
 }
 void Application::DestructNode(Node *node) {
 	SW_ENTRY()
-	Debug::Log("Delete node '{}':'{}'", node->Name(), node->_NodeType);
+	// Debug::Log("Delete node '{}':'{}'", node->Name(), node->_NodeType);
 
 	for (Node *child : node->GetChildren()) {
 		node->RemoveNode(child);

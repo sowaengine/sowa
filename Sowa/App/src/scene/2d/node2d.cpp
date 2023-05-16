@@ -4,10 +4,30 @@
 #include "core/application.hpp"
 #include "Core/nm_Matrix.hpp"
 
+#include "core/node_db.hpp"
+
 namespace sowa {
 Node2D::Node2D() {
 	_NodeType = "Node2D";
 	m_type = Typename();
+}
+
+void Node2D::Bind() {
+	NodeFactory factory;
+	factory.construct = []() -> Node* {
+		Node* node = Allocator<Node2D>::Get().allocate(1);
+		new (node) Node2D;
+
+		return node;
+	};
+
+	factory.destruct = [](Node* node) {
+		Allocator<Node2D>::Get().deallocate(reinterpret_cast<Node2D *>(node), 1);
+	};
+
+	NodeDB::Instance().RegisterNodeType("Node2D", "Node", factory);
+
+	Serializer::get_singleton().RegisterSerializer(Node2D::Typename(), SerializeImpl(Node2D::SaveImpl, Node2D::LoadImpl));
 }
 
 void Node2D::EnterScene() {

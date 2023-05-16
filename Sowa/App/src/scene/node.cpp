@@ -2,6 +2,8 @@
 #include "scene.hpp"
 #include "serialize/serializer.hpp"
 
+#include "core/node_db.hpp"
+
 namespace sowa {
 Node::Node() : _Name("Node") {
 	m_type = Typename();
@@ -10,6 +12,25 @@ Node::Node(const std::string &name) : _Name(name) {}
 Node::~Node() {
 	if (IsValid()) {
 	}
+}
+
+void Node::Bind() {
+	NodeFactory factory;
+	factory.construct = []() -> Node* {
+		Node* node = Allocator<Node>::Get().allocate(1);
+		new (node) Node;
+
+		return node;
+	};
+
+	factory.destruct = [](Node* node) {
+		Allocator<Node>::Get().deallocate(reinterpret_cast<Node *>(node), 1);
+	};
+
+	NodeDB::Instance().RegisterNodeType("Node", "", factory);
+
+
+	Serializer::get_singleton().RegisterSerializer(Node::Typename(), SerializeImpl(Node::SaveImpl, Node::LoadImpl));
 }
 
 void Node::AddChild(Node *node) {
@@ -58,6 +79,7 @@ FileBuffer Node::SaveImpl(object_type *out) {
 	Node *o = reinterpret_cast<Node *>(out);
 
 	doc["Name"] = o->Name();
+	doc["Type"] = o->GetNodeType();
 	doc["Children"] = YAML::Node();
 	for (Node *node : o->GetChildren()) {
 		doc["Children"].push_back(Serializer::get_singleton().Save(node).Yaml());
@@ -67,7 +89,24 @@ FileBuffer Node::SaveImpl(object_type *out) {
 
 bool Node::LoadImpl(object_type *out, const FileBuffer &buf) {
 	Debug::Error("Node::LoadImpl is not implemented");
-	return false;
+
+	Node *o = reinterpret_cast<Node *>(out);
+	YamlNode doc = buf.Yaml();
+	o->Name() = doc["Name"].as<std::string>("Node");
+
+	YamlNode children = doc["Children"];
+	for(YamlNode::const_iterator it = children.begin(); it != children.end(); ++it) {
+		// Node* node = Scene::Create("Type", "Name");
+		// if(!Serializer::Load(node, *it)) {
+		// 		return false;
+		// }
+		// AddChild(node);
+	}
+	/*
+		Application::RegisterNodeType(nodeType, constructFunc, destructFunc);
+	*/
+
+	return true;
 }
 
 } // namespace sowa
