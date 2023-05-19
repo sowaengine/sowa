@@ -10,10 +10,39 @@
 #include "core/application.hpp"
 #include "scene/scene.hpp"
 #include "resource/resource_loader.hpp"
+#include "core/node_db.hpp"
 
 namespace sowa {
 Sprite2D::Sprite2D() {
 	_NodeType = "Sprite2D";
+}
+
+void Sprite2D::Bind() {
+	NodeFactory factory;
+	factory.construct = []() -> Node* {
+		Node* node = Allocator<Sprite2D>::Get().allocate(1);
+		new (node) Sprite2D;
+
+		return node;
+	};
+
+	factory.destruct = [](Node* node) {
+		Allocator<Sprite2D>::Get().deallocate(reinterpret_cast<Sprite2D *>(node), 1);
+	};
+
+	NodeDB::Instance().RegisterNodeType("Sprite2D", "Node2D", factory);
+
+	Serializer::get_singleton().RegisterSerializer(Sprite2D::Typename(), SerializeImpl(Sprite2D::SaveImpl, Sprite2D::LoadImpl));
+
+	NodeDB::Instance().RegisterAttribute<std::string>("Sprite2D", "texture.path", [](Node* node) -> std::string {
+		Debug::Error("Impelement Sprite2D Attribute getter texture.path");
+		return "";
+	}, [](Node* node, std::string path) {
+		Sprite2D* sprite = dynamic_cast<Sprite2D*>(node);
+		if(nullptr != sprite) {
+			sprite->Texture() = ResourceLoader::get_singleton().LoadResource<ImageTexture>(path);
+		}
+	});
 }
 
 void Sprite2D::EnterScene() {
@@ -59,7 +88,7 @@ void Sprite2D::UpdateDraw() {
 FileBuffer Sprite2D::SaveImpl(object_type *out) {
 	Sprite2D *o = reinterpret_cast<Sprite2D *>(out);
 
-	YAML::Node doc = Serializer::get_singleton().SaveWithType<Node2D>(out).Yaml();
+	YAML::Node doc = Serializer::get_singleton().SaveWithType<Sprite2D>(out).Yaml();
 	
 	return FileBuffer(doc);
 }

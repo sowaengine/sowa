@@ -13,6 +13,7 @@ class Sprite2D : public Node2D {
 	Sprite2D();
 
 	static std::string Typename() { return "sowa::Sprite2D"; }
+	static void Bind();
 
 	void EnterScene() override;
 	void ExitScene() override;

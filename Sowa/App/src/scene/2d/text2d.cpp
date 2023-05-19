@@ -5,6 +5,7 @@
 #include "core/application.hpp"
 #include "core/renderer.hpp"
 #include "resource/resource_loader.hpp"
+#include "core/node_db.hpp"
 
 #include "gfx/graphics.hpp"
 
@@ -12,6 +13,37 @@ namespace sowa {
 Text2D::Text2D() {
 	_NodeType = "Text2D";
 	m_type = Typename();
+}
+
+void Text2D::Bind() {
+	NodeFactory factory;
+	factory.construct = []() -> Node* {
+		Node* node = Allocator<Text2D>::Get().allocate(1);
+		new (node) Text2D;
+
+		return node;
+	};
+
+	factory.destruct = [](Node* node) {
+		Allocator<Text2D>::Get().deallocate(reinterpret_cast<Text2D *>(node), 1);
+	};
+
+	NodeDB::Instance().RegisterNodeType("Text2D", "Node2D", factory);
+
+	Serializer::get_singleton().RegisterSerializer(Text2D::Typename(), SerializeImpl(Text2D::SaveImpl, Text2D::LoadImpl));
+
+	NodeDB::Instance().RegisterAttribute<std::string>("Text2D", "text", [](Node* node) -> std::string {
+		Text2D* text2d = dynamic_cast<Text2D*>(node);
+		if(nullptr != text2d) {
+			return text2d->GetText();
+		}
+		return "";
+	}, [](Node* node, std::string text) {
+		Text2D* text2d = dynamic_cast<Text2D*>(node);
+		if(nullptr != text2d) {
+			text2d->SetText(text);
+		}
+	});
 }
 
 void Text2D::EnterScene() {

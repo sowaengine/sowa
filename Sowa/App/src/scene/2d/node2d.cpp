@@ -28,6 +28,72 @@ void Node2D::Bind() {
 	NodeDB::Instance().RegisterNodeType("Node2D", "Node", factory);
 
 	Serializer::get_singleton().RegisterSerializer(Node2D::Typename(), SerializeImpl(Node2D::SaveImpl, Node2D::LoadImpl));
+
+
+	NodeDB::Instance().RegisterAttribute<float>("Node2D", "position.x", [](Node* node) -> float {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			return node2d->Position().x;
+		}
+		return 0.f;
+	}, [](Node* node, float pos) {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			node2d->Position().x = pos;
+		}
+	});
+
+	NodeDB::Instance().RegisterAttribute<float>("Node2D", "position.y", [](Node* node) -> float {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			return node2d->Position().y;
+		}
+		return 0.f;
+	}, [](Node* node, float pos) {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			node2d->Position().y = pos;
+		}
+	});
+
+	NodeDB::Instance().RegisterAttribute<float>("Node2D", "rotation", [](Node* node) -> float {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			return node2d->Rotation();
+		}
+		return 0.f;
+	}, [](Node* node, float rot) {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			node2d->Rotation() = rot;
+		}
+	});
+
+	NodeDB::Instance().RegisterAttribute<float>("Node2D", "scale.x", [](Node* node) -> float {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			return node2d->Scale().x;
+		}
+		return 0.f;
+	}, [](Node* node, float pos) {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			node2d->Scale().x = pos;
+		}
+	});
+
+	NodeDB::Instance().RegisterAttribute<float>("Node2D", "scale.y", [](Node* node) -> float {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			return node2d->Scale().y;
+		}
+		return 0.f;
+	}, [](Node* node, float pos) {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			node2d->Scale().y = pos;
+		}
+	});
 }
 
 void Node2D::EnterScene() {

@@ -2,6 +2,9 @@
 
 #include "AL/al.h"
 
+#include "core/node_db.hpp"
+#include "resource/resource_loader.hpp"
+
 namespace sowa {
 AudioStreamPlayer::AudioStreamPlayer() {
     m_type = Typename();
@@ -15,6 +18,72 @@ AudioStreamPlayer::AudioStreamPlayer() {
 AudioStreamPlayer::~AudioStreamPlayer() {
 	alDeleteSources(1, &m_SourceId);
 }
+
+void AudioStreamPlayer::Bind() {
+	NodeFactory factory;
+	factory.construct = []() -> Node* {
+		Node* node = Allocator<AudioStreamPlayer>::Get().allocate(1);
+		new (node) AudioStreamPlayer;
+
+		return node;
+	};
+
+	factory.destruct = [](Node* node) {
+		Allocator<AudioStreamPlayer>::Get().deallocate(reinterpret_cast<AudioStreamPlayer *>(node), 1);
+	};
+
+	NodeDB::Instance().RegisterNodeType("AudioStreamPlayer", "Node", factory);
+
+
+	NodeDB::Instance().RegisterAttribute<std::string>("AudioStreamPlayer", "stream.path", [](Node* node) -> std::string {
+		Debug::Error("Impelement AudioStreamPlayer Attribute getter texture.path");
+		return "";
+	}, [](Node* node, std::string path) {
+		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
+		if(nullptr != player) {
+			player->Stream() = ResourceLoader::get_singleton().LoadResource<AudioStream>(path);
+		}
+	});
+
+	NodeDB::Instance().RegisterAttribute<bool>("AudioStreamPlayer", "autostart", [](Node* node) -> bool {
+		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
+		if(nullptr != player) {
+			return player->AutoStart();
+		}
+		return false;
+	}, [](Node* node, bool start) {
+		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
+		if(nullptr != player) {
+			player->AutoStart() = start;
+		}
+	});
+
+	NodeDB::Instance().RegisterAttribute<bool>("AudioStreamPlayer", "playing", [](Node* node) -> bool {
+		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
+		if(nullptr != player) {
+			return player->IsPlaying();
+		}
+		return false;
+	}, [](Node* node, bool play) {
+		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
+		if(nullptr != player) {
+			if(play) {
+				player->Play();
+			}
+			else {
+				player->Stop();
+			}
+		}
+	});
+}
+
+void AudioStreamPlayer::UpdateLogic() {
+	if(m_autoStart && m_Stream != nullptr && m_Stream->ID() != 0) {
+		m_autoStart = false;
+		Play();
+	}
+}
+
 void AudioStreamPlayer::Play() {
 	if (m_Stream == nullptr) {
 		return;

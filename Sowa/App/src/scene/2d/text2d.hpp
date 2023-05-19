@@ -14,6 +14,7 @@ class Text2D : public Node2D {
 	Text2D();
 
 	static std::string Typename() { return "sowa::Text2D"; }
+	static void Bind();
 
 	void EnterScene() override;
 	void ExitScene() override;
