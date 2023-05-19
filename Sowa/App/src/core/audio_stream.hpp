@@ -9,7 +9,7 @@ class AudioStream {
 	AudioStream();
 	~AudioStream();
 
-	void Load(unsigned char *data, size_t length);
+	bool Load(const unsigned char *data, size_t length);
 	void Delete();
 
 	inline unsigned int ID() { return m_bufferId; }
