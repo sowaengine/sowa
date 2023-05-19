@@ -5,9 +5,9 @@
 #include "stlpch.hpp"
 
 #include "node.hpp"
+#include "object_type.hpp"
 #include "utils/memory.hpp"
 #include "utils/random.hpp"
-#include "object_type.hpp"
 
 namespace sowa {
 
@@ -23,21 +23,11 @@ class Scene : public object_type {
 	void UpdateLogic();
 	void UpdateDraw();
 
-	template <typename T>
-	T *Create(const std::string &name, uint32_t id = 0) {
-		std::allocator<T> allocator = Allocator<T>::Get();
-		T *node = allocator.allocate(1);
-		new (node) T;
-		node->_pScene = _SelfRef;
-		// maybe lookup by id later
-		node->m_id = id == 0 ? Random::GenerateID32() : id;
-		node->Name() = name;
-		Register(node);
+	void Load(const std::string& path);
 
-		return node;
-	}
+	Node *Create(const std::string &typeName, const std::string &name, uint32_t id = 0);
 
-	Node* GetNodeByID(uint32_t id);
+	Node *GetNodeByID(uint32_t id);
 
 	static Reference<Scene> New();
 
@@ -47,6 +37,9 @@ class Scene : public object_type {
 	bool IsPaused() { return _Paused; }
 
 	inline void SetRoot(Node *node) {
+		if (_Root != nullptr)
+			_Root->SetParent(nullptr);
+		
 		_Root = node;
 		if (_Root != nullptr)
 			_Root->SetParent(nullptr);
@@ -56,12 +49,12 @@ class Scene : public object_type {
 	// Deallocates parentless entities
 	void CollectNodes();
 
-	static FileBuffer SaveImpl(object_type* out);
-	static bool LoadImpl(object_type* out, const FileBuffer& buf);
+	static FileBuffer SaveImpl(object_type *out);
+	static bool LoadImpl(object_type *out, const FileBuffer &buf);
 
 	inline const uint32_t GetCurrentCamera2D() const { return m_CurrentCamera2D; }
 	void SetCurrentCamera2D(uint32_t id) { m_CurrentCamera2D = id; }
-	
+
   private:
 	Scene();
 	bool _Paused{false};
