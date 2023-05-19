@@ -1,0 +1,60 @@
+# Sowa Engine scene file
+name = "scene"
+version = 1
+
+[[filesystem]]
+
+[[filesystem]]
+path = "res://kenney.png"
+flags = 0b11
+
+[[filesystem]]
+path = "res://music.ogg"
+flags = 0b11
+
+[nodes]
+
+[nodes.12]
+name = "Root"
+type = "Node"
+parent = 0
+
+[nodes.122]
+name = "Child Node"
+type = "Node2D"
+parent = 12
+position.x = 10.0
+position.y = 10.0
+rotation = 0.0
+scale.x = 1.0
+scale.y = 1.0
+
+[nodes.123]
+name = "Sprite"
+type = "Sprite2D"
+parent = 12
+position.x = 200.0
+position.y = 200.0
+texture.path = "res://kenney.png"
+
+[nodes.124]
+name = "A Text"
+type = "Text2D"
+position.x = -200
+position.y = -200
+parent = 12
+text = "This is not very long text"
+
+[nodes.125]
+name = "My Player"
+type = "AudioStreamPlayer"
+parent = 12
+stream.path = "res://laserShoot.wav"
+
+
+[nodes.126]
+name = "Music player"
+type = "AudioStreamPlayer"
+parent = 12
+stream.path = "res://music.ogg"
+autostart = false
