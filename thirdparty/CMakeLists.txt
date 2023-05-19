@@ -61,3 +61,11 @@ set(
 
     PARENT_SCOPE
 )
+
+set(
+    TOMLPLUSPLUS_INCLUDE
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/tomlplusplus-3.3.0
+
+    PARENT_SCOPE
+)

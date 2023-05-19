@@ -29,3 +29,8 @@
 - Upstream: https://github.com/kcat/openal-soft
 - Version: 1.23.1
 - License: `thirdparty/openal-soft-1.23.1/COPYING`
+
+## toml++
+- Upstream: https://github.com/marzer/tomlplusplus
+- Version: 3.3.0
+- License: MIT Copyright (c) Mark Gillard <mark.gillard@outlook.com.au> `thirdparty/tomlplusplus-3.3.0/LICENSE`
