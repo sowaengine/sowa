@@ -75,6 +75,8 @@
 #include <windows.h>
 #endif
 
+//todo: add Node::Is(nodeType);
+
 namespace sowa {
 static void InitStreams(const std::string logFile);
 
@@ -130,9 +132,14 @@ bool Application::Init(int argc, char const **argv) {
 		return false;
 	}
 
+	InitStreams(argParse.logFile);
+
 	Node::Bind();
 	Node2D::Bind();
 	Camera2D::Bind();
+	Sprite2D::Bind();
+	Text2D::Bind();
+	AudioStreamPlayer::Bind();
 	
 
 	Serializer::get_singleton().RegisterSerializer(Project::Typename(), SerializeImpl(Project::SaveImpl, Project::LoadImpl));
@@ -142,10 +149,6 @@ bool Application::Init(int argc, char const **argv) {
 	Serializer::get_singleton().RegisterSerializer(vec2::Typename(), SerializeImpl(vec2::SaveImpl, vec2::LoadImpl));
 
 	Serializer::get_singleton().RegisterSerializer(Scene::Typename(), SerializeImpl(Scene::SaveImpl, Scene::LoadImpl));
-	Serializer::get_singleton().RegisterSerializer(Sprite2D::Typename(), SerializeImpl(Sprite2D::SaveImpl, Sprite2D::LoadImpl));
-	Serializer::get_singleton().RegisterSerializer(Text2D::Typename(), SerializeImpl(Text2D::SaveImpl, Text2D::LoadImpl));
-
-	InitStreams(argParse.logFile);
 
 	std::filesystem::path projectPath = argParse.projectPath;
 	if (!project->Load(projectPath.string().c_str())) {
@@ -215,33 +218,31 @@ bool Application::Init(int argc, char const **argv) {
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
-	RegisterNodeDestructor("Sprite2D", [](Node *node) {
-		Allocator<Sprite2D>::Get().deallocate(reinterpret_cast<Sprite2D *>(node), 1);
-	});
-	RegisterNodeDestructor("Text2D", [](Node *node) {
-		Allocator<Text2D>::Get().deallocate(reinterpret_cast<Text2D *>(node), 1);
-	});
+	
 	RegisterNodeDestructor("NineSlicePanel", [](Node *node) {
 		Allocator<NineSlicePanel>::Get().deallocate(reinterpret_cast<NineSlicePanel *>(node), 1);
-	});
-	RegisterNodeDestructor("AudioStreamPlayer", [](Node *node) {
-		Allocator<AudioStreamPlayer>::Get().deallocate(reinterpret_cast<AudioStreamPlayer *>(node), 1);
 	});
 
 	Debug::Info("Sowa Engine v{}", SOWA_VERSION);
 
 	Reference<Scene> scene = Scene::New();
-	Node2D *node = scene->Create<Node2D>("New Node");
+	// scene->SetRoot(scene->Create("Node", "Root"));
+	scene->Load("res://scene.toml");
+	// if(!Serializer::get_singleton().Load(scene.get(), File::LoadFile(File::Path("res://scene.scn")))) {
+	// 	Debug::Error("Failed to load scene");
+	// }
+
+	/*Node2D *node = dynamic_cast<Node2D*>(scene->Create("Node2D", "New Node"));
 
 	Reference<ImageTexture> meteorTexture = std::make_shared<ImageTexture>();
-	Serializer::get_singleton().Load(meteorTexture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/Meteors/meteorGrey_big4.png"));
-	Random::RandomNumberGenerator rnd;
+	Serializer::get_singleton().Load(meteorTexture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/Meteors/meteorGrey_big4.png")); */
+	/*Random::RandomNumberGenerator rnd;
 	for (int y = -5; y < 5; y++) {
 		for (int x = -5; x < 5; x++) {
 			int num;
 			rnd.Generate(num, 400, 500);
 
-			Sprite2D *sprite = scene->Create<Sprite2D>("Some Sprite");
+			Sprite2D *sprite = dynamic_cast<Sprite2D*>(scene->Create("Sprite2D", "Some Sprite"));
 			sprite->Texture() = meteorTexture;
 			sprite->Position() = {x * num, y * num};
 
@@ -250,15 +251,15 @@ bool Application::Init(int argc, char const **argv) {
 
 			node->AddChild(sprite);
 		}
-	}
+	}*/
+/*
+	Node2D *node1 = dynamic_cast<Node2D*>(scene->Create("Node2D", "Node1"));
+	Node2D *node2 = dynamic_cast<Node2D*>(scene->Create("Node2D", "Node2"));
+	Sprite2D *node3 = dynamic_cast<Sprite2D*>(scene->Create("Sprite2D", "Node3"));
+	Text2D *node4 = dynamic_cast<Text2D*>(scene->Create("Text2D", "Node4"));
 
-	Node2D *node1 = scene->Create<Node2D>("Node1");
-	Node2D *node2 = scene->Create<Node2D>("Node2");
-	Sprite2D *node3 = scene->Create<Sprite2D>("Node3");
-	Text2D *node4 = scene->Create<Text2D>("Node4");
-
-	Camera2D *camera = scene->Create<Camera2D>("Main Camera");
-	scene->SetCurrentCamera2D(camera->ID());
+	Camera2D *camera = dynamic_cast<Camera2D*>(scene->Create("Camera2D", "Main Camera"));
+	scene->SetCurrentCamera2D(camera->ID());*/
 
 	// Reference<ImageTexture> anotherTexture = std::make_shared<ImageTexture>();
 	// Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://kenney.png"));
@@ -273,7 +274,7 @@ bool Application::Init(int argc, char const **argv) {
 	// button->Rotation() = 9.f;
 	// button->Size() = {3000.f, 2000.f};
 	// button->Text() = "Click me";
-
+/*
 	Reference<ImageTexture> texture = std::make_shared<ImageTexture>();
 	Serializer::get_singleton().Load(texture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_red.png"));
 
@@ -291,7 +292,8 @@ bool Application::Init(int argc, char const **argv) {
 	// node->AddChild(button);
 	node4->SetText("Sowa Engine | Lexographics");
 
-	scene->SetRoot(node);
+	scene->SetRoot(node); */
+	
 	SetCurrentScene(scene);
 
 	OnInput() += [this](InputEvent e) {
@@ -379,11 +381,11 @@ bool Application::Init(int argc, char const **argv) {
 		StartGame();
 	}
 
-	FileBuffer scn = Serializer::get_singleton().Save(scene.get());
+	// FileBuffer scn = Serializer::get_singleton().Save(scene.get());
 	// Debug::Log("{}", scn.String());
 
-	std::ofstream ofstream(File::Path("res://scene.scn"));
-	ofstream << scn.String();
+	// std::ofstream ofstream(File::Path("res://scene.scn"));
+	// ofstream << scn.String();
 
 	return true;
 }
@@ -470,8 +472,8 @@ bool Application::Process() {
 	} else {
 		static float f = 0.f;
 		f += 0.02f;
-		((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position() = {std::sin(f) * 200, std::cos(f) * 200};
-		((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Rotation() += 0.4f;
+		// ((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position() = {std::sin(f) * 200, std::cos(f) * 200};
+		// ((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Rotation() += 0.4f;
 	}
 
 	static float g;
@@ -522,6 +524,7 @@ bool Application::Process() {
 
 	const sowa::vec2 windowSize = m_window->GetWindowSize();
 	const sowa::vec2 videoSize = m_window->GetVideoSize();
+/*
 
 	static gfx::GLTexture tex;
 	static bool loaded = false;
@@ -540,79 +543,7 @@ bool Application::Process() {
 	float targetRot = atan2(pos.y - videoSize.y * 0.5, pos.x - videoSize.x * 0.5) - (3.141592653589 / 2);
 	static float rot = targetRot;
 	rot = lerpAngle(rot, targetRot, 0.25f);
-
-	// sowa::mat4 modelMatrix = CalculateModelMatrix({position.x, position.y, -10}, {0.f, 0.f, glm::degrees(rot)}, {112.f * 1.5f, 75.f * 1.5f, 1.f}, {0.f, 0.f, 0.f}, mat4(1.f));
-
-	// BindProjectionUniform(Graphics().Default2DShader(), "uProj");
-	// BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
-
-	// BindViewUniform(Graphics().Default2DShader(), "uView");
-	// BindViewUniform(Graphics().DefaultSolidColorShader(), "uView");
-
-	// Graphics().Default2DShader().Bind();
-	// Graphics().Default2DShader().UniformTexture("uTexture", tex.ID(), 0);
-	// Graphics().Default2DShader().UniformMat4("uModel", modelMatrix);
-	// Graphics().DrawQuad();
-
-	vec2 velocity{0.f, 0.f};
-	if (m_window->IsKeyDown(GLFW_KEY_W)) {
-		velocity.y += 1;
-	}
-	if (m_window->IsKeyDown(GLFW_KEY_S)) {
-		velocity.y -= 1;
-	}
-	if (m_window->IsKeyDown(GLFW_KEY_D)) {
-		velocity.x += 1;
-	}
-	if (m_window->IsKeyDown(GLFW_KEY_A)) {
-		velocity.x -= 1;
-	}
-	if (velocity.length() > 0.1) {
-		velocity = velocity.clamp();
-		velocity.x *= speed;
-		velocity.y *= speed;
-	} else {
-		velocity = {0.f, 0.f};
-	}
-
-	position.x += velocity.x;
-	position.y += velocity.y;
-
-	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position().x += velocity.x;
-	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position().y += velocity.y;
-	((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Rotation() = glm::degrees(rot);
-
-	static Reference<gfx::IFont> font = nullptr;
-	if (font == nullptr) {
-		font = std::make_shared<gfx::GLFont>();
-
-		auto data = File::GetFileContent("res://Roboto-Medium.ttf");
-
-		font->LoadTTF(data.data(), data.size());
-	}
-
-	{
-		static float f = 0.f;
-		f += 0.025f;
-
-		mat4 transform = glm::translate(mat4(1.f), glm::vec3{-600.f, 300.f, 0.f});
-
-		gfx::DrawTextUIArgs args;
-		args.targetWidth = 500.f + std::sin(f) * 200;
-		args.drawMode = gfx::TextDrawMode::WordWrap;
-		args.align = gfx::TextAlign::Left;
-		args.transform = transform;
-
-		Graphics().DrawTextUI("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vulputate est nunc, quis laoreet metus malesuada ac. Suspendisse posuere fringilla pharetra.", font.get(), args);
-
-		transform = glm::translate(mat4(1.f), glm::vec3{300.f, 300.f, 0.f});
-		args.transform = transform;
-		args.align = gfx::TextAlign::Left;
-		args.drawMode = gfx::TextDrawMode::LetterWrap;
-		args.targetWidth = 500.f + std::sin(f) * 200;
-
-		Graphics().DrawTextUI("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum vulputate est nunc, quis laoreet metus malesuada ac. Suspendisse posuere fringilla pharetra.", font.get(), args);
-	}
+*/
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();
@@ -655,12 +586,9 @@ bool Application::Process() {
 		Graphics().DrawFullscreenQuad();
 	}
 
-	// if (_AfterRenderCallback != nullptr) {
-	// 	_AfterRenderCallback();
-	// }
-
 	m_window->SwapBuffers();
 
+		/*
 	static Reference<AudioStream> stream;
 	static bool audioFirst = true;
 	if (audioFirst) {
@@ -670,7 +598,7 @@ bool Application::Process() {
 		FileBufferData data = File::GetFileContent("res://laserShoot.wav");
 		stream->Load(data.data(), data.size());
 
-		AudioStreamPlayer *player = GetCurrentScene()->Create<AudioStreamPlayer>("My Player");
+		AudioStreamPlayer *player = dynamic_cast<AudioStreamPlayer*>(GetCurrentScene()->Create("AudioStreamPlayer", "My Player"));
 		GetCurrentScene()->GetRoot()->AddChild(player);
 		player->Stream() = stream;
 
@@ -678,7 +606,7 @@ bool Application::Process() {
 		FileBufferData musicdata = File::GetFileContent("res://music.ogg");
 		music->Load(musicdata.data(), musicdata.size());
 
-		AudioStreamPlayer *musicplayer = GetCurrentScene()->Create<AudioStreamPlayer>("Music");
+		AudioStreamPlayer *musicplayer = dynamic_cast<AudioStreamPlayer*>(GetCurrentScene()->Create("AudioStreamPlayer", "Music"));
 		GetCurrentScene()->GetRoot()->AddChild(musicplayer);
 		musicplayer->Stream() = music;
 		musicplayer->Loop() = true;
@@ -686,6 +614,8 @@ bool Application::Process() {
 
 		musicplayer->Play();
 	}
+		*/
+	
 
 	if (m_window->IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 		if (!((AudioStreamPlayer *)GetCurrentScene()->GetRoot()->GetChild("My Player"))->IsPlaying()) {
@@ -777,16 +707,13 @@ void Application::RegisterNodeDestructor(const std::string &nodeType, std::funct
 }
 void Application::DestructNode(Node *node) {
 	SW_ENTRY()
-	// Debug::Log("Delete node '{}':'{}'", node->Name(), node->_NodeType);
-
+	Debug::Log("Delete node '{}':'{}'", node->Name(), node->_NodeType);
+	
 	for (Node *child : node->GetChildren()) {
 		node->RemoveNode(child);
 	}
-	if (_NodeTypeDestructors.find(node->_NodeType) != _NodeTypeDestructors.end()) {
-		_NodeTypeDestructors[node->_NodeType](node);
-	} else {
-		Debug::Error("Tried to destruct unknown node type '{}'", node->_NodeType);
-	}
+
+	NodeDB::Instance().DestructNode(node);
 }
 
 void Application::Step() {
