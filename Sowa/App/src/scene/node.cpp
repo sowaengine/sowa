@@ -60,18 +60,20 @@ void Node::RemoveNode(Node *node) {
 	for (size_t i = 0; i < _Children.size(); i++) {
 		Node *child = _Children[i];
 		if (child == node) {
-			if (node->GetParent() != nullptr)
+			if (node->GetParent() == this) {
+				_Children.erase(_Children.begin() + i);
 				node->SetParent(nullptr);
-			_Children.erase(_Children.begin() + i);
+			}
 			return;
 		}
 	}
 }
 
-void Node::SetParent(Node *node) {
-	_Parent = node;
-	if (_Parent != nullptr && _Parent != node)
-		node->RemoveNode(this);
+void Node::SetParent(Node *parent) {
+	if (_Parent != nullptr && _Parent != parent)
+		_Parent->RemoveNode(this);
+	
+	_Parent = parent;
 }
 
 FileBuffer Node::SaveImpl(object_type *out) {
