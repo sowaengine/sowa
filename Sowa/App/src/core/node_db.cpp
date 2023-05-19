@@ -6,9 +6,29 @@ NodeDB::NodeDB() {
 NodeDB::~NodeDB() {
 }
 
+template<>
+AttributeType ConvertAttributeType(int t) {
+	return AttributeType::Integer;
+}
+
+template<>
+AttributeType ConvertAttributeType(std::string t) {
+	return AttributeType::String;
+}
+
+template<>
+AttributeType ConvertAttributeType(float t) {
+	return AttributeType::Float;
+}
+
+template<>
+AttributeType ConvertAttributeType(bool t) {
+	return AttributeType::Bool;
+}
+
 NodeDB &NodeDB::Instance() {
-	static NodeDB db;
-	return db;
+	static NodeDB* db = new NodeDB;
+	return *db;
 }
 
 void NodeDB::RegisterNodeType(const std::string &typeName, const std::string &extendsFrom, const NodeFactory &factory) {
@@ -18,6 +38,7 @@ void NodeDB::RegisterNodeType(const std::string &typeName, const std::string &ex
 	t.factory = factory;
 
 	m_types[typeName] = t;
+	Debug::Log("Registered type : {}", typeName);
 }
 
 Node *NodeDB::ConstructNode(const std::string &typeName) {
