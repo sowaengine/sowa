@@ -1,6 +1,8 @@
 #ifndef SW_GRAPHICS_GL_HPP_
 #define SW_GRAPHICS_GL_HPP_
 
+#include <vector>
+
 #include "../graphics.hpp"
 #include "./mesh_gl.hpp"
 #include "./shader_gl.hpp"
@@ -21,6 +23,7 @@ class GraphicsGL : public IGraphics {
 	IShader &DefaultSolidColorShader() override;
 	IShader &DefaultFullscreenShader() override;
 	IShader &DefaultUITextShader() override;
+	IShader &DefaultBatch2DShader() override;
 
 	void DrawQuad() override;
 	void DrawFullscreenQuad() override;
@@ -32,17 +35,33 @@ class GraphicsGL : public IGraphics {
 	void SetViewportStyle(SetViewportStyleArgs args) override;
 	void Clear() override;
 
-  private:
-	GLShader m_default2dshader;
-	GLShader m_defaultSolidColorShader;
-	GLShader m_defaultFullscreenShader;
-	GLShader m_defaultUITextShader;
+	void Batch2DBegin() override;
+	void Batch2DPushQuad(BatchVertex vertices[4]) override;
+	void Batch2DEnd() override;
 
+  private:
+
+	GLShader m_default2dshader;
 	GLMesh m_default2dmesh;
+
+	GLShader m_defaultSolidColorShader;
+
+	GLShader m_defaultFullscreenShader;
 	GLMesh m_defaultFullscreenMesh;
 
+	GLShader m_defaultUITextShader;
 	GLBuffer m_UITextBuffer;
 	GLVertexArray m_UITextArray;
+
+	GLShader m_defaultBatch2DShader;
+	GLBuffer m_batch2dBuffer;
+	GLVertexArray m_batch2DArray;
+	std::vector<BatchVertex> m_batch2dVertices;
+	
+	// textures[textureId] = slot;
+	std::map<uint32_t, uint32_t> m_batch2dTextures;
+	uint32_t m_batch2dTextureCounter = 0;
+
 };
 
 } // namespace gfx

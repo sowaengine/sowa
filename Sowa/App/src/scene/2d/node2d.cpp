@@ -3,6 +3,7 @@
 
 #include "core/application.hpp"
 #include "Core/nm_Matrix.hpp"
+#include "math/math.hpp"
 
 #include "core/node_db.hpp"
 
@@ -127,7 +128,7 @@ const glm::mat4& Node2D::CalculateTransform() {
 	}
 
 	_LastUpdateFrameID = frameID;
-	_LatestTransform = nmGfx::CalculateModelMatrix(_Position, _Rotation, {_Scale.x, _Scale.y}, {0.f, 0.f}, baseTransform);
+	_LatestTransform = CalculateModelMatrix({_Position.x, _Position.y, 0.f}, {0.f, 0.f, _Rotation}, {_Scale.x, _Scale.y, 1.f}, {0.f, 0.f, 0.f}, baseTransform);
 	return _LatestTransform;
 }
 

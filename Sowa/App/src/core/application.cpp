@@ -20,11 +20,12 @@
 #include "core/audio_stream.hpp"
 #include "core/engine_context.hpp"
 #include "core/export_generator.hpp"
+#include "core/node_db.hpp"
 #include "core/project.hpp"
 #include "core/renderer.hpp"
 #include "core/script_server.hpp"
 #include "core/window.hpp"
-#include "core/node_db.hpp"
+#include "core/stats.hpp"
 
 #include "scene/2d/button.hpp"
 #include "scene/2d/camera_2d.hpp"
@@ -60,6 +61,8 @@
 #include "argparser/arg_parser.hpp"
 
 #include "res/Roboto-Medium.ttf.res.hpp"
+#include "res/shaders/batch2d.frag.res.hpp"
+#include "res/shaders/batch2d.vert.res.hpp"
 #include "res/shaders/default2d.frag.res.hpp"
 #include "res/shaders/default2d.vert.res.hpp"
 #include "res/shaders/fullscreen.frag.res.hpp"
@@ -75,7 +78,7 @@
 #include <windows.h>
 #endif
 
-//todo: add Node::Is(nodeType);
+// todo: add Node::Is(nodeType);
 
 namespace sowa {
 static void InitStreams(const std::string logFile);
@@ -140,7 +143,7 @@ bool Application::Init(int argc, char const **argv) {
 	Sprite2D::Bind();
 	Text2D::Bind();
 	AudioStreamPlayer::Bind();
-	
+	NineSlicePanel::Bind();
 
 	Serializer::get_singleton().RegisterSerializer(Project::Typename(), SerializeImpl(Project::SaveImpl, Project::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(size::Typename(), SerializeImpl(size::SaveImpl, size::LoadImpl));
@@ -211,6 +214,7 @@ bool Application::Init(int argc, char const **argv) {
 	Graphics().DefaultSolidColorShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_frag_data)));
 	Graphics().DefaultFullscreenShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_frag_data)));
 	Graphics().DefaultUITextShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_frag_data)));
+	Graphics().DefaultBatch2DShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_frag_data)));
 
 	m_defaultFont = new gfx::GLFont;
 	m_defaultFont->LoadTTF(Res::App_include_res_Roboto_Medium_ttf_data.data(), Res::App_include_res_Roboto_Medium_ttf_data.size());
@@ -218,7 +222,6 @@ bool Application::Init(int argc, char const **argv) {
 	// if (projectSettings->_application.MainScene != "")
 	// 	_pCurrentScene->LoadFromFile(projectSettings->_application.MainScene.c_str());
 
-	
 	RegisterNodeDestructor("NineSlicePanel", [](Node *node) {
 		Allocator<NineSlicePanel>::Get().deallocate(reinterpret_cast<NineSlicePanel *>(node), 1);
 	});
@@ -252,14 +255,14 @@ bool Application::Init(int argc, char const **argv) {
 			node->AddChild(sprite);
 		}
 	}*/
-/*
-	Node2D *node1 = dynamic_cast<Node2D*>(scene->Create("Node2D", "Node1"));
-	Node2D *node2 = dynamic_cast<Node2D*>(scene->Create("Node2D", "Node2"));
-	Sprite2D *node3 = dynamic_cast<Sprite2D*>(scene->Create("Sprite2D", "Node3"));
-	Text2D *node4 = dynamic_cast<Text2D*>(scene->Create("Text2D", "Node4"));
+	/*
+		Node2D *node1 = dynamic_cast<Node2D*>(scene->Create("Node2D", "Node1"));
+		Node2D *node2 = dynamic_cast<Node2D*>(scene->Create("Node2D", "Node2"));
+		Sprite2D *node3 = dynamic_cast<Sprite2D*>(scene->Create("Sprite2D", "Node3"));
+		Text2D *node4 = dynamic_cast<Text2D*>(scene->Create("Text2D", "Node4"));
 
-	Camera2D *camera = dynamic_cast<Camera2D*>(scene->Create("Camera2D", "Main Camera"));
-	scene->SetCurrentCamera2D(camera->ID());*/
+		Camera2D *camera = dynamic_cast<Camera2D*>(scene->Create("Camera2D", "Main Camera"));
+		scene->SetCurrentCamera2D(camera->ID());*/
 
 	// Reference<ImageTexture> anotherTexture = std::make_shared<ImageTexture>();
 	// Serializer::get_singleton().Load(anotherTexture.get(), File::GetFileContent("res://kenney.png"));
@@ -274,26 +277,26 @@ bool Application::Init(int argc, char const **argv) {
 	// button->Rotation() = 9.f;
 	// button->Size() = {3000.f, 2000.f};
 	// button->Text() = "Click me";
-/*
-	Reference<ImageTexture> texture = std::make_shared<ImageTexture>();
-	Serializer::get_singleton().Load(texture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_red.png"));
+	/*
+		Reference<ImageTexture> texture = std::make_shared<ImageTexture>();
+		Serializer::get_singleton().Load(texture.get(), File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_red.png"));
 
-	node3->Scale() = {1.f, 1.f};
-	node3->Rotation() = 45.f;
-	node3->Texture() = texture;
-	node3->Position() = {600, 300};
-	node4->Position() = {200.f, -200.f};
+		node3->Scale() = {1.f, 1.f};
+		node3->Rotation() = 45.f;
+		node3->Texture() = texture;
+		node3->Position() = {600, 300};
+		node4->Position() = {200.f, -200.f};
 
-	node->AddChild(node1);
-	node->AddChild(node2);
-	node->AddChild(node3);
-	node->AddChild(node4);
-	node3->AddChild(camera);
-	// node->AddChild(button);
-	node4->SetText("Sowa Engine | Lexographics");
+		node->AddChild(node1);
+		node->AddChild(node2);
+		node->AddChild(node3);
+		node->AddChild(node4);
+		node3->AddChild(camera);
+		// node->AddChild(button);
+		node4->SetText("Sowa Engine | Lexographics");
 
-	scene->SetRoot(node); */
-	
+		scene->SetRoot(node); */
+
 	SetCurrentScene(scene);
 
 	OnInput() += [this](InputEvent e) {
@@ -392,6 +395,11 @@ bool Application::Init(int argc, char const **argv) {
 
 bool Application::Process() {
 	SW_ENTRY()
+
+	Stats::StatsData stats = Stats::Instance().Data();
+	Stats::Instance().Reset();
+
+	Debug::Log("Stats -- draw call: {}, batch2d draw call: {}", stats.drawCall, stats.drawCall_Batch2d);
 
 	m_window->PollEvents();
 	if (m_window->ShouldClose())
@@ -524,26 +532,76 @@ bool Application::Process() {
 
 	const sowa::vec2 windowSize = m_window->GetWindowSize();
 	const sowa::vec2 videoSize = m_window->GetVideoSize();
-/*
+	/*
 
-	static gfx::GLTexture tex;
-	static bool loaded = false;
-	if (!loaded) {
-		loaded = true;
-		auto data = File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_blue.png");
-		tex.Load2D(data.data(), data.size());
+		static gfx::GLTexture tex;
+		static bool loaded = false;
+		if (!loaded) {
+			loaded = true;
+			auto data = File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_blue.png");
+			tex.Load2D(data.data(), data.size());
+		}
+
+		static vec2 position{1920.f / 2, 1080.f / 2};
+		const float speed = 200 * (1.0f / 60);
+
+		vec2 pos = m_window->GetVideoMousePosition();
+		pos.y = m_window->GetVideoSize().y - pos.y;
+
+		float targetRot = atan2(pos.y - videoSize.y * 0.5, pos.x - videoSize.x * 0.5) - (3.141592653589 / 2);
+		static float rot = targetRot;
+		rot = lerpAngle(rot, targetRot, 0.25f);
+	*/
+
+	Graphics().Batch2DBegin();
+	BindProjectionUniform(Graphics().DefaultBatch2DShader(), "uProj");
+	BindViewUniform(Graphics().DefaultBatch2DShader(), "uView");
+
+	static std::vector<Reference<ImageTexture>> textures;
+	if(textures.size() == 0) {
+		for(int i=0; i<32; i++) {
+			Reference<ImageTexture> s = ResourceLoader::get_singleton().LoadResource<ImageTexture>("res://kenney.png");
+			if(s == nullptr) {
+				Debug::Error("Failed to load texture {}", i);
+			}
+			textures.push_back(s);
+		}
 	}
 
-	static vec2 position{1920.f / 2, 1080.f / 2};
-	const float speed = 200 * (1.0f / 60);
+	int index = 0;
+	for(int x = 0; x < 16; x++) {
+		for(int y = 0; y < 16; y++) {
+			float sz = 256;
+			float halfSize = sz / 2.f;
+			index++;
 
-	vec2 pos = m_window->GetVideoMousePosition();
-	pos.y = m_window->GetVideoSize().y - pos.y;
+			gfx::BatchVertex v1((x-8) * sz - halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
+			gfx::BatchVertex v2((x-8) * sz - halfSize,  (y-8) * sz - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
+			gfx::BatchVertex v3((x-8) * sz + halfSize,  (y-8) * sz - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
+			gfx::BatchVertex v4((x-8) * sz + halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
+			gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
 
-	float targetRot = atan2(pos.y - videoSize.y * 0.5, pos.x - videoSize.x * 0.5) - (3.141592653589 / 2);
-	static float rot = targetRot;
-	rot = lerpAngle(rot, targetRot, 0.25f);
-*/
+			Graphics().Batch2DPushQuad(vertices);
+		}
+	}
+
+	
+	for(int i=0; i<0; i++) {
+		float x = (i-16) * 256;
+		float y = 0;
+		float halfSize = 128;
+
+		gfx::BatchVertex v1(x - halfSize,  y + halfSize,  0.f, /**/ 1.f, 1.f, 0.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()));
+		gfx::BatchVertex v2(x - halfSize,  y - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()));
+		gfx::BatchVertex v3(x + halfSize,  y - halfSize,  0.f, /**/ 0.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()));
+		gfx::BatchVertex v4(x + halfSize,  y + halfSize,  0.f, /**/ 1.f, 0.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()));
+		gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
+
+		Graphics().Batch2DPushQuad(vertices);
+	}
+	
+
+	Graphics().Batch2DEnd();
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();
@@ -588,34 +646,33 @@ bool Application::Process() {
 
 	m_window->SwapBuffers();
 
-		/*
-	static Reference<AudioStream> stream;
-	static bool audioFirst = true;
-	if (audioFirst) {
-		stream = std::make_shared<AudioStream>();
-		audioFirst = false;
+	/*
+static Reference<AudioStream> stream;
+static bool audioFirst = true;
+if (audioFirst) {
+	stream = std::make_shared<AudioStream>();
+	audioFirst = false;
 
-		FileBufferData data = File::GetFileContent("res://laserShoot.wav");
-		stream->Load(data.data(), data.size());
+	FileBufferData data = File::GetFileContent("res://laserShoot.wav");
+	stream->Load(data.data(), data.size());
 
-		AudioStreamPlayer *player = dynamic_cast<AudioStreamPlayer*>(GetCurrentScene()->Create("AudioStreamPlayer", "My Player"));
-		GetCurrentScene()->GetRoot()->AddChild(player);
-		player->Stream() = stream;
+	AudioStreamPlayer *player = dynamic_cast<AudioStreamPlayer*>(GetCurrentScene()->Create("AudioStreamPlayer", "My Player"));
+	GetCurrentScene()->GetRoot()->AddChild(player);
+	player->Stream() = stream;
 
-		Reference<AudioStream> music = std::make_shared<AudioStream>();
-		FileBufferData musicdata = File::GetFileContent("res://music.ogg");
-		music->Load(musicdata.data(), musicdata.size());
+	Reference<AudioStream> music = std::make_shared<AudioStream>();
+	FileBufferData musicdata = File::GetFileContent("res://music.ogg");
+	music->Load(musicdata.data(), musicdata.size());
 
-		AudioStreamPlayer *musicplayer = dynamic_cast<AudioStreamPlayer*>(GetCurrentScene()->Create("AudioStreamPlayer", "Music"));
-		GetCurrentScene()->GetRoot()->AddChild(musicplayer);
-		musicplayer->Stream() = music;
-		musicplayer->Loop() = true;
-		musicplayer->Gain() = -100.f;
+	AudioStreamPlayer *musicplayer = dynamic_cast<AudioStreamPlayer*>(GetCurrentScene()->Create("AudioStreamPlayer", "Music"));
+	GetCurrentScene()->GetRoot()->AddChild(musicplayer);
+	musicplayer->Stream() = music;
+	musicplayer->Loop() = true;
+	musicplayer->Gain() = -100.f;
 
-		musicplayer->Play();
-	}
-		*/
-	
+	musicplayer->Play();
+}
+	*/
 
 	if (m_window->IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 		if (!((AudioStreamPlayer *)GetCurrentScene()->GetRoot()->GetChild("My Player"))->IsPlaying()) {
@@ -708,7 +765,7 @@ void Application::RegisterNodeDestructor(const std::string &nodeType, std::funct
 void Application::DestructNode(Node *node) {
 	SW_ENTRY()
 	Debug::Log("Delete node '{}':'{}'", node->Name(), node->_NodeType);
-	
+
 	for (Node *child : node->GetChildren()) {
 		node->RemoveNode(child);
 	}

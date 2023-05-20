@@ -90,6 +90,16 @@ void GLShader::UniformMat4(const std::string& name, const mat4& value) {
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
 }
 
+void GLShader::UniformVec2(const std::string& name, const glm::vec2& value) {
+	Bind();
+	int loc = GL().getUniformLocation(m_id, name);
+	if(loc < 0) {
+		Debug::Error("Failed to get uniform location {}", name);
+	}
+
+	glUniform2f(loc, value.x, value.y);
+}
+
 void GLShader::UniformVec4(const std::string& name, const glm::vec4& value) {
 	Bind();
 	int loc = GL().getUniformLocation(m_id, name);
@@ -98,6 +108,16 @@ void GLShader::UniformVec4(const std::string& name, const glm::vec4& value) {
 	}
 
 	glUniform4f(loc, value.x, value.y, value.z, value.w);
+}
+
+void GLShader::UniformIntVector(const std::string& name, const std::vector<int>& value) {
+	Bind();
+	int loc = GL().getUniformLocation(m_id, name);
+	if(loc < 0) {
+		Debug::Error("Failed to get uniform location {}", name);
+	}
+
+	glUniform1iv(loc, value.size(), value.data());
 }
 
 } // namespace gfx
