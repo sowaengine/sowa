@@ -13,6 +13,8 @@ class NineSlicePanel : public Node2D {
 
 	static std::string Typename() { return "sowa::NineSlicePanel"; }
 
+	static void Bind();
+
 	void EnterScene() override;
 	void ExitScene() override;
 	void UpdateLogic() override;
@@ -25,14 +27,14 @@ class NineSlicePanel : public Node2D {
 
 	inline vec2& Size() { return m_Size; }
 
-	inline Reference<ImageTexture>& Texture() { return _Texture; }
+	inline Reference<ImageTexture>& Texture() { return m_texture; }
 
 	static FileBuffer SaveImpl(object_type* out);
 	static bool LoadImpl(object_type* out, const FileBuffer& buf);
 
   private:
 	friend class Application;
-	Reference<ImageTexture> _Texture;
+	Reference<ImageTexture> m_texture;
 
 	/**
 	 * Margin in pixels
