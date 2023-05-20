@@ -63,6 +63,8 @@ struct BatchVertex {
 	float uvY;
 	float textureId;
 
+	BatchVertex() = default;
+
 	BatchVertex(float x, float y, float z, float r, float g, float b, float a, float uvX, float uvY, float textureId) {
 		this->x = x;
 		this->y = y;

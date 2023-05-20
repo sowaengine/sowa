@@ -390,11 +390,20 @@ void GraphicsGL::Batch2DBegin() {
 	m_batch2dTextureCounter = 0;
 }
 void GraphicsGL::Batch2DPushQuad(BatchVertex vertices[4]) {
+	static GLTexture whiteTexture;
+	if(whiteTexture.ID() == 0) {
+		unsigned char data[4] = {255, 255, 255, 255};
+		whiteTexture.Load2DFromData(data, 1, 1, GLDataType::UByte, GLTextureFormat::Rgba);
+	}
 	// 1 2 3
 	// 1 3 4
 
 	for(int i=0; i<4; i++) {
 		uint32_t textureId = static_cast<uint32_t>(vertices[i].textureId);
+		if(textureId == 0) {
+			textureId = whiteTexture.ID();
+		}
+
 		if(m_batch2dTextures[textureId] == 0) {
 			m_batch2dTextures[textureId] = ++m_batch2dTextureCounter;
 		}

@@ -62,20 +62,20 @@ bool GLTexture::Load2DFromData(unsigned char* data, int width, int height, GLDat
     Delete();
     m_type = GLTextureType::Texture2D;
 
-    m_pixels = data;
+    // m_pixels = data;
     m_width = width;
     m_height = height;
     m_channels = 0;
 
     glGenTextures(1, &m_id);
     glBindTexture(GL_TEXTURE_2D, m_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    GL().texImage2D(GLTextureType::Texture2D, 0, internalFormat, width, height, 0, dataType, data, format);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 
-    // GL().generateMipmap(m_type);
+    GL().generateMipmap(m_type);
 
     return true;
 }

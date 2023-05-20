@@ -53,36 +53,86 @@ void Sprite2D::UpdateLogic() {
 }
 void Sprite2D::UpdateDraw() {
 	if (m_texture != nullptr) {
-		const float outlineWidth = 3.f;
-		mat4 transform = CalculateTransform();
-		transform = glm::scale(transform, {m_texture->Width(), m_texture->Height(), 1.f});
+		const float outlineWidth = 10.f; // todo: make outline width fixed size (proportional to camera zoom)
+		mat4 nodeTransform = CalculateTransform();
+		mat4 transform = glm::scale(nodeTransform, {m_texture->Width(), m_texture->Height(), 1.f});
 
-		Application::get_singleton().BindViewUniform(Graphics().DefaultSolidColorShader(), "uProj");
-		Application::get_singleton().BindViewUniform(Graphics().Default2DShader(), "uView");
-
-		Graphics().DefaultSolidColorShader().Bind();
-		Application::get_singleton().BindProjectionUniform(Graphics().DefaultSolidColorShader(), "uProj");
-		Graphics().DefaultSolidColorShader().UniformTexture("uTexture", m_texture->TextureID(), 0);
-		Graphics().DefaultSolidColorShader().UniformVec4("uColor", {0.2f, 0.68f, 0.81f, 1.0f});
 		for(int i=0; i<8; i++) {
 			glm::vec3 offset = glm::rotateZ(glm::vec3{outlineWidth, 0.f, 0.f}, glm::radians(i * 45.f));
-			mat4 newTransform = glm::translate(CalculateTransform(), offset);
+			mat4 newTransform = glm::translate(nodeTransform, offset);
 			newTransform = glm::scale(newTransform, {m_texture->Width(), m_texture->Height(), 1.f});
 
-			Graphics().DefaultSolidColorShader().UniformMat4("uModel", newTransform);
+			glm::vec4 points[4] = {
+				{-0.5f, +0.5f, 0.f, 1.f},
+				{-0.5f, -0.5f, 0.f, 1.f},
+				{+0.5f, -0.5f, 0.f, 1.f},
+				{+0.5f, +0.5f, 0.f, 1.f}
+			};
+			glm::vec2 uvs[4] = {
+				{0.f, 1.f},
+				{0.f, 0.f},
+				{1.f, 0.f},
+				{1.f, 1.f}
+			};
+
+			gfx::BatchVertex vertices[4];
+			for(int i=0; i<4; i++) {
+				points[i] = newTransform * points[i];
+
+				vertices[i].x = points[i].x;
+				vertices[i].y = points[i].y;
+				vertices[i].z = 0.f;
+				vertices[i].r = 0.2f;
+				vertices[i].g = 0.68f;
+				vertices[i].b = 0.81f;
+				vertices[i].a = 1.f;
+				vertices[i].uvX = uvs[i].x;
+				vertices[i].uvY = uvs[i].y;
+				vertices[i].textureId = 0.f;
+			}
+			Graphics().Batch2DPushQuad(vertices);
 
 			Graphics().DrawQuad();
 		}
 
-		Graphics().Default2DShader().Bind();
-		Graphics().Default2DShader().UniformTexture("uTexture", m_texture->TextureID(), 0);
-		Application::get_singleton().BindProjectionUniform(Graphics().Default2DShader(), "uProj");
+		glm::vec4 points[4] = {
+			{-0.5f, +0.5f, 0.f, 1.f},
+			{-0.5f, -0.5f, 0.f, 1.f},
+			{+0.5f, -0.5f, 0.f, 1.f},
+			{+0.5f, +0.5f, 0.f, 1.f}
+		};
+		glm::vec2 uvs[4] = {
+			{0.f, 1.f},
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{1.f, 1.f}
+		};
 
-		Graphics().Default2DShader().UniformMat4("uModel", transform);
+		gfx::BatchVertex vertices[4];
+		for(int i=0; i<4; i++) {
+			points[i] = transform * points[i];
 
-		Graphics().DrawQuad();
+			vertices[i].x = points[i].x;
+			vertices[i].y = points[i].y;
+			vertices[i].z = 0.f;
+			vertices[i].r = 1.f;
+			vertices[i].g = 1.f;
+			vertices[i].b = 1.f;
+			vertices[i].a = 1.f;
+			vertices[i].uvX = uvs[i].x;
+			vertices[i].uvY = uvs[i].y;
+			vertices[i].textureId = static_cast<float>(m_texture->TextureID());
+		}
+		Graphics().Batch2DPushQuad(vertices);
+
+		// Graphics().Default2DShader().Bind();
+		// Graphics().Default2DShader().UniformTexture("uTexture", m_texture->TextureID(), 0);
+		// Application::get_singleton().BindProjectionUniform(Graphics().Default2DShader(), "uProj");
+
+		// Graphics().Default2DShader().UniformMat4("uModel", transform);
+
+		// Graphics().DrawQuad();
 	}
-	// Renderer::get_singleton().DrawTexture(CalculateTransform(), *_Texture.get(), {(float)_Texture->Width(), (float)_Texture->Height()}, ID());
 }
 
 FileBuffer Sprite2D::SaveImpl(object_type *out) {

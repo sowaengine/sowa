@@ -503,7 +503,13 @@ bool Application::Process() {
 	}
 
 	if (_Scene != nullptr) {
+		Graphics().Batch2DBegin();
+		BindProjectionUniform(Graphics().DefaultBatch2DShader(), "uProj");
+		BindViewUniform(Graphics().DefaultBatch2DShader(), "uView");
+
 		_Scene->UpdateDraw();
+
+		Graphics().Batch2DEnd();
 	}
 
 	if (!_AppRunning) {
@@ -553,10 +559,6 @@ bool Application::Process() {
 		rot = lerpAngle(rot, targetRot, 0.25f);
 	*/
 
-	Graphics().Batch2DBegin();
-	BindProjectionUniform(Graphics().DefaultBatch2DShader(), "uProj");
-	BindViewUniform(Graphics().DefaultBatch2DShader(), "uView");
-
 	static std::vector<Reference<ImageTexture>> textures;
 	if(textures.size() == 0) {
 		for(int i=0; i<32; i++) {
@@ -581,7 +583,7 @@ bool Application::Process() {
 			gfx::BatchVertex v4((x-8) * sz + halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
 			gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
 
-			Graphics().Batch2DPushQuad(vertices);
+			// Graphics().Batch2DPushQuad(vertices);
 		}
 	}
 
@@ -600,8 +602,6 @@ bool Application::Process() {
 		Graphics().Batch2DPushQuad(vertices);
 	}
 	
-
-	Graphics().Batch2DEnd();
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();
