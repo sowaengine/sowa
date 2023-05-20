@@ -25,7 +25,44 @@ void Camera2D::Bind() {
 
 	NodeDB::Instance().RegisterNodeType("Camera2D", "Node2D", factory);
 
-	Serializer::get_singleton().RegisterSerializer(Camera2D::Typename(), SerializeImpl(Camera2D::SaveImpl, Camera2D::LoadImpl));
+	NodeDB::Instance().RegisterAttribute<float>("Camera2D", "zoom.x", [](Node* node) -> float {
+		Camera2D* camera = dynamic_cast<Camera2D*>(node);
+		if(nullptr != camera) {
+			return camera->Zoom().x;
+		}
+		return 0.f;
+	}, [](Node* node, float zoom) {
+		Camera2D* camera = dynamic_cast<Camera2D*>(node);
+		if(nullptr != camera) {
+			camera->Zoom().x = zoom;
+		}
+	});
+
+	NodeDB::Instance().RegisterAttribute<float>("Camera2D", "zoom.y", [](Node* node) -> float {
+		Camera2D* camera = dynamic_cast<Camera2D*>(node);
+		if(nullptr != camera) {
+			return camera->Zoom().y;
+		}
+		return 0.f;
+	}, [](Node* node, float zoom) {
+		Camera2D* camera = dynamic_cast<Camera2D*>(node);
+		if(nullptr != camera) {
+			camera->Zoom().y = zoom;
+		}
+	});
+
+	NodeDB::Instance().RegisterAttribute<bool>("Camera2D", "rotatable", [](Node* node) -> bool {
+		Camera2D* camera = dynamic_cast<Camera2D*>(node);
+		if(nullptr != camera) {
+			return camera->Rotatable();
+		}
+		return 0.f;
+	}, [](Node* node, bool rotatable) {
+		Camera2D* camera = dynamic_cast<Camera2D*>(node);
+		if(nullptr != camera) {
+			camera->Rotatable() = rotatable;
+		}
+	});
 }
 
 FileBuffer Camera2D::SaveImpl(object_type *out) {

@@ -24,8 +24,8 @@
 #include "core/project.hpp"
 #include "core/renderer.hpp"
 #include "core/script_server.hpp"
-#include "core/window.hpp"
 #include "core/stats.hpp"
+#include "core/window.hpp"
 
 #include "scene/2d/button.hpp"
 #include "scene/2d/camera_2d.hpp"
@@ -435,13 +435,12 @@ bool Application::Process() {
 					glm::vec3 translation, rotation, scale;
 					if (nmGfx::DecomposeMatrix(mat, translation, rotation, scale)) {
 						m_Latest2DViewMatrix = CalculateModelMatrix(
-							translation, {0.f, 0.f, 0.f}, scale, {0.f, 0.f, 0.f}, mat4(1.f));
+							translation,
+							{0.f, 0.f, currentCamera2D->Rotatable() ? rotation.z : 0.f},
+							{currentCamera2D->Zoom().x, currentCamera2D->Zoom().y, 1.f},
+							{0.f, 0.f, 0.f}, mat4(1.f));
 						m_Latest2DViewMatrix = glm::inverse(m_Latest2DViewMatrix);
 					}
-					/* CalculateModelMatrix(glm::vec3{currentCamera2D->Position().x, currentCamera2D->Position().y, 0.f},
-												  glm::vec3{0.f, 0.f, currentCamera2D->Rotation()},
-												  glm::vec3{currentCamera2D->Zoom().x, currentCamera2D->Zoom().y, 1.f},
-												  glm::vec3{0.f, 0.f, 0.f}, mat4(1.f)); */
 				}
 			}
 		}
@@ -561,10 +560,10 @@ bool Application::Process() {
 	*/
 
 	static std::vector<Reference<ImageTexture>> textures;
-	if(textures.size() == 0) {
-		for(int i=0; i<32; i++) {
+	if (textures.size() == 0) {
+		for (int i = 0; i < 32; i++) {
 			Reference<ImageTexture> s = ResourceLoader::get_singleton().LoadResource<ImageTexture>("res://kenney.png");
-			if(s == nullptr) {
+			if (s == nullptr) {
 				Debug::Error("Failed to load texture {}", i);
 			}
 			textures.push_back(s);
@@ -572,44 +571,43 @@ bool Application::Process() {
 	}
 
 	int index = 0;
-	for(int x = 0; x < 16; x++) {
-		for(int y = 0; y < 16; y++) {
+	for (int x = 0; x < 16; x++) {
+		for (int y = 0; y < 16; y++) {
 			float sz = 256;
 			float halfSize = sz / 2.f;
 			index++;
 
-			gfx::BatchVertex v1((x-8) * sz - halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()), 0.f);
-			gfx::BatchVertex v2((x-8) * sz - halfSize,  (y-8) * sz - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[index%4]->TextureID()), 0.f);
-			gfx::BatchVertex v3((x-8) * sz + halfSize,  (y-8) * sz - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[index%4]->TextureID()), 0.f);
-			gfx::BatchVertex v4((x-8) * sz + halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()), 0.f);
+			gfx::BatchVertex v1((x - 8) * sz - halfSize, (y - 8) * sz + halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[index % 4]->TextureID()), 0.f);
+			gfx::BatchVertex v2((x - 8) * sz - halfSize, (y - 8) * sz - halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[index % 4]->TextureID()), 0.f);
+			gfx::BatchVertex v3((x - 8) * sz + halfSize, (y - 8) * sz - halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[index % 4]->TextureID()), 0.f);
+			gfx::BatchVertex v4((x - 8) * sz + halfSize, (y - 8) * sz + halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[index % 4]->TextureID()), 0.f);
 			gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
 
 			// Graphics().Batch2DPushQuad(vertices);
 		}
 	}
 
-	
-	for(int i=0; i<0; i++) {
-		float x = (i-16) * 256;
+	for (int i = 0; i < 0; i++) {
+		float x = (i - 16) * 256;
 		float y = 0;
 		float halfSize = 128;
 
-		gfx::BatchVertex v1(x - halfSize,  y + halfSize,  0.f, /**/ 1.f, 1.f, 0.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
-		gfx::BatchVertex v2(x - halfSize,  y - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
-		gfx::BatchVertex v3(x + halfSize,  y - halfSize,  0.f, /**/ 0.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
-		gfx::BatchVertex v4(x + halfSize,  y + halfSize,  0.f, /**/ 1.f, 0.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
+		gfx::BatchVertex v1(x - halfSize, y + halfSize, 0.f, /**/ 1.f, 1.f, 0.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
+		gfx::BatchVertex v2(x - halfSize, y - halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
+		gfx::BatchVertex v3(x + halfSize, y - halfSize, 0.f, /**/ 0.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
+		gfx::BatchVertex v4(x + halfSize, y + halfSize, 0.f, /**/ 1.f, 0.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
 		gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
 
 		Graphics().Batch2DPushQuad(vertices);
 	}
-	
+
 	vec2 mouse = m_window->GetVideoMousePosition();
 	// unsigned char color[4];
 	// m_drawpass2d.ReadAttachmentColor(0, mouse.x, videoSize.y - mouse.y, color);
 	// Debug::Log("Hovering on rgba({}, {}, {}, {})", color[0], color[1], color[2], color[3]);
 
 	int id = m_drawpass2d.ReadAttachmentInt(1, mouse.x, videoSize.y - mouse.y);
-	Debug::Log("Hovering on {}", id);
+	// Debug::Log("Hovering on {}", id);
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();

@@ -14,12 +14,14 @@ class Camera2D : public Node2D {
 	~Camera2D();
 
 	inline sowa::vec2f &Zoom() { return m_Zoom; }
+	inline bool& Rotatable() { return m_rotatable; }
 
 	static FileBuffer SaveImpl(object_type *out);
 	static bool LoadImpl(object_type *out, const FileBuffer &buf);
 
   private:
 	sowa::vec2f m_Zoom = {1.f, 1.f};
+	bool m_rotatable = true;
 };
 } // namespace sowa
 

@@ -69,6 +69,11 @@ void Scene::UpdateDraw() {
 void Scene::Load(const std::string& path) {
 	SerializeDocument doc = TomlSerializer::Load(path);
 
+	uint32_t active_camera_2d = 0;
+	doc.Value<uint32_t>("active_camera_2d", active_camera_2d);
+	SetCurrentCamera2D(active_camera_2d);
+	
+
 	SerializeDocument nodes = doc.Table("nodes");
 
 	
@@ -195,12 +200,14 @@ void Scene::CollectNodes() {
 		}
 		if (!node->IsLocked() && !node->IsValid()) {
 			_RegisteredNodes.erase(_RegisteredNodes.begin() + i);
+			Debug::Log("Delete 1 {}", node->Name());
 			Application::get_singleton().DestructNode(node);
 			continue;
 		}
 
 		if (!node->IsLocked() && (node->_Parent == nullptr && node != GetRoot())) {
 			_RegisteredNodes.erase(_RegisteredNodes.begin() + i);
+			Debug::Log("Delete 2 {}, {}", node->Name(), (void*)node->_Parent);
 			Application::get_singleton().DestructNode(node);
 			continue;
 		}
