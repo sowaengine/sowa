@@ -128,6 +128,7 @@ GraphicsGL::GraphicsGL() {
 	m_batch2DArray.SetAttribute(1, GLAttributeType::Vec4);
 	m_batch2DArray.SetAttribute(2, GLAttributeType::Vec2);
 	m_batch2DArray.SetAttribute(3, GLAttributeType::Float);
+	m_batch2DArray.SetAttribute(4, GLAttributeType::Float);
 	m_batch2DArray.UploadAttributes();
 
 	m_batch2DArray.Unbind();

@@ -122,6 +122,7 @@ void Sprite2D::UpdateDraw() {
 			vertices[i].uvX = uvs[i].x;
 			vertices[i].uvY = uvs[i].y;
 			vertices[i].textureId = static_cast<float>(m_texture->TextureID());
+			vertices[i].id = static_cast<float>(ID());
 		}
 		Graphics().Batch2DPushQuad(vertices);
 

@@ -1,10 +1,12 @@
 #version 330 core
 
 layout(location = 0) out vec4 color;
+layout(location = 1) out int drawId;
 
 in vec4 vColor;
 in vec2 vTexCoords;
 in float vTexture;
+in float vDrawId;
 
 uniform sampler2D uTextures[32];
 
@@ -18,6 +20,7 @@ float lerp(float from, float to, float t) {
 
 void main() {
     color = getTexture() * vColor;
+    drawId = int(vDrawId);
 
     if(color.a < 0.1)
         discard;

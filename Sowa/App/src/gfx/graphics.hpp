@@ -52,20 +52,21 @@ struct DrawTextUIArgs {
 
 
 struct BatchVertex {
-	float x;
-	float y;
-	float z;
-	float r;
-	float g;
-	float b;
-	float a;
-	float uvX;
-	float uvY;
-	float textureId;
+	float x = 0.f;
+	float y = 0.f;
+	float z = 0.f;
+	float r = 1.f;
+	float g = 1.f;
+	float b = 1.f;
+	float a = 1.f;
+	float uvX = 0.f;
+	float uvY = 0.f;
+	float textureId = 0.f;
+	float id = 0.f;
 
 	BatchVertex() = default;
 
-	BatchVertex(float x, float y, float z, float r, float g, float b, float a, float uvX, float uvY, float textureId) {
+	BatchVertex(float x, float y, float z, float r, float g, float b, float a, float uvX, float uvY, float textureId, float id) {
 		this->x = x;
 		this->y = y;
 		this->z = z;
@@ -76,6 +77,7 @@ struct BatchVertex {
 		this->uvX = uvX;
 		this->uvY = uvY;
 		this->textureId = textureId;
+		this->id = id;
 	}
 };
 

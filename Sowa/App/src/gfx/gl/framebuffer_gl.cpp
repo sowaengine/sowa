@@ -28,7 +28,7 @@ void GLFramebuffer::Create(int width, int height) {
 		    target.texture.Load2DFromData(nullptr, width, height, GLDataType::Float, GLTextureFormat::Rgba, GLTextureInternalFormat::Rgba16F);
             // glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, target.texture.ID(), 0);
             
-        } else if(target.type == GLFramebufferTargetType::Uint32) {
+        } else if(target.type == GLFramebufferTargetType::Int) {
             target.texture.Load2DFromData(nullptr, width, height, GLDataType::Int, GLTextureFormat::RedInteger, GLTextureInternalFormat::R32I);
         }
         GL().framebufferTexture2D(slot, target.texture.ID());
@@ -42,7 +42,7 @@ void GLFramebuffer::Create(int width, int height) {
 
     std::vector<int> attachments;
     for (auto &[slot, target] : m_targets) {
-        if(target.type == GLFramebufferTargetType::Vec4 || target.type == GLFramebufferTargetType::Uint32) {
+        if(target.type == GLFramebufferTargetType::Vec4 || target.type == GLFramebufferTargetType::Int) {
             attachments.push_back(slot);
         }
     }
@@ -82,6 +82,18 @@ int GLFramebuffer::GetTargetTextureID(int slot) {
     }
 
     return 0;
+}
+
+int GLFramebuffer::ReadAttachmentInt(int slot, int x, int y) {
+    int color = 0;
+    glReadBuffer(GL_COLOR_ATTACHMENT0 + slot);
+    glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &color);
+    return color;
+}
+
+void GLFramebuffer::ReadAttachmentColor(int slot, int x, int y, unsigned char color[4]) {
+    glReadBuffer(GL_COLOR_ATTACHMENT0 + slot);
+    glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
 }
 
 } // namespace gfx

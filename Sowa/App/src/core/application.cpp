@@ -203,6 +203,7 @@ bool Application::Init(int argc, char const **argv) {
 
 	const sowa::vec2 videoSize = m_window->GetVideoSize();
 	m_drawpass2d.SetTarget(0, gfx::GLFramebufferTargetType::Vec4);
+	m_drawpass2d.SetTarget(1, gfx::GLFramebufferTargetType::Int);
 	m_drawpass2d.Create(videoSize.x, videoSize.y);
 
 	gfx::GLTexture icon;
@@ -399,7 +400,7 @@ bool Application::Process() {
 	Stats::StatsData stats = Stats::Instance().Data();
 	Stats::Instance().Reset();
 
-	Debug::Log("Stats -- draw call: {}, batch2d draw call: {}", stats.drawCall, stats.drawCall_Batch2d);
+	// Debug::Log("Stats -- draw call: {}, batch2d draw call: {}", stats.drawCall, stats.drawCall_Batch2d);
 
 	m_window->PollEvents();
 	if (m_window->ShouldClose())
@@ -577,10 +578,10 @@ bool Application::Process() {
 			float halfSize = sz / 2.f;
 			index++;
 
-			gfx::BatchVertex v1((x-8) * sz - halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
-			gfx::BatchVertex v2((x-8) * sz - halfSize,  (y-8) * sz - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
-			gfx::BatchVertex v3((x-8) * sz + halfSize,  (y-8) * sz - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
-			gfx::BatchVertex v4((x-8) * sz + halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()));
+			gfx::BatchVertex v1((x-8) * sz - halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()), 0.f);
+			gfx::BatchVertex v2((x-8) * sz - halfSize,  (y-8) * sz - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[index%4]->TextureID()), 0.f);
+			gfx::BatchVertex v3((x-8) * sz + halfSize,  (y-8) * sz - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[index%4]->TextureID()), 0.f);
+			gfx::BatchVertex v4((x-8) * sz + halfSize,  (y-8) * sz + halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[index%4]->TextureID()), 0.f);
 			gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
 
 			// Graphics().Batch2DPushQuad(vertices);
@@ -593,15 +594,22 @@ bool Application::Process() {
 		float y = 0;
 		float halfSize = 128;
 
-		gfx::BatchVertex v1(x - halfSize,  y + halfSize,  0.f, /**/ 1.f, 1.f, 0.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()));
-		gfx::BatchVertex v2(x - halfSize,  y - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()));
-		gfx::BatchVertex v3(x + halfSize,  y - halfSize,  0.f, /**/ 0.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()));
-		gfx::BatchVertex v4(x + halfSize,  y + halfSize,  0.f, /**/ 1.f, 0.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()));
+		gfx::BatchVertex v1(x - halfSize,  y + halfSize,  0.f, /**/ 1.f, 1.f, 0.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
+		gfx::BatchVertex v2(x - halfSize,  y - halfSize,  0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
+		gfx::BatchVertex v3(x + halfSize,  y - halfSize,  0.f, /**/ 0.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
+		gfx::BatchVertex v4(x + halfSize,  y + halfSize,  0.f, /**/ 1.f, 0.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
 		gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
 
 		Graphics().Batch2DPushQuad(vertices);
 	}
 	
+	vec2 mouse = m_window->GetVideoMousePosition();
+	// unsigned char color[4];
+	// m_drawpass2d.ReadAttachmentColor(0, mouse.x, videoSize.y - mouse.y, color);
+	// Debug::Log("Hovering on rgba({}, {}, {}, {})", color[0], color[1], color[2], color[3]);
+
+	int id = m_drawpass2d.ReadAttachmentInt(1, mouse.x, videoSize.y - mouse.y);
+	Debug::Log("Hovering on {}", id);
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();

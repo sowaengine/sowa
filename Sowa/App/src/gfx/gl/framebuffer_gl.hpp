@@ -10,7 +10,7 @@ namespace gfx {
 
 enum class GLFramebufferTargetType {
     Vec4,
-    Uint32,
+    Int,
     // Depth24_Stencil8,
 };
 
@@ -33,6 +33,9 @@ class GLFramebuffer {
         void Unbind();
 
         int GetTargetTextureID(int slot);
+
+        int ReadAttachmentInt(int slot, int x, int y);
+        void ReadAttachmentColor(int slot, int x, int y, unsigned char color[4]);
     private:
         // slot, target
         std::map<uint32_t, GLFramebufferTarget> m_targets;
