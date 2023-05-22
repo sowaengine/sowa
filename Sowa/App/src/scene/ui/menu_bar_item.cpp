@@ -1,6 +1,7 @@
 #include "menu_bar_item.hpp"
 
 #include "core/node_db.hpp"
+#include "core/application.hpp"
 #include "scene/ui/ui_node.hpp"
 
 #include "gfx/graphics.hpp"
@@ -25,6 +26,10 @@ void MenuBarItem::Bind() {
 	};
 
 	NodeDB::Instance().RegisterNodeType("MenuBarItem", "UINode", factory);
+}
+
+void MenuBarItem::UpdateLogic() {
+	m_hovered = Application::get_singleton().HoveringNode() == ID();
 }
 
 void MenuBarItem::UpdateDraw() {
@@ -58,10 +63,10 @@ void MenuBarItem::UpdateDraw() {
 				vertices[i].x = points[i].x;
 				vertices[i].y = points[i].y;
 				vertices[i].z = 0.f;
-				vertices[i].r = .2f;
-				vertices[i].g = .1f;
-				vertices[i].b = .7f;
-				vertices[i].a = 1.f;
+				vertices[i].r = m_hovered ? m_hoveredBackgroundColor.r : m_backgroundColor.r;
+				vertices[i].g = m_hovered ? m_hoveredBackgroundColor.g : m_backgroundColor.g;
+				vertices[i].b = m_hovered ? m_hoveredBackgroundColor.b : m_backgroundColor.b;
+				vertices[i].a = m_hovered ? m_hoveredBackgroundColor.a : m_backgroundColor.a;
 				vertices[i].uvX = uvs[i].x;
 				vertices[i].uvY = uvs[i].y;
 				vertices[i].textureId = 0.f;

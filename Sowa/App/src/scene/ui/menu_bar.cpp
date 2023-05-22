@@ -59,10 +59,10 @@ void MenuBar::UpdateDraw() {
 				vertices[i].x = points[i].x;
 				vertices[i].y = points[i].y;
 				vertices[i].z = 0.f;
-				vertices[i].r = .6f;
-				vertices[i].g = .8f;
-				vertices[i].b = .6f;
-				vertices[i].a = 1.f;
+				vertices[i].r = m_backgroundColor.r;
+				vertices[i].g = m_backgroundColor.g;
+				vertices[i].b = m_backgroundColor.b;
+				vertices[i].a = m_backgroundColor.a;
 				vertices[i].uvX = uvs[i].x;
 				vertices[i].uvY = uvs[i].y;
 				vertices[i].textureId = 0.f;

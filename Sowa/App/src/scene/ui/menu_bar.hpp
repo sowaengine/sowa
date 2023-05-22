@@ -3,6 +3,8 @@
 
 #include "scene/ui/ui_node.hpp"
 
+#include "glm/glm.hpp"
+
 namespace sowa {
 class MenuBar : public UINode {
   public:
@@ -15,6 +17,8 @@ class MenuBar : public UINode {
 
   protected:
 	friend class Application;
+
+	glm::vec4 m_backgroundColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.f);
 };
 } // namespace sowa
 
