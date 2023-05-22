@@ -3,6 +3,7 @@
 
 #include "matrix/mat4.hpp"
 
+#include "vector/rect.hpp"
 #include "vector/size.hpp"
 #include "vector/vec2.hpp"
 #include "vector/vec2f.hpp"
