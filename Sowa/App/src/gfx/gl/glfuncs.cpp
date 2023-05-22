@@ -325,9 +325,9 @@ void GLManager::setUnpackAlignment(int v) {
 void GLManager::setDepthTest(bool v) {
 	LOG_FUNC("{}", v);
 	if (v) {
-		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
 	} else {
-		glDisable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
 	}
 }
 

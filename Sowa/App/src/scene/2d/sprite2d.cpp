@@ -81,7 +81,7 @@ void Sprite2D::UpdateDraw() {
 
 				vertices[i].x = points[i].x;
 				vertices[i].y = points[i].y;
-				vertices[i].z = 0.f;
+				vertices[i].z = -0.1f;
 				vertices[i].r = 0.2f;
 				vertices[i].g = 0.68f;
 				vertices[i].b = 0.81f;

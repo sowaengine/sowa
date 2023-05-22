@@ -672,8 +672,8 @@ void Application::BindProjectionUniform(gfx::IShader &shader, const std::string 
 		args.height = videoSize.y;
 		args.centerX = 0.5f;
 		args.centerY = 0.5f;
-		args.near = 0.f;
-		args.far = 1000.f;
+		args.near = -1000.f;
+		args.far = 1.f;
 		projectionMatrix = CalculateOrtho(args);
 	}
 

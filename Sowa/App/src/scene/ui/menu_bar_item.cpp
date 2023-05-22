@@ -62,7 +62,7 @@ void MenuBarItem::UpdateDraw() {
 
 				vertices[i].x = points[i].x;
 				vertices[i].y = points[i].y;
-				vertices[i].z = 0.f;
+				vertices[i].z = 0.1f;
 				vertices[i].r = m_hovered ? m_hoveredBackgroundColor.r : m_backgroundColor.r;
 				vertices[i].g = m_hovered ? m_hoveredBackgroundColor.g : m_backgroundColor.g;
 				vertices[i].b = m_hovered ? m_hoveredBackgroundColor.b : m_backgroundColor.b;
