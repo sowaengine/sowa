@@ -33,6 +33,9 @@
 #include "scene/2d/node2d.hpp"
 #include "scene/2d/sprite2d.hpp"
 #include "scene/2d/text2d.hpp"
+#include "scene/ui/ui_node.hpp"
+#include "scene/ui/menu_bar.hpp"
+#include "scene/ui/menu_bar_item.hpp"
 #include "scene/audio_stream_player.hpp"
 #include "scene/node.hpp"
 #include "scene/scene.hpp"
@@ -77,8 +80,6 @@
 #ifdef SW_WINDOWS
 #include <windows.h>
 #endif
-
-// todo: add Node::Is(nodeType);
 
 namespace sowa {
 static void InitStreams(const std::string logFile);
@@ -144,6 +145,9 @@ bool Application::Init(int argc, char const **argv) {
 	Text2D::Bind();
 	AudioStreamPlayer::Bind();
 	NineSlicePanel::Bind();
+	UINode::Bind();
+	MenuBar::Bind();
+	MenuBarItem::Bind();
 
 	Serializer::get_singleton().RegisterSerializer(Project::Typename(), SerializeImpl(Project::SaveImpl, Project::LoadImpl));
 	Serializer::get_singleton().RegisterSerializer(size::Typename(), SerializeImpl(size::SaveImpl, size::LoadImpl));
@@ -215,7 +219,9 @@ bool Application::Init(int argc, char const **argv) {
 	Graphics().DefaultSolidColorShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_frag_data)));
 	Graphics().DefaultFullscreenShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_frag_data)));
 	Graphics().DefaultUITextShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_frag_data)));
-	Graphics().DefaultBatch2DShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_frag_data)));
+
+	Graphics().BatchRenderer2D().Init(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_frag_data)));
+	Graphics().BatchRendererUI().Init(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_frag_data)));
 
 	m_defaultFont = new gfx::GLFont;
 	m_defaultFont->LoadTTF(Res::App_include_res_Roboto_Medium_ttf_data.data(), Res::App_include_res_Roboto_Medium_ttf_data.size());
@@ -407,6 +413,7 @@ bool Application::Process() {
 		return false;
 
 	if (_Scene != nullptr) {
+		_Scene->PreUpdate();
 		_Scene->UpdateLogic();
 	}
 
@@ -503,13 +510,19 @@ bool Application::Process() {
 	}
 
 	if (_Scene != nullptr) {
-		Graphics().Batch2DBegin();
-		BindProjectionUniform(Graphics().DefaultBatch2DShader(), "uProj");
-		BindViewUniform(Graphics().DefaultBatch2DShader(), "uView");
+		Graphics().BatchRenderer2D().Reset();
+		Graphics().BatchRendererUI().Reset();
+
+		BindProjectionUniform(Graphics().BatchRenderer2D().Shader(), "uProj");
+		BindViewUniform(Graphics().BatchRenderer2D().Shader(), "uView");
+
+		BindProjectionUniform(Graphics().BatchRendererUI().Shader(), "uProj");
+		Graphics().BatchRendererUI().Shader().UniformMat4("uView", mat4(1.f));
 
 		_Scene->UpdateDraw();
 
-		Graphics().Batch2DEnd();
+		Graphics().BatchRenderer2D().End();
+		Graphics().BatchRendererUI().End();
 	}
 
 	if (!_AppRunning) {
@@ -558,48 +571,6 @@ bool Application::Process() {
 		static float rot = targetRot;
 		rot = lerpAngle(rot, targetRot, 0.25f);
 	*/
-
-	static std::vector<Reference<ImageTexture>> textures;
-	if (textures.size() == 0) {
-		for (int i = 0; i < 32; i++) {
-			Reference<ImageTexture> s = ResourceLoader::get_singleton().LoadResource<ImageTexture>("res://kenney.png");
-			if (s == nullptr) {
-				Debug::Error("Failed to load texture {}", i);
-			}
-			textures.push_back(s);
-		}
-	}
-
-	int index = 0;
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			float sz = 256;
-			float halfSize = sz / 2.f;
-			index++;
-
-			gfx::BatchVertex v1((x - 8) * sz - halfSize, (y - 8) * sz + halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[index % 4]->TextureID()), 0.f);
-			gfx::BatchVertex v2((x - 8) * sz - halfSize, (y - 8) * sz - halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[index % 4]->TextureID()), 0.f);
-			gfx::BatchVertex v3((x - 8) * sz + halfSize, (y - 8) * sz - halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[index % 4]->TextureID()), 0.f);
-			gfx::BatchVertex v4((x - 8) * sz + halfSize, (y - 8) * sz + halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[index % 4]->TextureID()), 0.f);
-			gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
-
-			// Graphics().Batch2DPushQuad(vertices);
-		}
-	}
-
-	for (int i = 0; i < 0; i++) {
-		float x = (i - 16) * 256;
-		float y = 0;
-		float halfSize = 128;
-
-		gfx::BatchVertex v1(x - halfSize, y + halfSize, 0.f, /**/ 1.f, 1.f, 0.f, 1.f, /**/ 0.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
-		gfx::BatchVertex v2(x - halfSize, y - halfSize, 0.f, /**/ 1.f, 1.f, 1.f, 1.f, /**/ 0.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
-		gfx::BatchVertex v3(x + halfSize, y - halfSize, 0.f, /**/ 0.f, 1.f, 1.f, 1.f, /**/ 1.f, 0.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
-		gfx::BatchVertex v4(x + halfSize, y + halfSize, 0.f, /**/ 1.f, 0.f, 1.f, 1.f, /**/ 1.f, 1.f, /**/ static_cast<float>(textures[i]->TextureID()), 0.f);
-		gfx::BatchVertex vertices[4] = {v1, v2, v3, v4};
-
-		Graphics().Batch2DPushQuad(vertices);
-	}
 
 	vec2 mouse = m_window->GetVideoMousePosition();
 	// unsigned char color[4];
