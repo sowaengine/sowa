@@ -34,6 +34,7 @@ class Node : public object_type {
 	virtual void EnterScene() {}
 	virtual void ExitScene() {}
 
+	virtual void PreUpdate() {}
 	virtual void UpdateLogic() {}
 	virtual void UpdateDraw() {}
 
@@ -52,6 +53,8 @@ class Node : public object_type {
 	void RemoveChild(const std::string &name);
 	void RemoveNode(Node *node);
 	void SetParent(Node *node);
+
+	bool IsInstanceOf(const std::string& nodeType);
 
 	const std::string& GetNodeType() { return _NodeType; }
 

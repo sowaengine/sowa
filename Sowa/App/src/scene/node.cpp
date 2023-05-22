@@ -83,6 +83,10 @@ void Node::SetParent(Node *parent) {
 	_Parent = parent;
 }
 
+bool Node::IsInstanceOf(const std::string& nodeType) {
+	return NodeDB::Instance().IsInstanceOf(GetNodeType(), nodeType);
+}
+
 FileBuffer Node::SaveImpl(object_type *out) {
 	YamlNode doc;
 	Node *o = reinterpret_cast<Node *>(out);

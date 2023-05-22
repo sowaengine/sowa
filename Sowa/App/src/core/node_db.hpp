@@ -74,6 +74,18 @@ class NodeDB {
 		}
 	}
 
+	bool IsInstanceOf(std::string nodeType, std::string instanceOf) {
+		if(nodeType == instanceOf) {
+			return true;
+		}
+		std::string extendsFrom = m_types[nodeType].extendsFrom;
+		if(extendsFrom == "") {
+			return false;
+		}
+
+		return IsInstanceOf(extendsFrom, instanceOf);
+	}
+
 	Node *ConstructNode(const std::string &typeName);
 	void DestructNode(Node *node);
 
