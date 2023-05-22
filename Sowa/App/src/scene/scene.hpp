@@ -20,6 +20,7 @@ class Scene : public object_type {
 	void Enter();
 	void Exit();
 
+	void PreUpdate();
 	void UpdateLogic();
 	void UpdateDraw();
 

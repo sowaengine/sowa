@@ -55,6 +55,11 @@ void Scene::Exit() {
 	callExit(root);
 }
 
+void Scene::PreUpdate() {
+	for (Node *node : _RegisteredNodes) {
+		node->PreUpdate();
+	}
+}
 void Scene::UpdateLogic() {
 	for (Node *node : _RegisteredNodes) {
 		node->UpdateLogic();
