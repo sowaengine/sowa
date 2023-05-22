@@ -21,11 +21,12 @@ void BatchRendererGL::Init(const std::string &vsource, const std::string &fsourc
 	m_buffer.BufferData(nullptr, sizeof(BatchVertex) * BATCH2D_MAX_VERTEX, BufferUsage::DynamicDraw);
 
 	m_array.ResetAttributes();
-	m_array.SetAttribute(0, GLAttributeType::Vec3);
-	m_array.SetAttribute(1, GLAttributeType::Vec4);
-	m_array.SetAttribute(2, GLAttributeType::Vec2);
-	m_array.SetAttribute(3, GLAttributeType::Float);
-	m_array.SetAttribute(4, GLAttributeType::Float);
+	m_array.SetAttribute(0, GLAttributeType::Vec3);  // position
+	m_array.SetAttribute(1, GLAttributeType::Vec4);  // color
+	m_array.SetAttribute(2, GLAttributeType::Vec2);  // uv
+	m_array.SetAttribute(3, GLAttributeType::Float);  // texture
+	m_array.SetAttribute(4, GLAttributeType::Float);  // drawID
+	m_array.SetAttribute(5, GLAttributeType::Float);  // drawMode
 	m_array.UploadAttributes();
 
 	m_array.Unbind();

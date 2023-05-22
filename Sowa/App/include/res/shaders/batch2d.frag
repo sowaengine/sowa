@@ -7,6 +7,7 @@ in vec4 vColor;
 in vec2 vTexCoords;
 in float vTexture;
 in float vDrawId;
+in float vDrawMode;
 
 uniform sampler2D uTextures[32];
 
@@ -19,8 +20,14 @@ float lerp(float from, float to, float t) {
 
 
 void main() {
-    color = getTexture() * vColor;
     drawId = int(vDrawId);
+
+    if(int(vDrawMode) == 0) {
+        color = getTexture() * vColor;
+    }
+    else if(int(vDrawMode) == 1) {
+        color = vec4(1.0, 1.0, 1.0, getTexture().r) * vColor;
+    }
 
     if(color.a < 0.1)
         discard;

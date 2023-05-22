@@ -143,8 +143,6 @@ void GraphicsGL::DrawFullscreenQuad() {
 }
 
 void GraphicsGL::DrawText(const std::string &text, IFont *font, float x, float y, mat4 transform, float scale) {
-	DefaultUITextShader().Bind();
-	m_UITextArray.Bind();
 
 	std::string::const_iterator c;
 	for (c = text.begin(); c != text.end(); c++) {
@@ -156,33 +154,39 @@ void GraphicsGL::DrawText(const std::string &text, IFont *font, float x, float y
 		float w = ch.size.x * scale;
 		float h = ch.size.y * scale;
 
-		glm::vec4 pos1 = transform * glm::vec4{xpos, ypos + h, 0.f, 1.f};
-		glm::vec4 pos2 = transform * glm::vec4{xpos, ypos, 0.f, 1.f};
-		glm::vec4 pos3 = transform * glm::vec4{xpos + w, ypos, 0.f, 1.f};
-		glm::vec4 pos4 = transform * glm::vec4{xpos + w, ypos + h, 0.f, 1.f};
+		glm::vec4 points[4] = {
+			{xpos, ypos + h, 0.f, 1.f},
+			{xpos, ypos, 0.f, 1.f},
+			{xpos + w, ypos, 0.f, 1.f},
+			{xpos + w, ypos + h, 0.f, 1.f}};
 
-		float vertices[6][4] = {
-			{pos1.x, pos1.y, 0.f, 0.f},
-			{pos2.x, pos2.y, 0.f, 1.f},
-			{pos3.x, pos3.y, 1.f, 1.f},
+		glm::vec2 uvs[4] = {
+			{0.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f},
+			{1.f, 0.f}};
 
-			{pos1.x, pos1.y, 0.f, 0.f},
-			{pos3.x, pos3.y, 1.f, 1.f},
-			{pos4.x, pos4.y, 1.f, 0.f}};
+		gfx::BatchVertex vertices[4];
+		for (int i = 0; i < 4; i++) {
+			points[i] = transform * points[i];
 
-		DefaultUITextShader().UniformTexture("uTexture", ch.textureId, 0);
-
-		m_UITextBuffer.Bind();
-		m_UITextBuffer.BufferSubdata(vertices, sizeof(vertices), 0);
-		m_UITextBuffer.Unbind();
-
-		if (ch.textureId != 0) {
-			GL().drawArrays(GLDrawMode::Triangles, 0, 6);
+			vertices[i].x = points[i].x;
+			vertices[i].y = points[i].y;
+			vertices[i].z = 0.f;
+			vertices[i].r = 1.f;
+			vertices[i].g = 1.f;
+			vertices[i].b = 1.f;
+			vertices[i].a = 1.f;
+			vertices[i].uvX = uvs[i].x;
+			vertices[i].uvY = uvs[i].y;
+			vertices[i].textureId = ch.textureId;
+			vertices[i].drawMode = static_cast<float>(gfx::BatchVertex::DrawMode::Text);
 		}
+
+		BatchRendererUI().PushQuad(vertices);
 
 		x += (ch.advance >> 6) * scale;
 	}
-	m_UITextArray.Unbind();
 }
 
 void GraphicsGL::DrawTextBlank(const std::string &text, IFont *font) {
@@ -293,7 +297,7 @@ void GraphicsGL::DrawTextUI(const std::string &text, IFont *font, DrawTextUIArgs
 }
 
 void GraphicsGL::Clear() {
-	GL().clearColor(0.02f, 0.04f, 0.07f, 0.f);
+	GL().clearColor(0.02f, 0.1f, 0.12f, 0.f);
 	GL().clearColorBit();
 	GL().clearDepthBit();
 }

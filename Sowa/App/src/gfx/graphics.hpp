@@ -52,6 +52,11 @@ struct DrawTextUIArgs {
 };
 
 struct BatchVertex {
+	enum class DrawMode : uint32_t {
+		Default = 0,
+		Text = 1,
+	};
+
 	float x = 0.f;
 	float y = 0.f;
 	float z = 0.f;
@@ -63,10 +68,11 @@ struct BatchVertex {
 	float uvY = 0.f;
 	float textureId = 0.f;
 	float id = 0.f;
+	float drawMode = 0.f;
 
 	BatchVertex() = default;
 
-	BatchVertex(float x, float y, float z, float r, float g, float b, float a, float uvX, float uvY, float textureId, float id) {
+	BatchVertex(float x, float y, float z, float r, float g, float b, float a, float uvX, float uvY, float textureId, float id, DrawMode drawMode) {
 		this->x = x;
 		this->y = y;
 		this->z = z;
@@ -78,6 +84,7 @@ struct BatchVertex {
 		this->uvY = uvY;
 		this->textureId = textureId;
 		this->id = id;
+		this->drawMode = static_cast<float>((uint32_t)drawMode);
 	}
 };
 
