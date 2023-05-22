@@ -45,12 +45,11 @@ enum class TextDrawMode {
 };
 
 struct DrawTextUIArgs {
-	float targetWidth;
+	float targetWidth = -1.f;
 	TextDrawMode drawMode;
 	TextAlign align;
 	mat4 transform = mat4(1.f);
 };
-
 
 struct BatchVertex {
 	float x = 0.f;
@@ -98,7 +97,7 @@ class IGraphics {
 	virtual void DrawTextWithTransform(const std::string &text, IFont *font, mat4 modelTransform) = 0;
 	virtual void DrawTextUI(const std::string &text, IFont *font, DrawTextUIArgs args) = 0;
 
-	virtual void SetViewportStyle(SetViewportStyleArgs args) = 0;
+	virtual void SetViewportStyle(SetViewportStyleArgs args, rect *r = nullptr) = 0;
 	virtual void Clear() = 0;
 
 	virtual IBatchRenderer &BatchRenderer2D() = 0;

@@ -17,11 +17,11 @@
 #include "resource/font/font.hpp"
 #include "resource/resource_watcher/resource_watcher.hpp"
 
+#include "gfx/font.hpp"
 #include "gfx/gl/framebuffer_gl.hpp"
 #include "gfx/shader.hpp"
 #include "gfx/window.hpp"
 #include "gfx/window_manager.hpp"
-#include "gfx/font.hpp"
 
 class FT_LibraryRec_;
 
@@ -80,7 +80,7 @@ class Application {
 	void BindProjectionUniform(gfx::IShader &shader, const std::string &uniformName);
 	void BindViewUniform(gfx::IShader &shader, const std::string &uniformName);
 
-	FT_LibraryRec_* GetFTInstance();
+	FT_LibraryRec_ *GetFTInstance();
 
   private:
 	friend class Window;
@@ -101,7 +101,7 @@ class Application {
 	std::unordered_map<std::string, std::function<void(Node *)>> _NodeTypeDestructors;
 	Reference<Scene> _Scene{nullptr};
 
-	gfx::IFont* m_defaultFont = nullptr;
+	gfx::IFont *m_defaultFont = nullptr;
 
 	// std::unique_ptr<nmGfx::Renderer> _renderer;
 	gfx::Window *m_window;
@@ -123,9 +123,10 @@ class Application {
 
 	gfx::GLFramebuffer m_drawpass2d;
 
-	FT_LibraryRec_* m_ftInstance = nullptr;
+	FT_LibraryRec_ *m_ftInstance = nullptr;
 
 	// Editor
+	rect m_viewportRect = rect(0.f, 0.f, 0.f, 0.f);
 	vec2 _EditorCameraPos{0.f, 0.f};
 	float _EditorCameraZoom{10.f};
 	uint32_t m_picked_node;

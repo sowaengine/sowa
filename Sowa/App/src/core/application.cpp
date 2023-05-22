@@ -536,23 +536,26 @@ bool Application::Process() {
 		}
 	}
 
-	vec2 mousePos = GetWindow().GetVideoMousePosition();
-	// mousePos.x += (_EditorCameraPos.x * mapLog(_EditorCameraZoom)) - (GetWindow().GetVideoSize().x / 2);
-	// mousePos.y -= (_EditorCameraPos.y * mapLog(_EditorCameraZoom)) - (GetWindow().GetVideoSize().y / 2);
-	// int id = _renderer->Get2DPickID(mousePos.x, GetWindow().GetVideoSize().y - mousePos.y);
-	// if (GetCurrentScene() != nullptr) {
-	// 	if (GetCurrentScene()->GetNodeByID(id) != nullptr) {
-	// 		m_hovering_node = static_cast<uint32_t>(id);
-	// 	} else {
-	// look for editor clickables
-	// 		m_hovering_node = 0;
-	// 	}
-	// }
-
 	const sowa::vec2 windowSize = m_window->GetWindowSize();
 	const sowa::vec2 videoSize = m_window->GetVideoSize();
-	/*
 
+	vec2 mousePos = GetWindow().GetMousePosition();
+	mousePos.y = mousePos.y;
+	
+	mousePos = rect(0.f, 0.f, windowSize.x, windowSize.y).mapPoint(mousePos, m_viewportRect);
+	mousePos = rect(0.f, 0.f, videoSize.x, videoSize.y).mapPoint(mousePos, rect(0.f, 0.f, windowSize.x, windowSize.y));
+	mousePos.y = videoSize.y - mousePos.y;
+
+	int id = m_drawpass2d.ReadAttachmentInt(1, mousePos.x, mousePos.y);
+	if (GetCurrentScene() != nullptr) {
+		if (GetCurrentScene()->GetNodeByID(id) != nullptr) {
+			m_hovering_node = static_cast<uint32_t>(id);
+		} else {
+			m_hovering_node = 0;
+		}
+	}
+
+	/*
 		static gfx::GLTexture tex;
 		static bool loaded = false;
 		if (!loaded) {
@@ -571,14 +574,6 @@ bool Application::Process() {
 		static float rot = targetRot;
 		rot = lerpAngle(rot, targetRot, 0.25f);
 	*/
-
-	vec2 mouse = m_window->GetVideoMousePosition();
-	// unsigned char color[4];
-	// m_drawpass2d.ReadAttachmentColor(0, mouse.x, videoSize.y - mouse.y, color);
-	// Debug::Log("Hovering on rgba({}, {}, {}, {})", color[0], color[1], color[2], color[3]);
-
-	int id = m_drawpass2d.ReadAttachmentInt(1, mouse.x, videoSize.y - mouse.y);
-	// Debug::Log("Hovering on {}", id);
 
 	m_drawpass2d.Unbind();
 	Graphics().Clear();
@@ -617,7 +612,7 @@ bool Application::Process() {
 		args.windowHeight = windowSize.y;
 		args.videoWidth = videoSize.x;
 		args.videoHeight = videoSize.y;
-		Graphics().SetViewportStyle(args);
+		Graphics().SetViewportStyle(args, &m_viewportRect);
 		Graphics().DrawFullscreenQuad();
 	}
 

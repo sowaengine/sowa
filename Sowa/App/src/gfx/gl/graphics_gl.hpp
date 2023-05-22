@@ -31,7 +31,7 @@ class GraphicsGL : public IGraphics {
 	void DrawTextWithTransform(const std::string &text, IFont *font, mat4 modelTransform) override;
 	void DrawTextUI(const std::string &text, IFont *font, DrawTextUIArgs args) override;
 
-	void SetViewportStyle(SetViewportStyleArgs args) override;
+	void SetViewportStyle(SetViewportStyleArgs args, rect *r = nullptr) override;
 	void Clear() override;
 
 	inline IBatchRenderer &BatchRenderer2D() override { return m_batch2D; }
