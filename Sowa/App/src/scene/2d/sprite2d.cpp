@@ -90,9 +90,7 @@ void Sprite2D::UpdateDraw() {
 				vertices[i].uvY = uvs[i].y;
 				vertices[i].textureId = 0.f;
 			}
-			Graphics().Batch2DPushQuad(vertices);
-
-			Graphics().DrawQuad();
+			Graphics().BatchRenderer2D().PushQuad(vertices);
 		}
 
 		glm::vec4 points[4] = {
@@ -124,7 +122,7 @@ void Sprite2D::UpdateDraw() {
 			vertices[i].textureId = static_cast<float>(m_texture->TextureID());
 			vertices[i].id = static_cast<float>(ID());
 		}
-		Graphics().Batch2DPushQuad(vertices);
+		Graphics().BatchRenderer2D().PushQuad(vertices);
 
 		// Graphics().Default2DShader().Bind();
 		// Graphics().Default2DShader().UniformTexture("uTexture", m_texture->TextureID(), 0);

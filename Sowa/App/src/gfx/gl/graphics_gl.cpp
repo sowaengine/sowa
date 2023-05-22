@@ -114,24 +114,6 @@ GraphicsGL::GraphicsGL() {
 	m_UITextArray.UploadAttributes();
 
 	m_UITextArray.Unbind();
-
-
-	m_batch2DArray.New();
-	m_batch2dBuffer.New(BufferType::VertexBuffer);
-	m_batch2DArray.Bind();
-	m_batch2dBuffer.Bind();
-
-	m_batch2dBuffer.BufferData(nullptr, sizeof(BatchVertex) * BATCH2D_MAX_VERTEX, BufferUsage::DynamicDraw);
-
-	m_batch2DArray.ResetAttributes();
-	m_batch2DArray.SetAttribute(0, GLAttributeType::Vec3);
-	m_batch2DArray.SetAttribute(1, GLAttributeType::Vec4);
-	m_batch2DArray.SetAttribute(2, GLAttributeType::Vec2);
-	m_batch2DArray.SetAttribute(3, GLAttributeType::Float);
-	m_batch2DArray.SetAttribute(4, GLAttributeType::Float);
-	m_batch2DArray.UploadAttributes();
-
-	m_batch2DArray.Unbind();
 }
 GraphicsGL::~GraphicsGL() {
 }
@@ -154,10 +136,6 @@ IShader &GraphicsGL::DefaultFullscreenShader() {
 
 IShader &GraphicsGL::DefaultUITextShader() {
 	return m_defaultUITextShader;
-}
-
-IShader &GraphicsGL::DefaultBatch2DShader() {
-	return m_defaultBatch2DShader;
 }
 
 void GraphicsGL::DrawQuad() {
@@ -383,81 +361,6 @@ void GraphicsGL::SetViewportStyle(SetViewportStyleArgs args) {
 			GL().viewport(0, gap / 2, width, height);
 		}
 	}
-}
-
-void GraphicsGL::Batch2DBegin() {
-	m_batch2dVertices.clear();
-	m_batch2dTextures.clear();
-	m_batch2dTextureCounter = 0;
-}
-void GraphicsGL::Batch2DPushQuad(BatchVertex vertices[4]) {
-	static GLTexture whiteTexture;
-	if(whiteTexture.ID() == 0) {
-		unsigned char data[4] = {255, 255, 255, 255};
-		whiteTexture.Load2DFromData(data, 1, 1, GLDataType::UByte, GLTextureFormat::Rgba);
-	}
-	// 1 2 3
-	// 1 3 4
-
-	for(int i=0; i<4; i++) {
-		uint32_t textureId = static_cast<uint32_t>(vertices[i].textureId);
-		if(textureId == 0) {
-			textureId = whiteTexture.ID();
-		}
-
-		if(m_batch2dTextures[textureId] == 0) {
-			m_batch2dTextures[textureId] = ++m_batch2dTextureCounter;
-		}
-		vertices[i].textureId = static_cast<float>(m_batch2dTextures[textureId]) - 1.f;
-	}
-
-	m_batch2dVertices.push_back(vertices[0]);
-	m_batch2dVertices.push_back(vertices[1]);
-	m_batch2dVertices.push_back(vertices[2]);
-
-	m_batch2dVertices.push_back(vertices[0]);
-	m_batch2dVertices.push_back(vertices[2]);
-	m_batch2dVertices.push_back(vertices[3]);
-
-	if(m_batch2dTextures.size() >= BATCH2D_MAX_TEXTURE || m_batch2dVertices.size() >= BATCH2D_MAX_VERTEX) {
-		Batch2DEnd();
-	}
-}
-void GraphicsGL::Batch2DEnd() {
-	if(m_batch2dVertices.size() == 0) {
-		return;
-	}
-
-	DefaultBatch2DShader().Bind();
-	
-
-	m_batch2dBuffer.Bind();
-	m_batch2dBuffer.BufferSubdata(m_batch2dVertices.data(), m_batch2dVertices.size() * sizeof(BatchVertex), 0);
-	m_batch2dBuffer.Unbind();
-
-
-	// m_batch2dTextures[id] = slot + 1;
-
-	std::vector<int> textures;
-	for(const auto& [id, slot] : m_batch2dTextures) {
-		GL().activeTexture(slot - 1);
-		GL().bindTexture(GLTextureType::Texture2D, id);
-		textures.push_back(slot - 1);
-	}
-	std::sort(textures.begin(), textures.end());
-	for(size_t i = 0; i < textures.size(); i++) {
-	}
-	DefaultBatch2DShader().UniformIntVector("uTextures", textures);
-
-
-	m_batch2DArray.Bind();
-	GL().drawArrays(GLDrawMode::Triangles, 0, m_batch2dVertices.size());
-	Stats::Instance().Batch2DDrawCall();
-	m_batch2DArray.Unbind();
-
-	m_batch2dVertices.clear();
-	m_batch2dTextures.clear();
-	m_batch2dTextureCounter = 0;
 }
 
 } // namespace gfx

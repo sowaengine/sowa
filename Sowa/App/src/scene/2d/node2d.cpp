@@ -76,10 +76,10 @@ void Node2D::Bind() {
 			return node2d->Scale().x;
 		}
 		return 0.f;
-	}, [](Node* node, float pos) {
+	}, [](Node* node, float sz) {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
-			node2d->Scale().x = pos;
+			node2d->Scale().x = sz;
 		}
 	});
 
@@ -89,10 +89,10 @@ void Node2D::Bind() {
 			return node2d->Scale().y;
 		}
 		return 0.f;
-	}, [](Node* node, float pos) {
+	}, [](Node* node, float sz) {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
-			node2d->Scale().y = pos;
+			node2d->Scale().y = sz;
 		}
 	});
 }

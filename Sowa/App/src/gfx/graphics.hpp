@@ -1,6 +1,7 @@
 #ifndef SW_GRAPHICS_HPP_
 #define SW_GRAPHICS_HPP_
 
+#include "batch_renderer.hpp"
 #include "math/math.hpp"
 #include "shader.hpp"
 
@@ -89,7 +90,6 @@ class IGraphics {
 	virtual IShader &DefaultSolidColorShader() = 0;
 	virtual IShader &DefaultFullscreenShader() = 0;
 	virtual IShader &DefaultUITextShader() = 0;
-	virtual IShader &DefaultBatch2DShader() = 0;
 
 	virtual void DrawQuad() = 0;
 	virtual void DrawFullscreenQuad() = 0;
@@ -101,9 +101,8 @@ class IGraphics {
 	virtual void SetViewportStyle(SetViewportStyleArgs args) = 0;
 	virtual void Clear() = 0;
 
-	virtual void Batch2DBegin() = 0;
-	virtual void Batch2DPushQuad(BatchVertex vertices[4]) = 0;
-	virtual void Batch2DEnd() = 0;
+	virtual IBatchRenderer &BatchRenderer2D() = 0;
+	virtual IBatchRenderer &BatchRendererUI() = 0;
 
   protected:
 	friend class sowa::Application;

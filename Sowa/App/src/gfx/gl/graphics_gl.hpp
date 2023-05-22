@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include "../graphics.hpp"
+#include "./batch_renderer_gl.hpp"
+#include "./buffer_gl.hpp"
 #include "./mesh_gl.hpp"
 #include "./shader_gl.hpp"
-#include "./buffer_gl.hpp"
 #include "./vertex_array_gl.hpp"
 
 namespace sowa {
@@ -23,24 +23,21 @@ class GraphicsGL : public IGraphics {
 	IShader &DefaultSolidColorShader() override;
 	IShader &DefaultFullscreenShader() override;
 	IShader &DefaultUITextShader() override;
-	IShader &DefaultBatch2DShader() override;
 
 	void DrawQuad() override;
 	void DrawFullscreenQuad() override;
-	void DrawText(const std::string& text, IFont* font, float x, float y, mat4 transform, float scale) override;
-	void DrawTextBlank(const std::string& text, IFont* font) override;
-	void DrawTextWithTransform(const std::string& text, IFont* font, mat4 modelTransform) override;
-	void DrawTextUI(const std::string& text, IFont* font, DrawTextUIArgs args) override;
+	void DrawText(const std::string &text, IFont *font, float x, float y, mat4 transform, float scale) override;
+	void DrawTextBlank(const std::string &text, IFont *font) override;
+	void DrawTextWithTransform(const std::string &text, IFont *font, mat4 modelTransform) override;
+	void DrawTextUI(const std::string &text, IFont *font, DrawTextUIArgs args) override;
 
 	void SetViewportStyle(SetViewportStyleArgs args) override;
 	void Clear() override;
 
-	void Batch2DBegin() override;
-	void Batch2DPushQuad(BatchVertex vertices[4]) override;
-	void Batch2DEnd() override;
+	inline IBatchRenderer &BatchRenderer2D() override { return m_batch2D; }
+	inline IBatchRenderer &BatchRendererUI() override { return m_batchUI; }
 
   private:
-
 	GLShader m_default2dshader;
 	GLMesh m_default2dmesh;
 
@@ -53,15 +50,8 @@ class GraphicsGL : public IGraphics {
 	GLBuffer m_UITextBuffer;
 	GLVertexArray m_UITextArray;
 
-	GLShader m_defaultBatch2DShader;
-	GLBuffer m_batch2dBuffer;
-	GLVertexArray m_batch2DArray;
-	std::vector<BatchVertex> m_batch2dVertices;
-	
-	// textures[textureId] = slot;
-	std::map<uint32_t, uint32_t> m_batch2dTextures;
-	uint32_t m_batch2dTextureCounter = 0;
-
+	BatchRendererGL m_batch2D;
+	BatchRendererGL m_batchUI;
 };
 
 } // namespace gfx
