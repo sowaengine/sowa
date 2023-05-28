@@ -122,6 +122,7 @@ class Application {
 	std::string _ExecutablePath{""};
 
 	gfx::GLFramebuffer m_drawpass2d;
+	gfx::GLFramebuffer m_finalDrawPass;
 
 	FT_LibraryRec_ *m_ftInstance = nullptr;
 

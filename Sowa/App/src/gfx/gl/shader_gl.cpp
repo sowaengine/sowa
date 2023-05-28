@@ -70,7 +70,7 @@ void GLShader::UniformTexture(const std::string& name, uint32_t textureID, int s
 		Debug::Error("Failed to get uniform location {}", name);
 	}
 
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE0 + slot);
 	// glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glUniform1i(loc, slot);

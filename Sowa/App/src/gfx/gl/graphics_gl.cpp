@@ -135,6 +135,10 @@ IShader &GraphicsGL::DefaultUITextShader() {
 	return m_defaultUITextShader;
 }
 
+IShader &GraphicsGL::DefaultFinalShader() {
+	return m_defaultFinalShader;
+}
+
 void GraphicsGL::DrawQuad() {
 	m_default2dmesh.Draw();
 }

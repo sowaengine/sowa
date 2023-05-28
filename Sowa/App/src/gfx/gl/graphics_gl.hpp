@@ -23,6 +23,7 @@ class GraphicsGL : public IGraphics {
 	IShader &DefaultSolidColorShader() override;
 	IShader &DefaultFullscreenShader() override;
 	IShader &DefaultUITextShader() override;
+	IShader &DefaultFinalShader() override;
 
 	void DrawQuad() override;
 	void DrawFullscreenQuad() override;
@@ -44,6 +45,7 @@ class GraphicsGL : public IGraphics {
 	GLShader m_defaultSolidColorShader;
 
 	GLShader m_defaultFullscreenShader;
+	GLShader m_defaultFinalShader;
 	GLMesh m_defaultFullscreenMesh;
 
 	GLShader m_defaultUITextShader;

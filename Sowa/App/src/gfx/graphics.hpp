@@ -96,6 +96,7 @@ class IGraphics {
 	virtual IShader &DefaultSolidColorShader() = 0;
 	virtual IShader &DefaultFullscreenShader() = 0;
 	virtual IShader &DefaultUITextShader() = 0;
+	virtual IShader &DefaultFinalShader() = 0;
 
 	virtual void DrawQuad() = 0;
 	virtual void DrawFullscreenQuad() = 0;

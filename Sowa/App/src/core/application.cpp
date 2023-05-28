@@ -70,6 +70,8 @@
 #include "res/shaders/default2d.vert.res.hpp"
 #include "res/shaders/fullscreen.frag.res.hpp"
 #include "res/shaders/fullscreen.vert.res.hpp"
+#include "res/shaders/final.frag.res.hpp"
+#include "res/shaders/final.vert.res.hpp"
 #include "res/shaders/solid_color.frag.res.hpp"
 #include "res/shaders/solid_color.vert.res.hpp"
 #include "res/shaders/text.frag.res.hpp"
@@ -210,6 +212,10 @@ bool Application::Init(int argc, char const **argv) {
 	m_drawpass2d.SetTarget(1, gfx::GLFramebufferTargetType::Int);
 	m_drawpass2d.Create(videoSize.x, videoSize.y);
 
+	m_finalDrawPass.SetTarget(0, gfx::GLFramebufferTargetType::Vec4);
+	m_finalDrawPass.SetTarget(1, gfx::GLFramebufferTargetType::Int);
+	m_finalDrawPass.Create(videoSize.x, videoSize.y);
+
 	gfx::GLTexture icon;
 	icon.Load2D(FILE_BUFFER(Res::App_include_res_textures_icon_512x_png_data));
 	m_window->SetWindowIcon(icon);
@@ -219,6 +225,7 @@ bool Application::Init(int argc, char const **argv) {
 	Graphics().DefaultSolidColorShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_solid_color_frag_data)));
 	Graphics().DefaultFullscreenShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_fullscreen_frag_data)));
 	Graphics().DefaultUITextShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_text_frag_data)));
+	Graphics().DefaultFinalShader().New(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_final_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_final_frag_data)));
 
 	Graphics().BatchRenderer2D().Init(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_frag_data)));
 	Graphics().BatchRendererUI().Init(std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_vert_data)), std::string(FILE_BUFFER_CHAR(Res::App_include_res_shaders_batch2d_frag_data)));
@@ -237,7 +244,18 @@ bool Application::Init(int argc, char const **argv) {
 
 	Reference<Scene> scene = Scene::New();
 	// scene->SetRoot(scene->Create("Node", "Root"));
-	scene->Load("res://scene.toml");
+	{
+		ScopeTimer timer("Scene load");
+		scene->Load("res://scene.toml");
+	}
+	{
+		ScopeTimer timer("Scene save");
+		scene->Save();
+	}
+
+	// Debug::Log("\n\n{}\nScene Saved", scene->Save());
+
+	
 	// if(!Serializer::get_singleton().Load(scene.get(), File::LoadFile(File::Path("res://scene.scn")))) {
 	// 	Debug::Error("Failed to load scene");
 	// }
@@ -457,10 +475,6 @@ bool Application::Process() {
 
 	m_drawpass2d.Bind();
 	Graphics().Clear();
-	// _renderer->Begin2D(
-	// 	GetCameraTransform(),
-	// 	{0.5f, 0.5f},
-	// 	{0.2f, 0.2f, 0.2f, 1.f});
 
 	BindProjectionUniform(Graphics().DefaultUITextShader(), "uProj");
 	BindViewUniform(Graphics().DefaultUITextShader(), "uView");
@@ -484,30 +498,8 @@ bool Application::Process() {
 		Renderer::get_singleton().DrawLine({m_window->GetVideoSize().x, m_window->GetVideoSize().y}, {0, m_window->GetVideoSize().y}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
 		Renderer::get_singleton().DrawLine({0, m_window->GetVideoSize().y}, {0, 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
 
-	} else {
-		static float f = 0.f;
-		f += 0.02f;
-		// ((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Position() = {std::sin(f) * 200, std::cos(f) * 200};
-		// ((Sprite2D *)_Scene->GetRoot()->GetChild("Node3"))->Rotation() += 0.4f;
 	}
 
-	static float g;
-	g += 0.02f;
-	// ((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().x = 3000 + (std::sin(g) * 100);
-	// ((NineSlicePanel *)_Scene->GetRoot()->GetChild("Button"))->Size().y = 2000 + (std::cos(g) * 100);
-
-	// Draw node selection
-	if (!IsRunning() && PickedNode() != 0 && GetCurrentScene() != nullptr) {
-		Node *node = GetCurrentScene()->GetNodeByID(PickedNode());
-		if (node != nullptr) {
-			Node2D *node2d = dynamic_cast<Node2D *>(node);
-			if (node2d != nullptr) {
-				float selectionThickness = 5.f;
-				Renderer::get_singleton().DrawLine({node2d->Position().x - 30, node2d->Position().y}, {node2d->Position().x + 30, node2d->Position().y}, selectionThickness * mapLog(_CurrentEditorCameraZoom), {.1f, .4f, .6f, 3.f});
-				Renderer::get_singleton().DrawLine({node2d->Position().x, node2d->Position().y - 30}, {node2d->Position().x, node2d->Position().y + 30}, selectionThickness * mapLog(_CurrentEditorCameraZoom), {.1f, .4f, .6f, 3.f});
-			}
-		}
-	}
 
 	if (_Scene != nullptr) {
 		Graphics().BatchRenderer2D().Reset();
@@ -539,6 +531,25 @@ bool Application::Process() {
 	const sowa::vec2 windowSize = m_window->GetWindowSize();
 	const sowa::vec2 videoSize = m_window->GetVideoSize();
 
+
+	m_drawpass2d.Unbind();
+	m_finalDrawPass.Bind();
+	Graphics().Clear();
+
+	{
+		gfx::SetViewportStyleArgs args;
+		args.mode = m_drawpass2d.DrawMode();
+		args.windowWidth = videoSize.x;
+		args.windowHeight = videoSize.y;
+		args.videoWidth = videoSize.x;
+		args.videoHeight = videoSize.y;
+		Graphics().SetViewportStyle(args, nullptr);
+		Graphics().DefaultFullscreenShader().Bind();
+		Graphics().DefaultFullscreenShader().UniformTexture("uAlbedo", m_drawpass2d.GetTargetTextureID(0), 0);
+		Graphics().DefaultFullscreenShader().UniformTexture("uDrawId", m_drawpass2d.GetTargetTextureID(1), 1);
+		Graphics().DrawFullscreenQuad();
+	}
+
 	vec2 mousePos = GetWindow().GetMousePosition();
 	mousePos.y = mousePos.y;
 	
@@ -546,7 +557,7 @@ bool Application::Process() {
 	mousePos = rect(0.f, 0.f, videoSize.x, videoSize.y).mapPoint(mousePos, rect(0.f, 0.f, windowSize.x, windowSize.y));
 	mousePos.y = videoSize.y - mousePos.y;
 
-	int id = m_drawpass2d.ReadAttachmentInt(1, mousePos.x, mousePos.y);
+	int id = m_finalDrawPass.ReadAttachmentInt(1, mousePos.x, mousePos.y);
 	if (GetCurrentScene() != nullptr) {
 		if (GetCurrentScene()->GetNodeByID(id) != nullptr) {
 			m_hovering_node = static_cast<uint32_t>(id);
@@ -555,96 +566,24 @@ bool Application::Process() {
 		}
 	}
 
-	/*
-		static gfx::GLTexture tex;
-		static bool loaded = false;
-		if (!loaded) {
-			loaded = true;
-			auto data = File::GetFileContent("res://kenney_space-shooter-redux/PNG/playerShip2_blue.png");
-			tex.Load2D(data.data(), data.size());
-		}
-
-		static vec2 position{1920.f / 2, 1080.f / 2};
-		const float speed = 200 * (1.0f / 60);
-
-		vec2 pos = m_window->GetVideoMousePosition();
-		pos.y = m_window->GetVideoSize().y - pos.y;
-
-		float targetRot = atan2(pos.y - videoSize.y * 0.5, pos.x - videoSize.x * 0.5) - (3.141592653589 / 2);
-		static float rot = targetRot;
-		rot = lerpAngle(rot, targetRot, 0.25f);
-	*/
-
-	m_drawpass2d.Unbind();
+	m_finalDrawPass.Unbind();
 	Graphics().Clear();
-
-	Graphics().DefaultFullscreenShader().Bind();
-	Graphics().DefaultFullscreenShader().UniformTexture("gAlbedo", m_drawpass2d.GetTargetTextureID(0), 0);
-
-	static gfx::ViewportDrawMode mode = gfx::ViewportDrawMode_KeepRatio;
-	if (m_window->IsKeyDown(GLFW_KEY_1)) {
-		mode = gfx::ViewportDrawMode_KeepRatio;
-	}
-	if (m_window->IsKeyDown(GLFW_KEY_2)) {
-		mode = gfx::ViewportDrawMode_KeepWidth;
-	}
-	if (m_window->IsKeyDown(GLFW_KEY_3)) {
-		mode = gfx::ViewportDrawMode_KeepHeight;
-	}
-	if (m_window->IsKeyDown(GLFW_KEY_4)) {
-		mode = gfx::ViewportDrawMode_Stretch;
-	}
-	if (m_window->IsKeyDown(GLFW_KEY_5)) {
-		mode = gfx::ViewportDrawMode_Contain;
-	}
-
-	if (m_window->IsKeyDown(GLFW_KEY_F1)) {
-		gfx::GL().setPolygonMode(gfx::GLPolygonMode::Fill);
-	}
-	if (m_window->IsKeyDown(GLFW_KEY_F2)) {
-		gfx::GL().setPolygonMode(gfx::GLPolygonMode::Line);
-	}
 
 	{
 		gfx::SetViewportStyleArgs args;
-		args.mode = mode;
+		args.mode = m_finalDrawPass.DrawMode();
 		args.windowWidth = windowSize.x;
 		args.windowHeight = windowSize.y;
 		args.videoWidth = videoSize.x;
 		args.videoHeight = videoSize.y;
 		Graphics().SetViewportStyle(args, &m_viewportRect);
+		Graphics().DefaultFinalShader().Bind();
+		Graphics().DefaultFinalShader().UniformTexture("uAlbedo", m_finalDrawPass.GetTargetTextureID(0), 0);
 		Graphics().DrawFullscreenQuad();
 	}
 
 	m_window->SwapBuffers();
 
-	/*
-static Reference<AudioStream> stream;
-static bool audioFirst = true;
-if (audioFirst) {
-	stream = std::make_shared<AudioStream>();
-	audioFirst = false;
-
-	FileBufferData data = File::GetFileContent("res://laserShoot.wav");
-	stream->Load(data.data(), data.size());
-
-	AudioStreamPlayer *player = dynamic_cast<AudioStreamPlayer*>(GetCurrentScene()->Create("AudioStreamPlayer", "My Player"));
-	GetCurrentScene()->GetRoot()->AddChild(player);
-	player->Stream() = stream;
-
-	Reference<AudioStream> music = std::make_shared<AudioStream>();
-	FileBufferData musicdata = File::GetFileContent("res://music.ogg");
-	music->Load(musicdata.data(), musicdata.size());
-
-	AudioStreamPlayer *musicplayer = dynamic_cast<AudioStreamPlayer*>(GetCurrentScene()->Create("AudioStreamPlayer", "Music"));
-	GetCurrentScene()->GetRoot()->AddChild(musicplayer);
-	musicplayer->Stream() = music;
-	musicplayer->Loop() = true;
-	musicplayer->Gain() = -100.f;
-
-	musicplayer->Play();
-}
-	*/
 
 	if (m_window->IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 		if (!((AudioStreamPlayer *)GetCurrentScene()->GetRoot()->GetChild("My Player"))->IsPlaying()) {
