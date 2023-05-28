@@ -4,10 +4,10 @@
 
 #include "core/application.hpp"
 #include "core/node_db.hpp"
-#include "utils/random.hpp"
-#include "serialize/serializer.hpp"
 #include "serialize/document.hpp"
+#include "serialize/serializer.hpp"
 #include "serialize/toml_serializer.hpp"
+#include "utils/random.hpp"
 
 #include <algorithm>
 
@@ -71,27 +71,24 @@ void Scene::UpdateDraw() {
 	}
 }
 
-void Scene::Load(const std::string& path) {
+void Scene::Load(const std::string &path) {
 	SerializeDocument doc = TomlSerializer::Load(path);
 
 	uint32_t active_camera_2d = 0;
 	doc.Value<uint32_t>("active_camera_2d", active_camera_2d);
 	SetCurrentCamera2D(active_camera_2d);
-	
 
 	SerializeDocument nodes = doc.Table("nodes");
 
-	
-	for(const auto [key, value] : nodes) {
-		if(value.type() != toml::node_type::table) {
+	for (const auto [key, value] : nodes) {
+		if (value.type() != toml::node_type::table) {
 			continue;
 		}
 		SerializeDocument nodeDocument = SerializeDocument(value);
 
-
 		int32_t id = 0;
 		auto r = std::from_chars(key.data(), key.data() + key.length(), id);
-		if(r.ec == std::errc::invalid_argument) {
+		if (r.ec == std::errc::invalid_argument) {
 			id = Random::GenerateID31();
 		}
 
@@ -99,55 +96,47 @@ void Scene::Load(const std::string& path) {
 		std::string nodeType = "Node";
 
 		nodeDocument.Value("name", name).Value("type", nodeType);
-		Node* node = Create(nodeType, name, id);
-		if(node == nullptr) {
+		Node *node = Create(nodeType, name, id);
+		if (node == nullptr) {
 			continue;
 		}
 
 		int32_t parentId = 0;
 		nodeDocument.Value("parent", parentId);
-		if(parentId == 0) {
+		if (parentId == 0) {
 			SetRoot(node);
 		} else {
-			Node* parent = GetNodeByID(parentId);
-			if(parent != nullptr) {
+			Node *parent = GetNodeByID(parentId);
+			if (parent != nullptr) {
 				parent->AddChild(node);
 			}
 		}
 
-		for(const auto [nodeKey, nodeValue] : nodeDocument) {
+		for (const auto [nodeKey, nodeValue] : nodeDocument) {
 			std::string keyStr = nodeKey.data();
 
-			if(nodeValue.is_string()) {
+			if (nodeValue.is_string()) {
 				NodeDB::Instance().SetAttribute(node, keyStr, nodeValue.value_or<std::string>(""));
-			}
-			else if(nodeValue.is_integer()) {
+			} else if (nodeValue.is_integer()) {
 				NodeDB::Instance().SetAttribute(node, keyStr, nodeValue.value_or<int>(0));
-			}
-			else if(nodeValue.is_floating_point()) {
+			} else if (nodeValue.is_floating_point()) {
 				NodeDB::Instance().SetAttribute(node, keyStr, nodeValue.value_or<float>(0.f));
-			}
-			else if(nodeValue.is_boolean()) {
+			} else if (nodeValue.is_boolean()) {
 				NodeDB::Instance().SetAttribute(node, keyStr, nodeValue.value_or<bool>(false));
-			}
-			else if(nodeValue.is_table()) {
+			} else if (nodeValue.is_table()) {
 				SerializeDocument attrTable = SerializeDocument(nodeValue);
-				for(const auto [attrKey, attrValue] : attrTable) {
+				for (const auto [attrKey, attrValue] : attrTable) {
 					std::string attrStr = attrKey.data();
 
-					if(attrValue.is_string()) {
+					if (attrValue.is_string()) {
 						NodeDB::Instance().SetAttribute(node, keyStr + "." + attrStr, attrValue.value_or<std::string>(""));
-					}
-					else if(attrValue.is_integer()) {
+					} else if (attrValue.is_integer()) {
 						NodeDB::Instance().SetAttribute(node, keyStr + "." + attrStr, attrValue.value_or<int>(0));
-					}
-					else if(attrValue.is_floating_point()) {
+					} else if (attrValue.is_floating_point()) {
 						NodeDB::Instance().SetAttribute(node, keyStr + "." + attrStr, attrValue.value_or<float>(0.f));
-					}
-					else if(attrValue.is_boolean()) {
+					} else if (attrValue.is_boolean()) {
 						NodeDB::Instance().SetAttribute(node, keyStr + "." + attrStr, attrValue.value_or<bool>(false));
-					}
-					else {
+					} else {
 						Debug::Error("Unknown attribute type on {}.{}", keyStr, attrStr);
 					}
 				}
@@ -155,10 +144,42 @@ void Scene::Load(const std::string& path) {
 				Debug::Error("Unknown attribute type on {}", keyStr);
 			}
 		}
-
-
-
 	}
+}
+
+std::string Scene::Save() {
+	SerializeDocument doc;
+	doc.Set("name", "Main_Scene")
+		.Set("version", 1)
+		.Set("active_camera_2d", GetCurrentCamera2D());
+
+	SerializeDocument nodes;
+	std::vector<std::string> attrs;
+	for (Node *node : _RegisteredNodes) {
+		attrs.clear();
+		NodeDB::Instance().GetAttributeList(node, attrs);
+
+		SerializeDocument nodeDoc;
+		for (const auto &attr : attrs) {
+			light_variant val = NodeDB::Instance().GetAttribute(node, attr);
+			if (val.Type() == LightVariantType::Int) {
+				nodeDoc.Set(attr, val.Int());
+			} else if (val.Type() == LightVariantType::Float) {
+				nodeDoc.Set(attr, val.Float());
+			} else if (val.Type() == LightVariantType::Double) {
+				nodeDoc.Set(attr, val.Double());
+			} else if (val.Type() == LightVariantType::Bool) {
+				nodeDoc.Set(attr, val.Bool());
+			} else if (val.Type() == LightVariantType::String) {
+				nodeDoc.Set(attr, val.String());
+			}
+		}
+
+		nodes.Set(std::to_string(node->ID()), nodeDoc);
+	}
+	doc.Set("nodes", nodes);
+
+	return doc.Serialize();
 }
 
 Reference<Scene> Scene::New() {
@@ -212,7 +233,7 @@ void Scene::CollectNodes() {
 
 		if (!node->IsLocked() && (node->_Parent == nullptr && node != GetRoot())) {
 			_RegisteredNodes.erase(_RegisteredNodes.begin() + i);
-			Debug::Log("Delete 2 {}, {}", node->Name(), (void*)node->_Parent);
+			Debug::Log("Delete 2 {}, {}", node->Name(), (void *)node->_Parent);
 			Application::get_singleton().DestructNode(node);
 			continue;
 		}

@@ -25,6 +25,7 @@ class Scene : public object_type {
 	void UpdateDraw();
 
 	void Load(const std::string& path);
+	std::string Save();
 
 	Node *Create(const std::string &typeName, const std::string &name, uint32_t id = 0);
 
