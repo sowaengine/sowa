@@ -1,8 +1,8 @@
 #include "node2d.hpp"
 #include "debug.hpp"
 
-#include "core/application.hpp"
 #include "Core/nm_Matrix.hpp"
+#include "core/application.hpp"
 #include "math/math.hpp"
 
 #include "core/node_db.hpp"
@@ -15,14 +15,14 @@ Node2D::Node2D() {
 
 void Node2D::Bind() {
 	NodeFactory factory;
-	factory.construct = []() -> Node* {
-		Node* node = Allocator<Node2D>::Get().allocate(1);
+	factory.construct = []() -> Node * {
+		Node *node = Allocator<Node2D>::Get().allocate(1);
 		new (node) Node2D;
 
 		return node;
 	};
 
-	factory.destruct = [](Node* node) {
+	factory.destruct = [](Node *node) {
 		Allocator<Node2D>::Get().deallocate(reinterpret_cast<Node2D *>(node), 1);
 	};
 
@@ -30,71 +30,65 @@ void Node2D::Bind() {
 
 	Serializer::get_singleton().RegisterSerializer(Node2D::Typename(), SerializeImpl(Node2D::SaveImpl, Node2D::LoadImpl));
 
-
-	NodeDB::Instance().RegisterAttribute<float>("Node2D", "position.x", [](Node* node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"Node2D", "position.x", [](Node *node) -> light_variant {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
 			return node2d->Position().x;
 		}
-		return 0.f;
-	}, [](Node* node, float pos) {
+		return 0.f; }, [](Node *node, light_variant pos) {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
-			node2d->Position().x = pos;
-		}
-	});
+			node2d->Position().x = pos.Float();
+		} });
 
-	NodeDB::Instance().RegisterAttribute<float>("Node2D", "position.y", [](Node* node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"Node2D", "position.y", [](Node *node) -> light_variant {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
 			return node2d->Position().y;
 		}
-		return 0.f;
-	}, [](Node* node, float pos) {
+		return 0.f; }, [](Node *node, light_variant pos) {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
-			node2d->Position().y = pos;
-		}
-	});
+			node2d->Position().y = pos.Float();
+		} });
 
-	NodeDB::Instance().RegisterAttribute<float>("Node2D", "rotation", [](Node* node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"Node2D", "rotation", [](Node *node) -> light_variant {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
 			return node2d->Rotation();
 		}
-		return 0.f;
-	}, [](Node* node, float rot) {
+		return 0.f; }, [](Node *node, light_variant rot) {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
-			node2d->Rotation() = rot;
-		}
-	});
+			node2d->Rotation() = rot.Float();
+		} });
 
-	NodeDB::Instance().RegisterAttribute<float>("Node2D", "scale.x", [](Node* node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"Node2D", "scale.x", [](Node *node) -> light_variant {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
 			return node2d->Scale().x;
 		}
-		return 0.f;
-	}, [](Node* node, float sz) {
+		return 0.f; }, [](Node *node, light_variant sz) {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
-			node2d->Scale().x = sz;
-		}
-	});
+			node2d->Scale().x = sz.Float();
+		} });
 
-	NodeDB::Instance().RegisterAttribute<float>("Node2D", "scale.y", [](Node* node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"Node2D", "scale.y", [](Node *node) -> light_variant {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
 			return node2d->Scale().y;
 		}
-		return 0.f;
-	}, [](Node* node, float sz) {
+		return 0.f; }, [](Node *node, light_variant sz) {
 		Node2D* node2d = dynamic_cast<Node2D*>(node);
 		if(nullptr != node2d) {
-			node2d->Scale().y = sz;
-		}
-	});
+			node2d->Scale().y = sz.Float();
+		} });
 }
 
 void Node2D::EnterScene() {
@@ -106,22 +100,21 @@ void Node2D::UpdateLogic() {
 void Node2D::UpdateDraw() {
 }
 
-
-const glm::mat4& Node2D::CalculateTransform() {
+const glm::mat4 &Node2D::CalculateTransform() {
 	auto frameID = Application::get_singleton().GetFrameCount();
 	if (frameID == _LastUpdateFrameID) {
 		return _LatestTransform;
 	}
 
-	Node* parent = GetParent();
+	Node *parent = GetParent();
 	glm::mat4 baseTransform(1.f);
-	if(parent != nullptr) {
+	if (parent != nullptr) {
 		// Temporary solution
 		// add Node::IsSubClassOf() later
 		auto nodeType = parent->GetNodeType();
-		if(nodeType == "Node2D" || nodeType == "Sprite2D" || nodeType == "Text2D") {
-			Node2D* parentNode2D = dynamic_cast<Node2D*>(parent);
-			if(parentNode2D != nullptr) {
+		if (nodeType == "Node2D" || nodeType == "Sprite2D" || nodeType == "Text2D") {
+			Node2D *parentNode2D = dynamic_cast<Node2D *>(parent);
+			if (parentNode2D != nullptr) {
 				baseTransform = parentNode2D->CalculateTransform();
 			}
 		}

@@ -1,8 +1,8 @@
 #ifndef SW_UI_PANEL_HPP
 #define SW_UI_PANEL_HPP
 
-#include "scene/node.hpp"
 #include "math/math.hpp"
+#include "scene/node.hpp"
 
 namespace sowa {
 class UINode : public Node {
@@ -18,8 +18,8 @@ class UINode : public Node {
 	void ResetX();
 	void ResetY();
 
-	inline vec2& Position() { return m_position; }
-	inline vec2& Size() { return m_size; }
+	inline vec2 &Position() { return m_position; }
+	inline vec2 &Size() { return m_size; }
 
 	vec2 GetCursorPos();
 

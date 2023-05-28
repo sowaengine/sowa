@@ -37,52 +37,52 @@ void UINode::Bind() {
 
 	NodeDB::Instance().RegisterNodeType("UINode", "Node", factory);
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"UINode", "position.x", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"UINode", "position.x", [](Node *node) -> light_variant {
 		UINode* uinode = dynamic_cast<UINode*>(node);
 		if(nullptr != uinode) {
 			return uinode->Position().x;
 		}
-		return 0.f; }, [](Node *node, float pos) {
+		return 0.f; }, [](Node *node, light_variant pos) {
 		UINode* uinode = dynamic_cast<UINode*>(node);
 		if(nullptr != uinode) {
-			uinode->Position().x = pos;
+			uinode->Position().x = pos.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"UINode", "position.y", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"UINode", "position.y", [](Node *node) -> light_variant {
 		UINode* uinode = dynamic_cast<UINode*>(node);
 		if(nullptr != uinode) {
 			return uinode->Position().y;
 		}
-		return 0.f; }, [](Node *node, float pos) {
+		return 0.f; }, [](Node *node, light_variant pos) {
 		UINode* uinode = dynamic_cast<UINode*>(node);
 		if(nullptr != uinode) {
-			uinode->Position().y = pos;
+			uinode->Position().y = pos.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"UINode", "size.x", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"UINode", "size.x", [](Node *node) -> light_variant {
 		UINode* uinode = dynamic_cast<UINode*>(node);
 		if(nullptr != uinode) {
 			return uinode->Size().x;
 		}
-		return 0.f; }, [](Node *node, float sz) {
+		return 0.f; }, [](Node *node, light_variant sz) {
 		UINode* uinode = dynamic_cast<UINode*>(node);
 		if(nullptr != uinode) {
-			uinode->Size().x = sz;
+			uinode->Size().x = sz.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"UINode", "size.y", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"UINode", "size.y", [](Node *node) -> light_variant {
 		UINode* uinode = dynamic_cast<UINode*>(node);
 		if(nullptr != uinode) {
 			return uinode->Size().y;
 		}
-		return 0.f; }, [](Node *node, float sz) {
+		return 0.f; }, [](Node *node, light_variant sz) {
 		UINode* uinode = dynamic_cast<UINode*>(node);
 		if(nullptr != uinode) {
-			uinode->Size().y = sz;
+			uinode->Size().y = sz.Float();
 		} });
 }
 

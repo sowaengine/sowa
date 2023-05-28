@@ -5,12 +5,12 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 
-#include "gfx/graphics.hpp"
-#include "core/renderer.hpp"
 #include "core/application.hpp"
-#include "scene/scene.hpp"
-#include "resource/resource_loader.hpp"
 #include "core/node_db.hpp"
+#include "core/renderer.hpp"
+#include "gfx/graphics.hpp"
+#include "resource/resource_loader.hpp"
+#include "scene/scene.hpp"
 
 namespace sowa {
 Sprite2D::Sprite2D() {
@@ -19,14 +19,14 @@ Sprite2D::Sprite2D() {
 
 void Sprite2D::Bind() {
 	NodeFactory factory;
-	factory.construct = []() -> Node* {
-		Node* node = Allocator<Sprite2D>::Get().allocate(1);
+	factory.construct = []() -> Node * {
+		Node *node = Allocator<Sprite2D>::Get().allocate(1);
 		new (node) Sprite2D;
 
 		return node;
 	};
 
-	factory.destruct = [](Node* node) {
+	factory.destruct = [](Node *node) {
 		Allocator<Sprite2D>::Get().deallocate(reinterpret_cast<Sprite2D *>(node), 1);
 	};
 
@@ -34,15 +34,14 @@ void Sprite2D::Bind() {
 
 	Serializer::get_singleton().RegisterSerializer(Sprite2D::Typename(), SerializeImpl(Sprite2D::SaveImpl, Sprite2D::LoadImpl));
 
-	NodeDB::Instance().RegisterAttribute<std::string>("Sprite2D", "texture.path", [](Node* node) -> std::string {
+	NodeDB::Instance().RegisterAttribute(
+		"Sprite2D", "texture.path", [](Node *node) -> light_variant {
 		Debug::Error("Impelement Sprite2D Attribute getter texture.path");
-		return "";
-	}, [](Node* node, std::string path) {
+		return ""; }, [](Node *node, light_variant path) {
 		Sprite2D* sprite = dynamic_cast<Sprite2D*>(node);
 		if(nullptr != sprite) {
-			sprite->Texture() = ResourceLoader::get_singleton().LoadResource<ImageTexture>(path);
-		}
-	});
+			sprite->Texture() = ResourceLoader::get_singleton().LoadResource<ImageTexture>(path.String());
+		} });
 }
 
 void Sprite2D::EnterScene() {
@@ -57,7 +56,7 @@ void Sprite2D::UpdateDraw() {
 		mat4 nodeTransform = CalculateTransform();
 		mat4 transform = glm::scale(nodeTransform, {m_texture->Width(), m_texture->Height(), 1.f});
 
-		for(int i=0; i<8; i++) {
+		for (int i = 0; i < 8; i++) {
 			glm::vec3 offset = glm::rotateZ(glm::vec3{outlineWidth, 0.f, 0.f}, glm::radians(i * 45.f));
 			mat4 newTransform = glm::translate(nodeTransform, offset);
 			newTransform = glm::scale(newTransform, {m_texture->Width(), m_texture->Height(), 1.f});
@@ -66,17 +65,15 @@ void Sprite2D::UpdateDraw() {
 				{-0.5f, +0.5f, 0.f, 1.f},
 				{-0.5f, -0.5f, 0.f, 1.f},
 				{+0.5f, -0.5f, 0.f, 1.f},
-				{+0.5f, +0.5f, 0.f, 1.f}
-			};
+				{+0.5f, +0.5f, 0.f, 1.f}};
 			glm::vec2 uvs[4] = {
 				{0.f, 1.f},
 				{0.f, 0.f},
 				{1.f, 0.f},
-				{1.f, 1.f}
-			};
+				{1.f, 1.f}};
 
 			gfx::BatchVertex vertices[4];
-			for(int i=0; i<4; i++) {
+			for (int i = 0; i < 4; i++) {
 				points[i] = newTransform * points[i];
 
 				vertices[i].x = points[i].x;
@@ -97,17 +94,15 @@ void Sprite2D::UpdateDraw() {
 			{-0.5f, +0.5f, 0.f, 1.f},
 			{-0.5f, -0.5f, 0.f, 1.f},
 			{+0.5f, -0.5f, 0.f, 1.f},
-			{+0.5f, +0.5f, 0.f, 1.f}
-		};
+			{+0.5f, +0.5f, 0.f, 1.f}};
 		glm::vec2 uvs[4] = {
 			{0.f, 1.f},
 			{0.f, 0.f},
 			{1.f, 0.f},
-			{1.f, 1.f}
-		};
+			{1.f, 1.f}};
 
 		gfx::BatchVertex vertices[4];
-		for(int i=0; i<4; i++) {
+		for (int i = 0; i < 4; i++) {
 			points[i] = transform * points[i];
 
 			vertices[i].x = points[i].x;
@@ -138,7 +133,7 @@ FileBuffer Sprite2D::SaveImpl(object_type *out) {
 	Sprite2D *o = reinterpret_cast<Sprite2D *>(out);
 
 	YAML::Node doc = Serializer::get_singleton().SaveWithType<Sprite2D>(out).Yaml();
-	
+
 	return FileBuffer(doc);
 }
 

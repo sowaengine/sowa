@@ -3,9 +3,9 @@
 #include "debug.hpp"
 
 #include "core/application.hpp"
+#include "core/node_db.hpp"
 #include "core/renderer.hpp"
 #include "resource/resource_loader.hpp"
-#include "core/node_db.hpp"
 
 #include "gfx/graphics.hpp"
 
@@ -17,14 +17,14 @@ Text2D::Text2D() {
 
 void Text2D::Bind() {
 	NodeFactory factory;
-	factory.construct = []() -> Node* {
-		Node* node = Allocator<Text2D>::Get().allocate(1);
+	factory.construct = []() -> Node * {
+		Node *node = Allocator<Text2D>::Get().allocate(1);
 		new (node) Text2D;
 
 		return node;
 	};
 
-	factory.destruct = [](Node* node) {
+	factory.destruct = [](Node *node) {
 		Allocator<Text2D>::Get().deallocate(reinterpret_cast<Text2D *>(node), 1);
 	};
 
@@ -32,18 +32,17 @@ void Text2D::Bind() {
 
 	Serializer::get_singleton().RegisterSerializer(Text2D::Typename(), SerializeImpl(Text2D::SaveImpl, Text2D::LoadImpl));
 
-	NodeDB::Instance().RegisterAttribute<std::string>("Text2D", "text", [](Node* node) -> std::string {
+	NodeDB::Instance().RegisterAttribute(
+		"Text2D", "text", [](Node *node) -> light_variant {
 		Text2D* text2d = dynamic_cast<Text2D*>(node);
 		if(nullptr != text2d) {
 			return text2d->GetText();
 		}
-		return "";
-	}, [](Node* node, std::string text) {
+		return ""; }, [](Node *node, light_variant text) {
 		Text2D* text2d = dynamic_cast<Text2D*>(node);
 		if(nullptr != text2d) {
-			text2d->SetText(text);
-		}
-	});
+			text2d->SetText(text.String());
+		} });
 }
 
 void Text2D::EnterScene() {
@@ -53,7 +52,7 @@ void Text2D::ExitScene() {
 void Text2D::UpdateLogic() {
 }
 void Text2D::UpdateDraw() {
-	gfx::IFont* fontHandle = m_font != nullptr ? m_font.get() : Application::get_singleton().GetDefaultFont();
+	gfx::IFont *fontHandle = m_font != nullptr ? m_font.get() : Application::get_singleton().GetDefaultFont();
 
 	{
 		gfx::DrawTextUIArgs args;
@@ -70,7 +69,7 @@ FileBuffer Text2D::SaveImpl(object_type *out) {
 
 	YAML::Node doc = Serializer::get_singleton().SaveWithType<Node2D>(out).Yaml();
 	doc["Text"] = o->GetText();
-	
+
 	return FileBuffer(doc);
 }
 

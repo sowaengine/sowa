@@ -38,85 +38,85 @@ void NineSlicePanel::Bind() {
 
 	NodeDB::Instance().RegisterNodeType("NineSlicePanel", "Node2D", factory);
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"NineSlicePanel", "size.x", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"NineSlicePanel", "size.x", [](Node *node) -> light_variant {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
 			return panel->Size().x;
 		}
-		return 0.f; }, [](Node *node, float sz) {
+		return 0.f; }, [](Node *node, light_variant sz) {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
-			panel->Size().x = sz;
+			panel->Size().x = sz.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"NineSlicePanel", "size.y", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"NineSlicePanel", "size.y", [](Node *node) -> light_variant {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
 			return panel->Size().y;
 		}
-		return 0.f; }, [](Node *node, float sz) {
+		return 0.f; }, [](Node *node, light_variant sz) {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
-			panel->Size().y = sz;
+			panel->Size().y = sz.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"NineSlicePanel", "margin.left", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"NineSlicePanel", "margin.left", [](Node *node) -> light_variant {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
 			return panel->MarginLeft();
 		}
-		return 0.f; }, [](Node *node, float margin) {
+		return 0.f; }, [](Node *node, light_variant margin) {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
-			panel->MarginLeft() = margin;
+			panel->MarginLeft() = margin.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"NineSlicePanel", "margin.top", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"NineSlicePanel", "margin.top", [](Node *node) -> light_variant {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
 			return panel->MarginTop();
 		}
-		return 0.f; }, [](Node *node, float margin) {
+		return 0.f; }, [](Node *node, light_variant margin) {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
-			panel->MarginTop() = margin;
+			panel->MarginTop() = margin.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"NineSlicePanel", "margin.right", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"NineSlicePanel", "margin.right", [](Node *node) -> light_variant {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
 			return panel->MarginRight();
 		}
-		return 0.f; }, [](Node *node, float margin) {
+		return 0.f; }, [](Node *node, light_variant margin) {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
-			panel->MarginRight() = margin;
+			panel->MarginRight() = margin.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<float>(
-		"NineSlicePanel", "margin.bottom", [](Node *node) -> float {
+	NodeDB::Instance().RegisterAttribute(
+		"NineSlicePanel", "margin.bottom", [](Node *node) -> light_variant {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
 			return panel->MarginBottom();
 		}
-		return 0.f; }, [](Node *node, float margin) {
+		return 0.f; }, [](Node *node, light_variant margin) {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
-			panel->MarginBottom() = margin;
+			panel->MarginBottom() = margin.Float();
 		} });
 
-	NodeDB::Instance().RegisterAttribute<std::string>(
-		"NineSlicePanel", "texture.path", [](Node *node) -> std::string {
+	NodeDB::Instance().RegisterAttribute(
+		"NineSlicePanel", "texture.path", [](Node *node) -> light_variant {
 		Debug::Error("Impelement NineSlicePanel Attribute getter texture.path");
-		return ""; }, [](Node *node, std::string path) {
+		return ""; }, [](Node *node, light_variant path) {
 		NineSlicePanel* panel = dynamic_cast<NineSlicePanel*>(node);
 		if(nullptr != panel) {
-			panel->Texture() = ResourceLoader::get_singleton().LoadResource<ImageTexture>(path);
+			panel->Texture() = ResourceLoader::get_singleton().LoadResource<ImageTexture>(path.String());
 		} });
 }
 

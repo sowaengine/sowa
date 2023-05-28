@@ -25,42 +25,42 @@ void Camera2D::Bind() {
 
 	NodeDB::Instance().RegisterNodeType("Camera2D", "Node2D", factory);
 
-	NodeDB::Instance().RegisterAttribute<float>("Camera2D", "zoom.x", [](Node* node) -> float {
+	NodeDB::Instance().RegisterAttribute("Camera2D", "zoom.x", [](Node* node) -> light_variant {
 		Camera2D* camera = dynamic_cast<Camera2D*>(node);
 		if(nullptr != camera) {
 			return camera->Zoom().x;
 		}
 		return 0.f;
-	}, [](Node* node, float zoom) {
+	}, [](Node* node, light_variant zoom) {
 		Camera2D* camera = dynamic_cast<Camera2D*>(node);
 		if(nullptr != camera) {
-			camera->Zoom().x = zoom;
+			camera->Zoom().x = zoom.Float();
 		}
 	});
 
-	NodeDB::Instance().RegisterAttribute<float>("Camera2D", "zoom.y", [](Node* node) -> float {
+	NodeDB::Instance().RegisterAttribute("Camera2D", "zoom.y", [](Node* node) -> light_variant {
 		Camera2D* camera = dynamic_cast<Camera2D*>(node);
 		if(nullptr != camera) {
 			return camera->Zoom().y;
 		}
 		return 0.f;
-	}, [](Node* node, float zoom) {
+	}, [](Node* node, light_variant zoom) {
 		Camera2D* camera = dynamic_cast<Camera2D*>(node);
 		if(nullptr != camera) {
-			camera->Zoom().y = zoom;
+			camera->Zoom().y = zoom.Float();
 		}
 	});
 
-	NodeDB::Instance().RegisterAttribute<bool>("Camera2D", "rotatable", [](Node* node) -> bool {
+	NodeDB::Instance().RegisterAttribute("Camera2D", "rotatable", [](Node* node) -> light_variant {
 		Camera2D* camera = dynamic_cast<Camera2D*>(node);
 		if(nullptr != camera) {
 			return camera->Rotatable();
 		}
 		return 0.f;
-	}, [](Node* node, bool rotatable) {
+	}, [](Node* node, light_variant rotatable) {
 		Camera2D* camera = dynamic_cast<Camera2D*>(node);
 		if(nullptr != camera) {
-			camera->Rotatable() = rotatable;
+			camera->Rotatable() = rotatable.Bool();
 		}
 	});
 }

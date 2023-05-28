@@ -7,8 +7,8 @@
 
 namespace sowa {
 AudioStreamPlayer::AudioStreamPlayer() {
-    m_type = Typename();
-    _NodeType = "AudioStreamPlayer";
+	m_type = Typename();
+	_NodeType = "AudioStreamPlayer";
 
 	alGenSources(1, &m_SourceId);
 	alSourcef(m_SourceId, AL_PITCH, m_Pitch);
@@ -21,64 +21,60 @@ AudioStreamPlayer::~AudioStreamPlayer() {
 
 void AudioStreamPlayer::Bind() {
 	NodeFactory factory;
-	factory.construct = []() -> Node* {
-		Node* node = Allocator<AudioStreamPlayer>::Get().allocate(1);
+	factory.construct = []() -> Node * {
+		Node *node = Allocator<AudioStreamPlayer>::Get().allocate(1);
 		new (node) AudioStreamPlayer;
 
 		return node;
 	};
 
-	factory.destruct = [](Node* node) {
+	factory.destruct = [](Node *node) {
 		Allocator<AudioStreamPlayer>::Get().deallocate(reinterpret_cast<AudioStreamPlayer *>(node), 1);
 	};
 
 	NodeDB::Instance().RegisterNodeType("AudioStreamPlayer", "Node", factory);
 
-
-	NodeDB::Instance().RegisterAttribute<std::string>("AudioStreamPlayer", "stream.path", [](Node* node) -> std::string {
+	NodeDB::Instance().RegisterAttribute(
+		"AudioStreamPlayer", "stream.path", [](Node *node) -> light_variant {
 		Debug::Error("Impelement AudioStreamPlayer Attribute getter texture.path");
-		return "";
-	}, [](Node* node, std::string path) {
+		return ""; }, [](Node *node, light_variant path) {
 		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
 		if(nullptr != player) {
-			player->Stream() = ResourceLoader::get_singleton().LoadResource<AudioStream>(path);
-		}
-	});
+			player->Stream() = ResourceLoader::get_singleton().LoadResource<AudioStream>(path.String());
+		} });
 
-	NodeDB::Instance().RegisterAttribute<bool>("AudioStreamPlayer", "autostart", [](Node* node) -> bool {
+	NodeDB::Instance().RegisterAttribute(
+		"AudioStreamPlayer", "autostart", [](Node *node) -> light_variant {
 		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
 		if(nullptr != player) {
 			return player->AutoStart();
 		}
-		return false;
-	}, [](Node* node, bool start) {
+		return false; }, [](Node *node, light_variant start) {
 		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
 		if(nullptr != player) {
-			player->AutoStart() = start;
-		}
-	});
+			player->AutoStart() = start.Bool();
+		} });
 
-	NodeDB::Instance().RegisterAttribute<bool>("AudioStreamPlayer", "playing", [](Node* node) -> bool {
+	NodeDB::Instance().RegisterAttribute(
+		"AudioStreamPlayer", "playing", [](Node *node) -> light_variant {
 		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
 		if(nullptr != player) {
 			return player->IsPlaying();
 		}
-		return false;
-	}, [](Node* node, bool play) {
+		return false; }, [](Node *node, light_variant play) {
 		AudioStreamPlayer* player = dynamic_cast<AudioStreamPlayer*>(node);
 		if(nullptr != player) {
-			if(play) {
+			if(play.Bool()) {
 				player->Play();
 			}
 			else {
 				player->Stop();
 			}
-		}
-	});
+		} });
 }
 
 void AudioStreamPlayer::UpdateLogic() {
-	if(m_autoStart && m_Stream != nullptr && m_Stream->ID() != 0) {
+	if (m_autoStart && m_Stream != nullptr && m_Stream->ID() != 0) {
 		m_autoStart = false;
 		Play();
 	}
@@ -122,9 +118,9 @@ void AudioStreamPlayer::Stop() {
 }
 
 bool AudioStreamPlayer::IsPlaying() {
-    int playing = 0;
-    alGetSourcei(m_SourceId, AL_SOURCE_STATE, &playing);
+	int playing = 0;
+	alGetSourcei(m_SourceId, AL_SOURCE_STATE, &playing);
 
-    return playing == AL_PLAYING;;
+	return playing == AL_PLAYING;
 }
 } // namespace sowa

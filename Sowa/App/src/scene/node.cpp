@@ -33,10 +33,10 @@ void Node::Bind() {
 	Serializer::get_singleton().RegisterSerializer(Node::Typename(), SerializeImpl(Node::SaveImpl, Node::LoadImpl));
 
 
-	NodeDB::Instance().RegisterAttribute<std::string>("Node", "name", [](Node* node) -> std::string {
+	NodeDB::Instance().RegisterAttribute("Node", "name", [](Node* node) -> light_variant {
 		return node->Name();
-	}, [](Node* node, std::string name) {
-		node->Name() = name;
+	}, [](Node* node, light_variant name) {
+		node->Name() = name.String();
 	});
 }
 
