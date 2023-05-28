@@ -38,6 +38,7 @@ void NodeDB::RegisterNodeType(const std::string &typeName, const std::string &ex
 	t.factory = factory;
 
 	m_types[typeName] = t;
+	m_attributes[typeName].clear();
 	Debug::Log("Registered type : {}", typeName);
 }
 

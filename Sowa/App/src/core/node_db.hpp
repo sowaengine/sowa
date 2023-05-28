@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "scene/scene.hpp"
+#include "utils/light_variant.hpp"
 
 namespace sowa {
 
@@ -27,14 +28,11 @@ AttributeType ConvertAttributeType(T t = T());
 struct AttributeModifier {
 	void *setterFunc;
 	void *getterFunc;
-	AttributeType attrType;
 };
 
-template <typename T>
-using GetterFunc = T (*)(Node *);
+using GetterFunc = light_variant (*)(Node *);
 
-template <typename T>
-using SetterFunc = void (*)(Node *, T);
+using SetterFunc = void (*)(Node *, light_variant);
 
 /*
 	Holds node types
@@ -46,40 +44,87 @@ class NodeDB {
 
 	void RegisterNodeType(const std::string &typeName, const std::string &extendsFrom, const NodeFactory &factory);
 
-	template <typename T>
-	void RegisterAttribute(const std::string &typeName, const std::string &attr, GetterFunc<T> getter, SetterFunc<T> setter) {
+	void RegisterAttribute(const std::string &typeName, const std::string &attr, GetterFunc getter, SetterFunc setter) {
 		AttributeModifier m;
 		m.getterFunc = (void *)getter;
 		m.setterFunc = (void *)setter;
-		m.attrType = ConvertAttributeType<T>();
 
 		m_attributes[typeName][attr] = m;
 	}
 
-	template <typename T>
-	void SetAttribute(Node *node, std::string attr, T value, std::string nodeType = "") {
-		if(nodeType == "") {
+	void SetAttribute(Node *node, std::string attr, light_variant value, std::string nodeType = "") {
+		if (nodeType == "") {
 			nodeType = node->GetNodeType();
 		}
 
-		SetterFunc<T> f = reinterpret_cast<SetterFunc<T>>(m_attributes[nodeType][attr].setterFunc);
-		if (f) {
+		bool lookup = true;
+		if (m_attributes.find(nodeType) == m_attributes.end()) {
+			return;
+		}
+		if (m_attributes[nodeType].find(attr) == m_attributes[nodeType].end()) {
+			lookup = false;
+		}
+
+		SetterFunc f = nullptr;
+		if (lookup)
+			f = reinterpret_cast<SetterFunc>(m_attributes[nodeType][attr].setterFunc);
+		if (lookup && f) {
 			f(node, value);
-			Debug::Log("{}.{} = {}", node->Name(), attr, value);
 		} else {
 			std::string extendsFrom = m_types[nodeType].extendsFrom;
-			if(extendsFrom != "") {
-				SetAttribute<T>(node, attr, value, extendsFrom);
+			if (extendsFrom != "") {
+				SetAttribute(node, attr, value, extendsFrom);
 			}
 		}
 	}
 
+	light_variant GetAttribute(Node *node, std::string attr, std::string nodeType = "") {
+		if (nodeType == "") {
+			nodeType = node->GetNodeType();
+		}
+
+		bool lookup = true;
+		if (m_attributes.find(nodeType) == m_attributes.end()) {
+			return light_variant(false);
+		}
+		if (m_attributes[nodeType].find(attr) == m_attributes[nodeType].end()) {
+			lookup = false;
+		}
+
+		GetterFunc f = nullptr;
+		if (lookup)
+			f = reinterpret_cast<GetterFunc>(m_attributes[nodeType][attr].getterFunc);
+		if (lookup && f) {
+			return f(node);
+		} else {
+			std::string extendsFrom = m_types[nodeType].extendsFrom;
+			if (extendsFrom != "") {
+				return GetAttribute(node, attr, extendsFrom);
+			}
+		}
+		return light_variant(false);
+	}
+
+	void GetAttributeList(Node *node, std::vector<std::string> &list, std::string nodeType = "") {
+		if (nodeType == "") {
+			nodeType = node->GetNodeType();
+		}
+
+		for (auto &[attrName, attrModifier] : m_attributes[nodeType]) {
+			list.push_back(attrName);
+		}
+		std::string extendsFrom = m_types[nodeType].extendsFrom;
+		if (extendsFrom != "") {
+			GetAttributeList(node, list, extendsFrom);
+		}
+	}
+
 	bool IsInstanceOf(std::string nodeType, std::string instanceOf) {
-		if(nodeType == instanceOf) {
+		if (nodeType == instanceOf) {
 			return true;
 		}
 		std::string extendsFrom = m_types[nodeType].extendsFrom;
-		if(extendsFrom == "") {
+		if (extendsFrom == "") {
 			return false;
 		}
 
