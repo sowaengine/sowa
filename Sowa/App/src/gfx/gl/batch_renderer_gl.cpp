@@ -21,12 +21,12 @@ void BatchRendererGL::Init(const std::string &vsource, const std::string &fsourc
 	m_buffer.BufferData(nullptr, sizeof(BatchVertex) * BATCH2D_MAX_VERTEX, BufferUsage::DynamicDraw);
 
 	m_array.ResetAttributes();
-	m_array.SetAttribute(0, GLAttributeType::Vec3);  // position
-	m_array.SetAttribute(1, GLAttributeType::Vec4);  // color
-	m_array.SetAttribute(2, GLAttributeType::Vec2);  // uv
-	m_array.SetAttribute(3, GLAttributeType::Float);  // texture
-	m_array.SetAttribute(4, GLAttributeType::Float);  // drawID
-	m_array.SetAttribute(5, GLAttributeType::Float);  // drawMode
+	m_array.SetAttribute(0, GLAttributeType::Vec3);	 // position
+	m_array.SetAttribute(1, GLAttributeType::Vec4);	 // color
+	m_array.SetAttribute(2, GLAttributeType::Vec2);	 // uv
+	m_array.SetAttribute(3, GLAttributeType::Float); // texture
+	m_array.SetAttribute(4, GLAttributeType::Float); // drawID
+	m_array.SetAttribute(5, GLAttributeType::Float); // drawMode
 	m_array.UploadAttributes();
 
 	m_array.Unbind();
@@ -70,6 +70,45 @@ void BatchRendererGL::PushQuad(BatchVertex vertices[4]) {
 		End();
 	}
 }
+
+void BatchRendererGL::PushLine(glm::vec2 p1, glm::vec2 p2, float thickness, glm::vec4 color, uint32_t id) {
+	float rot = atan2(p1.y - p2.y, p1.x - p2.x) * 180 / 3.141592653;
+
+	glm::vec2 sub = {p2.x - p1.x, p2.y - p1.y};
+	float len = sqrt((sub.x * sub.x) + (sub.y * sub.y));
+
+	mat4 mat = CalculateModelMatrix({p1.x, p1.y, 0.f}, {0.f, 0.f, rot}, {len, thickness, 1.f}, {-len / 2.f, 0.f, 0.f}, mat4(1.f));
+
+	glm::vec4 points[4] = {
+		{-0.5f, +0.5f, 0.f, 1.f},
+		{-0.5f, -0.5f, 0.f, 1.f},
+		{+0.5f, -0.5f, 0.f, 1.f},
+		{+0.5f, +0.5f, 0.f, 1.f}};
+	glm::vec2 uvs[4] = {
+		{0.f, 1.f},
+		{0.f, 0.f},
+		{1.f, 0.f},
+		{1.f, 1.f}};
+
+	gfx::BatchVertex vertices[4];
+	for (int i = 0; i < 4; i++) {
+		points[i] = mat * points[i];
+
+		vertices[i].x = points[i].x;
+		vertices[i].y = points[i].y;
+		vertices[i].z = 0.f;
+		vertices[i].r = color.r;
+		vertices[i].g = color.g;
+		vertices[i].b = color.b;
+		vertices[i].a = color.a;
+		vertices[i].uvX = uvs[i].x;
+		vertices[i].uvY = uvs[i].y;
+		vertices[i].textureId = 0.f;
+		vertices[i].id = id;
+	}
+	PushQuad(vertices);
+}
+
 void BatchRendererGL::End() {
 	if (m_vertices.size() == 0) {
 		return;

@@ -18,6 +18,7 @@ class BatchRendererGL : public IBatchRenderer {
 
     void Reset() override;
 	void PushQuad(BatchVertex vertices[4]) override;
+	void PushLine(glm::vec2 p1, glm::vec2 p2, float thickness, glm::vec4 color = glm::vec4{1.f, 1.f, 1.f, 1.f}, uint32_t id = 0) override;
 	void End() override;
 
     inline IShader& Shader() { return m_shader; }
