@@ -13,6 +13,8 @@ namespace sowa {
 Text2D::Text2D() {
 	_NodeType = "Text2D";
 	m_type = Typename();
+
+	ZIndex() = 100;
 }
 
 void Text2D::Bind() {

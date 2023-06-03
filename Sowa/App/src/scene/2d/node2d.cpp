@@ -89,6 +89,18 @@ void Node2D::Bind() {
 		if(nullptr != node2d) {
 			node2d->Scale().y = sz.Float();
 		} });
+
+	NodeDB::Instance().RegisterAttribute(
+		"Node2D", "z_index", [](Node *node) -> light_variant {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			return node2d->ZIndex();
+		}
+		return 0.f; }, [](Node *node, light_variant index) {
+		Node2D* node2d = dynamic_cast<Node2D*>(node);
+		if(nullptr != node2d) {
+			node2d->ZIndex() = index.UInt16();
+		} });
 }
 
 void Node2D::EnterScene() {
@@ -121,7 +133,7 @@ const glm::mat4 &Node2D::CalculateTransform() {
 	}
 
 	_LastUpdateFrameID = frameID;
-	_LatestTransform = CalculateModelMatrix({_Position.x, _Position.y, 0.f}, {0.f, 0.f, _Rotation}, {_Scale.x, _Scale.y, 1.f}, {0.f, 0.f, 0.f}, baseTransform);
+	_LatestTransform = CalculateModelMatrix({m_position.x, m_position.y, static_cast<float>(m_zIndex)}, {0.f, 0.f, m_rotation}, {m_scale.x, m_scale.y, 1.f}, {0.f, 0.f, 0.f}, baseTransform);
 	return _LatestTransform;
 }
 

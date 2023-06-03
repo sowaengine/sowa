@@ -176,7 +176,7 @@ void GraphicsGL::DrawText(const std::string &text, IFont *font, float x, float y
 
 			vertices[i].x = points[i].x;
 			vertices[i].y = points[i].y;
-			vertices[i].z = 0.f;
+			vertices[i].z = points[i].z;
 			vertices[i].r = 1.f;
 			vertices[i].g = 1.f;
 			vertices[i].b = 1.f;

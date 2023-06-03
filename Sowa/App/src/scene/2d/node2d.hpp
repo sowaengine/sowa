@@ -19,9 +19,10 @@ class Node2D : public Node {
 	void UpdateLogic() override;
 	void UpdateDraw() override;
 
-	inline vec2 &Position() { return _Position; }
-	inline double &Rotation() { return _Rotation; }
-	inline vec2 &Scale() { return _Scale; }
+	inline vec2 &Position() { return m_position; }
+	inline double &Rotation() { return m_rotation; }
+	inline vec2 &Scale() { return m_scale; }
+	inline uint16_t &ZIndex() { return m_zIndex; }
 
 	static FileBuffer SaveImpl(object_type *out);
 	static bool LoadImpl(object_type *out, const FileBuffer &buf);
@@ -29,9 +30,10 @@ class Node2D : public Node {
   protected:
 	friend class Application;
 
-	vec2 _Position{0.f, 0.f};
-	double _Rotation{0.0};
-	vec2 _Scale{1.f, 1.f};
+	vec2 m_position = vec2{0.f, 0.f};
+	double m_rotation = 0.0;
+	vec2 m_scale = vec2{1.f, 1.f};
+	uint16_t m_zIndex = 0;
 
 	const glm::mat4 &CalculateTransform();
 
