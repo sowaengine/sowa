@@ -56,38 +56,41 @@ void Sprite2D::UpdateDraw() {
 		mat4 nodeTransform = CalculateTransform();
 		mat4 transform = glm::scale(nodeTransform, {m_texture->Width(), m_texture->Height(), 1.f});
 
-		for (int i = 0; i < 8; i++) {
-			glm::vec3 offset = glm::rotateZ(glm::vec3{outlineWidth, 0.f, 0.f}, glm::radians(i * 45.f));
-			mat4 newTransform = glm::translate(nodeTransform, offset);
-			newTransform = glm::scale(newTransform, {m_texture->Width(), m_texture->Height(), 1.f});
+		if (Application::get_singleton().PickedNode() == ID()) {
 
-			glm::vec4 points[4] = {
-				{-0.5f, +0.5f, 0.f, 1.f},
-				{-0.5f, -0.5f, 0.f, 1.f},
-				{+0.5f, -0.5f, 0.f, 1.f},
-				{+0.5f, +0.5f, 0.f, 1.f}};
-			glm::vec2 uvs[4] = {
-				{0.f, 1.f},
-				{0.f, 0.f},
-				{1.f, 0.f},
-				{1.f, 1.f}};
+			for (int i = 0; i < 8; i++) {
+				glm::vec3 offset = glm::rotateZ(glm::vec3{outlineWidth, 0.f, 0.f}, glm::radians(i * 45.f));
+				mat4 newTransform = glm::translate(nodeTransform, offset);
+				newTransform = glm::scale(newTransform, {m_texture->Width(), m_texture->Height(), 1.f});
 
-			gfx::BatchVertex vertices[4];
-			for (int i = 0; i < 4; i++) {
-				points[i] = newTransform * points[i];
+				glm::vec4 points[4] = {
+					{-0.5f, +0.5f, 0.f, 1.f},
+					{-0.5f, -0.5f, 0.f, 1.f},
+					{+0.5f, -0.5f, 0.f, 1.f},
+					{+0.5f, +0.5f, 0.f, 1.f}};
+				glm::vec2 uvs[4] = {
+					{0.f, 1.f},
+					{0.f, 0.f},
+					{1.f, 0.f},
+					{1.f, 1.f}};
 
-				vertices[i].x = points[i].x;
-				vertices[i].y = points[i].y;
-				vertices[i].z = -0.1f;
-				vertices[i].r = 0.2f;
-				vertices[i].g = 0.68f;
-				vertices[i].b = 0.81f;
-				vertices[i].a = 1.f;
-				vertices[i].uvX = uvs[i].x;
-				vertices[i].uvY = uvs[i].y;
-				vertices[i].textureId = 0.f;
+				gfx::BatchVertex vertices[4];
+				for (int i = 0; i < 4; i++) {
+					points[i] = newTransform * points[i];
+
+					vertices[i].x = points[i].x;
+					vertices[i].y = points[i].y;
+					vertices[i].z = -0.1f;
+					vertices[i].r = 0.2f;
+					vertices[i].g = 0.68f;
+					vertices[i].b = 0.81f;
+					vertices[i].a = 1.f;
+					vertices[i].uvX = uvs[i].x;
+					vertices[i].uvY = uvs[i].y;
+					vertices[i].textureId = 0.f;
+				}
+				Graphics().BatchRenderer2D().PushQuad(vertices);
 			}
-			Graphics().BatchRenderer2D().PushQuad(vertices);
 		}
 
 		glm::vec4 points[4] = {
