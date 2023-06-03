@@ -33,12 +33,12 @@
 #include "scene/2d/node2d.hpp"
 #include "scene/2d/sprite2d.hpp"
 #include "scene/2d/text2d.hpp"
-#include "scene/ui/ui_node.hpp"
-#include "scene/ui/menu_bar.hpp"
-#include "scene/ui/menu_bar_item.hpp"
 #include "scene/audio_stream_player.hpp"
 #include "scene/node.hpp"
 #include "scene/scene.hpp"
+#include "scene/ui/menu_bar.hpp"
+#include "scene/ui/menu_bar_item.hpp"
+#include "scene/ui/ui_node.hpp"
 
 #include "core/input.hpp"
 #include "utils/algorithm.hpp"
@@ -68,10 +68,10 @@
 #include "res/shaders/batch2d.vert.res.hpp"
 #include "res/shaders/default2d.frag.res.hpp"
 #include "res/shaders/default2d.vert.res.hpp"
-#include "res/shaders/fullscreen.frag.res.hpp"
-#include "res/shaders/fullscreen.vert.res.hpp"
 #include "res/shaders/final.frag.res.hpp"
 #include "res/shaders/final.vert.res.hpp"
+#include "res/shaders/fullscreen.frag.res.hpp"
+#include "res/shaders/fullscreen.vert.res.hpp"
 #include "res/shaders/solid_color.frag.res.hpp"
 #include "res/shaders/solid_color.vert.res.hpp"
 #include "res/shaders/text.frag.res.hpp"
@@ -255,7 +255,6 @@ bool Application::Init(int argc, char const **argv) {
 
 	// Debug::Log("\n\n{}\nScene Saved", scene->Save());
 
-	
 	// if(!Serializer::get_singleton().Load(scene.get(), File::LoadFile(File::Path("res://scene.scn")))) {
 	// 	Debug::Error("Failed to load scene");
 	// }
@@ -328,18 +327,22 @@ bool Application::Init(int argc, char const **argv) {
 		if (e.Type() == InputEventType::MouseMove) {
 			float ratioX = (float)GetWindow().GetVideoSize().x / GetWindow().GetWindowSize().x;
 			float ratioY = (float)GetWindow().GetVideoSize().x / GetWindow().GetWindowSize().y;
+			vec2 videoSize = GetWindow().GetVideoSize();
+			vec2 windowSize = GetWindow().GetWindowSize();
 
+			vec2 delta = rect(0.f, 0.f, videoSize.x, videoSize.y).mapPoint(vec2(e.mouseMove.deltaX, e.mouseMove.deltaY), rect(0.f, 0.f, windowSize.x, windowSize.y));
 			if (!IsRunning() && GetWindow().IsButtonDown(GLFW_MOUSE_BUTTON_RIGHT)) {
-				_EditorCameraPos.x += e.mouseMove.deltaX * mapLog(_EditorCameraZoom) * ratioX;
-				_EditorCameraPos.y -= e.mouseMove.deltaY * mapLog(_EditorCameraZoom) * ratioY;
+
+				_EditorCameraPos.x += delta.x * mapLog(_EditorCameraZoom);
+				_EditorCameraPos.y -= delta.y * mapLog(_EditorCameraZoom);
 
 				if (m_is_node_dragging && PickedNode() != 0) {
 					Node *node = GetCurrentScene()->GetNodeByID(PickedNode());
 					if (node != nullptr) {
 						Node2D *node2d = dynamic_cast<Node2D *>(node);
 						if (node2d != nullptr) {
-							node2d->Position().x += e.mouseMove.deltaX * mapLog(_EditorCameraZoom) * ratioX;
-							node2d->Position().y -= e.mouseMove.deltaY * mapLog(_EditorCameraZoom) * ratioY;
+							node2d->Position().x += delta.x * mapLog(_EditorCameraZoom);
+							node2d->Position().y -= delta.y * mapLog(_EditorCameraZoom);
 						}
 					}
 				}
@@ -351,8 +354,8 @@ bool Application::Init(int argc, char const **argv) {
 				if (node != nullptr) {
 					Node2D *node2d = dynamic_cast<Node2D *>(node);
 					if (node2d != nullptr) {
-						node2d->Position().x -= e.mouseMove.deltaX * mapLog(_EditorCameraZoom) * ratioX;
-						node2d->Position().y += e.mouseMove.deltaY * mapLog(_EditorCameraZoom) * ratioY;
+						node2d->Position().x -= delta.x * mapLog(_EditorCameraZoom);
+						node2d->Position().y += delta.y * mapLog(_EditorCameraZoom);
 					}
 				}
 			}
@@ -392,13 +395,15 @@ bool Application::Init(int argc, char const **argv) {
 		} else if (e.Type() == InputEventType::MouseClick) {
 			// Debug::Log("Mouse Click Event: button: {}, single: {}, mods: {}", e.mouseClick.button, e.mouseClick.single, e.mouseClick.modifiers);
 			// if modifiers & ctrl, multi select
-			if (!m_on_drag_mode && e.mouseClick.button == 0 && e.mouseClick.single) {
-				this->m_picked_node = this->m_hovering_node;
-			}
+			if (!IsRunning()) {
+				if (!m_on_drag_mode && e.mouseClick.button == 0 && e.mouseClick.single) {
+					this->m_picked_node = this->m_hovering_node;
+				}
 
-			if (m_on_drag_mode && e.mouseClick.button == 0 && e.mouseClick.single) {
-				// set window mode to visible
-				m_on_drag_mode = false;
+				if (m_on_drag_mode && e.mouseClick.button == 0 && e.mouseClick.single) {
+					// set window mode to visible
+					m_on_drag_mode = false;
+				}
 			}
 
 		} else if (e.Type() == InputEventType::Character) {
@@ -435,17 +440,29 @@ bool Application::Process() {
 		_Scene->UpdateLogic();
 	}
 
-	if (HoveringNode() != 0 && HoveringNode() == PickedNode() && GetWindow().IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+	if (!IsRunning() && HoveringNode() != 0 && HoveringNode() == PickedNode() && GetWindow().IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 		m_is_node_dragging = true;
 	}
-	if (PickedNode() != 0 && GetWindow().IsKeyJustPressed(GLFW_KEY_G)) {
+	if (!IsRunning() && PickedNode() != 0 && GetWindow().IsKeyJustPressed(GLFW_KEY_G)) {
 		// set window mode to hidden
 		m_on_drag_mode = true;
 	}
 
 	m_Latest2DViewMatrix = mat4(1.f);
 
-	if (GetCurrentScene() != nullptr) {
+	if (!_AppRunning) {
+		_CurrentEditorCameraZoom = lerp(_CurrentEditorCameraZoom, _EditorCameraZoom, 0.5f);
+		_CurrentEditorCameraPos.x = lerp(_CurrentEditorCameraPos.x, _EditorCameraPos.x, 0.5f);
+		_CurrentEditorCameraPos.y = lerp(_CurrentEditorCameraPos.y, _EditorCameraPos.y, 0.5f);
+
+		m_Latest2DViewMatrix = CalculateModelMatrix(
+			{_CurrentEditorCameraPos.x, _CurrentEditorCameraPos.y, 0.f},
+			{0.f, 0.f, 0.f},
+			{mapLog(_CurrentEditorCameraZoom), mapLog(_CurrentEditorCameraZoom), 1.f},
+			{0.f, 0.f, 0.f},
+			mat4(1.f));
+		m_Latest2DViewMatrix = glm::inverse(m_Latest2DViewMatrix);
+	} else if (GetCurrentScene() != nullptr) {
 		Node *currentCamera2DNode = nullptr;
 		currentCamera2DNode = GetCurrentScene()->GetNodeByID(GetCurrentScene()->GetCurrentCamera2D());
 
@@ -489,19 +506,16 @@ bool Application::Process() {
 		Renderer::get_singleton().DrawLine({centerX - cursorSize, centerY}, {centerX + cursorSize, centerY}, cursorThickness * mapLog(_CurrentEditorCameraZoom), {1.f, 1.f, 0.f});
 		Renderer::get_singleton().DrawLine({centerX, centerY - cursorSize}, {centerX, centerY + cursorSize}, cursorThickness * mapLog(_CurrentEditorCameraZoom), {1.f, 1.f, 0.f});
 
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {1920.f * 100, 0.f}, 2.f * mapLog(_CurrentEditorCameraZoom), {1.f, 0.f, 0.f, .6f});
-		Renderer::get_singleton().DrawLine({0.f, 0.f}, {0.f, 1080.f * 100}, 2.f * mapLog(_CurrentEditorCameraZoom), {0.f, 1.f, 0.f, .6f});
-
 		float viewportThickness = 3.f;
 		Renderer::get_singleton().DrawLine({0, 0}, {m_window->GetVideoSize().x, 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
 		Renderer::get_singleton().DrawLine({m_window->GetVideoSize().x, 0}, {m_window->GetVideoSize().x, m_window->GetVideoSize().y}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
 		Renderer::get_singleton().DrawLine({m_window->GetVideoSize().x, m_window->GetVideoSize().y}, {0, m_window->GetVideoSize().y}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
 		Renderer::get_singleton().DrawLine({0, m_window->GetVideoSize().y}, {0, 0}, viewportThickness * mapLog(_CurrentEditorCameraZoom), {.0f, .2f, .7f});
-
 	}
 
-
 	if (_Scene != nullptr) {
+		Debug::ScopeTimer t("Draw Update");
+
 		Graphics().BatchRenderer2D().Reset();
 		Graphics().BatchRendererUI().Reset();
 
@@ -513,24 +527,29 @@ bool Application::Process() {
 
 		_Scene->UpdateDraw();
 
+		// Editor lines
+		if (!_AppRunning) {
+			// Dimension lines
+			Graphics().BatchRenderer2D().PushLine({0.f, 0.f}, {1920.f * 100, 0.f}, 2.f * mapLog(_CurrentEditorCameraZoom), {1.f, 0.f, 0.f, 1.f});
+			Graphics().BatchRenderer2D().PushLine({0.f, 0.f}, {0.f, 1080.f * 100}, 2.f * mapLog(_CurrentEditorCameraZoom), {0.f, 1.f, 0.f, 1.f});
+
+			// Editor grid
+			float spacing = 512.f;
+			int lineCount = 256;
+			for (int i = -lineCount; i <= lineCount; i++) {
+				Graphics().BatchRenderer2D().PushLine({i * spacing, -10000}, {i * spacing, 10000}, 2 * mapLog(_EditorCameraZoom), {.7f, .7f, .7f, 0.9f});
+			}
+			for (int i = -lineCount; i <= lineCount; i++) {
+				Graphics().BatchRenderer2D().PushLine({10000, i * spacing}, {-10000, i * spacing}, 2 * mapLog(_EditorCameraZoom), {.7f, .7f, .7f, 0.9f});
+			}
+		}
+
 		Graphics().BatchRenderer2D().End();
 		Graphics().BatchRendererUI().End();
 	}
 
-	if (!_AppRunning) {
-		float spacing = 512.f;
-		int lineCount = 256;
-		for (int i = -lineCount; i <= lineCount; i++) {
-			Renderer::get_singleton().DrawLine({i * spacing, -10000}, {i * spacing, 10000}, 2 * mapLog(_EditorCameraZoom), {.7f, .7f, .7f, .3f});
-		}
-		for (int i = -lineCount; i <= lineCount; i++) {
-			Renderer::get_singleton().DrawLine({10000, i * spacing}, {-10000, i * spacing}, 2 * mapLog(_EditorCameraZoom), {.7f, .7f, .7f, .3f});
-		}
-	}
-
 	const sowa::vec2 windowSize = m_window->GetWindowSize();
 	const sowa::vec2 videoSize = m_window->GetVideoSize();
-
 
 	m_drawpass2d.Unbind();
 	m_finalDrawPass.Bind();
@@ -552,7 +571,7 @@ bool Application::Process() {
 
 	vec2 mousePos = GetWindow().GetMousePosition();
 	mousePos.y = mousePos.y;
-	
+
 	mousePos = rect(0.f, 0.f, windowSize.x, windowSize.y).mapPoint(mousePos, m_viewportRect);
 	mousePos = rect(0.f, 0.f, videoSize.x, videoSize.y).mapPoint(mousePos, rect(0.f, 0.f, windowSize.x, windowSize.y));
 	mousePos.y = videoSize.y - mousePos.y;
@@ -583,7 +602,6 @@ bool Application::Process() {
 	}
 
 	m_window->SwapBuffers();
-
 
 	if (m_window->IsButtonJustPressed(GLFW_MOUSE_BUTTON_LEFT)) {
 		if (!((AudioStreamPlayer *)GetCurrentScene()->GetRoot()->GetChild("My Player"))->IsPlaying()) {
