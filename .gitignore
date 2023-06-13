@@ -47,3 +47,5 @@ Game/
 logs/
 *.log
 *.res.hpp
+docs
+*.ignore.*

@@ -1,1 +1,0 @@
-cmake -S nmResource -B build/thirdparty/nmres -DBUILD_SHARED_LIBS=OFF

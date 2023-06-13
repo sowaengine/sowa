@@ -1,4 +1,0 @@
->App/include/res/textures/*.png
->App/include/res/shaders/*.frag
->App/include/res/shaders/*.vert
->App/include/res/*.ttf

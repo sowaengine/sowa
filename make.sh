@@ -1,1 +1,0 @@
-cmake --build build/sowa/ --parallel 2 --target all
