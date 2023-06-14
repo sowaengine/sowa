@@ -16,7 +16,7 @@ jobs:
             clean: false
         
         - name: Install Dependencies
-          run: sudo apt-get install libxrandr-dev libxinerama-dev
+          run: sudo apt-get install libxrandr-dev libxinerama-dev libxcursor-dev
 
         - name: Configure CMake
           run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
