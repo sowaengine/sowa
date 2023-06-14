@@ -1,0 +1,25 @@
+name: Build
+
+on:
+    push:
+        branches: ["main", "develop"]
+    pull_request:
+        branches: ["main", "develop"]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@v3
+          with:
+            clean: false
+        
+        # - name: Install Dependencies
+        #   run: sudo apt-get install
+
+        - name: Configure CMake
+          run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+
+        - name: Build
+          run: cmake --build ${{github.workspace}}/build --config Release
