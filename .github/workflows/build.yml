@@ -9,6 +9,7 @@ on:
 jobs:
   create-release:
     name: Create Release
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     
     steps:
@@ -78,6 +79,7 @@ jobs:
       run: cpack
 
     - name: "Upload release assets"
+      if: github.event_name != 'pull_request'
       shell: bash
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
