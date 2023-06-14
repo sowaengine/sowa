@@ -1,1 +1,0 @@
-nmres --recursive --cwd Sowa --namespace Sowa::Res --suffix .res.hpp --rules res_rules.txt

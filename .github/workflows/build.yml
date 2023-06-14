@@ -1,0 +1,87 @@
+name: Build
+
+on:
+  push:
+      branches: ["main"]
+  pull_request:
+      branches: ["main"]
+
+jobs:
+  create-release:
+    name: Create Release
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Create release
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: hub release create -d -m "Build ${{github.run_number}}" ${GITHUB_REF##*/}
+
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    strategy:
+      fail-fast: true
+      matrix:
+        config:
+          - name: "Ubuntu GCC"
+            os: ubuntu-latest
+            artifact: "linux"
+            cc: "gcc"
+            cxx: "g++"
+            generator: "Ninja"
+            github_env: $GITHUB_ENV
+          
+          - name: "Windows MinGW"
+            os: windows-latest
+            artifact: "windows"
+            cc: "gcc"
+            cxx: "g++"
+            generator: "MinGW Makefiles"
+            github_env: $env:GITHUB_ENV
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        clean: false
+    
+    - name: "(windows) Install dependencies"
+      if: startsWith(matrix.config.os, 'windows')
+      run: |
+        ninja --version
+        cmake --version
+      
+    - name: "(ubuntu) Install Dependencies"
+      if: startsWith(matrix.config.os, 'ubuntu')
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build cmake
+        sudo apt-get install -y libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+        ninja --version
+        cmake --version
+        gcc --version
+
+    - name: Configure
+      run: |
+        mkdir build
+        cmake -S . -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -G "${{matrix.config.generator}}"
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release --parallel 4
+
+    - name: Package
+      shell: bash
+      working-directory: build
+      run: cpack
+
+    - name: "Upload release assets"
+      if: github.event_name != 'pull_request'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        hub release edit $(find package/ -maxdepth 1 -type f -printf "-a %p " -name "*.exe" -o -name "*.zip" -o -name "*.tar.gz") -m "" ${GITHUB_REF##*/}

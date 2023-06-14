@@ -1,4 +1,6 @@
 .vscode/
+bin/
+pkg/
 
 # Prerequisites
 *.d
@@ -45,3 +47,5 @@ Game/
 logs/
 *.log
 *.res.hpp
+docs
+*.ignore.*

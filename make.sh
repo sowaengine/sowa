@@ -1,1 +1,0 @@
-cmake --build build --parallel 2 --target all
