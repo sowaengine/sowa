@@ -4,16 +4,18 @@
 
 #include "data/project_settings.hxx"
 
+#ifdef SW_WEB
+#include <GLES3/gl3.h>
+#include <GLFW/glfw3.h>
+#include <emscripten.h>
+#else
 #include <glad/glad.h>
 //
 #include <GLFW/glfw3.h>
+#endif
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-
-void processInput(GLFWwindow *window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
-}
+#include "servers/input_server.hxx"
+#include "servers/rendering_server.hxx"
 
 float vertices[] = {
 	0.5f, 0.5f, 0.0f,	// top right
@@ -25,43 +27,33 @@ unsigned int indices[] = {
 	0, 1, 3,
 	1, 2, 3};
 
-#define GLSL(x) "#version 330 core\n" #x
+#define GLSL(x) "#version 300 es\n" #x
 
 const char *vertexShaderSource = GLSL(
-	layout(location = 0) in vec3 aPos;
+	precision mediump float;
+
+	in vec3 aPos;
+	// layout(location = 0) in vec3 aPos;
 	void main() {
 		gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
 	});
 
 const char *fragmentShaderSource = GLSL(
+	precision mediump float;
 	out vec4 FragColor;
 
 	void main() {
 		FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+		// gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
 	});
 
+void mainLoop();
+
+unsigned int VAO;
+unsigned int shaderProgram;
+
 int main() {
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	// glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-	GLFWwindow *window = glfwCreateWindow(800, 600, "Sowa Engine", NULL, NULL);
-	if (window == NULL) {
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
-
-	glViewport(0, 0, 800, 600);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	RenderingServer::GetInstance().CreateWindow(800, 600, "Sowa Engine");
 
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
@@ -101,7 +93,6 @@ int main() {
 		}
 	}
 
-	unsigned int shaderProgram;
 	shaderProgram = glCreateProgram();
 
 	glAttachShader(shaderProgram, vertexShader);
@@ -118,7 +109,6 @@ int main() {
 					  << infoLog << std::endl;
 		}
 	}
-	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
@@ -129,20 +119,16 @@ int main() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-	glEnableVertexAttribArray(0);
+	int loc = glGetAttribLocation(shaderProgram, "aPos");
+	glEnableVertexAttribArray(loc);
 
-	while (!glfwWindowShouldClose(window)) {
-		processInput(window);
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+#ifdef SW_WEB
+	emscripten_set_main_loop(mainLoop, 0, 1);
+#else
+	while (!RenderingServer::GetInstance().WindowShouldClose()) {
+		mainLoop();
 	}
+#endif
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
@@ -153,4 +139,17 @@ int main() {
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
+}
+
+void mainLoop() {
+	InputServer::GetInstance().ProcessInput();
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glUseProgram(shaderProgram);
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	RenderingServer::GetInstance().SwapBuffers();
+	InputServer::GetInstance().PollEvents();
 }

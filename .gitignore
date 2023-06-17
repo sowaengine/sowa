@@ -49,3 +49,4 @@ logs/
 *.res.hpp
 docs
 *.ignore.*
+*.ignore
