@@ -4,6 +4,23 @@ project(
   VERSION 1.0
   LANGUAGES CXX C)
 
+message(${CMAKE_SYSTEM_NAME})
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(TARGET_PLATFORM "Linux")
+  add_definitions(-DSW_LINUX)
+
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  set(TARGET_PLATFORM "Windows")
+  add_definitions(-DSW_WINDOWS)
+  
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+  set(TARGET_PLATFORM "Web")
+  add_definitions(-DSW_WEB)
+
+else()
+  message(FATAL_ERROR "Unsupported platform ${CMAKE_SYSTEM_NAME}")
+endif()
+
 file(GLOB_RECURSE SOWA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
 set(SOWA_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 
@@ -18,6 +35,12 @@ target_include_directories(
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 target_link_libraries(sowa PRIVATE glfw)
+if(${TARGET_PLATFORM} STREQUAL "Web")
+  set_target_properties(sowa
+    PROPERTIES SUFFIX ".html"
+    LINK_FLAGS " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap --shell-file ${CMAKE_SOURCE_DIR}/layout.html")
+
+endif()
 
 
 
