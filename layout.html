@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="icon" type="image/png" href="/static/icon.png">
 
     <title> Sowa Engine </title>
@@ -16,26 +16,79 @@
             padding: 0;
         }
 
-        div {
+        body {
+            overscroll-behavior-y: contain;
+        }
+
+        #main {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100vw;
-            height: 100vh;
+            height: 100svh;
+
         }
 
         canvas {
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             object-fit: contain;
         }
+
+        .fab>i {
+            transition: 0.2s;
+        }
+
+        .fab:hover {
+            background-color: #ff6d6d;
+            cursor: pointer;
+        }
+
+        .fab.open>i {
+            transform: rotateZ(180deg);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background-color: red;
+            border-radius: 50%;
+            width: 4rem;
+            height: 4rem;
+            font-size: 4rem;
+            color: white;
+            transition: 0.2s;
+        }
+
+        .fab-item.toggled {
+            transform: translateY(-5rem);
+        }
+
+        .fab-item {
+            font-size: 2rem;
+        }
+
+        .fab-item>i {
+            padding: 1rem;
+        }
     </style>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 
 <body>
-    <div>
+    <div id="main">
         <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
     </div>
+
+
+    <div id="btn-fullscreen" class="fab fab-item">
+        <i class='bx bx-fullscreen'></i>
+    </div>
+    <div id="fab" class="fab">
+        <i class='bx bx-chevron-down'></i>
+    </div>
+
 
     <script type='text/javascript'>
         function resizefunc() {
@@ -49,6 +102,44 @@
         var Module = {
             canvas: (function () { return canvas; })()
         };
+
+        function getFullscreenElement() {
+            return document.fullscreenElement
+                || document.webkitFullscreenElement
+                || document.mozFullscreenElement
+                || document.msFullscreenElement;
+        }
+
+        document.addEventListener('fullscreenchange', () => { })
+
+        const fab = document.getElementById("fab");
+        function toggleActionButton() {
+            fab.classList.toggle('open');
+            const elems = document.querySelectorAll('.fab-item');
+            for (let el of elems) {
+                el.classList.toggle('toggled');
+            }
+        }
+
+        fab.addEventListener('click', (e) => {
+            toggleActionButton();
+        })
+
+        const btn_fullscreen = document.getElementById("btn-fullscreen")
+        btn_fullscreen.addEventListener('click', () => {
+            if (getFullscreenElement()) {
+                document.exitFullscreen().catch((e) => {
+                    alert(e);
+                });
+            } else {
+                document.documentElement.requestFullscreen().catch((e) => {
+                    alert(e);
+                })
+            }
+
+            toggleActionButton();
+        });
+
     </script>
 
     {{{ SCRIPT }}}
