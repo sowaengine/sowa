@@ -153,3 +153,6 @@ void mainLoop() {
 	RenderingServer::GetInstance().SwapBuffers();
 	InputServer::GetInstance().PollEvents();
 }
+
+extern "C" void Resize(int width, int height) {
+}
