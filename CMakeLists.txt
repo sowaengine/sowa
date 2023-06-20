@@ -37,14 +37,22 @@ target_include_directories(
 target_link_libraries(sowa PRIVATE glfw)
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(sowa
-    PROPERTIES SUFFIX ".html"
-    LINK_FLAGS " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap --shell-file ${CMAKE_SOURCE_DIR}/layout.html")
-
+    PROPERTIES
+      OUTPUT_NAME "index"
+      SUFFIX ".html"
+      LINK_FLAGS " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap --shell-file ${CMAKE_SOURCE_DIR}/layout.html")
 endif()
 
 
-
-install(TARGETS sowa RUNTIME DESTINATION .)
+if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
+  install(TARGETS sowa RUNTIME DESTINATION .)
+else()
+  install(FILES
+    "$<TARGET_FILE_DIR:sowa>/index.html"
+    "$<TARGET_FILE_DIR:sowa>/index.wasm"
+    "$<TARGET_FILE_DIR:sowa>/index.js"
+    DESTINATION .)
+endif()
 
 set(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/package)
 set(CPACK_PACKAGE_NAME sowaengine)
