@@ -16,7 +16,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   set(TARGET_PLATFORM "Windows")
   add_definitions(-DSW_WINDOWS)
-  
+
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
   set(TARGET_PLATFORM "Web")
   add_definitions(-DSW_WEB)
@@ -40,22 +40,22 @@ target_include_directories(
 
 target_link_libraries(sowa PRIVATE glfw)
 if(${TARGET_PLATFORM} STREQUAL "Web")
-  set_target_properties(sowa
+  set_target_properties(
+    sowa
     PROPERTIES
       OUTPUT_NAME "index"
       SUFFIX ".html"
-      LINK_FLAGS " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap --shell-file ${CMAKE_SOURCE_DIR}/layout.html")
+      LINK_FLAGS
+      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
+  )
 endif()
-
 
 if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
   install(TARGETS sowa RUNTIME DESTINATION .)
 else()
-  install(FILES
-    "$<TARGET_FILE_DIR:sowa>/index.html"
-    "$<TARGET_FILE_DIR:sowa>/index.wasm"
-    "$<TARGET_FILE_DIR:sowa>/index.js"
-    DESTINATION .)
+  install(FILES "$<TARGET_FILE_DIR:sowa>/index.html"
+                "$<TARGET_FILE_DIR:sowa>/index.wasm"
+                "$<TARGET_FILE_DIR:sowa>/index.js" DESTINATION .)
 endif()
 
 set(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/package)
@@ -72,9 +72,9 @@ set(CPACK_STRIP_FILES TRUE)
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 
 if(UNIX)
-   set(CPACK_GENERATOR TGZ)
+  set(CPACK_GENERATOR TGZ)
 elseif(WIN32)
-   set(CPACK_GENERATOR ZIP)
+  set(CPACK_GENERATOR ZIP)
 endif()
 
 include(CPack)
