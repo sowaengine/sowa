@@ -8,6 +8,8 @@
 
 class App {
   public:
+	~App();
+
 	Error Init();
 	Error Run();
 

@@ -4,9 +4,16 @@
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
 
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+
 #ifdef SW_WEB
 #include <emscripten.h>
 #endif
+
+App::~App() {
+}
 
 Error App::Init() {
 	RenderingServer::GetInstance().CreateWindow(800, 600, "Sowa Engine");
@@ -30,6 +37,37 @@ Error App::Init() {
 			// gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
 		}));
 	mainShader.Build();
+
+	// Create working dir
+	EM_ASM(
+		FS.mkdir('/app');
+		FS.mount(IDBFS, {}, '/app');
+		FS.syncfs(
+			true, function(err) {
+				console.log('synced');
+				if (err) {
+					console.error("An error occured while syncing fs", err);
+				}
+				Module.ccall('FSSyncReady');
+			}););
+
+	if (std::filesystem::exists("/app/test4")) {
+		std::cout << "File exists" << std::endl;
+	} else {
+		std::cout << "File doesnt exists" << std::endl;
+	}
+
+	// std::ofstream ofstream("/app/test4");
+	// ofstream << "testtest" << std::endl;
+	// ofstream.close();
+
+	// std::ofstream ofstream2("/app/test5");
+	// ofstream2 << "testtest" << std::endl;
+	// ofstream2.close();
+
+	for (auto &entry : std::filesystem::directory_iterator("/app")) {
+		std::cout << "Got: " << entry.path() << std::endl;
+	}
 
 	return OK;
 }
@@ -59,4 +97,24 @@ void App::mainLoop() {
 
 void App::mainLoopCaller(void *self) {
 	static_cast<App *>(self)->mainLoop();
+}
+
+extern "C" void FSSyncReady() {
+	if (std::filesystem::exists("/app/test4")) {
+		std::cout << "File exists" << std::endl;
+	} else {
+		std::cout << "File doesnt exists" << std::endl;
+	}
+}
+
+extern "C" void Unload() {
+	EM_ASM(
+		FS.syncfs(
+			false, function(err) {
+				if (err) {
+					alert("An error occured while syncing fs", err);
+				} else {
+					console.log("Successfully synced");
+				}
+			}););
 }
