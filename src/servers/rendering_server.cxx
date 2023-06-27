@@ -2,7 +2,7 @@
 
 #include "rendering_server.hxx"
 
-#include "gl.hxx"
+#include "core/rendering/gl.hxx"
 
 #include <stdexcept>
 

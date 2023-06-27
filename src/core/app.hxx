@@ -13,6 +13,7 @@ class App {
 
   private:
 	void mainLoop();
+	static void mainLoopCaller(void *self);
 
   private:
 	Model rectModel;

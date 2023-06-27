@@ -2,7 +2,7 @@
 #define SW_GFX_BUFFER_HXX
 #pragma once
 
-#include "gl.hxx"
+#include "../gl.hxx"
 
 namespace gfx {
 

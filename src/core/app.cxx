@@ -4,6 +4,10 @@
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
 
+#ifdef SW_WEB
+#include <emscripten.h>
+#endif
+
 Error App::Init() {
 	RenderingServer::GetInstance().CreateWindow(800, 600, "Sowa Engine");
 
@@ -32,7 +36,7 @@ Error App::Init() {
 
 Error App::Run() {
 #ifdef SW_WEB
-	emscripten_set_main_loop(mainLoop, 0, 1);
+	emscripten_set_main_loop_arg(mainLoopCaller, this, 0, 1);
 #else
 	while (!RenderingServer::GetInstance().WindowShouldClose()) {
 		mainLoop();
@@ -51,4 +55,8 @@ void App::mainLoop() {
 
 	RenderingServer::GetInstance().SwapBuffers();
 	InputServer::GetInstance().PollEvents();
+}
+
+void App::mainLoopCaller(void *self) {
+	static_cast<App *>(self)->mainLoop();
 }

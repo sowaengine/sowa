@@ -2,7 +2,7 @@
 #define SW_GFX_VERTEX_ARRAY_HXX
 #pragma once
 
-#include "gl.hxx"
+#include "../gl.hxx"
 
 #include <vector>
 
