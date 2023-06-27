@@ -15,6 +15,8 @@ class RenderingServer {
 	bool WindowShouldClose();
 	void SwapBuffers();
 
+	void Terminate();
+
   private:
 	friend struct CallbackBridge;
 	friend class InputServer;

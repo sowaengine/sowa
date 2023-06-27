@@ -1,14 +1,8 @@
+#define GLFW_INCLUDE_NONE
+
 #include "rendering_server.hxx"
 
-#ifdef SW_WEB
-#include <GLES3/gl3.h>
-#include <GLFW/glfw3.h>
-#include <emscripten.h>
-#else
-#include <glad/glad.h>
-//
-#include <GLFW/glfw3.h>
-#endif
+#include "gl.hxx"
 
 #include <stdexcept>
 
@@ -67,6 +61,10 @@ bool RenderingServer::WindowShouldClose() {
 
 void RenderingServer::SwapBuffers() {
 	glfwSwapBuffers(m_pWindowHandle);
+}
+
+void RenderingServer::Terminate() {
+	glfwTerminate();
 }
 
 void RenderingServer::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
