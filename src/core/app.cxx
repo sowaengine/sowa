@@ -15,6 +15,21 @@
 App::~App() {
 }
 
+EM_JS(void, sync_fs_from_db, (), {
+	Module.timer = false;
+	FS.syncfs(
+		true, function(err) {
+			if (err) {
+				console.error("An error occured while syncing fs", err);
+			}
+			Module.timer = true;
+		});
+});
+
+EM_JS(bool, check_timer, (), {
+	return Module.timer;
+});
+
 Error App::Init() {
 	RenderingServer::GetInstance().CreateWindow(800, 600, "Sowa Engine");
 
@@ -41,15 +56,12 @@ Error App::Init() {
 	// Create working dir
 	EM_ASM(
 		FS.mkdir('/app');
-		FS.mount(IDBFS, {}, '/app');
-		FS.syncfs(
-			true, function(err) {
-				console.log('synced');
-				if (err) {
-					console.error("An error occured while syncing fs", err);
-				}
-				Module.ccall('FSSyncReady');
-			}););
+		FS.mount(IDBFS, {}, '/app'););
+	sync_fs_from_db();
+
+	while (!check_timer()) {
+		emscripten_sleep(1);
+	}
 
 	if (std::filesystem::exists("/app/test4")) {
 		std::cout << "File exists" << std::endl;
@@ -97,14 +109,6 @@ void App::mainLoop() {
 
 void App::mainLoopCaller(void *self) {
 	static_cast<App *>(self)->mainLoop();
-}
-
-extern "C" void FSSyncReady() {
-	if (std::filesystem::exists("/app/test4")) {
-		std::cout << "File exists" << std::endl;
-	} else {
-		std::cout << "File doesnt exists" << std::endl;
-	}
 }
 
 extern "C" void Unload() {
