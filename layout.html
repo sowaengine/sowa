@@ -62,7 +62,7 @@
         }
 
         .fab-item.toggled {
-            transform: translateY(-5rem);
+            transform: translateY(calc(-5rem * var(--i)));
         }
 
         .fab-item {
@@ -82,8 +82,11 @@
     </div>
 
 
-    <div id="btn-fullscreen" class="fab fab-item">
+    <div style="--i:1" id="btn-fullscreen" class="fab fab-item">
         <i class='bx bx-fullscreen'></i>
+    </div>
+    <div style="--i:2" id="btn-import" class="fab fab-item">
+        <i class='bx bxs-file-import'></i>
     </div>
     <div id="fab" class="fab">
         <i class='bx bx-chevron-down'></i>
@@ -94,6 +97,10 @@
         function resizefunc() {
             Module.ccall('Resize', 'void', ['number', 'number'], [window.innerWidth, window.innerHeight]);
         }
+
+        window.addEventListener('beforeunload', function (e) {
+            Module.ccall('Unload');
+        }, false);
 
         const canvas = document.getElementById('canvas');
         window.addEventListener('resize', (event) => {
@@ -136,6 +143,31 @@
                     alert(e);
                 })
             }
+
+            toggleActionButton();
+        });
+
+        const btn_import = document.getElementById("btn-import")
+        btn_import.addEventListener('click', () => {
+            let input = document.createElement('input');
+            input.type = 'file';
+
+            input.accept = '.apng, .avif, .bmp, .gif, .ico, .jfif, .jpe, .jpeg, .jpg, .png, .svg, .tif, .tiff, .webp';
+            input.onchange = function (e) {
+                var file = e.target.files[0];
+                var reader = new FileReader();
+                reader.readAsArrayBuffer(file);
+                reader.onload = function () {
+                    var arrayBuffer = reader.result;
+                    var uint8View = new Uint8Array(arrayBuffer);
+                    FS.writeFile('/app/file', uint8View);
+                    FS.syncfs(false, function (err) {
+                        console.log('file can be loaded');
+                        assert(!err);
+                    });
+                }
+            };
+            input.click();
 
             toggleActionButton();
         });
