@@ -1,14 +1,6 @@
 #include "shader.hxx"
 
-#ifdef SW_WEB
-#include <GLES3/gl3.h>
-#include <GLFW/glfw3.h>
-#include <emscripten.h>
-#else
-#include <glad/glad.h>
-//
-#include <GLFW/glfw3.h>
-#endif
+#include "gl.hxx"
 
 #include <iostream>
 
