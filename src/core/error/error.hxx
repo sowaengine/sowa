@@ -4,6 +4,8 @@
 
 enum Error {
 	OK = 0,
+	ERR_FAILED,
+	ERR_NOT_INITIALIZED,
 	MAX_ERROR
 };
 

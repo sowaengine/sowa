@@ -1,0 +1,14 @@
+config_version = 1
+
+[app]
+author = 'Author'
+name = 'Sowa Engine'
+version = '1.0'
+
+[config]
+icon = 'res://icon.png'
+
+[window]
+height = 600
+width = 800
+

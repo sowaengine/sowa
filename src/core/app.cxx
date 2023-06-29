@@ -4,6 +4,8 @@
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
 
+#include "data/toml_document.hxx"
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -33,7 +35,9 @@ EM_JS(bool, check_timer, (), {
 #endif
 
 Error App::Init() {
-	RenderingServer::GetInstance().CreateWindow(800, 600, "Sowa Engine");
+	m_projectSettings.Load("project/project.sowa");
+	m_projectSettings.Save("project/project.sowa");
+	RenderingServer::GetInstance().CreateWindow(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
 
 	// Initialize rendering
 	ModelBuilder::Quad2D(rectModel);

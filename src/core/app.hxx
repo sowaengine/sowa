@@ -3,8 +3,8 @@
 #pragma once
 
 #include "core/error/error.hxx"
-
 #include "core/graphics.hxx"
+#include "data/project_settings.hxx"
 
 class App {
   public:
@@ -20,6 +20,7 @@ class App {
   private:
 	Model rectModel;
 	Shader mainShader;
+	project_settings m_projectSettings;
 };
 
 #endif // SW_APP_HXX
