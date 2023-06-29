@@ -15,6 +15,7 @@
 App::~App() {
 }
 
+#ifdef SW_WEB
 EM_JS(void, sync_fs_from_db, (), {
 	Module.timer = false;
 	FS.syncfs(
@@ -29,6 +30,7 @@ EM_JS(void, sync_fs_from_db, (), {
 EM_JS(bool, check_timer, (), {
 	return Module.timer;
 });
+#endif
 
 Error App::Init() {
 	RenderingServer::GetInstance().CreateWindow(800, 600, "Sowa Engine");
@@ -53,7 +55,8 @@ Error App::Init() {
 		}));
 	mainShader.Build();
 
-	// Create working dir
+// Create working dir
+#ifdef SW_WEB
 	EM_ASM(
 		FS.mkdir('/app');
 		FS.mount(IDBFS, {}, '/app'););
@@ -62,24 +65,7 @@ Error App::Init() {
 	while (!check_timer()) {
 		emscripten_sleep(1);
 	}
-
-	if (std::filesystem::exists("/app/test4")) {
-		std::cout << "File exists" << std::endl;
-	} else {
-		std::cout << "File doesnt exists" << std::endl;
-	}
-
-	// std::ofstream ofstream("/app/test4");
-	// ofstream << "testtest" << std::endl;
-	// ofstream.close();
-
-	// std::ofstream ofstream2("/app/test5");
-	// ofstream2 << "testtest" << std::endl;
-	// ofstream2.close();
-
-	for (auto &entry : std::filesystem::directory_iterator("/app")) {
-		std::cout << "Got: " << entry.path() << std::endl;
-	}
+#endif
 
 	return OK;
 }
