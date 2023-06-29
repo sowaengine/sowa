@@ -98,6 +98,7 @@ void App::mainLoopCaller(void *self) {
 }
 
 extern "C" void Unload() {
+#ifdef SW_WEB
 	EM_ASM(
 		FS.syncfs(
 			false, function(err) {
@@ -107,4 +108,5 @@ extern "C" void Unload() {
 					console.log("Successfully synced");
 				}
 			}););
+#endif
 }
