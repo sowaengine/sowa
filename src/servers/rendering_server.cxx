@@ -36,6 +36,13 @@ void RenderingServer::CreateWindow(int width, int height, const std::string &tit
 		throw std::runtime_error("Failed to create window. Window already exists");
 	}
 
+	if (width <= 0) {
+		width = 640;
+	}
+	if (height <= 0) {
+		height = 480;
+	}
+
 	m_pWindowHandle = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 	if (m_pWindowHandle == NULL) {
 		glfwTerminate();
@@ -61,6 +68,10 @@ bool RenderingServer::WindowShouldClose() {
 
 void RenderingServer::SwapBuffers() {
 	glfwSwapBuffers(m_pWindowHandle);
+}
+
+void RenderingServer::GetWindowSize(int &width, int &height) {
+	glfwGetFramebufferSize(m_pWindowHandle, &width, &height);
 }
 
 void RenderingServer::Terminate() {

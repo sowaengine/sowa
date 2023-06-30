@@ -16,3 +16,7 @@ void InputServer::ProcessInput() {
 void InputServer::PollEvents() {
 	glfwPollEvents();
 }
+
+void InputServer::GetMousePosition(double &x, double &y) {
+	glfwGetCursorPos(RenderingServer::GetInstance().m_pWindowHandle, &x, &y);
+}

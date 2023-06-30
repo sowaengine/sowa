@@ -9,6 +9,8 @@ class InputServer {
 
 	void ProcessInput();
 	void PollEvents();
+
+	void GetMousePosition(double &x, double &y);
 };
 
 #endif // SW_INPUT_SERVER_HXX

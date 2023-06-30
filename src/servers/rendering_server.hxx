@@ -15,6 +15,7 @@ class RenderingServer {
 
 	bool WindowShouldClose();
 	void SwapBuffers();
+	void GetWindowSize(int &width, int &height);
 
 	void Terminate();
 
