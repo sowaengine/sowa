@@ -43,12 +43,39 @@ Error App::Init() {
 #endif
 	FileServer::Create(this);
 
+	// Create working dir
+#ifdef SW_WEB
+	EM_ASM({
+		let text = Module.UTF8ToString($0, $1);
+
+		FS.mkdir(text);
+		FS.mount(IDBFS, {}, text);
+	},
+		   m_appPath.string().c_str(), m_appPath.string().size());
+	sync_fs_from_db();
+
+	while (!check_timer()) {
+		emscripten_sleep(1);
+	}
+#endif
+
 	Error err = m_projectSettings.Load("res://project.sowa");
 	if (err != OK) {
 		//
 	}
 
 	RenderingServer::GetInstance().CreateWindow(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
+
+#ifdef SW_WEB
+	// Update page title
+	if (m_projectSettings.app_name != "") {
+		EM_ASM({
+			document.title = Module.UTF8ToString($0, $1);
+			console.log(document.title);
+		},
+			   m_projectSettings.app_name.c_str(), m_projectSettings.app_name.size());
+	}
+#endif
 
 	// Initialize rendering
 	ModelBuilder::Quad2D(rectModel);
@@ -69,22 +96,6 @@ Error App::Init() {
 			// gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
 		}));
 	mainShader.Build();
-
-// Create working dir
-#ifdef SW_WEB
-	EM_ASM({
-		let text = Module.UTF8ToString($0, $1);
-
-		FS.mkdir(text);
-		FS.mount(IDBFS, {}, text);
-	},
-		   m_appPath.string().c_str(), m_appPath.string().size());
-	sync_fs_from_db();
-
-	while (!check_timer()) {
-		emscripten_sleep(1);
-	}
-#endif
 
 	return OK;
 }

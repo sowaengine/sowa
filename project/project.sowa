@@ -2,7 +2,7 @@ config_version = 1
 
 [app]
 author = 'Author'
-name = 'Sowa Engine'
+name = 'Sowa Engine App'
 version = '1.0'
 
 [config]
