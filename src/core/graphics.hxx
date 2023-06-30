@@ -8,6 +8,7 @@
 
 #include "rendering/model.hxx"
 #include "rendering/model_builder.hxx"
+#include "rendering/render_layer.hxx"
 #include "rendering/shader.hxx"
 
 #endif // SW_GRAPHICS_HXX

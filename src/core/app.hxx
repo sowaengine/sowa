@@ -17,6 +17,8 @@ class App {
 
 	inline project_settings &ProjectSettings() { return m_projectSettings; }
 
+	void SetRenderLayer(RenderLayer *renderlayer);
+
   private:
 	void mainLoop();
 	static void mainLoopCaller(void *self);
@@ -24,6 +26,12 @@ class App {
   private:
 	Model rectModel;
 	Shader mainShader;
+
+	Model fullscreenModel;
+	Shader fullscreenShader;
+	RenderLayer m_layer2D;
+	RenderLayer m_layerUI;
+
 	project_settings m_projectSettings;
 
 	friend class FileServer;
