@@ -1,7 +1,8 @@
 #include "project_settings.hxx"
 
-#include <fstream>
 #include <iostream>
+
+#include "servers/file_server.hxx"
 
 Error project_settings::Load(const char *path) {
 	Error err = m_doc.LoadFile(path);
@@ -40,8 +41,10 @@ Error project_settings::Save(const char *path) {
 	std::string s;
 	doc.Serialize(s);
 
-	std::ofstream ofstream(path);
-	ofstream << s << std::endl;
+	Error err = FileServer::GetInstance().WriteFileString(path, s);
+	if (err != OK) {
+		return err;
+	}
 
 	return OK;
 }

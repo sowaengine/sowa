@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include "servers/file_server.hxx"
+
 struct toml_document_data {
 	toml::table table;
 
@@ -32,7 +34,13 @@ toml_document::~toml_document() {
 
 Error toml_document::LoadFile(const char *path) {
 	try {
-		toml_document_data::get(m_internal).table = toml::parse_file(path);
+		std::string buf;
+		Error err = FileServer::GetInstance().ReadFileString(path, buf);
+		if (err != OK) {
+			return err;
+		}
+
+		toml_document_data::get(m_internal).table = toml::parse(buf);
 	} catch (const std::exception &ex) {
 		return ERR_FAILED;
 	}

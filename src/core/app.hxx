@@ -6,12 +6,16 @@
 #include "core/graphics.hxx"
 #include "data/project_settings.hxx"
 
+#include <filesystem>
+
 class App {
   public:
 	~App();
 
 	Error Init();
 	Error Run();
+
+	inline project_settings &ProjectSettings() { return m_projectSettings; }
 
   private:
 	void mainLoop();
@@ -21,6 +25,9 @@ class App {
 	Model rectModel;
 	Shader mainShader;
 	project_settings m_projectSettings;
+
+	friend class FileServer;
+	std::filesystem::path m_appPath = "";
 };
 
 #endif // SW_APP_HXX

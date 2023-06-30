@@ -1,6 +1,7 @@
 #include "app.hxx"
 
 #include "core/graphics.hxx"
+#include "servers/file_server.hxx"
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
 
@@ -35,8 +36,18 @@ EM_JS(bool, check_timer, (), {
 #endif
 
 Error App::Init() {
-	m_projectSettings.Load("project/project.sowa");
-	m_projectSettings.Save("project/project.sowa");
+#ifndef SW_WEB
+	m_appPath = "./project";
+#else
+	m_appPath = "/app";
+#endif
+	FileServer::Create(this);
+
+	Error err = m_projectSettings.Load("res://project.sowa");
+	if (err != OK) {
+		//
+	}
+
 	RenderingServer::GetInstance().CreateWindow(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
 
 	// Initialize rendering
@@ -62,8 +73,8 @@ Error App::Init() {
 // Create working dir
 #ifdef SW_WEB
 	EM_ASM(
-		FS.mkdir('/app');
-		FS.mount(IDBFS, {}, '/app'););
+		FS.mkdir(m_appPath);
+		FS.mount(IDBFS, {}, m_appPath););
 	sync_fs_from_db();
 
 	while (!check_timer()) {
