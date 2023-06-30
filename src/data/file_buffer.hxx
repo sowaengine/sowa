@@ -15,6 +15,8 @@ class file_buffer {
 	size_t size() { return m_buffer.size(); }
 
   private:
+	friend class FileServer;
+
 	std::vector<unsigned char> m_buffer;
 };
 

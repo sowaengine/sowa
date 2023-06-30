@@ -17,6 +17,8 @@ class FileServer {
 	Error ReadFileString(const char *path, std::string &buffer);
 	Error WriteFileString(const char *path, const std::string &buffer);
 
+	Error ReadFileBytes(const char *path, file_buffer &buffer);
+
   private:
 	std::string getFilepath(const std::string &path);
 

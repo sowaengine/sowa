@@ -53,6 +53,41 @@ Error FileServer::WriteFileString(const char *p, const std::string &buffer) {
 	return OK;
 }
 
+Error FileServer::ReadFileBytes(const char *p, file_buffer &buffer) {
+	std::string path = getFilepath(p);
+	if (path == "") {
+		return ERR_FILE_NOT_FOUND;
+	}
+
+	try {
+		std::ifstream ifstream(path, std::ifstream::binary);
+		if (!ifstream.is_open()) {
+			return ERR_FILE_NOT_FOUND;
+		}
+
+		ifstream.unsetf(std::ios::skipws);
+
+		std::streampos fileSize;
+		ifstream.seekg(0, std::ios::end);
+		fileSize = ifstream.tellg();
+		ifstream.seekg(0, std::ios::beg);
+
+		if (fileSize < 0) {
+			return ERR_FILE_NOT_FOUND;
+		}
+
+		buffer.m_buffer.clear();
+		buffer.m_buffer.resize(fileSize);
+		ifstream.read((char *)buffer.m_buffer.data(), fileSize);
+
+		ifstream.close();
+	} catch (const std::exception &ex) {
+		return ERR_FAILED;
+	}
+
+	return OK;
+}
+
 std::string FileServer::getFilepath(const std::string &path) {
 	// scheme://path/to/file
 	auto tokens = Split(path, "://");
