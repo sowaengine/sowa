@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 static FileServer s_instance;
 

@@ -72,9 +72,13 @@ Error App::Init() {
 
 // Create working dir
 #ifdef SW_WEB
-	EM_ASM(
-		FS.mkdir(m_appPath);
-		FS.mount(IDBFS, {}, m_appPath););
+	EM_ASM({
+		let text = Module.UTF8ToString($0, $1);
+
+		FS.mkdir(text);
+		FS.mount(IDBFS, {}, text);
+	},
+		   m_appPath.string().c_str(), m_appPath.string().size());
 	sync_fs_from_db();
 
 	while (!check_timer()) {

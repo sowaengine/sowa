@@ -46,7 +46,7 @@ if(${TARGET_PLATFORM} STREQUAL "Web")
       OUTPUT_NAME "index"
       SUFFIX ".html"
       LINK_FLAGS
-      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main,_Unload -sEXPORTED_RUNTIME_METHODS=ccall,cwrap --shell-file ${CMAKE_SOURCE_DIR}/layout.html -lidbfs.js -sASYNCIFY"
+      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main,_Unload -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,UTF8ToString --shell-file ${CMAKE_SOURCE_DIR}/layout.html -lidbfs.js -sASYNCIFY"
   )
 endif()
 
