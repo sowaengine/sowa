@@ -92,16 +92,27 @@ Error App::Init() {
 		precision mediump float;
 
 		layout(location = 0) in vec3 aPos;
+		layout(location = 1) in vec2 aUV;
+
+		out vec2 sUV;
+
 		void main() {
 			gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+
+			sUV = aUV;
 		}));
 	mainShader.SetFragmentSource(GLSL(
 		precision mediump float;
 		layout(location = 0) out vec4 FragColor;
 		layout(location = 1) out int ID;
 
+		in vec2 sUV;
+
+		uniform sampler2D uTexture;
+
 		void main() {
-			FragColor = vec4(1.0f, 0.6f, 0.2f, 1.0f);
+			/// FragColor = vec4(1.0f, 0.6f, 0.2f, 1.0f);
+			FragColor = texture(uTexture, sUV);
 			ID = 1;
 			// gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
 		}));
@@ -134,6 +145,11 @@ Error App::Init() {
 			FragColor = texture(uTexture, sUV);
 		}));
 	fullscreenShader.Build();
+
+	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
+	if (err != OK) {
+		std::cout << "Failed to load texture: " << err << std::endl;
+	}
 
 	return OK;
 }
@@ -172,6 +188,8 @@ void App::mainLoop() {
 	m_layer2D.Clear(0.2f, 0.5f, 0.7f, 1.0f);
 
 	mainShader.Bind();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_testTexture.ID());
 	rectModel.Draw();
 
 	// double x, y;

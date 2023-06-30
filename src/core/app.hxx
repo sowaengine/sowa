@@ -27,6 +27,8 @@ class App {
 	Model rectModel;
 	Shader mainShader;
 
+	Texture m_testTexture;
+
 	Model fullscreenModel;
 	Shader fullscreenShader;
 	RenderLayer m_layer2D;

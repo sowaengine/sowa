@@ -10,5 +10,6 @@
 #include "rendering/model_builder.hxx"
 #include "rendering/render_layer.hxx"
 #include "rendering/shader.hxx"
+#include "rendering/texture.hxx"
 
 #endif // SW_GRAPHICS_HXX
