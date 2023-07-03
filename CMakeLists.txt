@@ -4,6 +4,27 @@ project(
   VERSION 1.0
   LANGUAGES CXX C)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+message(${CMAKE_SYSTEM_NAME})
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  set(TARGET_PLATFORM "Linux")
+  add_definitions(-DSW_LINUX)
+
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  set(TARGET_PLATFORM "Windows")
+  add_definitions(-DSW_WINDOWS)
+
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+  set(TARGET_PLATFORM "Web")
+  add_definitions(-DSW_WEB)
+
+else()
+  message(FATAL_ERROR "Unsupported platform ${CMAKE_SYSTEM_NAME}")
+endif()
+
 file(GLOB_RECURSE SOWA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
 set(SOWA_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 
@@ -18,10 +39,24 @@ target_include_directories(
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 target_link_libraries(sowa PRIVATE glfw)
+if(${TARGET_PLATFORM} STREQUAL "Web")
+  set_target_properties(
+    sowa
+    PROPERTIES
+      OUTPUT_NAME "index"
+      SUFFIX ".html"
+      LINK_FLAGS
+      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main,_Unload -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,UTF8ToString --shell-file ${CMAKE_SOURCE_DIR}/layout.html -lidbfs.js -sASYNCIFY"
+  )
+endif()
 
-
-
-install(TARGETS sowa RUNTIME DESTINATION .)
+if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
+  install(TARGETS sowa RUNTIME DESTINATION .)
+else()
+  install(FILES "$<TARGET_FILE_DIR:sowa>/index.html"
+                "$<TARGET_FILE_DIR:sowa>/index.wasm"
+                "$<TARGET_FILE_DIR:sowa>/index.js" DESTINATION .)
+endif()
 
 set(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/package)
 set(CPACK_PACKAGE_NAME sowaengine)
@@ -37,9 +72,9 @@ set(CPACK_STRIP_FILES TRUE)
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 
 if(UNIX)
-   set(CPACK_GENERATOR TGZ)
+  set(CPACK_GENERATOR TGZ)
 elseif(WIN32)
-   set(CPACK_GENERATOR ZIP)
+  set(CPACK_GENERATOR ZIP)
 endif()
 
 include(CPack)

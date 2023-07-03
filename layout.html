@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="/static/icon.png">
+
+    <title> Sowa Engine </title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overscroll-behavior-y: contain;
+        }
+
+        #main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100svh;
+
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            /* object-fit: contain; */
+        }
+
+        .fab>i {
+            transition: 0.2s;
+        }
+
+        .fab:hover {
+            background-color: #ff6d6d;
+            cursor: pointer;
+        }
+
+        .fab.open>i {
+            transform: rotateZ(180deg);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            background-color: red;
+            border-radius: 50%;
+            width: 4rem;
+            height: 4rem;
+            font-size: 4rem;
+            color: white;
+            transition: 0.2s;
+        }
+
+        .fab-item.toggled {
+            transform: translateY(calc(-5rem * var(--i)));
+        }
+
+        #btn-fullscreen {
+            background-color: rgb(92, 92, 92);
+        }
+
+        #btn-fullscreen:hover {
+            background-color: rgb(141, 141, 141);
+        }
+
+        #btn-import {
+            background-color: rgb(3, 122, 33);
+        }
+
+        #btn-import:hover {
+            background-color: rgb(6, 185, 15);
+        }
+
+        .fab-item {
+            font-size: 2rem;
+        }
+
+        .fab-item>i {
+            padding: 1rem;
+        }
+    </style>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body>
+    <div id="main">
+        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    </div>
+
+
+    <div style="--i:1" id="btn-fullscreen" class="fab fab-item">
+        <i class='bx bx-fullscreen'></i>
+    </div>
+    <div style="--i:2" id="btn-import" class="fab fab-item">
+        <i class='bx bxs-file-import'></i>
+    </div>
+    <div id="fab" class="fab">
+        <i class='bx bx-chevron-down'></i>
+    </div>
+
+
+    <script type='text/javascript'>
+        function resizefunc() {
+            Module.ccall('Resize', 'void', ['number', 'number'], [window.innerWidth, window.innerHeight]);
+        }
+
+        window.addEventListener('beforeunload', function (e) {
+            Module.ccall('Unload');
+        }, false);
+
+        const canvas = document.getElementById('canvas');
+        window.addEventListener('resize', (event) => {
+            resizefunc();
+        })
+        var Module = {
+            canvas: (function () { return canvas; })()
+        };
+
+        function getFullscreenElement() {
+            return document.fullscreenElement
+                || document.webkitFullscreenElement
+                || document.mozFullscreenElement
+                || document.msFullscreenElement;
+        }
+
+        document.addEventListener('fullscreenchange', () => { })
+
+        const fab = document.getElementById("fab");
+        function toggleActionButton() {
+            fab.classList.toggle('open');
+            const elems = document.querySelectorAll('.fab-item');
+            for (let el of elems) {
+                el.classList.toggle('toggled');
+            }
+        }
+
+        fab.addEventListener('click', (e) => {
+            toggleActionButton();
+        })
+
+        const btn_fullscreen = document.getElementById("btn-fullscreen")
+        btn_fullscreen.addEventListener('click', () => {
+            if (getFullscreenElement()) {
+                document.exitFullscreen().catch((e) => {
+                    alert(e);
+                });
+            } else {
+                document.documentElement.requestFullscreen().catch((e) => {
+                    alert(e);
+                })
+            }
+
+            toggleActionButton();
+        });
+
+        const btn_import = document.getElementById("btn-import")
+        btn_import.addEventListener('click', () => {
+            let input = document.createElement('input');
+            input.type = 'file';
+
+            // input.accept = '.apng, .avif, .bmp, .gif, .ico, .jfif, .jpe, .jpeg, .jpg, .png, .svg, .tif, .tiff, .webp';
+            input.onchange = function (e) {
+                var file = e.target.files[0];
+                var reader = new FileReader();
+                reader.readAsArrayBuffer(file);
+                reader.onload = function () {
+                    var arrayBuffer = reader.result;
+                    var uint8View = new Uint8Array(arrayBuffer);
+
+                    let filename = file.name || "file";
+                    let p = prompt("File will be saved as " + filename + ". type to overwrite it.")
+                    filename = p || filename;
+
+                    FS.writeFile('/app/' + filename, uint8View);
+                    FS.syncfs(false, function (err) {
+                        console.log('file /app/' + filename + " can be loaded");
+                        assert(!err);
+                    });
+                }
+            };
+            input.click();
+
+            toggleActionButton();
+        });
+
+    </script>
+
+    {{{ SCRIPT }}}
+</body>
+
+</html>
