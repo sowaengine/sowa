@@ -97,7 +97,7 @@ std::string FileServer::getFilepath(const std::string &path) {
 
 	const std::string &scheme = tokens[0];
 	if (scheme == "res") {
-		return m_pApp->m_appPath / tokens[1];
+		return (m_pApp->m_appPath / std::filesystem::path(tokens[1])).string();
 	}
 
 	return "";
