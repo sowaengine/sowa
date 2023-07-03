@@ -113,6 +113,9 @@ Error App::Init() {
 	cont.anchor = Anchor::Left;
 	cont.width = "27%";
 	cont.height = "100%";
+	cont.backgroundColor = Color::FromRGB(200, 100, 20);
+	cont.padding = Padding::All(5.f);
+	cont.id = 1;
 
 	m_editorTree.Calculate();
 
@@ -172,11 +175,12 @@ void App::mainLoop() {
 		}
 	}
 
-	// double x, y;
-	// InputServer::GetInstance().GetMousePosition(x, y);
-	// x *= (1920.f / 800.f);
-	// y *= (1080.f / 600.f);
-	// int id = m_layer2D.ReadAttachmentInt(1, x, y);
+	double x, y;
+	InputServer::GetInstance().GetMousePosition(x, y);
+	x *= (1920.f / (float)w);
+	y *= (1080.f / (float)h);
+	int id = m_layer2D.ReadAttachmentInt(1, x, y);
+	// std::cout << id << std::endl;
 
 	SetRenderLayer(nullptr);
 

@@ -130,7 +130,17 @@ void UITree::Calculate() {
 		container->m_uitree_y = static_cast<float>(y);
 		container->m_uitree_w = static_cast<float>(w);
 		container->m_uitree_h = static_cast<float>(h);
-		ModelBuilder::Quad2D(container->m_model, (x / m_root.width.Number()) * 2, (y / m_root.height.Number()) * 2, (w / m_root.width.Number()) * 2, (h / m_root.height.Number()) * 2);
+		ModelBuilder::UIQuad(
+			container->m_model,
+			(x / m_root.width.Number()) * 2,
+			(y / m_root.height.Number()) * 2,
+			(w / m_root.width.Number()) * 2,
+			(h / m_root.height.Number()) * 2,
+			container->backgroundColor.r,
+			container->backgroundColor.g,
+			container->backgroundColor.b,
+			container->backgroundColor.a,
+			container->id);
 
 		for (UIContainer &child : container->Children()) {
 			self(self, &child);

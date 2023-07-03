@@ -65,6 +65,7 @@ class UIContainer {
 	bool active = true;
 	UISize width = "128px";
 	UISize height = "128px";
+	int id = 0;
 
   private:
 	friend class UITree;
