@@ -7,6 +7,7 @@
 class ModelBuilder {
   public:
 	static bool Quad2D(Model &model, float size = 1.0f);
+	static bool Quad2D(Model &model, float x, float y, float w, float h);
 
   private:
 	ModelBuilder() = default;
