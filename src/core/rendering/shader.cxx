@@ -2,6 +2,7 @@
 
 #include "gl.hxx"
 
+#include "servers/file_server.hxx"
 #include <iostream>
 
 static bool HandleCompileError(uint32_t id, const char *shaderType) {
@@ -37,6 +38,28 @@ Shader::~Shader() {
 	Delete();
 }
 
+Error Shader::Load(const char *vertexPath, const char *fragmentPath) {
+	Error err;
+	std::string buf;
+	err = FileServer::GetInstance().ReadFileString(vertexPath, buf);
+	if (err != OK) {
+		SetVertexSource("");
+		SetFragmentSource("");
+		return err;
+	}
+	SetVertexSource(buf);
+
+	err = FileServer::GetInstance().ReadFileString(fragmentPath, buf);
+	if (err != OK) {
+		SetVertexSource("");
+		SetFragmentSource("");
+		return err;
+	}
+	SetFragmentSource(buf);
+
+	return Build();
+}
+
 void Shader::SetVertexSource(const std::string &src) {
 	m_vertexSource = src;
 }
@@ -45,7 +68,7 @@ void Shader::SetFragmentSource(const std::string &src) {
 	m_fragmentSource = src;
 }
 
-void Shader::Build() {
+Error Shader::Build() {
 	Delete();
 
 	uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -53,7 +76,7 @@ void Shader::Build() {
 	glShaderSource(vertexShader, 1, &vertexSrc, nullptr);
 	glCompileShader(vertexShader);
 	if (!HandleCompileError(vertexShader, "vertex")) {
-		return;
+		return ERR_FAILED;
 	}
 
 	uint32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -61,7 +84,7 @@ void Shader::Build() {
 	glShaderSource(fragmentShader, 1, &fragmentSrc, nullptr);
 	glCompileShader(fragmentShader);
 	if (!HandleCompileError(fragmentShader, "fragment")) {
-		return;
+		return ERR_FAILED;
 	}
 
 	m_id = glCreateProgram();
@@ -69,14 +92,16 @@ void Shader::Build() {
 	glAttachShader(m_id, fragmentShader);
 	glLinkProgram(m_id);
 	if (!HandleLinkError(m_id)) {
-		return;
+		return ERR_FAILED;
 	}
+
+	return OK;
 }
 
-void Shader::New(const std::string &vertexSource, const std::string &fragmentSource) {
+Error Shader::New(const std::string &vertexSource, const std::string &fragmentSource) {
 	SetVertexSource(vertexSource);
 	SetFragmentSource(fragmentSource);
-	Build();
+	return Build();
 }
 
 void Shader::Delete() {

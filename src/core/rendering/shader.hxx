@@ -2,6 +2,7 @@
 #define SW_SHADER_HXX
 #pragma once
 
+#include "core/error/error.hxx"
 #include <string>
 
 class Shader {
@@ -9,11 +10,13 @@ class Shader {
 	Shader() = default;
 	~Shader();
 
+	Error Load(const char *vertexPath, const char *fragmentPath);
+
 	void SetVertexSource(const std::string &src);
 	void SetFragmentSource(const std::string &src);
-	void Build();
+	Error Build();
 
-	void New(const std::string &vertexSource, const std::string &fragmentSource);
+	Error New(const std::string &vertexSource, const std::string &fragmentSource);
 	void Delete();
 
 	void Bind();

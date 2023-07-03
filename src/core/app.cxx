@@ -90,88 +90,11 @@ Error App::Init() {
 
 	// Initialize rendering
 	ModelBuilder::Quad2D(rectModel);
-
-	mainShader.SetVertexSource(GLSL(
-		precision mediump float;
-
-		layout(location = 0) in vec3 aPos;
-		layout(location = 1) in vec2 aUV;
-
-		out vec2 sUV;
-
-		void main() {
-			gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-
-			sUV = aUV;
-		}));
-	mainShader.SetFragmentSource(GLSL(
-		precision mediump float;
-		layout(location = 0) out vec4 FragColor;
-		layout(location = 1) out int ID;
-
-		in vec2 sUV;
-
-		uniform sampler2D uTexture;
-
-		void main() {
-			/// FragColor = vec4(1.0f, 0.6f, 0.2f, 1.0f);
-			FragColor = texture(uTexture, sUV);
-			ID = 1;
-			// gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-		}));
-	mainShader.Build();
-
 	ModelBuilder::Quad2D(fullscreenModel, 2.f);
 
-	fullscreenShader.SetVertexSource(GLSL(
-		precision mediump float;
-
-		layout(location = 0) in vec3 aPos;
-		layout(location = 1) in vec2 aUV;
-
-		out vec2 sUV;
-		void main() {
-			gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-
-			sUV = aUV;
-		}));
-
-	fullscreenShader.SetFragmentSource(GLSL(
-		precision mediump float;
-		layout(location = 0) out vec4 FragColor;
-
-		in vec2 sUV;
-
-		uniform sampler2D uTexture;
-
-		void main() {
-			FragColor = texture(uTexture, sUV);
-		}));
-	fullscreenShader.Build();
-
-	uiShader.SetVertexSource(GLSL(
-		precision mediump float;
-
-		layout(location = 0) in vec3 aPos;
-		layout(location = 1) in vec2 aUV;
-
-		out vec2 sUV;
-		void main() {
-			gl_Position = vec4(aPos.x - 1.0, -(aPos.y - 1.0), aPos.z, 1.0);
-
-			sUV = aUV;
-		}));
-
-	uiShader.SetFragmentSource(GLSL(
-		precision mediump float;
-		layout(location = 0) out vec4 FragColor;
-
-		in vec2 sUV;
-
-		void main() {
-			FragColor = vec4(sUV, 0.0, 1.0);
-		}));
-	uiShader.Build();
+	mainShader.Load("res://shaders/main.vs", "res://shaders/main.fs");
+	fullscreenShader.Load("res://shaders/fullscreen.vs", "res://shaders/fullscreen.fs");
+	uiShader.Load("res://shaders/ui_panel.vs", "res://shaders/ui_panel.fs");
 
 	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
 	if (err != OK) {
