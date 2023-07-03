@@ -7,6 +7,9 @@
 
 #include "data/toml_document.hxx"
 
+#include "ui/ui_container.hxx"
+#include "ui/ui_tree.hxx"
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -146,10 +149,49 @@ Error App::Init() {
 		}));
 	fullscreenShader.Build();
 
+	uiShader.SetVertexSource(GLSL(
+		precision mediump float;
+
+		layout(location = 0) in vec3 aPos;
+		layout(location = 1) in vec2 aUV;
+
+		out vec2 sUV;
+		void main() {
+			gl_Position = vec4(aPos.x - 1.0, -(aPos.y - 1.0), aPos.z, 1.0);
+
+			sUV = aUV;
+		}));
+
+	uiShader.SetFragmentSource(GLSL(
+		precision mediump float;
+		layout(location = 0) out vec4 FragColor;
+
+		in vec2 sUV;
+
+		void main() {
+			FragColor = vec4(sUV, 0.0, 1.0);
+		}));
+	uiShader.Build();
+
 	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
 	if (err != OK) {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
+
+	m_editorTree.Root().width = "1920px";
+	m_editorTree.Root().height = "1080px";
+	m_editorTree.Root().anchor = Anchor::Center;
+
+	UIContainer &cont = m_editorTree.Root().Children().emplace_back();
+	cont.wrap = Wrap::Wrap;
+	cont.flexDirection = FlexDirection::Row;
+	cont.justifyContent = JustifyContent::Middle;
+	cont.layoutModel = LayoutModel::Flex;
+	cont.anchor = Anchor::Left;
+	cont.width = "27%";
+	cont.height = "100%";
+
+	m_editorTree.Calculate();
 
 	return OK;
 }
@@ -187,10 +229,25 @@ void App::mainLoop() {
 	SetRenderLayer(&m_layer2D);
 	m_layer2D.Clear(0.2f, 0.5f, 0.7f, 1.0f);
 
+	int w, h;
+	RenderingServer::GetInstance().GetWindowSize(w, h);
+	m_editorTree.Root().width.Number() = w;
+	m_editorTree.Root().height.Number() = h;
+	m_editorTree.Calculate();
+
 	mainShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_testTexture.ID());
-	rectModel.Draw();
+
+	uiShader.Bind();
+	m_editorTree.Root().m_model.Draw();
+	for (auto &child : m_editorTree.Root().Children()) {
+		child.m_model.Draw();
+
+		for (auto &c : child.Children()) {
+			c.m_model.Draw();
+		}
+	}
 
 	// double x, y;
 	// InputServer::GetInstance().GetMousePosition(x, y);
