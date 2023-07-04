@@ -6,6 +6,11 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
+enum class CursorMode {
+	Normal,
+	Pointer
+};
+
 class RenderingServer {
   public:
 	RenderingServer();
@@ -17,12 +22,17 @@ class RenderingServer {
 	void SwapBuffers();
 	void GetWindowSize(int &width, int &height);
 
+	void SetCursorMode(CursorMode mode = CursorMode::Normal);
+
 	void Terminate();
 
   private:
 	friend struct CallbackBridge;
 	friend class InputServer;
 	GLFWwindow *m_pWindowHandle = nullptr;
+
+	GLFWcursor *m_pStandartCursor = nullptr;
+	GLFWcursor *m_pPointerCursor = nullptr;
 
 	void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 };

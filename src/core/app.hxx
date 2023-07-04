@@ -5,6 +5,7 @@
 #include "core/error/error.hxx"
 #include "core/graphics.hxx"
 #include "data/project_settings.hxx"
+#include "ui/ui_tree.hxx"
 
 #include <filesystem>
 
@@ -29,12 +30,16 @@ class App {
 
 	Texture m_testTexture;
 
+	Shader uiShader;
+
 	Model fullscreenModel;
 	Shader fullscreenShader;
 	RenderLayer m_layer2D;
 	RenderLayer m_layerUI;
 
 	project_settings m_projectSettings;
+
+	UITree m_editorTree;
 
 	friend class FileServer;
 	std::filesystem::path m_appPath = "";

@@ -7,6 +7,9 @@
 
 #include "data/toml_document.hxx"
 
+#include "ui/ui_container.hxx"
+#include "ui/ui_tree.hxx"
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -87,69 +90,54 @@ Error App::Init() {
 
 	// Initialize rendering
 	ModelBuilder::Quad2D(rectModel);
-
-	mainShader.SetVertexSource(GLSL(
-		precision mediump float;
-
-		layout(location = 0) in vec3 aPos;
-		layout(location = 1) in vec2 aUV;
-
-		out vec2 sUV;
-
-		void main() {
-			gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-
-			sUV = aUV;
-		}));
-	mainShader.SetFragmentSource(GLSL(
-		precision mediump float;
-		layout(location = 0) out vec4 FragColor;
-		layout(location = 1) out int ID;
-
-		in vec2 sUV;
-
-		uniform sampler2D uTexture;
-
-		void main() {
-			/// FragColor = vec4(1.0f, 0.6f, 0.2f, 1.0f);
-			FragColor = texture(uTexture, sUV);
-			ID = 1;
-			// gl_FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-		}));
-	mainShader.Build();
-
 	ModelBuilder::Quad2D(fullscreenModel, 2.f);
 
-	fullscreenShader.SetVertexSource(GLSL(
-		precision mediump float;
-
-		layout(location = 0) in vec3 aPos;
-		layout(location = 1) in vec2 aUV;
-
-		out vec2 sUV;
-		void main() {
-			gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-
-			sUV = aUV;
-		}));
-
-	fullscreenShader.SetFragmentSource(GLSL(
-		precision mediump float;
-		layout(location = 0) out vec4 FragColor;
-
-		in vec2 sUV;
-
-		uniform sampler2D uTexture;
-
-		void main() {
-			FragColor = texture(uTexture, sUV);
-		}));
-	fullscreenShader.Build();
+	mainShader.Load("res://shaders/main.vs", "res://shaders/main.fs");
+	fullscreenShader.Load("res://shaders/fullscreen.vs", "res://shaders/fullscreen.fs");
+	uiShader.Load("res://shaders/ui_panel.vs", "res://shaders/ui_panel.fs");
 
 	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
 	if (err != OK) {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
+
+	auto &root = m_editorTree.GetTree().New(1);
+	m_editorTree.SetRoot(root);
+
+	root.Node().width = "1920px";
+	root.Node().height = "1080px";
+	root.Node().anchor = Anchor::Center;
+	root.Node().layoutModel = LayoutModel::Flex;
+
+	auto &cont = m_editorTree.GetTree().New(2);
+	auto &inner = m_editorTree.GetTree().New(3);
+
+	root.AddChild(2);
+	root.AddChild(3);
+
+	cont.Node().wrap = Wrap::Wrap;
+	cont.Node().flexDirection = FlexDirection::Row;
+	cont.Node().justifyContent = JustifyContent::Middle;
+	cont.Node().layoutModel = LayoutModel::Flex;
+	cont.Node().anchor = Anchor::Left;
+	cont.Node().width = "27%";
+	cont.Node().height = "100%";
+	cont.Node().backgroundColor = Color::FromRGB(200, 100, 20);
+	cont.Node().padding = Padding::All(5.f);
+	cont.Node().active = true;
+	cont.Node().cursorMode = CursorMode::Pointer;
+
+	inner.Node().wrap = Wrap::Wrap;
+	inner.Node().flexDirection = FlexDirection::Row;
+	inner.Node().justifyContent = JustifyContent::Middle;
+	inner.Node().layoutModel = LayoutModel::Flex;
+	inner.Node().width = "73%";
+	inner.Node().height = "100%";
+	inner.Node().backgroundColor = Color::FromRGB(200, 100, 20);
+	inner.Node().padding = Padding::All(5.f);
+	inner.Node().cursorMode = CursorMode::Pointer;
+
+	m_editorTree.Calculate();
 
 	return OK;
 }
@@ -187,18 +175,42 @@ void App::mainLoop() {
 	SetRenderLayer(&m_layer2D);
 	m_layer2D.Clear(0.2f, 0.5f, 0.7f, 1.0f);
 
+	int w, h;
+	RenderingServer::GetInstance().GetWindowSize(w, h);
+	// m_editorTree.Root().width.Number() = w;
+	// m_editorTree.Root().height.Number() = h;
+	m_editorTree.Calculate();
+
 	mainShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_testTexture.ID());
-	rectModel.Draw();
 
-	// double x, y;
-	// InputServer::GetInstance().GetMousePosition(x, y);
-	// x *= (1920.f / 800.f);
-	// y *= (1080.f / 600.f);
-	// int id = m_layer2D.ReadAttachmentInt(1, x, y);
+	uiShader.Bind();
+
+	CursorMode cursorMode = CursorMode::Normal;
+
+	m_editorTree.DrawLayout();
+
+	double x, y;
+	InputServer::GetInstance().GetMousePosition(x, y);
+	x *= (1920.f / (float)w);
+	y *= (1080.f / (float)h);
+	int id = m_layer2D.ReadAttachmentInt(1, x, y);
+	// std::cout << id << std::endl;
+
+	if (id != 0xFF) {
+		auto *c = m_editorTree.GetTree().FindNodeByID(id);
+		if (c != nullptr) {
+			if (c->Node().cursorMode != CursorMode::Normal) {
+				// todo: if container is resizable and is hovering on corner, set cursor to resize
+				cursorMode = c->Node().cursorMode;
+			}
+		}
+	}
 
 	SetRenderLayer(nullptr);
+
+	RenderingServer::GetInstance().SetCursorMode(cursorMode);
 
 	fullscreenShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
