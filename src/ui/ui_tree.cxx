@@ -112,7 +112,7 @@ void UITree::Calculate() {
 	m_calculateCount++;
 
 	auto positionUINode = [this](const auto &self, UIContainer *container) {
-		if (nullptr == container) {
+		if (nullptr == container || !container->active) {
 			return;
 		}
 

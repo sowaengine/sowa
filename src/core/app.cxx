@@ -104,6 +104,7 @@ Error App::Init() {
 	m_editorTree.Root().width = "1920px";
 	m_editorTree.Root().height = "1080px";
 	m_editorTree.Root().anchor = Anchor::Center;
+	m_editorTree.Root().layoutModel = LayoutModel::Flex;
 
 	UIContainer &cont = m_editorTree.Root().Children().emplace_back();
 	cont.wrap = Wrap::Wrap;
@@ -116,6 +117,19 @@ Error App::Init() {
 	cont.backgroundColor = Color::FromRGB(200, 100, 20);
 	cont.padding = Padding::All(5.f);
 	cont.id = 1;
+	cont.active = true;
+	// cont.visible = false;
+
+	UIContainer &inner = m_editorTree.Root().Children().emplace_back();
+	inner.wrap = Wrap::Wrap;
+	inner.flexDirection = FlexDirection::Row;
+	inner.justifyContent = JustifyContent::Middle;
+	inner.layoutModel = LayoutModel::Flex;
+	// inner.anchor = Anchor::Left;
+	inner.width = "73%";
+	inner.height = "100%";
+	inner.backgroundColor = Color::FromRGB(200, 100, 20);
+	inner.padding = Padding::All(5.f);
 
 	m_editorTree.Calculate();
 
@@ -166,14 +180,23 @@ void App::mainLoop() {
 	glBindTexture(GL_TEXTURE_2D, m_testTexture.ID());
 
 	uiShader.Bind();
-	m_editorTree.Root().m_model.Draw();
-	for (auto &child : m_editorTree.Root().Children()) {
-		child.m_model.Draw();
 
-		for (auto &c : child.Children()) {
-			c.m_model.Draw();
-		}
-	}
+	const auto drawUIContainer = [this](UIContainer &container) {
+		static void (*func)(UIContainer &) = [](UIContainer &container) {
+			if (container.active) {
+				if (container.visible) {
+					container.m_model.Draw();
+				}
+
+				for (auto &child : container.Children()) {
+					func(child);
+				}
+			}
+		};
+		func(container);
+	};
+
+	drawUIContainer(m_editorTree.Root());
 
 	double x, y;
 	InputServer::GetInstance().GetMousePosition(x, y);
