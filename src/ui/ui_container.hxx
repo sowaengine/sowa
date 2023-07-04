@@ -7,6 +7,7 @@
 #include "data/margin.hxx"
 #include "data/ui_size.hxx"
 #include "layout.h"
+#include "servers/rendering_server.hxx"
 #include <string>
 #include <vector>
 
@@ -65,7 +66,8 @@ class UIContainer {
 	bool active = true;
 	UISize width = "128px";
 	UISize height = "128px";
-	int id = 0;
+	int id = 0xFF;
+	CursorMode cursorMode = CursorMode::Normal;
 
   private:
 	friend class UITree;

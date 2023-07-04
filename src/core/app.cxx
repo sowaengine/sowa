@@ -119,6 +119,7 @@ Error App::Init() {
 	cont.id = 1;
 	cont.active = true;
 	// cont.visible = false;
+	cont.cursorMode = CursorMode::Pointer;
 
 	UIContainer &inner = m_editorTree.Root().Children().emplace_back();
 	inner.wrap = Wrap::Wrap;
@@ -130,6 +131,8 @@ Error App::Init() {
 	inner.height = "100%";
 	inner.backgroundColor = Color::FromRGB(200, 100, 20);
 	inner.padding = Padding::All(5.f);
+	inner.id = 2;
+	inner.cursorMode = CursorMode::Pointer;
 
 	m_editorTree.Calculate();
 
@@ -191,8 +194,15 @@ void App::mainLoop() {
 	y *= (1080.f / (float)h);
 	int id = m_layer2D.ReadAttachmentInt(1, x, y);
 	// std::cout << id << std::endl;
-	if (id == 1) {
-		cursorMode = CursorMode::Pointer;
+
+	if (id != 0xFF) {
+		auto *c = m_editorTree.FindContainerByID(id);
+		if (c != nullptr) {
+			if (c->cursorMode != CursorMode::Normal) {
+				// todo: if container is resizable and is hovering on corner, set cursor to resize
+				cursorMode = c->cursorMode;
+			}
+		}
 	}
 
 	SetRenderLayer(nullptr);
