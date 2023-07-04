@@ -183,22 +183,7 @@ void App::mainLoop() {
 
 	CursorMode cursorMode = CursorMode::Normal;
 
-	const auto drawUIContainer = [this](UIContainer &container) {
-		static void (*func)(UIContainer &) = [](UIContainer &container) {
-			if (container.active) {
-				if (container.visible) {
-					container.m_model.Draw();
-				}
-
-				for (auto &child : container.Children()) {
-					func(child);
-				}
-			}
-		};
-		func(container);
-	};
-
-	drawUIContainer(m_editorTree.Root());
+	m_editorTree.DrawLayout();
 
 	double x, y;
 	InputServer::GetInstance().GetMousePosition(x, y);

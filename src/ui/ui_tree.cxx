@@ -148,3 +148,19 @@ void UITree::Calculate() {
 	};
 	positionUINode(positionUINode, &m_root);
 }
+
+void UITree::DrawLayout() {
+	drawContainer(m_root);
+}
+
+void UITree::drawContainer(UIContainer &container) {
+	if (container.active) {
+		if (container.visible) {
+			container.m_model.Draw();
+		}
+
+		for (UIContainer &child : container.Children()) {
+			drawContainer(child);
+		}
+	}
+}
