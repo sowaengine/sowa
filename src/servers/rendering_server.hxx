@@ -8,7 +8,10 @@
 
 enum class CursorMode {
 	Normal,
-	Pointer
+	Pointer,
+	ResizeX,
+	ResizeY,
+	Resize
 };
 
 class RenderingServer {
@@ -33,6 +36,9 @@ class RenderingServer {
 
 	GLFWcursor *m_pStandartCursor = nullptr;
 	GLFWcursor *m_pPointerCursor = nullptr;
+	GLFWcursor *m_pResizeXCursor = nullptr;
+	GLFWcursor *m_pResizeYCursor = nullptr;
+	GLFWcursor *m_pResizeCursor = nullptr;
 
 	void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 };

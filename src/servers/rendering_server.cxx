@@ -37,6 +37,9 @@ RenderingServer::RenderingServer() {
 
 	m_pStandartCursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 	m_pPointerCursor = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
+	m_pResizeXCursor = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
+	m_pResizeYCursor = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
+	m_pResizeCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
 }
 
 RenderingServer &RenderingServer::GetInstance() {
@@ -94,6 +97,12 @@ void RenderingServer::SetCursorMode(CursorMode mode) {
 		glfwSetCursor(m_pWindowHandle, m_pStandartCursor);
 	} else if (mode == CursorMode::Pointer) {
 		glfwSetCursor(m_pWindowHandle, m_pPointerCursor);
+	} else if (mode == CursorMode::ResizeX) {
+		glfwSetCursor(m_pWindowHandle, m_pResizeXCursor);
+	} else if (mode == CursorMode::ResizeY) {
+		glfwSetCursor(m_pWindowHandle, m_pResizeYCursor);
+	} else if (mode == CursorMode::Resize) {
+		glfwSetCursor(m_pWindowHandle, m_pResizeCursor);
 	}
 }
 

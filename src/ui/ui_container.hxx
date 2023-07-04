@@ -4,6 +4,7 @@
 
 #include "core/graphics.hxx"
 #include "data/color.hxx"
+#include "data/lrtb_flags.hxx"
 #include "data/margin.hxx"
 #include "data/ui_size.hxx"
 #include "layout.h"
@@ -67,6 +68,7 @@ class UIContainer {
 	UISize width = "128px";
 	UISize height = "128px";
 	CursorMode cursorMode = CursorMode::Normal;
+	LRTBFlags resizable;
 
   private:
 	friend class UITree;

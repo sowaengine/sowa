@@ -126,6 +126,7 @@ Error App::Init() {
 	cont.Node().padding = Padding::All(5.f);
 	cont.Node().active = true;
 	cont.Node().cursorMode = CursorMode::Pointer;
+	cont.Node().resizable.right = true;
 
 	inner.Node().wrap = Wrap::Wrap;
 	inner.Node().flexDirection = FlexDirection::Row;
@@ -198,12 +199,57 @@ void App::mainLoop() {
 	int id = m_layer2D.ReadAttachmentInt(1, x, y);
 	// std::cout << id << std::endl;
 
-	if (id != 0xFF) {
+	if (id != m_editorTree.RootID()) {
 		auto *c = m_editorTree.GetTree().FindNodeByID(id);
 		if (c != nullptr) {
 			if (c->Node().cursorMode != CursorMode::Normal) {
-				// todo: if container is resizable and is hovering on corner, set cursor to resize
 				cursorMode = c->Node().cursorMode;
+
+				// Resizing
+				float resizeWidth = 10.f;
+
+				LRTBFlags resized_on;
+
+				float itemLeft = m_editorTree.GetGlobalX(*c);
+				float itemRight = itemLeft + c->Node().m_uitree_w;
+				float itemTop = m_editorTree.GetGlobalY(*c);
+				float itemBottom = itemTop + c->Node().m_uitree_h;
+
+				if (c->Node().resizable.left) {
+					if (x > itemLeft && x < itemLeft + resizeWidth) {
+						resized_on.left = true;
+					}
+				}
+
+				if (c->Node().resizable.right) {
+					if (x > itemRight - resizeWidth && x < itemRight) {
+						resized_on.right = true;
+					}
+				}
+
+				if (c->Node().resizable.top) {
+					if (y > itemTop && y < itemTop + resizeWidth) {
+						resized_on.top = true;
+					}
+				}
+
+				if (c->Node().resizable.bottom) {
+					if (y > itemBottom - resizeWidth && y < itemBottom) {
+						resized_on.bottom = true;
+					}
+				}
+
+				unsigned int resize = 0b00;
+				resize |= (resized_on.left || resized_on.right) << 0;
+				resize |= (resized_on.bottom || resized_on.top) << 1;
+
+				if (resize == 0b01) {
+					cursorMode = CursorMode::ResizeX;
+				} else if (resize == 0b10) {
+					cursorMode = CursorMode::ResizeY;
+				} else if (resize == 0b11) {
+					cursorMode = CursorMode::Resize;
+				}
 			}
 		}
 	}

@@ -12,11 +12,15 @@ class UITree {
 	~UITree();
 
 	void SetRoot(TreeNode<UIContainer> &root);
+	inline const int RootID() { return m_rootID; }
 
 	Tree<UIContainer> &GetTree() { return m_tree; }
 
 	void Calculate();
 	void DrawLayout();
+
+	float GetGlobalX(TreeNode<UIContainer> &node);
+	float GetGlobalY(TreeNode<UIContainer> &node);
 
   private:
 	lay_context m_ctx;

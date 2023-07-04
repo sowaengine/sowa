@@ -166,6 +166,24 @@ void UITree::DrawLayout() {
 	}
 }
 
+float UITree::GetGlobalX(TreeNode<UIContainer> &node) {
+	TreeNode<UIContainer> *parent = node.GetParent();
+	if (nullptr != parent) {
+		return GetGlobalX(*parent) + node.Node().m_uitree_x;
+	}
+
+	return node.Node().m_uitree_x;
+}
+
+float UITree::GetGlobalY(TreeNode<UIContainer> &node) {
+	TreeNode<UIContainer> *parent = node.GetParent();
+	if (nullptr != parent) {
+		return GetGlobalX(*parent) + node.Node().m_uitree_y;
+	}
+
+	return node.Node().m_uitree_y;
+}
+
 void UITree::drawContainer(TreeNode<UIContainer> &container) {
 
 	if (container.Node().active) {
