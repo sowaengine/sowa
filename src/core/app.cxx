@@ -101,38 +101,41 @@ Error App::Init() {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
 
-	m_editorTree.Root().width = "1920px";
-	m_editorTree.Root().height = "1080px";
-	m_editorTree.Root().anchor = Anchor::Center;
-	m_editorTree.Root().layoutModel = LayoutModel::Flex;
+	auto &root = m_editorTree.GetTree().New(1);
+	m_editorTree.SetRoot(root);
 
-	UIContainer &cont = m_editorTree.Root().Children().emplace_back();
-	cont.wrap = Wrap::Wrap;
-	cont.flexDirection = FlexDirection::Row;
-	cont.justifyContent = JustifyContent::Middle;
-	cont.layoutModel = LayoutModel::Flex;
-	cont.anchor = Anchor::Left;
-	cont.width = "27%";
-	cont.height = "100%";
-	cont.backgroundColor = Color::FromRGB(200, 100, 20);
-	cont.padding = Padding::All(5.f);
-	cont.id = 1;
-	cont.active = true;
-	// cont.visible = false;
-	cont.cursorMode = CursorMode::Pointer;
+	root.Node().width = "1920px";
+	root.Node().height = "1080px";
+	root.Node().anchor = Anchor::Center;
+	root.Node().layoutModel = LayoutModel::Flex;
 
-	UIContainer &inner = m_editorTree.Root().Children().emplace_back();
-	inner.wrap = Wrap::Wrap;
-	inner.flexDirection = FlexDirection::Row;
-	inner.justifyContent = JustifyContent::Middle;
-	inner.layoutModel = LayoutModel::Flex;
-	// inner.anchor = Anchor::Left;
-	inner.width = "73%";
-	inner.height = "100%";
-	inner.backgroundColor = Color::FromRGB(200, 100, 20);
-	inner.padding = Padding::All(5.f);
-	inner.id = 2;
-	inner.cursorMode = CursorMode::Pointer;
+	auto &cont = m_editorTree.GetTree().New(2);
+	auto &inner = m_editorTree.GetTree().New(3);
+
+	root.AddChild(2);
+	root.AddChild(3);
+
+	cont.Node().wrap = Wrap::Wrap;
+	cont.Node().flexDirection = FlexDirection::Row;
+	cont.Node().justifyContent = JustifyContent::Middle;
+	cont.Node().layoutModel = LayoutModel::Flex;
+	cont.Node().anchor = Anchor::Left;
+	cont.Node().width = "27%";
+	cont.Node().height = "100%";
+	cont.Node().backgroundColor = Color::FromRGB(200, 100, 20);
+	cont.Node().padding = Padding::All(5.f);
+	cont.Node().active = true;
+	cont.Node().cursorMode = CursorMode::Pointer;
+
+	inner.Node().wrap = Wrap::Wrap;
+	inner.Node().flexDirection = FlexDirection::Row;
+	inner.Node().justifyContent = JustifyContent::Middle;
+	inner.Node().layoutModel = LayoutModel::Flex;
+	inner.Node().width = "73%";
+	inner.Node().height = "100%";
+	inner.Node().backgroundColor = Color::FromRGB(200, 100, 20);
+	inner.Node().padding = Padding::All(5.f);
+	inner.Node().cursorMode = CursorMode::Pointer;
 
 	m_editorTree.Calculate();
 
@@ -174,8 +177,8 @@ void App::mainLoop() {
 
 	int w, h;
 	RenderingServer::GetInstance().GetWindowSize(w, h);
-	m_editorTree.Root().width.Number() = w;
-	m_editorTree.Root().height.Number() = h;
+	// m_editorTree.Root().width.Number() = w;
+	// m_editorTree.Root().height.Number() = h;
 	m_editorTree.Calculate();
 
 	mainShader.Bind();
@@ -196,11 +199,11 @@ void App::mainLoop() {
 	// std::cout << id << std::endl;
 
 	if (id != 0xFF) {
-		auto *c = m_editorTree.FindContainerByID(id);
+		auto *c = m_editorTree.GetTree().FindNodeByID(id);
 		if (c != nullptr) {
-			if (c->cursorMode != CursorMode::Normal) {
+			if (c->Node().cursorMode != CursorMode::Normal) {
 				// todo: if container is resizable and is hovering on corner, set cursor to resize
-				cursorMode = c->cursorMode;
+				cursorMode = c->Node().cursorMode;
 			}
 		}
 	}

@@ -66,7 +66,6 @@ class UIContainer {
 	bool active = true;
 	UISize width = "128px";
 	UISize height = "128px";
-	int id = 0xFF;
 	CursorMode cursorMode = CursorMode::Normal;
 
   private:
