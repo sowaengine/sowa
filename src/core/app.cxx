@@ -181,6 +181,8 @@ void App::mainLoop() {
 
 	uiShader.Bind();
 
+	CursorMode cursorMode = CursorMode::Normal;
+
 	const auto drawUIContainer = [this](UIContainer &container) {
 		static void (*func)(UIContainer &) = [](UIContainer &container) {
 			if (container.active) {
@@ -204,8 +206,13 @@ void App::mainLoop() {
 	y *= (1080.f / (float)h);
 	int id = m_layer2D.ReadAttachmentInt(1, x, y);
 	// std::cout << id << std::endl;
+	if (id == 1) {
+		cursorMode = CursorMode::Pointer;
+	}
 
 	SetRenderLayer(nullptr);
+
+	RenderingServer::GetInstance().SetCursorMode(cursorMode);
 
 	fullscreenShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
