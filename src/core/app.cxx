@@ -18,7 +18,17 @@
 #include <emscripten.h>
 #endif
 
+static App *s_instance;
+
+App::App() {
+	s_instance = this;
+}
+
 App::~App() {
+}
+
+App &App::GetInstance() {
+	return *s_instance;
 }
 
 #ifdef SW_WEB
@@ -140,6 +150,18 @@ Error App::Init() {
 
 	m_editorTree.Calculate();
 
+	MouseInputCallback().append([](InputEventMouseButton event) {
+		if (event.action == PRESSED) {
+			// std::cout << "Mouse input event" << std::endl;
+			// std::cout << "Button: " << event.button << std::endl;
+			// std::cout << "Action: " << event.action << std::endl;
+			// std::cout << "Modifiers: alt: " << event.modifiers.alt << std::endl;
+			// std::cout << "Modifiers: control: " << event.modifiers.control << std::endl;
+			// std::cout << "Modifiers: shift: " << event.modifiers.shift << std::endl;
+			// std::cout << "Modifiers: super: " << event.modifiers.super << std::endl;
+		}
+	});
+
 	return OK;
 }
 
@@ -196,11 +218,11 @@ void App::mainLoop() {
 	InputServer::GetInstance().GetMousePosition(x, y);
 	x *= (1920.f / (float)w);
 	y *= (1080.f / (float)h);
-	int id = m_layer2D.ReadAttachmentInt(1, x, y);
+	m_hoveringUINode = m_layer2D.ReadAttachmentInt(1, x, y);
 	// std::cout << id << std::endl;
 
-	if (id != m_editorTree.RootID()) {
-		auto *c = m_editorTree.GetTree().FindNodeByID(id);
+	if (m_hoveringUINode != m_editorTree.RootID()) {
+		auto *c = m_editorTree.GetTree().FindNodeByID(m_hoveringUINode);
 		if (c != nullptr) {
 			if (c->Node().cursorMode != CursorMode::Normal) {
 				cursorMode = c->Node().cursorMode;

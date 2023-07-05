@@ -2,6 +2,7 @@
 
 #include "rendering_server.hxx"
 
+#include "core/app.hxx"
 #include "core/rendering/gl.hxx"
 
 #include <iostream>
@@ -123,8 +124,33 @@ void RenderingServer::framebuffer_size_callback(GLFWwindow *window, int width, i
 	glViewport(0, 0, width, height);
 }
 
-void RenderingServer::mouse_button_callback(GLFWwindow *window, int button, int action, int pressed) {
-	if (action == GLFW_PRESS) {
-		std::cout << "Clicked button " << button << std::endl;
-	}
+void RenderingServer::mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
+	InputEventMouseButton event;
+	static std::unordered_map<int, MouseButton> buttons = {
+		{GLFW_MOUSE_BUTTON_LEFT, MB_LEFT},
+		{GLFW_MOUSE_BUTTON_RIGHT, MB_RIGHT},
+		{GLFW_MOUSE_BUTTON_MIDDLE, MB_MIDDLE},
+		{GLFW_MOUSE_BUTTON_4, MB_4},
+		{GLFW_MOUSE_BUTTON_5, MB_5},
+		{GLFW_MOUSE_BUTTON_6, MB_6},
+		{GLFW_MOUSE_BUTTON_7, MB_7},
+		{GLFW_MOUSE_BUTTON_8, MB_8}};
+
+	event.button = buttons[button];
+
+	if (action == GLFW_PRESS)
+		event.action = PRESSED;
+	else if (action == GLFW_RELEASE)
+		event.action = RELEASED;
+
+	if (mods & GLFW_MOD_SHIFT)
+		event.modifiers.shift = true;
+	if (mods & GLFW_MOD_CONTROL)
+		event.modifiers.control = true;
+	if (mods & GLFW_MOD_ALT)
+		event.modifiers.alt = true;
+	if (mods & GLFW_MOD_SUPER)
+		event.modifiers.super = true;
+
+	App::GetInstance().MouseInputCallback()(event);
 }

@@ -9,16 +9,25 @@
 
 #include <filesystem>
 
+#include "data/input_event/mouse_button.hxx"
+
+#include "eventpp/callbacklist.h"
+
 class App {
   public:
+	App();
 	~App();
 
 	Error Init();
 	Error Run();
 
+	static App &GetInstance();
+
 	inline project_settings &ProjectSettings() { return m_projectSettings; }
 
 	void SetRenderLayer(RenderLayer *renderlayer);
+
+	inline eventpp::CallbackList<void(InputEventMouseButton)> &MouseInputCallback() { return m_mouseInputCallback; }
 
   private:
 	void mainLoop();
@@ -39,7 +48,10 @@ class App {
 
 	project_settings m_projectSettings;
 
+	eventpp::CallbackList<void(InputEventMouseButton)> m_mouseInputCallback;
+
 	UITree m_editorTree;
+	int m_hoveringUINode = 0;
 
 	friend class FileServer;
 	std::filesystem::path m_appPath = "";
