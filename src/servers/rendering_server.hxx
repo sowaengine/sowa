@@ -41,6 +41,7 @@ class RenderingServer {
 	GLFWcursor *m_pResizeCursor = nullptr;
 
 	void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+	void mouse_button_callback(GLFWwindow *window, int button, int action, int pressed);
 };
 
 #endif // SW_RENDERING_SERVER_HXX

@@ -14,10 +14,18 @@ struct CallbackBridge {
 	void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
 		RenderingServer::GetInstance().framebuffer_size_callback(window, width, height);
 	}
+
+	void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+		RenderingServer::GetInstance().mouse_button_callback(window, button, action, mods);
+	}
 };
 
 static void CallbackWrapperFramebufferSizeCallback(GLFWwindow *window, int width, int height) {
 	CallbackBridge().FramebufferSizeCallback(window, width, height);
+}
+
+static void CallbackWrapperMouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
+	CallbackBridge().MouseButtonCallback(window, button, action, mods);
 }
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -78,6 +86,7 @@ void RenderingServer::CreateWindow(int width, int height, const std::string &tit
 	glfwSetFramebufferSizeCallback(m_pWindowHandle, CallbackWrapperFramebufferSizeCallback);
 	glfwSetCharCallback(m_pWindowHandle, char_callback);
 	glfwSetKeyCallback(m_pWindowHandle, key_callback);
+	glfwSetMouseButtonCallback(m_pWindowHandle, CallbackWrapperMouseButtonCallback);
 }
 
 bool RenderingServer::WindowShouldClose() {
@@ -112,4 +121,10 @@ void RenderingServer::Terminate() {
 
 void RenderingServer::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
+}
+
+void RenderingServer::mouse_button_callback(GLFWwindow *window, int button, int action, int pressed) {
+	if (action == GLFW_PRESS) {
+		std::cout << "Clicked button " << button << std::endl;
+	}
 }
