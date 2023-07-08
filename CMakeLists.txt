@@ -10,7 +10,8 @@ endif()
 
 message("Building in ${CMAKE_BUILD_TYPE}")
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS
+    "-Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
