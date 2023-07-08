@@ -9,7 +9,7 @@
 
 #include <filesystem>
 
-#include "data/input_event/mouse_button.hxx"
+#include "data/input_event/input_event.hxx"
 
 #include "eventpp/callbacklist.h"
 
@@ -27,7 +27,10 @@ class App {
 
 	void SetRenderLayer(RenderLayer *renderlayer);
 
+	inline BatchRenderer &Renderer() { return m_batchRenderer; }
+
 	inline eventpp::CallbackList<void(InputEventMouseButton)> &MouseInputCallback() { return m_mouseInputCallback; }
+	inline eventpp::CallbackList<void(InputEventMouseMove)> &MouseMoveCallback() { return m_mouseMoveCallback; }
 
   private:
 	void mainLoop();
@@ -48,7 +51,10 @@ class App {
 
 	project_settings m_projectSettings;
 
+	BatchRenderer m_batchRenderer;
+
 	eventpp::CallbackList<void(InputEventMouseButton)> m_mouseInputCallback;
+	eventpp::CallbackList<void(InputEventMouseMove)> m_mouseMoveCallback;
 
 	UITree m_editorTree;
 	int m_hoveringUINode = 0;

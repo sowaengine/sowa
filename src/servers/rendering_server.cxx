@@ -19,6 +19,10 @@ struct CallbackBridge {
 	void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 		RenderingServer::GetInstance().mouse_button_callback(window, button, action, mods);
 	}
+
+	void CursorPosCalllback(GLFWwindow *window, double x, double y) {
+		RenderingServer::GetInstance().cursor_pos_callback(window, x, y);
+	}
 };
 
 static void CallbackWrapperFramebufferSizeCallback(GLFWwindow *window, int width, int height) {
@@ -27,6 +31,10 @@ static void CallbackWrapperFramebufferSizeCallback(GLFWwindow *window, int width
 
 static void CallbackWrapperMouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
 	CallbackBridge().MouseButtonCallback(window, button, action, mods);
+}
+
+static void CallbackWrapperCursorPosCallback(GLFWwindow *window, double x, double y) {
+	CallbackBridge().CursorPosCalllback(window, x, y);
 }
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -88,6 +96,7 @@ void RenderingServer::CreateWindow(int width, int height, const std::string &tit
 	glfwSetCharCallback(m_pWindowHandle, char_callback);
 	glfwSetKeyCallback(m_pWindowHandle, key_callback);
 	glfwSetMouseButtonCallback(m_pWindowHandle, CallbackWrapperMouseButtonCallback);
+	glfwSetCursorPosCallback(m_pWindowHandle, CallbackWrapperCursorPosCallback);
 }
 
 bool RenderingServer::WindowShouldClose() {
@@ -153,4 +162,20 @@ void RenderingServer::mouse_button_callback(GLFWwindow *window, int button, int 
 		event.modifiers.super = true;
 
 	App::GetInstance().MouseInputCallback()(event);
+}
+
+void RenderingServer::cursor_pos_callback(GLFWwindow *window, double x, double y) {
+	InputEventMouseMove event;
+
+	double deltaX = x - m_input_mouseX;
+	double deltaY = y - m_input_mouseY;
+	m_input_mouseX = x;
+	m_input_mouseY = y;
+
+	event.deltaX = deltaX;
+	event.deltaY = deltaY;
+	event.mouseX = x;
+	event.mouseY = y;
+
+	App::GetInstance().MouseMoveCallback()(event);
 }
