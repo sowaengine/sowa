@@ -6,6 +6,7 @@
 
 #define GLSL(x) "#version 300 es\n" #x
 
+#include "rendering/batch_renderer.hxx"
 #include "rendering/model.hxx"
 #include "rendering/model_builder.hxx"
 #include "rendering/render_layer.hxx"

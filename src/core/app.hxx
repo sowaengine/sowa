@@ -5,20 +5,31 @@
 #include "core/error/error.hxx"
 #include "core/graphics.hxx"
 #include "data/project_settings.hxx"
-#include "ui/ui_tree.hxx"
 
 #include <filesystem>
 
+#include "data/input_event/input_event.hxx"
+
+#include "eventpp/callbacklist.h"
+
 class App {
   public:
+	App();
 	~App();
 
 	Error Init();
 	Error Run();
 
+	static App &GetInstance();
+
 	inline project_settings &ProjectSettings() { return m_projectSettings; }
 
 	void SetRenderLayer(RenderLayer *renderlayer);
+
+	inline BatchRenderer &Renderer() { return m_batchRenderer; }
+
+	inline eventpp::CallbackList<void(InputEventMouseButton)> &MouseInputCallback() { return m_mouseInputCallback; }
+	inline eventpp::CallbackList<void(InputEventMouseMove)> &MouseMoveCallback() { return m_mouseMoveCallback; }
 
   private:
 	void mainLoop();
@@ -39,7 +50,12 @@ class App {
 
 	project_settings m_projectSettings;
 
-	UITree m_editorTree;
+	BatchRenderer m_batchRenderer;
+
+	eventpp::CallbackList<void(InputEventMouseButton)> m_mouseInputCallback;
+	eventpp::CallbackList<void(InputEventMouseMove)> m_mouseMoveCallback;
+
+	int m_hoveredItem = 0;
 
 	friend class FileServer;
 	std::filesystem::path m_appPath = "";

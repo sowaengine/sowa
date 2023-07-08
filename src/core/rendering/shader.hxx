@@ -3,7 +3,9 @@
 #pragma once
 
 #include "core/error/error.hxx"
+#include "glm/glm.hpp"
 #include <string>
+#include <vector>
 
 class Shader {
   public:
@@ -21,6 +23,9 @@ class Shader {
 
 	void Bind();
 	void Unbind();
+
+	void Uniformiv(const char *name, const std::vector<int> &value);
+	void UniformMat4(const char *name, const glm::mat4 &value);
 
 	inline uint32_t ID() const { return m_id; }
 

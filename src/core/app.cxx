@@ -1,5 +1,9 @@
 #include "app.hxx"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/projection.hpp"
+
 #include "core/graphics.hxx"
 #include "servers/file_server.hxx"
 #include "servers/input_server.hxx"
@@ -7,8 +11,8 @@
 
 #include "data/toml_document.hxx"
 
-#include "ui/ui_container.hxx"
-#include "ui/ui_tree.hxx"
+// #include "ui/new_container.hxx"
+// #include "ui/new_tree.hxx"
 
 #include <filesystem>
 #include <fstream>
@@ -18,7 +22,17 @@
 #include <emscripten.h>
 #endif
 
+static App *s_instance;
+
+App::App() {
+	s_instance = this;
+}
+
 App::~App() {
+}
+
+App &App::GetInstance() {
+	return *s_instance;
 }
 
 #ifdef SW_WEB
@@ -92,52 +106,42 @@ Error App::Init() {
 	ModelBuilder::Quad2D(rectModel);
 	ModelBuilder::Quad2D(fullscreenModel, 2.f);
 
-	mainShader.Load("res://shaders/main.vs", "res://shaders/main.fs");
-	fullscreenShader.Load("res://shaders/fullscreen.vs", "res://shaders/fullscreen.fs");
-	uiShader.Load("res://shaders/ui_panel.vs", "res://shaders/ui_panel.fs");
+	err = mainShader.Load("res://shaders/main.vs", "res://shaders/main.fs");
+	if (err != OK) {
+		std::cerr << "Failed to load main shader" << err << std::endl;
+	}
+
+	err = fullscreenShader.Load("res://shaders/fullscreen.vs", "res://shaders/fullscreen.fs");
+	if (err != OK) {
+		std::cerr << "Failed to load fullscreen shader" << std::endl;
+	}
+
+	err = uiShader.Load("res://shaders/ui_panel.vs", "res://shaders/ui_panel.fs");
+	if (err != OK) {
+		std::cerr << "Failed to load ui shader" << std::endl;
+	}
 
 	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
 	if (err != OK) {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
 
-	auto &root = m_editorTree.GetTree().New(1);
-	m_editorTree.SetRoot(root);
+	err = m_batchRenderer.Init("res://shaders/batch2d.vs", "res://shaders/batch2d.fs");
+	if (err != OK) {
+		std::cout << "Failed to load renderer: " << err << std::endl;
+	}
 
-	root.Node().width = "1920px";
-	root.Node().height = "1080px";
-	root.Node().anchor = Anchor::Center;
-	root.Node().layoutModel = LayoutModel::Flex;
+	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 800.f, 0.f, 600.f));
+	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
-	auto &cont = m_editorTree.GetTree().New(2);
-	auto &inner = m_editorTree.GetTree().New(3);
+	/*
+	NewTree tree;
+	tree.Root().SetOrientation(ContainerOrientation::Row);
+	tree.Root().SetChildren({60.f, 40.f});
 
-	root.AddChild(2);
-	root.AddChild(3);
-
-	cont.Node().wrap = Wrap::Wrap;
-	cont.Node().flexDirection = FlexDirection::Row;
-	cont.Node().justifyContent = JustifyContent::Middle;
-	cont.Node().layoutModel = LayoutModel::Flex;
-	cont.Node().anchor = Anchor::Left;
-	cont.Node().width = "27%";
-	cont.Node().height = "100%";
-	cont.Node().backgroundColor = Color::FromRGB(200, 100, 20);
-	cont.Node().padding = Padding::All(5.f);
-	cont.Node().active = true;
-	cont.Node().cursorMode = CursorMode::Pointer;
-
-	inner.Node().wrap = Wrap::Wrap;
-	inner.Node().flexDirection = FlexDirection::Row;
-	inner.Node().justifyContent = JustifyContent::Middle;
-	inner.Node().layoutModel = LayoutModel::Flex;
-	inner.Node().width = "73%";
-	inner.Node().height = "100%";
-	inner.Node().backgroundColor = Color::FromRGB(200, 100, 20);
-	inner.Node().padding = Padding::All(5.f);
-	inner.Node().cursorMode = CursorMode::Pointer;
-
-	m_editorTree.Calculate();
+	tree.Root().Child(0)->SetOrientation(ContainerOrientation::Column);
+	tree.Root().Child(0)->SetChildren({50.f, 50.f});
+	*/
 
 	return OK;
 }
@@ -177,9 +181,6 @@ void App::mainLoop() {
 
 	int w, h;
 	RenderingServer::GetInstance().GetWindowSize(w, h);
-	// m_editorTree.Root().width.Number() = w;
-	// m_editorTree.Root().height.Number() = h;
-	m_editorTree.Calculate();
 
 	mainShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
@@ -189,24 +190,39 @@ void App::mainLoop() {
 
 	CursorMode cursorMode = CursorMode::Normal;
 
-	m_editorTree.DrawLayout();
-
 	double x, y;
 	InputServer::GetInstance().GetMousePosition(x, y);
 	x *= (1920.f / (float)w);
 	y *= (1080.f / (float)h);
-	int id = m_layer2D.ReadAttachmentInt(1, x, y);
-	// std::cout << id << std::endl;
+	m_hoveredItem = m_layer2D.ReadAttachmentInt(1, x, y);
+	// std::cout << m_hoveredItem << std::endl;
 
-	if (id != 0xFF) {
-		auto *c = m_editorTree.GetTree().FindNodeByID(id);
-		if (c != nullptr) {
-			if (c->Node().cursorMode != CursorMode::Normal) {
-				// todo: if container is resizable and is hovering on corner, set cursor to resize
-				cursorMode = c->Node().cursorMode;
-			}
+	Renderer().Reset();
+
+	static float f = 0.f;
+	f += 0.1f;
+
+	static int frame = 0;
+	frame++;
+	// std::cout << "Frame: " << frame << std::endl;
+	static std::chrono::time_point t = std::chrono::system_clock::now();
+	if (frame == 60) {
+		std::chrono::time_point now = std::chrono::system_clock::now();
+		std::chrono::duration<double, std::milli> ms = now - t;
+
+		std::cout << "took " << ms.count() << "ms" << std::endl;
+	}
+
+	for (float x = 0.f; x < 800; x += 32) {
+		for (float y = 0.f; y < 600; y += 32) {
+
+			float sinf = std::sin((x / 32.f + y / 32.f) * f * 0.02f) * 100;
+			float cosf = std::cos((x / 32.f + y / 32.f) * f * 0.02f) * 100;
+			Renderer().PushQuad(x + sinf, y + cosf, 0.f, 32.f, 32.f, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
 		}
 	}
+
+	Renderer().End();
 
 	SetRenderLayer(nullptr);
 

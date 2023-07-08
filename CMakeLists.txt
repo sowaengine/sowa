@@ -4,6 +4,17 @@ project(
   VERSION 1.0
   LANGUAGES CXX C)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+message("Building in ${CMAKE_BUILD_TYPE}")
+
+set(CMAKE_CXX_FLAGS
+    "-Wall -Wextra -Werror -Wno-unused-variable -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -38,7 +49,7 @@ target_include_directories(
   PUBLIC ${SOWA_INCLUDES}
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
-target_link_libraries(sowa PRIVATE glfw)
+target_link_libraries(sowa PRIVATE glfw eventpp::eventpp)
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(
     sowa
