@@ -35,6 +35,7 @@ class BatchRenderer {
 
 	void Reset();
 	void PushQuad(BatchVertex vertices[4]);
+	void PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID);
 	void End();
 
 	inline Shader &GetShader() { return m_shader; }

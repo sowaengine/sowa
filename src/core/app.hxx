@@ -5,7 +5,6 @@
 #include "core/error/error.hxx"
 #include "core/graphics.hxx"
 #include "data/project_settings.hxx"
-#include "ui/ui_tree.hxx"
 
 #include <filesystem>
 

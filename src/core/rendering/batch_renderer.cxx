@@ -55,6 +55,7 @@ void BatchRenderer::Reset() {
 	m_textures.clear();
 	m_textureCounter = 0;
 }
+
 void BatchRenderer::PushQuad(BatchVertex vertices[4]) {
 
 	// 1 2 3
@@ -84,6 +85,44 @@ void BatchRenderer::PushQuad(BatchVertex vertices[4]) {
 		End();
 	}
 }
+
+void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID) {
+	/*
+		{ 0.0f, 1.0f,  0.f, 1.f}
+		{ 0.0f, 0.0f,  0.f, 1.f}
+		{ 1.0f, 0.0f,  0.f, 1.f}
+		{ 1.0f, 1.0f,  0.f, 1.f}
+		*/
+
+	glm::vec4 points[4] = {
+		{x, y + h, 0.f, 1.f},
+		{x, y, 0.f, 1.f},
+		{x + w, y, 0.f, 1.f},
+		{x + w, y + h, 0.f, 1.f}};
+	glm::vec2 uvs[4] = {
+		{0.f, 1.f},
+		{0.f, 0.f},
+		{1.f, 0.f},
+		{1.f, 1.f}};
+
+	BatchVertex vertices[4];
+	for (int i = 0; i < 4; i++) {
+		vertices[i].x = points[i].x;
+		vertices[i].y = points[i].y;
+		vertices[i].z = z;
+		vertices[i].r = r;
+		vertices[i].g = g;
+		vertices[i].b = b;
+		vertices[i].a = a;
+		vertices[i].u = uvs[i].x;
+		vertices[i].v = uvs[i].y;
+		vertices[i].t_id = textureID;
+		vertices[i].d_id = drawID;
+	}
+
+	PushQuad(vertices);
+}
+
 void BatchRenderer::End() {
 	if (m_vertices.size() == 0) {
 		return;

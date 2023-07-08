@@ -13,8 +13,6 @@
 
 #include "ui/new_container.hxx"
 #include "ui/new_tree.hxx"
-#include "ui/ui_container.hxx"
-#include "ui/ui_tree.hxx"
 
 #include <filesystem>
 #include <fstream>
@@ -200,45 +198,10 @@ void App::mainLoop() {
 		std::cout << "took " << ms.count() << "ms" << std::endl;
 	}
 
-	for (float x = 0; x < 100'000; x += 1.f) {
-		glm::vec4 points[4] = {
-			{-0.5f, +0.5f, 0.f, 1.f},
-			{-0.5f, -0.5f, 0.f, 1.f},
-			{+0.5f, -0.5f, 0.f, 1.f},
-			{+0.5f, +0.5f, 0.f, 1.f}};
-		glm::vec2 uvs[4] = {
-			{0.f, 1.f},
-			{0.f, 0.f},
-			{1.f, 0.f},
-			{1.f, 1.f}};
-
-		BatchVertex vertices[4];
-		for (int i = 0; i < 4; i++) {
-			points[i] = glm::mat4(1.f) * points[i];
-			glm::mat4 tf = glm::translate(glm::mat4(1.f), {100.f, 100.f, 100.f});
-			tf = glm::scale(tf, {2.f, 2.f, 2.f});
-			tf = glm::rotate(tf, 1.7f, {0.f, 0.f, 1.f});
-			tf = glm::rotate(tf, 1.7f, {0.f, 1.f, 0.f});
-			tf = glm::rotate(tf, 1.7f, {1.f, 0.f, 0.f});
-
-			vertices[i].x = (points[i].x * 50) + (x * 40);
-			vertices[i].y = (points[i].y * 100) + 500;
-			vertices[i].z = 0.f;
-			vertices[i].r = 1.f;
-			vertices[i].g = 1.f;
-			vertices[i].b = 1.f;
-			// vertices[i].r = (std::sin((float)(f + x + 3.1f)) * 0.5) + 0.5f;
-			// vertices[i].g = (std::sin((float)(f + x + 7.1f)) * 0.5) + 0.5f;
-			// vertices[i].b = (std::sin((float)(f + x + 8.1f)) * 0.5) + 0.5f;
-			vertices[i].a = 1.f;
-			vertices[i].u = uvs[i].x;
-			vertices[i].v = uvs[i].y;
-			vertices[i].t_id = static_cast<float>(m_testTexture.ID());
-			// vertices[i].t_id = static_cast<float>(Renderer().BlankTexture().ID());
-			vertices[i].d_id = x;
+	for (float x = 0.f; x < 800; x += 32) {
+		for (float y = 0.f; y < 600; y += 32) {
+			Renderer().PushQuad(x, y, 0.f, 32.f, 32.f, 1.f, 1.f, 1.f, 1.f, 1.f, m_testTexture.ID());
 		}
-
-		Renderer().PushQuad(vertices);
 	}
 
 	Renderer().End();
