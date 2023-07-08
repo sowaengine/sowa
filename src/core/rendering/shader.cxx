@@ -119,3 +119,23 @@ void Shader::Bind() {
 void Shader::Unbind() {
 	glUseProgram(0);
 }
+
+void Shader::Uniformiv(const char *name, const std::vector<int> &value) {
+	Bind();
+	int loc = glGetUniformLocation(m_id, name);
+	if (loc < 0) {
+		return;
+	}
+
+	glUniform1iv(loc, value.size(), value.data());
+}
+
+void Shader::UniformMat4(const char *name, const glm::mat4 &value) {
+	Bind();
+	int loc = glGetUniformLocation(m_id, name);
+	if (loc < 0) {
+		return;
+	}
+
+	glUniformMatrix4fv(loc, 1, GL_FALSE, &value[0][0]);
+}
