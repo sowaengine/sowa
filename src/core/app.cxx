@@ -11,8 +11,8 @@
 
 #include "data/toml_document.hxx"
 
-#include "ui/new_container.hxx"
-#include "ui/new_tree.hxx"
+// #include "ui/new_container.hxx"
+// #include "ui/new_tree.hxx"
 
 #include <filesystem>
 #include <fstream>
@@ -106,16 +106,31 @@ Error App::Init() {
 	ModelBuilder::Quad2D(rectModel);
 	ModelBuilder::Quad2D(fullscreenModel, 2.f);
 
-	mainShader.Load("res://shaders/main.vs", "res://shaders/main.fs");
-	fullscreenShader.Load("res://shaders/fullscreen.vs", "res://shaders/fullscreen.fs");
-	uiShader.Load("res://shaders/ui_panel.vs", "res://shaders/ui_panel.fs");
+	err = mainShader.Load("res://shaders/main.vs", "res://shaders/main.fs");
+	if (err != OK) {
+		std::cerr << "Failed to load main shader" << err << std::endl;
+	}
+
+	err = fullscreenShader.Load("res://shaders/fullscreen.vs", "res://shaders/fullscreen.fs");
+	if (err != OK) {
+		std::cerr << "Failed to load fullscreen shader" << std::endl;
+	}
+
+	err = uiShader.Load("res://shaders/ui_panel.vs", "res://shaders/ui_panel.fs");
+	if (err != OK) {
+		std::cerr << "Failed to load ui shader" << std::endl;
+	}
 
 	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
 	if (err != OK) {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
 
-	m_batchRenderer.Init("res://shaders/batch2d.vs", "res://shaders/batch2d.fs");
+	err = m_batchRenderer.Init("res://shaders/batch2d.vs", "res://shaders/batch2d.fs");
+	if (err != OK) {
+		std::cout << "Failed to load renderer: " << err << std::endl;
+	}
+
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 800.f, 0.f, 600.f));
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
@@ -200,7 +215,10 @@ void App::mainLoop() {
 
 	for (float x = 0.f; x < 800; x += 32) {
 		for (float y = 0.f; y < 600; y += 32) {
-			Renderer().PushQuad(x, y, 0.f, 32.f, 32.f, 1.f, 1.f, 1.f, 1.f, 1.f, m_testTexture.ID());
+
+			float sinf = std::sin((x / 32.f + y / 32.f) * f * 0.02f) * 100;
+			float cosf = std::cos((x / 32.f + y / 32.f) * f * 0.02f) * 100;
+			Renderer().PushQuad(x + sinf, y + cosf, 0.f, 32.f, 32.f, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
 		}
 	}
 
