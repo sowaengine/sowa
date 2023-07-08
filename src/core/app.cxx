@@ -1,5 +1,9 @@
 #include "app.hxx"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/projection.hpp"
+
 #include "core/graphics.hxx"
 #include "servers/file_server.hxx"
 #include "servers/input_server.hxx"
@@ -7,6 +11,8 @@
 
 #include "data/toml_document.hxx"
 
+#include "ui/new_container.hxx"
+#include "ui/new_tree.hxx"
 #include "ui/ui_container.hxx"
 #include "ui/ui_tree.hxx"
 
@@ -111,56 +117,18 @@ Error App::Init() {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
 
-	auto &root = m_editorTree.GetTree().New(1);
-	m_editorTree.SetRoot(root);
+	m_batchRenderer.Init("res://shaders/batch2d.vs", "res://shaders/batch2d.fs");
+	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 800.f, 0.f, 600.f));
+	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
-	root.Node().width = "1920px";
-	root.Node().height = "1080px";
-	root.Node().anchor = Anchor::Center;
-	root.Node().layoutModel = LayoutModel::Flex;
+	/*
+	NewTree tree;
+	tree.Root().SetOrientation(ContainerOrientation::Row);
+	tree.Root().SetChildren({60.f, 40.f});
 
-	auto &cont = m_editorTree.GetTree().New(2);
-	auto &inner = m_editorTree.GetTree().New(3);
-
-	root.AddChild(2);
-	root.AddChild(3);
-
-	cont.Node().wrap = Wrap::Wrap;
-	cont.Node().flexDirection = FlexDirection::Row;
-	cont.Node().justifyContent = JustifyContent::Middle;
-	cont.Node().layoutModel = LayoutModel::Flex;
-	cont.Node().anchor = Anchor::Left;
-	cont.Node().width = "27%";
-	cont.Node().height = "100%";
-	cont.Node().backgroundColor = Color::FromRGB(200, 100, 20);
-	cont.Node().padding = Padding::All(5.f);
-	cont.Node().active = true;
-	cont.Node().cursorMode = CursorMode::Pointer;
-	cont.Node().resizable.right = true;
-
-	inner.Node().wrap = Wrap::Wrap;
-	inner.Node().flexDirection = FlexDirection::Row;
-	inner.Node().justifyContent = JustifyContent::Middle;
-	inner.Node().layoutModel = LayoutModel::Flex;
-	inner.Node().width = "73%";
-	inner.Node().height = "100%";
-	inner.Node().backgroundColor = Color::FromRGB(200, 100, 20);
-	inner.Node().padding = Padding::All(5.f);
-	inner.Node().cursorMode = CursorMode::Pointer;
-
-	m_editorTree.Calculate();
-
-	MouseInputCallback().append([](InputEventMouseButton event) {
-		if (event.action == PRESSED) {
-			// std::cout << "Mouse input event" << std::endl;
-			// std::cout << "Button: " << event.button << std::endl;
-			// std::cout << "Action: " << event.action << std::endl;
-			// std::cout << "Modifiers: alt: " << event.modifiers.alt << std::endl;
-			// std::cout << "Modifiers: control: " << event.modifiers.control << std::endl;
-			// std::cout << "Modifiers: shift: " << event.modifiers.shift << std::endl;
-			// std::cout << "Modifiers: super: " << event.modifiers.super << std::endl;
-		}
-	});
+	tree.Root().Child(0)->SetOrientation(ContainerOrientation::Column);
+	tree.Root().Child(0)->SetChildren({50.f, 50.f});
+	*/
 
 	return OK;
 }
@@ -200,9 +168,6 @@ void App::mainLoop() {
 
 	int w, h;
 	RenderingServer::GetInstance().GetWindowSize(w, h);
-	// m_editorTree.Root().width.Number() = w;
-	// m_editorTree.Root().height.Number() = h;
-	m_editorTree.Calculate();
 
 	mainShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
@@ -212,69 +177,71 @@ void App::mainLoop() {
 
 	CursorMode cursorMode = CursorMode::Normal;
 
-	m_editorTree.DrawLayout();
-
 	double x, y;
 	InputServer::GetInstance().GetMousePosition(x, y);
 	x *= (1920.f / (float)w);
 	y *= (1080.f / (float)h);
-	m_hoveringUINode = m_layer2D.ReadAttachmentInt(1, x, y);
-	// std::cout << id << std::endl;
+	m_hoveredItem = m_layer2D.ReadAttachmentInt(1, x, y);
+	// std::cout << m_hoveredItem << std::endl;
 
-	if (m_hoveringUINode != m_editorTree.RootID()) {
-		auto *c = m_editorTree.GetTree().FindNodeByID(m_hoveringUINode);
-		if (c != nullptr) {
-			if (c->Node().cursorMode != CursorMode::Normal) {
-				cursorMode = c->Node().cursorMode;
+	Renderer().Reset();
 
-				// Resizing
-				float resizeWidth = 10.f;
+	static float f = 0.f;
+	f += 0.1f;
 
-				LRTBFlags resized_on;
+	static int frame = 0;
+	frame++;
+	// std::cout << "Frame: " << frame << std::endl;
+	static std::chrono::time_point t = std::chrono::system_clock::now();
+	if (frame == 60) {
+		std::chrono::time_point now = std::chrono::system_clock::now();
+		std::chrono::duration<double, std::milli> ms = now - t;
 
-				float itemLeft = m_editorTree.GetGlobalX(*c);
-				float itemRight = itemLeft + c->Node().m_uitree_w;
-				float itemTop = m_editorTree.GetGlobalY(*c);
-				float itemBottom = itemTop + c->Node().m_uitree_h;
-
-				if (c->Node().resizable.left) {
-					if (x > itemLeft && x < itemLeft + resizeWidth) {
-						resized_on.left = true;
-					}
-				}
-
-				if (c->Node().resizable.right) {
-					if (x > itemRight - resizeWidth && x < itemRight) {
-						resized_on.right = true;
-					}
-				}
-
-				if (c->Node().resizable.top) {
-					if (y > itemTop && y < itemTop + resizeWidth) {
-						resized_on.top = true;
-					}
-				}
-
-				if (c->Node().resizable.bottom) {
-					if (y > itemBottom - resizeWidth && y < itemBottom) {
-						resized_on.bottom = true;
-					}
-				}
-
-				unsigned int resize = 0b00;
-				resize |= (resized_on.left || resized_on.right) << 0;
-				resize |= (resized_on.bottom || resized_on.top) << 1;
-
-				if (resize == 0b01) {
-					cursorMode = CursorMode::ResizeX;
-				} else if (resize == 0b10) {
-					cursorMode = CursorMode::ResizeY;
-				} else if (resize == 0b11) {
-					cursorMode = CursorMode::Resize;
-				}
-			}
-		}
+		std::cout << "took " << ms.count() << "ms" << std::endl;
 	}
+
+	for (float x = 0; x < 100'000; x += 1.f) {
+		glm::vec4 points[4] = {
+			{-0.5f, +0.5f, 0.f, 1.f},
+			{-0.5f, -0.5f, 0.f, 1.f},
+			{+0.5f, -0.5f, 0.f, 1.f},
+			{+0.5f, +0.5f, 0.f, 1.f}};
+		glm::vec2 uvs[4] = {
+			{0.f, 1.f},
+			{0.f, 0.f},
+			{1.f, 0.f},
+			{1.f, 1.f}};
+
+		BatchVertex vertices[4];
+		for (int i = 0; i < 4; i++) {
+			points[i] = glm::mat4(1.f) * points[i];
+			glm::mat4 tf = glm::translate(glm::mat4(1.f), {100.f, 100.f, 100.f});
+			tf = glm::scale(tf, {2.f, 2.f, 2.f});
+			tf = glm::rotate(tf, 1.7f, {0.f, 0.f, 1.f});
+			tf = glm::rotate(tf, 1.7f, {0.f, 1.f, 0.f});
+			tf = glm::rotate(tf, 1.7f, {1.f, 0.f, 0.f});
+
+			vertices[i].x = (points[i].x * 50) + (x * 40);
+			vertices[i].y = (points[i].y * 100) + 500;
+			vertices[i].z = 0.f;
+			vertices[i].r = 1.f;
+			vertices[i].g = 1.f;
+			vertices[i].b = 1.f;
+			// vertices[i].r = (std::sin((float)(f + x + 3.1f)) * 0.5) + 0.5f;
+			// vertices[i].g = (std::sin((float)(f + x + 7.1f)) * 0.5) + 0.5f;
+			// vertices[i].b = (std::sin((float)(f + x + 8.1f)) * 0.5) + 0.5f;
+			vertices[i].a = 1.f;
+			vertices[i].u = uvs[i].x;
+			vertices[i].v = uvs[i].y;
+			vertices[i].t_id = static_cast<float>(m_testTexture.ID());
+			// vertices[i].t_id = static_cast<float>(Renderer().BlankTexture().ID());
+			vertices[i].d_id = x;
+		}
+
+		Renderer().PushQuad(vertices);
+	}
+
+	Renderer().End();
 
 	SetRenderLayer(nullptr);
 

@@ -56,8 +56,7 @@ class App {
 	eventpp::CallbackList<void(InputEventMouseButton)> m_mouseInputCallback;
 	eventpp::CallbackList<void(InputEventMouseMove)> m_mouseMoveCallback;
 
-	UITree m_editorTree;
-	int m_hoveringUINode = 0;
+	int m_hoveredItem = 0;
 
 	friend class FileServer;
 	std::filesystem::path m_appPath = "";
