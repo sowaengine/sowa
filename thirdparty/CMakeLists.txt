@@ -22,6 +22,7 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/layout"
     "${CMAKE_CURRENT_SOURCE_DIR}/tomlplusplus-3.3.0"
     "${CMAKE_CURRENT_SOURCE_DIR}/eventpp-0.1.2/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/glm-0.9.9.8/include"
 )
 
 set(SOWA_THIRDPARTY_INCLUDES
