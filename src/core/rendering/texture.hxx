@@ -25,13 +25,15 @@ class Texture {
 	void Unbind();
 
 	Error Load(texture_type_t type, const char *path);
+	Error Load2DUByteRGBA(unsigned char *data, int width, int height);
+
 	void Delete();
 
-	inline const uint32_t ID() const { return m_id; }
-	inline const int Width() const { return m_width; }
-	inline const int Height() const { return m_height; }
-	inline const int Channels() const { return m_channels; }
-	inline const unsigned char *Pixels() const { return m_pixels; }
+	inline uint32_t ID() const { return m_id; }
+	inline int Width() const { return m_width; }
+	inline int Height() const { return m_height; }
+	inline int Channels() const { return m_channels; }
+	inline unsigned char *Pixels() const { return m_pixels; }
 
   private:
 	uint32_t m_id = 0;
@@ -39,6 +41,7 @@ class Texture {
 	int m_height = 0;
 	int m_channels = 0;
 	unsigned char *m_pixels = nullptr;
+	bool m_shouldFree = false;
 
 	texture_type_t m_type = TextureType::Texture2D;
 };
