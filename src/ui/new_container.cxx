@@ -32,7 +32,7 @@ NewContainer *NewContainer::Child(int idx) {
 }
 
 void NewContainer::DrawLayout(float x, float y, float width, float height, float z) {
-	float padding = 2.f;
+	float padding = 1.f;
 	if (m_children.size() == 0)
 		App::GetInstance().Renderer().PushQuad(
 			x + padding,

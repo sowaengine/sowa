@@ -5,6 +5,8 @@
 #include "glm/gtx/projection.hpp"
 
 #include "core/graphics.hxx"
+#include "core/time.hxx"
+
 #include "servers/file_server.hxx"
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
@@ -131,6 +133,8 @@ Error App::Init() {
 		std::cout << "Failed to load renderer: " << err << std::endl;
 	}
 
+	Time::update();
+
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 800.f, 0.f, 600.f));
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
@@ -175,6 +179,7 @@ void App::mainLoop() {
 	InputServer::GetInstance().ProcessInput();
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+	Time::update();
 
 	SetRenderLayer(&m_layer2D);
 	m_layer2D.Clear(0.5f, 0.5f, 0.5f, 1.0f);
