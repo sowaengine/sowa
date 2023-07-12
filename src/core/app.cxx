@@ -11,8 +11,8 @@
 
 #include "data/toml_document.hxx"
 
-// #include "ui/new_container.hxx"
-// #include "ui/new_tree.hxx"
+#include "ui/new_container.hxx"
+#include "ui/new_tree.hxx"
 
 #include <filesystem>
 #include <fstream>
@@ -134,14 +134,14 @@ Error App::Init() {
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 800.f, 0.f, 600.f));
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
-	/*
-	NewTree tree;
-	tree.Root().SetOrientation(ContainerOrientation::Row);
-	tree.Root().SetChildren({60.f, 40.f});
+	m_uiTree.Root().SetOrientation(ContainerOrientation::Row);
+	m_uiTree.Root().SetChildren({20.f, 55.f, 25.f});
 
-	tree.Root().Child(0)->SetOrientation(ContainerOrientation::Column);
-	tree.Root().Child(0)->SetChildren({50.f, 50.f});
-	*/
+	m_uiTree.Root().Child(1)->SetOrientation(ContainerOrientation::Column);
+	m_uiTree.Root().Child(1)->SetChildren({30.f, 70.f});
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 
 	return OK;
 }
@@ -177,7 +177,7 @@ void App::mainLoop() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	SetRenderLayer(&m_layer2D);
-	m_layer2D.Clear(0.2f, 0.5f, 0.7f, 1.0f);
+	m_layer2D.Clear(0.5f, 0.5f, 0.5f, 1.0f);
 
 	int w, h;
 	RenderingServer::GetInstance().GetWindowSize(w, h);
@@ -213,6 +213,7 @@ void App::mainLoop() {
 		std::cout << "took " << ms.count() << "ms" << std::endl;
 	}
 
+	/*
 	for (float x = 0.f; x < 800; x += 32) {
 		for (float y = 0.f; y < 600; y += 32) {
 
@@ -221,6 +222,9 @@ void App::mainLoop() {
 			Renderer().PushQuad(x + sinf, y + cosf, 0.f, 32.f, 32.f, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
 		}
 	}
+	*/
+
+	m_uiTree.Root().DrawLayout(0.f, 0.f, 800.f, 600.f);
 
 	Renderer().End();
 

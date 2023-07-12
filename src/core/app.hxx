@@ -9,6 +9,7 @@
 #include <filesystem>
 
 #include "data/input_event/input_event.hxx"
+#include "ui/new_tree.hxx"
 
 #include "eventpp/callbacklist.h"
 
@@ -51,6 +52,7 @@ class App {
 	project_settings m_projectSettings;
 
 	BatchRenderer m_batchRenderer;
+	NewTree m_uiTree;
 
 	eventpp::CallbackList<void(InputEventMouseButton)> m_mouseInputCallback;
 	eventpp::CallbackList<void(InputEventMouseMove)> m_mouseMoveCallback;
