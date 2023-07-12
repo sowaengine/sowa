@@ -12,10 +12,12 @@ class NewTree {
 
 	inline NewContainer &Root() { return m_root; }
 
+	NewContainer *GetContainerByID(int id);
+
   private:
 	friend class NewContainer;
 	void initContainer(NewContainer *container);
-  void deinitContainer(NewContainer* container);
+	void deinitContainer(NewContainer *container);
 
   private:
 	NewContainer m_root;

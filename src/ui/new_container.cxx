@@ -11,13 +11,14 @@ NewContainer::NewContainer(float size) {
 }
 
 NewContainer::~NewContainer() {
-	m_pTree->deinitContainer(this);
 }
 
 void NewContainer::SetChildren(std::initializer_list<float> ratios) {
 	m_children.clear();
+
 	for (float f : ratios) {
-		NewContainer &child = m_children.emplace_back(f);
+		NewContainer &child = m_children.emplace_back();
+		child.m_sizePercentage = f;
 		child.m_parent = this;
 		m_pTree->initContainer(&child);
 	}
@@ -67,4 +68,19 @@ void NewContainer::DrawLayout(float x, float y, float width, float height, float
 			yCursor += h;
 		}
 	}
+}
+
+NewContainer *NewContainer::getContainer(int id) {
+	for (auto &child : m_children) {
+		if (child.ID() == id) {
+			return &child;
+		}
+
+		NewContainer *container = child.getContainer(id);
+		if (nullptr != container) {
+			return container;
+		}
+	}
+
+	return nullptr;
 }

@@ -202,6 +202,11 @@ void App::mainLoop() {
 	m_hoveredItem = m_layer2D.ReadAttachmentInt(1, x, y);
 	// std::cout << m_hoveredItem << std::endl;
 
+	NewContainer *cont = m_uiTree.GetContainerByID(m_hoveredItem);
+	if (cont != nullptr) {
+		std::cout << cont->ID() << std::endl;
+	}
+
 	Renderer().Reset();
 
 	static float f = 0.f;

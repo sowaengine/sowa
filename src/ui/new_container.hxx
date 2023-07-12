@@ -35,6 +35,8 @@ class NewContainer {
 
 	NewTree *m_pTree = nullptr;
 
+	NewContainer *getContainer(int id);
+
 	int m_id = 0;
 	float m_sizePercentage = 100.f;
 	ContainerOrientation m_orientation = ContainerOrientation::Row;
