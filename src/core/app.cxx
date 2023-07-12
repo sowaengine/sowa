@@ -11,6 +11,7 @@
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
 
+#include "data/lrtb_flags.hxx"
 #include "data/toml_document.hxx"
 
 #include "ui/new_container.hxx"
@@ -135,7 +136,129 @@ Error App::Init() {
 
 	Time::update();
 
-	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 800.f, 0.f, 600.f));
+	MouseInputCallback().append([this](InputEventMouseButton event) {
+		if (event.action == PRESSED) {
+			if (this->m_resizeContainerID != 0 && !this->m_resizing) {
+				this->m_resizing = true;
+			}
+		} else if (event.action == RELEASED) {
+			if (this->m_resizing) {
+				this->m_resizing = false;
+				this->m_resizeContainerID = 0;
+			}
+		}
+	});
+
+	MouseMoveCallback().append([this](InputEventMouseMove event) {
+		if (this->m_resizing) {
+			int w, h;
+			RenderingServer::GetInstance().GetWindowSize(w, h);
+
+			event.deltaX *= (1920.f / (float)w);
+			event.deltaY *= (1080.f / (float)h);
+
+			NewContainer *resizeContainer = this->m_uiTree.GetContainerByID(this->m_resizeContainerID);
+			if (nullptr == resizeContainer)
+				return;
+
+			// root container cannot be resized
+			NewContainer *parent = resizeContainer->GetParent();
+			if (nullptr == parent)
+				return;
+
+			if (this->m_resizeFlags.right) {
+				float currentWidth = resizeContainer->Width();
+
+				float newSize = resizeContainer->m_sizePercentage * (currentWidth + event.deltaX) / currentWidth;
+				float sizeDiff = newSize - resizeContainer->m_sizePercentage;
+				int idx = parent->GetChildIndex(this->m_resizeContainerID);
+				if (idx == -1 && idx >= parent->ChildCount() - 2)
+					return;
+
+				NewContainer *nextChild = parent->Child(idx + 1);
+				if (nullptr == nextChild)
+					return;
+
+				if (nextChild->m_sizePercentage - sizeDiff < nextChild->minWidth) {
+					sizeDiff = nextChild->m_sizePercentage - nextChild->minWidth;
+				}
+				if (resizeContainer->m_sizePercentage + sizeDiff < resizeContainer->minWidth) {
+					sizeDiff = -(resizeContainer->m_sizePercentage - resizeContainer->minWidth);
+				}
+
+				nextChild->m_sizePercentage -= sizeDiff;
+				resizeContainer->m_sizePercentage += sizeDiff;
+			} else if (this->m_resizeFlags.left) {
+				float currentWidth = resizeContainer->Width();
+
+				float newSize = resizeContainer->m_sizePercentage * (currentWidth + event.deltaX) / currentWidth;
+				float sizeDiff = newSize - resizeContainer->m_sizePercentage;
+				int idx = parent->GetChildIndex(this->m_resizeContainerID);
+				if (idx <= 0)
+					return;
+
+				NewContainer *previousChild = parent->Child(idx - 1);
+				if (nullptr == previousChild)
+					return;
+
+				if (previousChild->m_sizePercentage + sizeDiff < previousChild->minWidth) {
+					sizeDiff = -(previousChild->m_sizePercentage - previousChild->minWidth);
+				}
+				if (resizeContainer->m_sizePercentage - sizeDiff < resizeContainer->minWidth) {
+					sizeDiff = resizeContainer->m_sizePercentage - resizeContainer->minWidth;
+				}
+
+				previousChild->m_sizePercentage += sizeDiff;
+				resizeContainer->m_sizePercentage -= sizeDiff;
+			} else if (this->m_resizeFlags.bottom) {
+				float currentHeight = resizeContainer->Height();
+
+				float newSize = resizeContainer->m_sizePercentage * (currentHeight + event.deltaY) / currentHeight;
+				float sizeDiff = newSize - resizeContainer->m_sizePercentage;
+				int idx = parent->GetChildIndex(this->m_resizeContainerID);
+				if (idx <= 0)
+					return;
+
+				NewContainer *previousChild = parent->Child(idx - 1);
+				if (nullptr == previousChild)
+					return;
+
+				if (previousChild->m_sizePercentage - sizeDiff < previousChild->minWidth) {
+					sizeDiff = previousChild->m_sizePercentage - previousChild->minWidth;
+				}
+				if (resizeContainer->m_sizePercentage + sizeDiff < resizeContainer->minWidth) {
+					sizeDiff = -(resizeContainer->m_sizePercentage - resizeContainer->minWidth);
+				}
+
+				previousChild->m_sizePercentage -= sizeDiff;
+				resizeContainer->m_sizePercentage += sizeDiff;
+			} else if (this->m_resizeFlags.top) {
+				float currentHeight = resizeContainer->Height();
+
+				float newSize = resizeContainer->m_sizePercentage * (currentHeight + event.deltaY) / currentHeight;
+				float sizeDiff = newSize - resizeContainer->m_sizePercentage;
+				int idx = parent->GetChildIndex(this->m_resizeContainerID);
+				if (idx == -1 && idx >= parent->ChildCount() - 2)
+					return;
+
+				NewContainer *nextChild = parent->Child(idx + 1);
+				if (nullptr == nextChild)
+					return;
+
+				if (nextChild->m_sizePercentage + sizeDiff < nextChild->minWidth) {
+					sizeDiff = -(nextChild->m_sizePercentage - nextChild->minWidth);
+				}
+				if (resizeContainer->m_sizePercentage - sizeDiff < resizeContainer->minWidth) {
+					sizeDiff = resizeContainer->m_sizePercentage - resizeContainer->minWidth;
+				}
+
+				nextChild->m_sizePercentage += sizeDiff;
+				resizeContainer->m_sizePercentage -= sizeDiff;
+			}
+		}
+	});
+
+	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
 	m_uiTree.Root().SetOrientation(ContainerOrientation::Row);
@@ -200,11 +323,103 @@ void App::mainLoop() {
 	x *= (1920.f / (float)w);
 	y *= (1080.f / (float)h);
 	m_hoveredItem = m_layer2D.ReadAttachmentInt(1, x, y);
-	// std::cout << m_hoveredItem << std::endl;
+
+	if (!m_resizing) {
+		m_resizeFlags.left = false;
+		m_resizeFlags.top = false;
+		m_resizeFlags.right = false;
+		m_resizeFlags.bottom = false;
+		m_resizeContainerID = 0;
+	}
 
 	NewContainer *cont = m_uiTree.GetContainerByID(m_hoveredItem);
 	if (cont != nullptr) {
-		std::cout << cont->ID() << std::endl;
+
+		LRTBFlags flags;
+
+		// if parent is row, last element cannot be resized to right
+		// if parent is column, last element cannot be resized to top
+		// if parent is row, first element cannot be resized to left
+		// if parent is column, first element cannot be resized to bottom
+
+		NewContainer *parent = cont->GetParent();
+		if (nullptr != parent) {
+
+			int index = parent->GetChildIndex(cont->ID());
+			if (parent->GetOrientation() == ContainerOrientation::Row) {
+				flags.right = true;
+				flags.left = true;
+
+				if (index == parent->ChildCount() - 1) {
+					flags.right = false;
+				} else if (index == 0) {
+					flags.left = false;
+				}
+			} else {
+				flags.top = true;
+				flags.bottom = true;
+
+				if (index == parent->ChildCount() - 1) {
+					flags.top = false;
+				} else if (index == 0) {
+					flags.bottom = false;
+				}
+			}
+		}
+
+		float itemLeft = cont->PosX();
+		float itemRight = cont->PosX() + cont->Width();
+		float itemBottom = cont->PosY();
+		float itemTop = cont->PosY() + cont->Height();
+		float resizeWidth = 20.f;
+
+		double x, y;
+		InputServer::GetInstance().GetMousePosition(x, y);
+		y = h - y;
+		x *= (1920.f / (float)w);
+		y *= (1080.f / (float)h);
+
+		LRTBFlags resized_on;
+		if (flags.left) {
+			if (x > itemLeft && x < itemLeft + resizeWidth) {
+				resized_on.left = true;
+			}
+		}
+
+		if (flags.right) {
+			if (x > itemRight - resizeWidth && x < itemRight) {
+				resized_on.right = true;
+			}
+		}
+
+		if (flags.top) {
+			if (y > itemTop - resizeWidth && y < itemTop) {
+				resized_on.top = true;
+			}
+		}
+
+		if (flags.bottom) {
+			if (y > itemBottom && y < itemBottom + resizeWidth) {
+				resized_on.bottom = true;
+			}
+		}
+
+		unsigned int resize = 0b00;
+		resize |= (resized_on.left || resized_on.right) << 0;
+		resize |= (resized_on.bottom || resized_on.top) << 1;
+
+		if (resize == 0b01) {
+			cursorMode = CursorMode::ResizeX;
+		} else if (resize == 0b10) {
+			cursorMode = CursorMode::ResizeY;
+		} else if (resize == 0b11) {
+			cursorMode = CursorMode::Resize;
+		}
+
+		if (!m_resizing) {
+			m_resizeFlags = resized_on;
+			m_resizeContainerID = cont->ID();
+		}
 	}
 
 	Renderer().Reset();
@@ -234,7 +449,7 @@ void App::mainLoop() {
 	}
 	*/
 
-	m_uiTree.Root().DrawLayout(0.f, 0.f, 800.f, 600.f);
+	m_uiTree.Root().DrawLayout(0.f, 0.f, 1920.f, 1080.f);
 
 	Renderer().End();
 

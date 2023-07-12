@@ -32,8 +32,30 @@ NewContainer *NewContainer::Child(int idx) {
 	return &m_children[idx];
 }
 
+int NewContainer::GetChildIndex(int id) {
+	size_t index = 0;
+
+	for (NewContainer &child : m_children) {
+		if (child.ID() == id) {
+			return index;
+		}
+		index++;
+	}
+
+	return -1;
+}
+
+int NewContainer::ChildCount() {
+	return static_cast<int>(m_children.size());
+}
+
 void NewContainer::DrawLayout(float x, float y, float width, float height, float z) {
-	float padding = 1.f;
+	m_xPos = x;
+	m_yPos = y;
+	m_width = width;
+	m_height = height;
+
+	float padding = 3.f;
 	if (m_children.size() == 0)
 		App::GetInstance().Renderer().PushQuad(
 			x + padding,

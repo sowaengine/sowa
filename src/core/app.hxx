@@ -9,6 +9,7 @@
 #include <filesystem>
 
 #include "data/input_event/input_event.hxx"
+#include "data/lrtb_flags.hxx"
 #include "ui/new_tree.hxx"
 
 #include "eventpp/callbacklist.h"
@@ -58,6 +59,9 @@ class App {
 	eventpp::CallbackList<void(InputEventMouseMove)> m_mouseMoveCallback;
 
 	int m_hoveredItem = 0;
+	LRTBFlags m_resizeFlags;
+	int m_resizeContainerID = 0;
+	bool m_resizing = false;
 
 	friend class FileServer;
 	std::filesystem::path m_appPath = "";
