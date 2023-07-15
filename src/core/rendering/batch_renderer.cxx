@@ -35,6 +35,7 @@ Error BatchRenderer::Init(const char *vsPath, const char *fsPath) {
 	m_array.SetAttribute(2, gfx::AttributeType::Vec4);	// color
 	m_array.SetAttribute(3, gfx::AttributeType::Float); // draw id
 	m_array.SetAttribute(4, gfx::AttributeType::Float); // texture slot
+	m_array.SetAttribute(5, gfx::AttributeType::Float); // draw mode
 	m_array.UploadAttributes();
 
 	m_array.Unbind();
@@ -86,7 +87,7 @@ void BatchRenderer::PushQuad(BatchVertex vertices[4]) {
 	}
 }
 
-void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID) {
+void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID, float drawMode) {
 	/*
 		{ 0.0f, 1.0f,  0.f, 1.f}
 		{ 0.0f, 0.0f,  0.f, 1.f}
@@ -118,6 +119,7 @@ void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float 
 		vertices[i].v = uvs[i].y;
 		vertices[i].t_id = textureID;
 		vertices[i].d_id = drawID;
+		vertices[i].draw_mode = drawMode;
 	}
 
 	PushQuad(vertices);

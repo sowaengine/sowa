@@ -65,7 +65,7 @@ void NewContainer::DrawLayout(float x, float y, float width, float height, float
 			height - (padding * 2),
 			color.r, color.g, color.b, color.a,
 			static_cast<float>(m_id),
-			0.f);
+			0.f, 1.f);
 
 	float xCursor = x;
 	float yCursor = y;

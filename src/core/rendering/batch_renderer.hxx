@@ -13,17 +13,18 @@
 #include "texture.hxx"
 
 struct BatchVertex {
-	float x;
-	float y;
-	float z;
-	float u;
-	float v;
-	float r;
-	float g;
-	float b;
-	float a;
-	float d_id; // draw id
-	float t_id; // texture id
+	float x = 0.f;
+	float y = 0.f;
+	float z = 0.f;
+	float u = 0.f;
+	float v = 0.f;
+	float r = 1.f;
+	float g = 1.f;
+	float b = 1.f;
+	float a = 1.f;
+	float d_id = 0.f; // draw id
+	float t_id = 0.f; // texture id
+	float draw_mode = 0.f;
 };
 
 class BatchRenderer {
@@ -35,7 +36,7 @@ class BatchRenderer {
 
 	void Reset();
 	void PushQuad(BatchVertex vertices[4]);
-	void PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID);
+	void PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID, float drawMode = 0.f);
 	void End();
 
 	inline Shader &GetShader() { return m_shader; }

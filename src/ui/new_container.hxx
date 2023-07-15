@@ -36,7 +36,7 @@ class NewContainer {
 
 	void DrawLayout(float x, float y, float width, float height, float z = 0.f);
 
-	Color color = Color::FromRGB(45, 45, 45);
+	Color color = Color::FromRGB(70, 70, 70);
 	float minWidth = 5.f;
 	float maxWidth = 100.f;
 	bool resizable = true;

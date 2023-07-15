@@ -8,6 +8,7 @@ in vec4 vColor;
 in vec2 vTexCoords;
 in float vTexture;
 in float vDrawId;
+in float vDrawMode;
 
 uniform sampler2D uTextures[32];
 
@@ -19,11 +20,17 @@ float lerp(float from, float to, float t) {
 
 void main() {
   drawId = int(vDrawId);
-  // color = getTexture() * vColor;
 
   // diagonal gradient
-  float mult = (vTexCoords.x + vTexCoords.y) / 2.0f;
-  color = getTexture() * vColor * vec4(mult, mult, mult, 1.0f);
+  if(vDrawMode == 0.0f) {
+    color = getTexture() * vColor;
+  } else {
+    float mult = (vTexCoords.x + vTexCoords.y) / 2.0f;
+    mult += 0.3f;
+    mult = min(mult, 1.0f);
+
+    color = getTexture() * vColor * vec4(mult, mult, mult, 1.0f);
+  }
 
   if(color.a < 0.1f)
     discard;
