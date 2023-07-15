@@ -19,11 +19,11 @@ float lerp(float from, float to, float t) {
 
 void main() {
   drawId = int(vDrawId);
-  color = getTexture() * vColor;
+  // color = getTexture() * vColor;
 
   // diagonal gradient
-  // float mult = (vTexCoords.x + vTexCoords.y) / 2.0f;
-  // color = getTexture() * vColor * vec4(mult, mult, mult, 1.0f);
+  float mult = (vTexCoords.x + vTexCoords.y) / 2.0f;
+  color = getTexture() * vColor * vec4(mult, mult, mult, 1.0f);
 
   if(color.a < 0.1f)
     discard;

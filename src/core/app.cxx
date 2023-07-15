@@ -185,6 +185,12 @@ Error App::Init() {
 				if (resizeContainer->m_sizePercentage + sizeDiff < resizeContainer->minWidth) {
 					sizeDiff = -(resizeContainer->m_sizePercentage - resizeContainer->minWidth);
 				}
+				if (nextChild->m_sizePercentage - sizeDiff > nextChild->maxWidth) {
+					sizeDiff = -(nextChild->maxWidth - nextChild->m_sizePercentage);
+				}
+				if (resizeContainer->m_sizePercentage + sizeDiff > resizeContainer->maxWidth) {
+					sizeDiff = resizeContainer->maxWidth - resizeContainer->m_sizePercentage;
+				}
 
 				nextChild->m_sizePercentage -= sizeDiff;
 				resizeContainer->m_sizePercentage += sizeDiff;
@@ -206,6 +212,12 @@ Error App::Init() {
 				}
 				if (resizeContainer->m_sizePercentage - sizeDiff < resizeContainer->minWidth) {
 					sizeDiff = resizeContainer->m_sizePercentage - resizeContainer->minWidth;
+				}
+				if (previousChild->m_sizePercentage + sizeDiff > previousChild->maxWidth) {
+					sizeDiff = previousChild->maxWidth - previousChild->m_sizePercentage;
+				}
+				if (resizeContainer->m_sizePercentage - sizeDiff > resizeContainer->maxWidth) {
+					sizeDiff = -(resizeContainer->maxWidth - resizeContainer->m_sizePercentage);
 				}
 
 				previousChild->m_sizePercentage += sizeDiff;
@@ -229,6 +241,12 @@ Error App::Init() {
 				if (resizeContainer->m_sizePercentage + sizeDiff < resizeContainer->minWidth) {
 					sizeDiff = -(resizeContainer->m_sizePercentage - resizeContainer->minWidth);
 				}
+				if (previousChild->m_sizePercentage - sizeDiff > previousChild->maxWidth) {
+					sizeDiff = previousChild->maxWidth - previousChild->m_sizePercentage;
+				}
+				if (resizeContainer->m_sizePercentage + sizeDiff > resizeContainer->maxWidth) {
+					sizeDiff = resizeContainer->maxWidth - resizeContainer->m_sizePercentage;
+				}
 
 				previousChild->m_sizePercentage -= sizeDiff;
 				resizeContainer->m_sizePercentage += sizeDiff;
@@ -251,6 +269,12 @@ Error App::Init() {
 				if (resizeContainer->m_sizePercentage - sizeDiff < resizeContainer->minWidth) {
 					sizeDiff = resizeContainer->m_sizePercentage - resizeContainer->minWidth;
 				}
+				if (nextChild->m_sizePercentage + sizeDiff > nextChild->maxWidth) {
+					sizeDiff = nextChild->maxWidth - nextChild->m_sizePercentage;
+				}
+				if (resizeContainer->m_sizePercentage - sizeDiff > resizeContainer->maxWidth) {
+					sizeDiff = -(resizeContainer->maxWidth - resizeContainer->m_sizePercentage);
+				}
 
 				nextChild->m_sizePercentage += sizeDiff;
 				resizeContainer->m_sizePercentage -= sizeDiff;
@@ -261,11 +285,17 @@ Error App::Init() {
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
-	m_uiTree.Root().SetOrientation(ContainerOrientation::Row);
-	m_uiTree.Root().SetChildren({20.f, 55.f, 25.f});
+	m_uiTree.Root().SetOrientation(ContainerOrientation::Column);
+	m_uiTree.Root().SetChildren({95, 5});
 
-	m_uiTree.Root().Child(1)->SetOrientation(ContainerOrientation::Column);
-	m_uiTree.Root().Child(1)->SetChildren({30.f, 70.f});
+	m_uiTree.Root().Child(1)->maxWidth = 5.f;
+	m_uiTree.Root().Child(1)->resizable = false;
+
+	m_uiTree.Root().Child(0)->SetOrientation(ContainerOrientation::Row);
+	m_uiTree.Root().Child(0)->SetChildren({20.f, 55.f, 25.f});
+
+	m_uiTree.Root().Child(0)->Child(1)->SetOrientation(ContainerOrientation::Column);
+	m_uiTree.Root().Child(0)->Child(1)->SetChildren({30.f, 70.f});
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
@@ -334,6 +364,8 @@ void App::mainLoop() {
 
 	NewContainer *cont = m_uiTree.GetContainerByID(m_hoveredItem);
 	if (cont != nullptr) {
+		if (!cont->resizable)
+			return;
 
 		LRTBFlags flags;
 

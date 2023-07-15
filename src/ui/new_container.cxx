@@ -55,7 +55,7 @@ void NewContainer::DrawLayout(float x, float y, float width, float height, float
 	m_width = width;
 	m_height = height;
 
-	float padding = 3.f;
+	float padding = 0.f;
 	if (m_children.size() == 0)
 		App::GetInstance().Renderer().PushQuad(
 			x + padding,

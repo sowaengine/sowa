@@ -38,7 +38,8 @@ class NewContainer {
 
 	Color color = Color::FromRGB(45, 45, 45);
 	float minWidth = 5.f;
-	float minHeight = 5.f;
+	float maxWidth = 100.f;
+	bool resizable = true;
 
 	float Width() { return m_width; }
 	float Height() { return m_height; }
