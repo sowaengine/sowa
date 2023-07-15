@@ -286,16 +286,22 @@ Error App::Init() {
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
 	m_uiTree.Root().SetOrientation(ContainerOrientation::Column);
-	m_uiTree.Root().SetChildren({95, 5});
+	m_uiTree.Root().SetChildren({3, 93, 4});
 
-	m_uiTree.Root().Child(1)->maxWidth = 5.f;
-	m_uiTree.Root().Child(1)->resizable = false;
+	m_uiTree.Root().Child(0)->maxWidth = 3.f;
+	m_uiTree.Root().Child(0)->minWidth = 3.f;
+	m_uiTree.Root().Child(0)->resizable = false;
+	m_uiTree.Root().Child(0)->color = Color::FromRGB(42, 202, 234);
 
-	m_uiTree.Root().Child(0)->SetOrientation(ContainerOrientation::Row);
-	m_uiTree.Root().Child(0)->SetChildren({20.f, 55.f, 25.f});
+	m_uiTree.Root().Child(2)->maxWidth = 4.f;
+	m_uiTree.Root().Child(2)->minWidth = 4.f;
+	m_uiTree.Root().Child(2)->resizable = false;
 
-	m_uiTree.Root().Child(0)->Child(1)->SetOrientation(ContainerOrientation::Column);
-	m_uiTree.Root().Child(0)->Child(1)->SetChildren({30.f, 70.f});
+	m_uiTree.Root().Child(1)->SetOrientation(ContainerOrientation::Row);
+	m_uiTree.Root().Child(1)->SetChildren({20.f, 55.f, 25.f});
+
+	m_uiTree.Root().Child(1)->Child(1)->SetOrientation(ContainerOrientation::Column);
+	m_uiTree.Root().Child(1)->Child(1)->SetChildren({30.f, 70.f});
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
@@ -470,18 +476,16 @@ void App::mainLoop() {
 		std::cout << "took " << ms.count() << "ms" << std::endl;
 	}
 
-	/*
-	for (float x = 0.f; x < 800; x += 32) {
-		for (float y = 0.f; y < 600; y += 32) {
+	m_uiTree.Root().DrawLayout(0.f, 0.f, 1920.f, 1080.f);
+	float size = 64.f;
+	for (float x = 550.f; x < 1200.f; x += size) {
+		for (float y = 450.f; y < 850.f; y += size) {
 
-			float sinf = std::sin((x / 32.f + y / 32.f) * f * 0.02f) * 100;
-			float cosf = std::cos((x / 32.f + y / 32.f) * f * 0.02f) * 100;
-			Renderer().PushQuad(x + sinf, y + cosf, 0.f, 32.f, 32.f, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
+			float sinf = std::sin((x / 64.f + y / 64.f) * f * 0.02f) * 100;
+			float cosf = std::cos((x / 64.f + y / 64.f) * f * 0.02f) * 100;
+			Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
 		}
 	}
-	*/
-
-	m_uiTree.Root().DrawLayout(0.f, 0.f, 1920.f, 1080.f);
 
 	Renderer().End();
 
