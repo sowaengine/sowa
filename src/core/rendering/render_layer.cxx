@@ -49,6 +49,11 @@ void RenderLayer::Create(int width, int height) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void RenderLayer::Resize(int width, int height) {
+	Delete();
+	Create(width, height);
+}
+
 void RenderLayer::Delete() {
 	if (m_id != 0) {
 		glDeleteFramebuffers(1, &m_id);
