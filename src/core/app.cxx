@@ -307,6 +307,12 @@ Error App::Init() {
 	m_uiTree.Root().Child(2)->maxWidth = 3.5f;
 	m_uiTree.Root().Child(2)->minWidth = 3.5f;
 	m_uiTree.Root().Child(2)->resizable = false;
+	m_uiTree.Root().Child(2)->alwaysDraw = true;
+	m_uiTree.Root().Child(2)->SetChildren({6, 6, 6, 6});
+	m_uiTree.Root().Child(2)->Child(0)->resizable = false;
+	m_uiTree.Root().Child(2)->Child(1)->resizable = false;
+	m_uiTree.Root().Child(2)->Child(2)->resizable = false;
+	m_uiTree.Root().Child(2)->Child(3)->resizable = false;
 
 	m_uiTree.Root().Child(1)->SetOrientation(ContainerOrientation::Row);
 	m_uiTree.Root().Child(1)->SetChildren({20.f, 55.f, 25.f});

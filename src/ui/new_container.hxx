@@ -40,6 +40,7 @@ class NewContainer {
 	float minWidth = 5.f;
 	float maxWidth = 100.f;
 	bool resizable = true;
+	bool alwaysDraw = false;
 
 	float Width() { return m_width; }
 	float Height() { return m_height; }
