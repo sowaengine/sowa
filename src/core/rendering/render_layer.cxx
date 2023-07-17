@@ -59,6 +59,11 @@ void RenderLayer::Delete() {
 		glDeleteFramebuffers(1, &m_id);
 	}
 
+	for (auto &[slot, target] : m_targets) {
+		glDeleteTextures(1, &target.textureID);
+		target.textureID = 0;
+	}
+
 	m_id = 0;
 }
 
