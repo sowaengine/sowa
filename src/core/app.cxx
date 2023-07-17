@@ -90,9 +90,12 @@ Error App::Init() {
 	m_layer2D.SetTarget(1, RenderLayerTargetType::Int);
 	m_layer2D.Create(1920, 1080);
 
-	// m_layerUI.SetTarget(0, RenderLayerTargetType::Vec4);
-	// m_layerUI.SetTarget(1, RenderLayerTargetType::Int);
-	// m_layerUI.Create(1920, 1080);
+	int w, h;
+	RenderingServer::GetInstance().GetWindowSize(w, h);
+
+	m_layerUI.SetTarget(0, RenderLayerTargetType::Vec4);
+	m_layerUI.SetTarget(1, RenderLayerTargetType::Int);
+	m_layerUI.Create(w, h);
 
 #ifdef SW_WEB
 	// Update page title
@@ -129,6 +132,11 @@ Error App::Init() {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
 
+	err = m_testFont.LoadTTF("res://Roboto-Medium.ttf");
+	if (err != OK) {
+		std::cout << "Failed to load font: " << err << std::endl;
+	}
+
 	err = m_batchRenderer.Init("res://shaders/batch2d.vs", "res://shaders/batch2d.fs");
 	if (err != OK) {
 		std::cout << "Failed to load renderer: " << err << std::endl;
@@ -154,8 +162,8 @@ Error App::Init() {
 			int w, h;
 			RenderingServer::GetInstance().GetWindowSize(w, h);
 
-			event.deltaX *= (1920.f / (float)w);
-			event.deltaY *= (1080.f / (float)h);
+			// event.deltaX *= (1920.f / (float)w);
+			// event.deltaY *= (1080.f / (float)h);
 
 			NewContainer *resizeContainer = this->m_uiTree.GetContainerByID(this->m_resizeContainerID);
 			if (nullptr == resizeContainer)
@@ -282,19 +290,22 @@ Error App::Init() {
 		}
 	});
 
-	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
+	WindowResizeCallback().append([this](int width, int height) {
+		this->m_layerUI.Resize(width, height);
+	});
+
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
 	m_uiTree.Root().SetOrientation(ContainerOrientation::Column);
-	m_uiTree.Root().SetChildren({3, 93, 4});
+	m_uiTree.Root().SetChildren({3, 93.5, 3.5});
 
 	m_uiTree.Root().Child(0)->maxWidth = 3.f;
 	m_uiTree.Root().Child(0)->minWidth = 3.f;
 	m_uiTree.Root().Child(0)->resizable = false;
 	m_uiTree.Root().Child(0)->color = Color::FromRGB(42, 202, 234);
 
-	m_uiTree.Root().Child(2)->maxWidth = 4.f;
-	m_uiTree.Root().Child(2)->minWidth = 4.f;
+	m_uiTree.Root().Child(2)->maxWidth = 3.5f;
+	m_uiTree.Root().Child(2)->minWidth = 3.5f;
 	m_uiTree.Root().Child(2)->resizable = false;
 
 	m_uiTree.Root().Child(1)->SetOrientation(ContainerOrientation::Row);
@@ -340,25 +351,20 @@ void App::mainLoop() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	Time::update();
 
-	SetRenderLayer(&m_layer2D);
-	m_layer2D.Clear(0.5f, 0.5f, 0.5f, 1.0f);
+	SetRenderLayer(&m_layerUI);
+	m_layerUI.Clear(0.0f, 0.0f, 0.5f, 1.0f);
 
 	int w, h;
 	RenderingServer::GetInstance().GetWindowSize(w, h);
-
-	mainShader.Bind();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_testTexture.ID());
-
-	uiShader.Bind();
+	glViewport(0, 0, w, h);
 
 	CursorMode cursorMode = CursorMode::Normal;
 
 	double x, y;
 	InputServer::GetInstance().GetMousePosition(x, y);
-	x *= (1920.f / (float)w);
-	y *= (1080.f / (float)h);
-	m_hoveredItem = m_layer2D.ReadAttachmentInt(1, x, y);
+	// x *= (1920.f / (float)w);
+	// y *= (1080.f / (float)h);
+	m_hoveredItem = m_layerUI.ReadAttachmentInt(1, x, y);
 
 	if (!m_resizing) {
 		m_resizeFlags.left = false;
@@ -370,96 +376,98 @@ void App::mainLoop() {
 
 	NewContainer *cont = m_uiTree.GetContainerByID(m_hoveredItem);
 	if (cont != nullptr) {
-		if (!cont->resizable)
-			return;
+		if (cont->resizable) {
 
-		LRTBFlags flags;
+			LRTBFlags flags;
 
-		// if parent is row, last element cannot be resized to right
-		// if parent is column, last element cannot be resized to top
-		// if parent is row, first element cannot be resized to left
-		// if parent is column, first element cannot be resized to bottom
+			// if parent is row, last element cannot be resized to right
+			// if parent is column, last element cannot be resized to top
+			// if parent is row, first element cannot be resized to left
+			// if parent is column, first element cannot be resized to bottom
 
-		NewContainer *parent = cont->GetParent();
-		if (nullptr != parent) {
+			NewContainer *parent = cont->GetParent();
+			if (nullptr != parent) {
 
-			int index = parent->GetChildIndex(cont->ID());
-			if (parent->GetOrientation() == ContainerOrientation::Row) {
-				flags.right = true;
-				flags.left = true;
+				int index = parent->GetChildIndex(cont->ID());
+				if (parent->GetOrientation() == ContainerOrientation::Row) {
+					flags.right = true;
+					flags.left = true;
 
-				if (index == parent->ChildCount() - 1) {
-					flags.right = false;
-				} else if (index == 0) {
-					flags.left = false;
+					if (index == parent->ChildCount() - 1) {
+						flags.right = false;
+					} else if (index == 0) {
+						flags.left = false;
+					}
+				} else {
+					flags.top = true;
+					flags.bottom = true;
+
+					if (index == parent->ChildCount() - 1) {
+						flags.top = false;
+					} else if (index == 0) {
+						flags.bottom = false;
+					}
 				}
-			} else {
-				flags.top = true;
-				flags.bottom = true;
+			}
 
-				if (index == parent->ChildCount() - 1) {
-					flags.top = false;
-				} else if (index == 0) {
-					flags.bottom = false;
+			float itemLeft = cont->PosX();
+			float itemRight = cont->PosX() + cont->Width();
+			float itemBottom = cont->PosY();
+			float itemTop = cont->PosY() + cont->Height();
+			float resizeWidth = 20.f;
+
+			double x, y;
+			InputServer::GetInstance().GetMousePosition(x, y);
+			y = h - y;
+			// x *= (1920.f / (float)w);
+			// y *= (1080.f / (float)h);
+
+			LRTBFlags resized_on;
+			if (flags.left) {
+				if (x > itemLeft && x < itemLeft + resizeWidth) {
+					resized_on.left = true;
 				}
 			}
-		}
 
-		float itemLeft = cont->PosX();
-		float itemRight = cont->PosX() + cont->Width();
-		float itemBottom = cont->PosY();
-		float itemTop = cont->PosY() + cont->Height();
-		float resizeWidth = 20.f;
-
-		double x, y;
-		InputServer::GetInstance().GetMousePosition(x, y);
-		y = h - y;
-		x *= (1920.f / (float)w);
-		y *= (1080.f / (float)h);
-
-		LRTBFlags resized_on;
-		if (flags.left) {
-			if (x > itemLeft && x < itemLeft + resizeWidth) {
-				resized_on.left = true;
+			if (flags.right) {
+				if (x > itemRight - resizeWidth && x < itemRight) {
+					resized_on.right = true;
+				}
 			}
-		}
 
-		if (flags.right) {
-			if (x > itemRight - resizeWidth && x < itemRight) {
-				resized_on.right = true;
+			if (flags.top) {
+				if (y > itemTop - resizeWidth && y < itemTop) {
+					resized_on.top = true;
+				}
 			}
-		}
 
-		if (flags.top) {
-			if (y > itemTop - resizeWidth && y < itemTop) {
-				resized_on.top = true;
+			if (flags.bottom) {
+				if (y > itemBottom && y < itemBottom + resizeWidth) {
+					resized_on.bottom = true;
+				}
 			}
-		}
 
-		if (flags.bottom) {
-			if (y > itemBottom && y < itemBottom + resizeWidth) {
-				resized_on.bottom = true;
+			unsigned int resize = 0b00;
+			resize |= (resized_on.left || resized_on.right) << 0;
+			resize |= (resized_on.bottom || resized_on.top) << 1;
+
+			if (resize == 0b01) {
+				cursorMode = CursorMode::ResizeX;
+			} else if (resize == 0b10) {
+				cursorMode = CursorMode::ResizeY;
+			} else if (resize == 0b11) {
+				cursorMode = CursorMode::Resize;
 			}
-		}
 
-		unsigned int resize = 0b00;
-		resize |= (resized_on.left || resized_on.right) << 0;
-		resize |= (resized_on.bottom || resized_on.top) << 1;
-
-		if (resize == 0b01) {
-			cursorMode = CursorMode::ResizeX;
-		} else if (resize == 0b10) {
-			cursorMode = CursorMode::ResizeY;
-		} else if (resize == 0b11) {
-			cursorMode = CursorMode::Resize;
-		}
-
-		if (!m_resizing) {
-			m_resizeFlags = resized_on;
-			m_resizeContainerID = cont->ID();
+			if (!m_resizing) {
+				m_resizeFlags = resized_on;
+				m_resizeContainerID = cont->ID();
+			}
 		}
 	}
 
+	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(w), 0.f, static_cast<float>(h)));
+	// m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
 	Renderer().Reset();
 
 	static float f = 0.f;
@@ -475,18 +483,36 @@ void App::mainLoop() {
 
 		std::cout << "took " << ms.count() << "ms" << std::endl;
 	}
+	// std::cout << m_testFont.GetGlyphTextureID('B') << std::endl;
+	// std::cout << m_testFont.CalcTextSize("a").x << std::endl;
 
-	m_uiTree.Root().DrawLayout(0.f, 0.f, 1920.f, 1080.f);
+	m_uiTree.Root().DrawLayout(0.f, 0.f, w, h);
+	// m_uiTree.Root().DrawLayout(0.f, 0.f, 1920.f, 1080.f);
+
+	Renderer().DrawText("    File      Edit     View      Debug", &m_testFont, 0.f, h - ((h * 0.017) * 1.5f), glm::mat4(1.f), 4.f, 1.f, w * 0.4f, h * 0.017);
+
+	Renderer().End();
+
+	SetRenderLayer(&m_layer2D);
+	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f);
+
+	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
+	Renderer().Reset();
+	std::string text = "Example text";
 	float size = 64.f;
+	int i = 0;
 	for (float x = 550.f; x < 1200.f; x += size) {
 		for (float y = 450.f; y < 850.f; y += size) {
-
 			float sinf = std::sin((x / 64.f + y / 64.f) * f * 0.02f) * 100;
 			float cosf = std::cos((x / 64.f + y / 64.f) * f * 0.02f) * 100;
-			Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
+			// float sinf = 0.f;
+			// float cosf = 0.f;
+			//  Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
+
+			Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testFont.GetGlyphTextureID(text[i % text.size()]));
+			i++;
 		}
 	}
-
 	Renderer().End();
 
 	SetRenderLayer(nullptr);
@@ -494,6 +520,10 @@ void App::mainLoop() {
 	RenderingServer::GetInstance().SetCursorMode(cursorMode);
 
 	fullscreenShader.Bind();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_layerUI.GetTargetTextureID(0));
+	fullscreenModel.Draw();
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
 	fullscreenModel.Draw();
