@@ -49,7 +49,7 @@ target_include_directories(
   PUBLIC ${SOWA_INCLUDES}
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
-target_link_libraries(sowa PRIVATE glfw eventpp::eventpp)
+target_link_libraries(sowa PRIVATE glfw eventpp::eventpp freetype)
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(
     sowa
