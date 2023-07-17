@@ -10,6 +10,7 @@
 
 #include "data/input_event/input_event.hxx"
 #include "data/lrtb_flags.hxx"
+#include "resource/font.hxx"
 #include "ui/new_tree.hxx"
 
 #include "eventpp/callbacklist.h"
@@ -33,6 +34,10 @@ class App {
 	inline eventpp::CallbackList<void(InputEventMouseButton)> &MouseInputCallback() { return m_mouseInputCallback; }
 	inline eventpp::CallbackList<void(InputEventMouseMove)> &MouseMoveCallback() { return m_mouseMoveCallback; }
 
+	inline eventpp::CallbackList<void(int, int)> &WindowResizeCallback() { return m_windowResizeCallback; }
+
+	inline int HoveredItem() { return m_hoveredItem; }
+
   private:
 	void mainLoop();
 	static void mainLoopCaller(void *self);
@@ -42,6 +47,7 @@ class App {
 	Shader mainShader;
 
 	Texture m_testTexture;
+	Font m_testFont;
 
 	Shader uiShader;
 
@@ -57,6 +63,8 @@ class App {
 
 	eventpp::CallbackList<void(InputEventMouseButton)> m_mouseInputCallback;
 	eventpp::CallbackList<void(InputEventMouseMove)> m_mouseMoveCallback;
+
+	eventpp::CallbackList<void(int, int)> m_windowResizeCallback;
 
 	int m_hoveredItem = 0;
 	LRTBFlags m_resizeFlags;

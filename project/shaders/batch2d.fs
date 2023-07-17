@@ -10,6 +10,10 @@ in float vTexture;
 in float vDrawId;
 in float vDrawMode;
 
+const int MODE_SPRITE2D = 0;
+const int MODE_UI_CONTAINER = 1;
+const int MODE_TEXT = 2;
+
 uniform sampler2D uTextures[32];
 
 vec4 getTexture();
@@ -22,14 +26,21 @@ void main() {
   drawId = int(vDrawId);
 
   // diagonal gradient
-  if(vDrawMode == 0.0f) {
+  if(int(vDrawMode) == MODE_SPRITE2D) {
     color = getTexture() * vColor;
-  } else {
+
+  } else if(int(vDrawMode) == MODE_UI_CONTAINER) {
     float mult = (vTexCoords.x + vTexCoords.y) / 2.0f;
     mult += 0.3f;
     mult = min(mult, 1.0f);
 
     color = getTexture() * vColor * vec4(mult, mult, mult, 1.0f);
+
+  } else if(int(vDrawMode) == MODE_TEXT) {
+    color = vec4(1.0f, 1.0f, 1.0f, getTexture().r) * vColor;
+
+  } else {
+    color = vec4(0.f, 0.f, 0.f, 1.f);
   }
 
   if(color.a < 0.1f)

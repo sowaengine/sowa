@@ -125,6 +125,66 @@ void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float 
 	PushQuad(vertices);
 }
 
+void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float y, glm::mat4 transform, float draw_id, float scale, float maxWidth, float maxHeight) {
+	glm::vec2 textSize = font->CalcTextSize(text);
+
+	if (maxWidth > 0.f) {
+		if (textSize.x > maxWidth) {
+			scale = std::min(scale, maxWidth / textSize.x);
+		}
+	}
+
+	if (maxHeight > 0.f) {
+		if (textSize.y > maxHeight) {
+			scale = std::min(scale, maxHeight / textSize.y);
+		}
+	}
+
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++) {
+		Font::Character ch = font->m_characters[*c];
+
+		float xPos = x + ch.bearing.x * scale;
+		float yPos = y - (ch.size.y - ch.bearing.y) * scale;
+
+		float w = ch.size.x * scale;
+		float h = ch.size.y * scale;
+
+		glm::vec4 points[4] = {
+			{xPos, yPos + h, 0.f, 1.f},
+			{xPos, yPos, 0.f, 1.f},
+			{xPos + w, yPos, 0.f, 1.f},
+			{xPos + w, yPos + h, 0.f, 1.f}};
+
+		glm::vec2 uvs[4] = {
+			{0.f, 0.f},
+			{0.f, 1.f},
+			{1.f, 1.f},
+			{1.f, 0.f}};
+
+		BatchVertex vertices[4];
+		for (int i = 0; i < 4; i++) {
+			points[i] = transform * points[i];
+
+			vertices[i].x = points[i].x;
+			vertices[i].y = points[i].y;
+			vertices[i].z = 0.f;
+			vertices[i].r = 1.f;
+			vertices[i].g = 1.f;
+			vertices[i].b = 1.f;
+			vertices[i].a = 1.f;
+			vertices[i].u = uvs[i].x;
+			vertices[i].v = uvs[i].y;
+			vertices[i].t_id = ch.textureID;
+			vertices[i].d_id = draw_id;
+			vertices[i].draw_mode = 2.f;
+		}
+
+		PushQuad(vertices);
+		x += (ch.advance >> 6) * scale;
+	}
+}
+
 void BatchRenderer::End() {
 	if (m_vertices.size() == 0) {
 		return;

@@ -56,16 +56,22 @@ void NewContainer::DrawLayout(float x, float y, float width, float height, float
 	m_height = height;
 
 	float padding = 0.f;
-	if (m_children.size() == 0)
+	if (m_children.size() == 0) {
+		Color c = color;
+		if (App::GetInstance().HoveredItem() == ID()) {
+			c = Color::FromRGB(255, 255, 255);
+		}
+
 		App::GetInstance().Renderer().PushQuad(
 			x + padding,
 			y + padding,
 			z,
 			width - (padding * 2),
 			height - (padding * 2),
-			color.r, color.g, color.b, color.a,
+			c.r, c.g, c.b, c.a,
 			static_cast<float>(m_id),
 			0.f, 1.f);
+	}
 
 	float xCursor = x;
 	float yCursor = y;

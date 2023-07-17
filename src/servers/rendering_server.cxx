@@ -130,7 +130,8 @@ void RenderingServer::Terminate() {
 }
 
 void RenderingServer::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-	glViewport(0, 0, width, height);
+
+	App::GetInstance().WindowResizeCallback()(width, height);
 }
 
 void RenderingServer::mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
