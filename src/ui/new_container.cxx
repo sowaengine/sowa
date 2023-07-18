@@ -59,7 +59,7 @@ void NewContainer::DrawLayout(float x, float y, float width, float height, float
 	if (alwaysDraw || m_children.size() == 0) {
 		Color c = color;
 		if (App::GetInstance().HoveredItem() == ID()) {
-			c = Color::FromRGB(255, 255, 255);
+			// c = Color::FromRGB(255, 255, 255);
 		}
 
 		App::GetInstance().Renderer().PushQuad(

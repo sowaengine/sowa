@@ -1,8 +1,12 @@
 #include "batch_renderer.hxx"
 
-#include "core/graphics.hxx"
 #include <algorithm>
+#include <codecvt>
 #include <iostream>
+#include <locale>
+#include <string>
+
+#include "core/graphics.hxx"
 
 #define BATCH2D_MAX_RECT (1000)
 #define BATCH2D_MAX_VERTEX (BATCH2D_MAX_RECT * 6)
@@ -140,9 +144,16 @@ void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float
 		}
 	}
 
-	std::string::const_iterator c;
-	for (c = text.begin(); c != text.end(); c++) {
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring wide_string = converter.from_bytes(text);
+
+	std::wstring::const_iterator c;
+	for (c = wide_string.begin(); c != wide_string.end(); c++) {
 		Font::Character ch = font->m_characters[*c];
+		if (ch.textureID == 0) {
+			// std::wcout << *c << ":" << (int)(*c) << std::endl;
+			font->loadChar((int)(*c));
+		}
 
 		float xPos = x + ch.bearing.x * scale;
 		float yPos = y - (ch.size.y - ch.bearing.y) * scale;

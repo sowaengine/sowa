@@ -132,7 +132,8 @@ Error App::Init() {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
 
-	err = m_testFont.LoadTTF("res://Roboto-Medium.ttf");
+	// err = m_testFont.LoadTTF("res://Roboto-Medium.ttf");
+	err = m_testFont.LoadTTF("res://NotoSansKR-Medium.otf");
 	if (err != OK) {
 		std::cout << "Failed to load font: " << err << std::endl;
 	}
@@ -297,22 +298,12 @@ Error App::Init() {
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
 	m_uiTree.Root().SetOrientation(ContainerOrientation::Column);
-	m_uiTree.Root().SetChildren({3, 93.5, 3.5});
+	m_uiTree.Root().SetChildren({3, 97});
 
 	m_uiTree.Root().Child(0)->maxWidth = 3.f;
 	m_uiTree.Root().Child(0)->minWidth = 3.f;
 	m_uiTree.Root().Child(0)->resizable = false;
 	m_uiTree.Root().Child(0)->color = Color::FromRGB(42, 202, 234);
-
-	m_uiTree.Root().Child(2)->maxWidth = 3.5f;
-	m_uiTree.Root().Child(2)->minWidth = 3.5f;
-	m_uiTree.Root().Child(2)->resizable = false;
-	m_uiTree.Root().Child(2)->alwaysDraw = true;
-	m_uiTree.Root().Child(2)->SetChildren({6, 6, 6, 6});
-	m_uiTree.Root().Child(2)->Child(0)->resizable = false;
-	m_uiTree.Root().Child(2)->Child(1)->resizable = false;
-	m_uiTree.Root().Child(2)->Child(2)->resizable = false;
-	m_uiTree.Root().Child(2)->Child(3)->resizable = false;
 
 	m_uiTree.Root().Child(1)->SetOrientation(ContainerOrientation::Row);
 	m_uiTree.Root().Child(1)->SetChildren({20.f, 55.f, 25.f});
@@ -492,10 +483,20 @@ void App::mainLoop() {
 	// std::cout << m_testFont.GetGlyphTextureID('B') << std::endl;
 	// std::cout << m_testFont.CalcTextSize("a").x << std::endl;
 
-	m_uiTree.Root().DrawLayout(0.f, 0.f, w, h);
-	// m_uiTree.Root().DrawLayout(0.f, 0.f, 1920.f, 1080.f);
+	m_uiTree.Root().DrawLayout(0.f, 0.f, w, h - 24.f);
 
-	Renderer().DrawText("    File      Edit     View      Debug", &m_testFont, 0.f, h - ((h * 0.017) * 1.5f), glm::mat4(1.f), 4.f, 1.f, w * 0.4f, h * 0.017);
+	// Draw Menubar
+	Renderer().PushQuad(
+		0.f, h - 24.f, 0.f,
+		w, 24.f,
+		1.f, 1.f, 1.f, 1.f,
+		0.f,
+		0.f,
+		1.f);
+	Renderer().DrawText("    File      Edit     View      Debug", &m_testFont, 0.f, h - 20, glm::mat4(1.f), 0.f, 2048.f / w, 0.f, 14.f);
+
+	Renderer().DrawText("あああ 안녕하세요, 이것은 긴 텍스트입니다", &m_testFont, 10.f, 150.f, glm::mat4(1.f), 0.f, 1.f, w - 10, 0.f);
+	Renderer().DrawText("冰淇淋", &m_testFont, 10.f, 200.f, glm::mat4(1.f), 0.f, 1.f, w - 10.f, 0.f);
 
 	Renderer().End();
 
@@ -515,7 +516,7 @@ void App::mainLoop() {
 			// float cosf = 0.f;
 			//  Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
 
-			Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testFont.GetGlyphTextureID(text[i % text.size()]));
+			Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testFont.GetGlyphTextureID(text[i % text.size()]), 2.f);
 			i++;
 		}
 	}

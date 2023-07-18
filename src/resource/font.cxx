@@ -17,53 +17,30 @@ static FT_Library GetFreeType() {
 }
 
 Font::~Font() {
+	FT_Done_Face(reinterpret_cast<FT_Face>(m_face));
 }
 
 Error Font::LoadTTF(const char *path) {
 	FT_Library freetype = GetFreeType();
 
-	file_buffer buffer;
-	Error err = FileServer::GetInstance().ReadFileBytes(path, buffer);
+	Error err = FileServer::GetInstance().ReadFileBytes(path, m_buffer);
 	if (err != OK) {
 		return err;
 	}
 
-	FT_Face face;
-	if (FT_New_Memory_Face(freetype, buffer.data(), buffer.size(), 0, &face)) {
+	if (FT_New_Memory_Face(freetype, m_buffer.data(), m_buffer.size(), 0, reinterpret_cast<FT_Face *>(&m_face))) {
 		return ERR_FAILED;
 	}
-	FT_Set_Pixel_Sizes(face, 0, 48);
+	FT_Set_Pixel_Sizes(reinterpret_cast<FT_Face>(m_face), 0, 48);
 
-	if (FT_Load_Char(face, 'X', FT_LOAD_RENDER)) {
+	if (FT_Load_Char(reinterpret_cast<FT_Face>(m_face), 'X', FT_LOAD_RENDER)) {
 		return ERR_FAILED;
 	}
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	for (int c = 0; c < 128; c++) {
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-			continue;
-		}
-
-		uint32_t texture = 0;
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		Font::Character character;
-		character.textureID = texture;
-		character.size = glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows);
-		character.bearing = glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top);
-		character.advance = static_cast<uint32_t>(face->glyph->advance.x);
-
-		m_characters[c] = character;
+		loadChar(c);
 	}
-
-	FT_Done_Face(face);
 
 	return OK;
 }
@@ -73,11 +50,14 @@ uint32_t Font::GetGlyphTextureID(int codepoint) {
 }
 
 glm::vec2 Font::CalcTextSize(const std::string &text) {
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring wide_string = converter.from_bytes(text);
+
 	glm::vec2 size{0.f, 0.f};
 
 	float scale = 1.f;
-	std::string::const_iterator c;
-	for (c = text.begin(); c != text.end(); c++) {
+	std::wstring::const_iterator c;
+	for (c = wide_string.begin(); c != wide_string.end(); c++) {
 		Font::Character ch = m_characters[*c];
 		size.x += (ch.advance >> 6) * scale;
 
@@ -87,4 +67,34 @@ glm::vec2 Font::CalcTextSize(const std::string &text) {
 	}
 
 	return size;
+}
+
+void Font::loadChar(int codepoint) {
+	FT_Face face = reinterpret_cast<FT_Face>(m_face);
+	FT_UInt glyphIndex = FT_Get_Char_Index(face, codepoint);
+
+	if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT)) {
+		return;
+	}
+	if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL)) {
+		return;
+	}
+
+	uint32_t texture = 0;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	Font::Character character;
+	character.textureID = texture;
+	character.size = glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows);
+	character.bearing = glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top);
+	character.advance = static_cast<uint32_t>(face->glyph->advance.x);
+
+	m_characters[codepoint] = character;
 }
