@@ -12,7 +12,7 @@ class file_buffer {
 	file_buffer(unsigned char *data, unsigned int size);
 
 	unsigned char *data() { return m_buffer.data(); }
-	size_t size() { return m_buffer.size(); }
+	size_t size() const { return m_buffer.size(); }
 
   private:
 	friend class FileServer;

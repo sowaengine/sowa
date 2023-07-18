@@ -91,7 +91,7 @@ int RenderLayer::GetTargetTextureID(int slot) {
 	return 0;
 }
 
-void RenderLayer::Clear(float r, float g, float b, float a) {
+void RenderLayer::Clear(float r, float g, float b, float a, bool depth) {
 	std::vector<GLenum> attachments;
 	for (auto &[slot, target] : m_targets) {
 		if (target.type == RenderLayerTargetType::Vec4) {
@@ -102,6 +102,8 @@ void RenderLayer::Clear(float r, float g, float b, float a) {
 	glDrawBuffers(attachments.size(), attachments.data());
 	glClearColor(r, g, b, a);
 	glClear(GL_COLOR_BUFFER_BIT);
+	if (depth)
+		glClear(GL_DEPTH_BUFFER_BIT);
 
 	attachments.clear();
 	for (auto &[slot, target] : m_targets) {

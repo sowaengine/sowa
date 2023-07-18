@@ -30,7 +30,7 @@ class RenderLayer {
 	void Bind();
 	void Unbind();
 
-	void Clear(float r, float g, float b, float a);
+	void Clear(float r, float g, float b, float a, bool depth = false);
 	int GetTargetTextureID(int slot);
 
 	int ReadAttachmentInt(int slot, int x, int y);
