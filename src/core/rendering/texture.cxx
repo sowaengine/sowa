@@ -1,5 +1,7 @@
 #include "texture.hxx"
 
+#include "lunasvg.h"
+
 #include "gl.hxx"
 #include "servers/file_server.hxx"
 
@@ -12,10 +14,10 @@ Texture::~Texture() {
 
 void Texture::Bind(int slot) {
 	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(m_type, m_id);
+	glBindTexture(TextureType::GetType(m_type), m_id);
 }
 void Texture::Unbind() {
-	glBindTexture(m_type, 0);
+	glBindTexture(TextureType::GetType(m_type), 0);
 }
 
 Error Texture::Load(texture_type_t type, const char *path) {
@@ -27,27 +29,13 @@ Error Texture::Load(texture_type_t type, const char *path) {
 		return err;
 	}
 
-	stbi_set_flip_vertically_on_load(true);
-	m_pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &m_width, &m_height, &m_channels, 4);
-	m_shouldFree = true;
-	m_type = type;
-	if (!m_pixels) {
-		Delete();
-		return ERR_INVALID_FILE;
+	if (type == TextureType::Texture2D) {
+		return loadTexture2D(buffer);
 	}
-
-	glGenTextures(1, &m_id);
-	glBindTexture(m_type, m_id);
-
-	glTexParameteri(m_type, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(m_type, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(m_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(m_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glTexImage2D(m_type, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_pixels);
-	glGenerateMipmap(m_type);
-
-	return OK;
+	if (type == TextureType::Vector2D) {
+		return loadVector2D(buffer);
+	}
+	return ERR_FAILED;
 }
 
 Error Texture::Load2DUByteRGBA(unsigned char *data, int width, int height) {
@@ -61,15 +49,15 @@ Error Texture::Load2DUByteRGBA(unsigned char *data, int width, int height) {
 	m_channels = 4;
 
 	glGenTextures(1, &m_id);
-	glBindTexture(m_type, m_id);
+	glBindTexture(TextureType::GetType(m_type), m_id);
 
-	glTexParameteri(m_type, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(m_type, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(m_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(m_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(TextureType::GetType(m_type), GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(TextureType::GetType(m_type), GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(TextureType::GetType(m_type), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(TextureType::GetType(m_type), GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glTexImage2D(m_type, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(m_type);
+	glTexImage2D(TextureType::GetType(m_type), 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(TextureType::GetType(m_type));
 
 	return OK;
 }
@@ -83,4 +71,47 @@ void Texture::Delete() {
 
 	m_id = 0;
 	m_pixels = nullptr;
+}
+
+Error Texture::loadTexture2D(file_buffer &buffer) {
+	stbi_set_flip_vertically_on_load(true);
+	m_pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &m_width, &m_height, &m_channels, 4);
+	m_shouldFree = true;
+	m_type = TextureType::Texture2D;
+	if (!m_pixels) {
+		Delete();
+		return ERR_INVALID_FILE;
+	}
+
+	glGenTextures(1, &m_id);
+	glBindTexture(TextureType::GetType(m_type), m_id);
+
+	glTexParameteri(TextureType::GetType(m_type), GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(TextureType::GetType(m_type), GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(TextureType::GetType(m_type), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(TextureType::GetType(m_type), GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexImage2D(TextureType::GetType(m_type), 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_pixels);
+	glGenerateMipmap(TextureType::GetType(m_type));
+
+	return OK;
+}
+
+Error Texture::loadVector2D(file_buffer &buffer) {
+	using namespace lunasvg;
+
+	std::unique_ptr<Document> document = Document::loadFromData((const char *)buffer.data(), buffer.size());
+	Bitmap bitmap = document->renderToBitmap();
+	bitmap.convertToRGBA();
+	if (!bitmap.valid()) {
+		return ERR_INVALID_FILE;
+	}
+	m_width = bitmap.width();
+	m_height = bitmap.height();
+	m_channels = 4;
+	m_shouldFree = false;
+	m_pixels = nullptr;
+	m_type = TextureType::Vector2D;
+
+	return Load2DUByteRGBA(bitmap.data(), bitmap.width(), bitmap.height());
 }

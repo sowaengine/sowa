@@ -127,7 +127,8 @@ Error App::Init() {
 		std::cerr << "Failed to load ui shader" << std::endl;
 	}
 
-	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
+	// err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
+	err = m_testTexture.Load(TextureType::Vector2D, "res://tanks.svg");
 	if (err != OK) {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
@@ -501,7 +502,7 @@ void App::mainLoop() {
 	Renderer().End();
 
 	SetRenderLayer(&m_layer2D);
-	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f);
+	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f, true);
 
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
 	Renderer().Reset();
@@ -520,6 +521,7 @@ void App::mainLoop() {
 			i++;
 		}
 	}
+	Renderer().PushQuad(32.f, 32.f, 1.f, m_testTexture.Width(), m_testTexture.Height(), 1.f, 1.f, 1.f, 1.f, 1.f, m_testTexture.ID());
 	Renderer().End();
 
 	SetRenderLayer(nullptr);

@@ -2,14 +2,28 @@
 #define SW_TEXTURE_HXX
 #pragma once
 
-#include "core/error/error.hxx"
-#include "gl.hxx"
 #include <stdint.h>
 
-namespace TextureType {
-const int Texture2D = GL_TEXTURE_2D;
-} // namespace TextureType
+#include "core/error/error.hxx"
+#include "data/file_buffer.hxx"
+#include "gl.hxx"
+
 typedef int texture_type_t;
+
+namespace TextureType {
+const int Texture2D = 0;
+const int Vector2D = 1;
+
+inline GLenum GetType(texture_type_t t) {
+	if (t == Texture2D)
+		return GL_TEXTURE_2D;
+
+	if (t == Vector2D)
+		return GL_TEXTURE_2D;
+
+	return GL_NONE;
+}
+} // namespace TextureType
 
 namespace TextureFormat {
 const int RGBA = 0;
@@ -36,6 +50,9 @@ class Texture {
 	inline unsigned char *Pixels() const { return m_pixels; }
 
   private:
+	Error loadTexture2D(file_buffer &buffer);
+	Error loadVector2D(file_buffer &buffer);
+
 	uint32_t m_id = 0;
 	int m_width = 0;
 	int m_height = 0;
