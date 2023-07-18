@@ -20,7 +20,8 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/tomlplusplus-3.3.0"
     "${CMAKE_CURRENT_SOURCE_DIR}/eventpp-0.1.2/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/glm-0.9.9.8/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.13.1/include")
+    "${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.13.1/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lunasvg-2.3.8/include")
 
 set(SOWA_THIRDPARTY_INCLUDES
     ${SOWA_THIRDPARTY_INCLUDES}
@@ -32,3 +33,4 @@ set(SOWA_THIRDPARTY_SOURCES
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/eventpp-0.1.2" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.13.1" EXCLUDE_FROM_ALL)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/lunasvg-2.3.8" EXCLUDE_FROM_ALL)
