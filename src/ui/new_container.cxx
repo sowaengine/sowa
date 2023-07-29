@@ -55,6 +55,9 @@ void NewContainer::DrawLayout(float x, float y, float width, float height, float
 	m_width = width;
 	m_height = height;
 
+	m_cursorX = 0.f;
+	m_cursorY = m_height;
+
 	float padding = 0.f;
 	if (alwaysDraw || m_children.size() == 0) {
 		Color c = color;

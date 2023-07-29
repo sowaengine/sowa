@@ -47,9 +47,21 @@ class NewContainer {
 	float PosX() { return m_xPos; }
 	float PosY() { return m_yPos; }
 
+	inline float CursorX() { return m_cursorX; }
+	inline float CursorY() { return m_cursorY; }
+	inline void Advance(float x, float y) {
+		m_cursorX += x;
+		m_cursorY -= y;
+	}
+	inline float GetAvailableWidth() { return m_width - m_cursorX; }
+	inline float GetAvailableHeight() { return m_height - m_cursorY; }
+
   private:
 	friend class NewTree;
 	friend class App;
+
+	float m_cursorX = 0.f;
+	float m_cursorY = 0.f;
 
 	NewTree *m_pTree = nullptr;
 

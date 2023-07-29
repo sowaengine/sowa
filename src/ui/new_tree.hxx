@@ -6,6 +6,7 @@
 
 #include "new_container.hxx"
 
+class UICanvas;
 class NewTree {
   public:
 	NewTree();
@@ -13,6 +14,8 @@ class NewTree {
 	inline NewContainer &Root() { return m_root; }
 
 	NewContainer *GetContainerByID(int id);
+
+	UICanvas Canvas(int id);
 
   private:
 	friend class NewContainer;

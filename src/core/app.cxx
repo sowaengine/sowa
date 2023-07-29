@@ -16,6 +16,7 @@
 
 #include "ui/new_container.hxx"
 #include "ui/new_tree.hxx"
+#include "ui/ui_canvas.hxx"
 
 #include <filesystem>
 #include <fstream>
@@ -485,6 +486,10 @@ void App::mainLoop() {
 	// std::cout << m_testFont.CalcTextSize("a").x << std::endl;
 
 	m_uiTree.Root().DrawLayout(0.f, 0.f, w, h - 24.f);
+	UICanvas canvas = m_uiTree.Canvas(7);
+	canvas.Text("Sowa Engine UI", &m_testFont, w / 2048.f);
+	canvas.NewLine();
+	canvas.Text("あああ 冰淇淋 안녕하세요, 이것은 긴 텍스트입니다", &m_testFont, w / 2048.f);
 
 	// Draw Menubar
 	Renderer().PushQuad(
@@ -495,9 +500,6 @@ void App::mainLoop() {
 		0.f,
 		1.f);
 	Renderer().DrawText("    File      Edit     View      Debug", &m_testFont, 0.f, h - 20, glm::mat4(1.f), 0.f, 2048.f / w, 0.f, 14.f);
-
-	Renderer().DrawText("あああ 안녕하세요, 이것은 긴 텍스트입니다", &m_testFont, 10.f, 150.f, glm::mat4(1.f), 0.f, 1.f, w - 10, 0.f);
-	Renderer().DrawText("冰淇淋", &m_testFont, 10.f, 200.f, glm::mat4(1.f), 0.f, 1.f, w - 10.f, 0.f);
 
 	Renderer().End();
 
@@ -521,7 +523,7 @@ void App::mainLoop() {
 			i++;
 		}
 	}
-	Renderer().PushQuad(32.f, 32.f, 1.f, m_testTexture.Width(), m_testTexture.Height(), 1.f, 1.f, 1.f, 1.f, 1.f, m_testTexture.ID());
+	// Renderer().PushQuad(32.f, 32.f, 1.f, m_testTexture.Width(), m_testTexture.Height(), 1.f, 1.f, 1.f, 1.f, 1.f, m_testTexture.ID());
 	Renderer().End();
 
 	SetRenderLayer(nullptr);
