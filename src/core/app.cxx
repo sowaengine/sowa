@@ -18,6 +18,8 @@
 #include "ui/new_tree.hxx"
 #include "ui/ui_canvas.hxx"
 
+#include "scene/sprite_2d.hxx"
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -146,6 +148,15 @@ Error App::Init() {
 	}
 
 	Time::update();
+
+	Scene *scene = new Scene;
+	Sprite2D *sprite = new Sprite2D();
+	sprite->GetTexture() = std::make_shared<Texture>();
+	sprite->GetTexture()->Load(TextureType::Texture2D, "res://image.png");
+	sprite->Position() = {200.f, 200.f};
+	scene->Nodes().push_back(sprite);
+
+	SetCurrentScene(scene);
 
 	MouseInputCallback().append([this](InputEventMouseButton event) {
 		if (event.action == PRESSED) {
@@ -346,12 +357,12 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 
 void App::mainLoop() {
 	InputServer::GetInstance().ProcessInput();
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	Time::update();
 
 	SetRenderLayer(&m_layerUI);
-	m_layerUI.Clear(0.0f, 0.0f, 0.5f, 1.0f);
+	m_layerUI.Clear(0.0f, 0.0f, 0.0f, 0.0f);
 
 	int w, h;
 	RenderingServer::GetInstance().GetWindowSize(w, h);
@@ -485,6 +496,7 @@ void App::mainLoop() {
 	// std::cout << m_testFont.GetGlyphTextureID('B') << std::endl;
 	// std::cout << m_testFont.CalcTextSize("a").x << std::endl;
 
+	/*
 	m_uiTree.Root().DrawLayout(0.f, 0.f, w, h - 24.f);
 	UICanvas canvas = m_uiTree.Canvas(7);
 	canvas.Text("Sowa Engine UI", &m_testFont, w / 2048.f);
@@ -502,28 +514,19 @@ void App::mainLoop() {
 	Renderer().DrawText("    File      Edit     View      Debug", &m_testFont, 0.f, h - 20, glm::mat4(1.f), 0.f, 2048.f / w, 0.f, 14.f);
 
 	Renderer().End();
+	*/
 
 	SetRenderLayer(&m_layer2D);
 	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f, true);
 
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
 	Renderer().Reset();
-	std::string text = "Example text";
-	float size = 64.f;
-	int i = 0;
-	for (float x = 550.f; x < 1200.f; x += size) {
-		for (float y = 450.f; y < 850.f; y += size) {
-			float sinf = std::sin((x / 64.f + y / 64.f) * f * 0.02f) * 100;
-			float cosf = std::cos((x / 64.f + y / 64.f) * f * 0.02f) * 100;
-			// float sinf = 0.f;
-			// float cosf = 0.f;
-			//  Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testTexture.ID());
 
-			Renderer().PushQuad(x + sinf, y + cosf, 0.f, size, size, fmod(x * 1.2f, 1.f), fmod(y * 0.2f, 1.f), fmod((x * 1.5f + y * 5.1f), 1.f), 1.f, 1.f, m_testFont.GetGlyphTextureID(text[i % text.size()]), 2.f);
-			i++;
-		}
+	if (m_pCurrentScene != nullptr) {
+		m_pCurrentScene->UpdateScene();
 	}
-	// Renderer().PushQuad(32.f, 32.f, 1.f, m_testTexture.Width(), m_testTexture.Height(), 1.f, 1.f, 1.f, 1.f, 1.f, m_testTexture.ID());
+
+	Renderer().DrawText("Sowa Engine", &m_testFont, 10.f, 10.f, glm::mat4(1.f), 0.f, 1.f);
 	Renderer().End();
 
 	SetRenderLayer(nullptr);
@@ -545,6 +548,15 @@ void App::mainLoop() {
 
 void App::mainLoopCaller(void *self) {
 	static_cast<App *>(self)->mainLoop();
+}
+
+void App::SetCurrentScene(Scene *scene) {
+	if (m_pCurrentScene != nullptr) {
+		m_pCurrentScene->EndScene();
+	}
+
+	m_pCurrentScene = scene;
+	m_pCurrentScene->BeginScene();
 }
 
 extern "C" void Unload() {

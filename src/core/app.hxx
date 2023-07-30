@@ -13,6 +13,8 @@
 #include "resource/font.hxx"
 #include "ui/new_tree.hxx"
 
+#include "scene/scene.hxx"
+
 #include "eventpp/callbacklist.h"
 
 class App {
@@ -38,6 +40,8 @@ class App {
 
 	inline int HoveredItem() { return m_hoveredItem; }
 
+	void SetCurrentScene(Scene *scene);
+
   private:
 	void mainLoop();
 	static void mainLoopCaller(void *self);
@@ -45,6 +49,8 @@ class App {
   private:
 	Model rectModel;
 	Shader mainShader;
+
+	Scene *m_pCurrentScene = nullptr;
 
 	Texture m_testTexture;
 	Font m_testFont;
