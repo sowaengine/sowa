@@ -345,9 +345,28 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 	if (nullptr == renderlayer) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		int width, height;
-		RenderingServer::GetInstance().GetWindowSize(width, height);
-		glViewport(0, 0, width, height);
+		int w, h;
+		RenderingServer::GetInstance().GetWindowSize(w, h);
+
+		float windowRatio = (float)w / h;
+		float videoRatio = (float)1920.f / 1080.f;
+
+		if (windowRatio > videoRatio) {
+			float width = h * videoRatio;
+			float height = h;
+			float gap = w - width;
+
+			float x = gap / 2.f;
+			glViewport(x, 0.f, width, height);
+
+		} else {
+			float width = w;
+			float height = w / videoRatio;
+			float gap = h - height;
+
+			float y = gap / 2.f;
+			glViewport(0, y, width, height);
+		}
 
 		return;
 	}
@@ -357,7 +376,7 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 
 void App::mainLoop() {
 	InputServer::GetInstance().ProcessInput();
-	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.3f, 0.3f, 0.5f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	Time::update();
 
