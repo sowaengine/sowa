@@ -10,6 +10,7 @@
 class Sprite2D : public Node2D {
   public:
 	void Update() override;
+	virtual ~Sprite2D() = default;
 
 	inline std::shared_ptr<Texture> &GetTexture() { return m_texture; }
 

@@ -8,13 +8,17 @@
 
 class Node2D : public Node {
   public:
+	virtual ~Node2D() = default;
+
 	inline glm::vec2 &Position() { return m_position; }
 	inline glm::vec2 &Scale() { return m_scale; }
 	inline float &Rotation() { return m_rotation; }
+	inline float &ZIndex() { return m_zIndex; }
 
   protected:
 	glm::vec2 m_position = glm::vec2(0.f, 0.f);
 	glm::vec2 m_scale = glm::vec2(1.f, 1.f);
+	float m_zIndex = 0.f;
 	float m_rotation = 0.f;
 };
 

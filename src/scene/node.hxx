@@ -7,6 +7,7 @@
 class Node {
   public:
 	inline std::string &Name() { return m_name; }
+	virtual ~Node() = default;
 
 	virtual void Start() {}
 	virtual void Update() {}
