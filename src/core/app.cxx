@@ -20,6 +20,8 @@
 
 #include "scene/sprite_2d.hxx"
 
+#include "game/game.hxx"
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -148,15 +150,6 @@ Error App::Init() {
 	}
 
 	Time::update();
-
-	Scene *scene = new Scene;
-	Sprite2D *sprite = new Sprite2D();
-	sprite->GetTexture() = std::make_shared<Texture>();
-	sprite->GetTexture()->Load(TextureType::Texture2D, "res://image.png");
-	sprite->Position() = {200.f, 200.f};
-	scene->Nodes().push_back(sprite);
-
-	SetCurrentScene(scene);
 
 	MouseInputCallback().append([this](InputEventMouseButton event) {
 		if (event.action == PRESSED) {
@@ -326,6 +319,8 @@ Error App::Init() {
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
+
+	Main();
 
 	return OK;
 }
@@ -538,8 +533,9 @@ void App::mainLoop() {
 	SetRenderLayer(&m_layer2D);
 	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f, true);
 
-	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
+	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f, -128.f, 128.f));
 	Renderer().Reset();
+	glEnable(GL_DEPTH_TEST);
 
 	if (m_pCurrentScene != nullptr) {
 		m_pCurrentScene->UpdateScene();
@@ -548,6 +544,7 @@ void App::mainLoop() {
 	Renderer().DrawText("Sowa Engine", &m_testFont, 10.f, 10.f, glm::mat4(1.f), 0.f, 1.f);
 	Renderer().End();
 
+	glDisable(GL_DEPTH_TEST);
 	SetRenderLayer(nullptr);
 
 	RenderingServer::GetInstance().SetCursorMode(cursorMode);

@@ -42,6 +42,8 @@ class App {
 
 	void SetCurrentScene(Scene *scene);
 
+	Font& TestFont() { return m_testFont; }
+
   private:
 	void mainLoop();
 	static void mainLoopCaller(void *self);
