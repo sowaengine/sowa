@@ -11,6 +11,8 @@ class InputServer {
 	void PollEvents();
 
 	void GetMousePosition(double &x, double &y);
+
+	bool IsKeyDown(int key);
 };
 
 #endif // SW_INPUT_SERVER_HXX
