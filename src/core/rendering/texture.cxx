@@ -4,6 +4,7 @@
 
 #include "gl.hxx"
 #include "servers/file_server.hxx"
+#include "servers/rendering_server.hxx"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -64,7 +65,8 @@ Error Texture::Load2DUByteRGBA(unsigned char *data, int width, int height) {
 
 void Texture::Delete() {
 	if (m_id != 0)
-		glDeleteTextures(1, &m_id);
+		if (RenderingServer::GetInstance().Active())
+			glDeleteTextures(1, &m_id);
 
 	if (m_pixels != nullptr && m_shouldFree)
 		stbi_image_free(m_pixels);

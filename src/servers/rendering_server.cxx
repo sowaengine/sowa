@@ -57,6 +57,8 @@ RenderingServer::RenderingServer() {
 	m_pResizeXCursor = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
 	m_pResizeYCursor = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
 	m_pResizeCursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+
+	m_serverActive = true;
 }
 
 RenderingServer &RenderingServer::GetInstance() {
@@ -126,6 +128,7 @@ void RenderingServer::SetCursorMode(CursorMode mode) {
 }
 
 void RenderingServer::Terminate() {
+	m_serverActive = false;
 	glfwTerminate();
 }
 

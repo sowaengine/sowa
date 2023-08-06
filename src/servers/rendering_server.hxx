@@ -29,6 +29,8 @@ class RenderingServer {
 
 	void Terminate();
 
+	inline bool Active() { return m_serverActive; }
+
   private:
 	friend struct CallbackBridge;
 	friend class InputServer;
@@ -46,6 +48,8 @@ class RenderingServer {
 	void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 	void mouse_button_callback(GLFWwindow *window, int button, int action, int pressed);
 	void cursor_pos_callback(GLFWwindow *window, double x, double y);
+
+	bool m_serverActive = false;
 };
 
 #endif // SW_RENDERING_SERVER_HXX
