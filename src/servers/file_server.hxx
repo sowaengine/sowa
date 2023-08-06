@@ -2,6 +2,7 @@
 #define SW_FILE_SERVER_HXX
 #pragma once
 
+#include <sstream>
 #include <string>
 
 #include "core/app.hxx"
@@ -14,6 +15,7 @@ class FileServer {
 	static void Create(App *app);
 	static FileServer &GetInstance();
 
+	Error ReadFileString(const char *path, std::stringstream &stream);
 	Error ReadFileString(const char *path, std::string &buffer);
 	Error WriteFileString(const char *path, const std::string &buffer);
 

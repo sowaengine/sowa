@@ -19,9 +19,7 @@ FileServer &FileServer::GetInstance() {
 	return s_instance;
 }
 
-Error FileServer::ReadFileString(const char *p, std::string &buffer) {
-	buffer = "";
-
+Error FileServer::ReadFileString(const char *p, std::stringstream &stream) {
 	std::string path = getFilepath(p);
 	if (path == "") {
 		return ERR_FILE_NOT_FOUND;
@@ -31,9 +29,16 @@ Error FileServer::ReadFileString(const char *p, std::string &buffer) {
 	if (!ifstream.is_open()) {
 		return ERR_FILE_NOT_FOUND;
 	}
-	std::stringstream s;
-	s << ifstream.rdbuf();
 
+	stream << ifstream.rdbuf();
+	return OK;
+}
+
+Error FileServer::ReadFileString(const char *p, std::string &buffer) {
+	buffer = "";
+
+	std::stringstream s;
+	Error err = ReadFileString(p, s);
 	buffer = s.str();
 	return OK;
 }
@@ -49,6 +54,7 @@ Error FileServer::WriteFileString(const char *p, const std::string &buffer) {
 		return ERR_FILE_NOT_FOUND;
 	}
 	ofstream << buffer << std::endl;
+	std::cout << buffer << std::endl;
 
 	return OK;
 }
