@@ -56,6 +56,12 @@ Error toml_document::Serialize(std::string &str) {
 }
 
 template <>
+toml_document &toml_document::Set(const char *key, toml_document value) {
+	toml_document_data::get(m_internal).table.insert_or_assign(key, toml_document_data::get(value.m_internal).table);
+	return *this;
+}
+
+template <>
 int toml_document::Value(const char *key, int fallback) {
 	return toml_document_data::get(m_internal).table[key].value_or(fallback);
 }
@@ -89,14 +95,41 @@ toml_document &toml_document::Set(const char *key, std::string value) {
 }
 
 template <>
-toml_document &toml_document::Set(const char *key, const char *value) {
+float toml_document::Value(const char *key, float fallback) {
+	return toml_document_data::get(m_internal).table[key].value_or(fallback);
+}
+
+template <>
+toml_document &toml_document::Set(const char *key, float value) {
 	toml_document_data::get(m_internal).table.insert_or_assign(key, value);
 	return *this;
 }
 
 template <>
-toml_document &toml_document::Set(const char *key, toml_document value) {
-	toml_document_data::get(m_internal).table.insert_or_assign(key, toml_document_data::get(value.m_internal).table);
+glm::vec2 toml_document::Value(const char *key, glm::vec2 fallback) {
+	toml_document doc;
+	toml::table *t = toml_document_data::get(m_internal).table[key].as_table();
+	if (nullptr != t) {
+		toml_document_data::get(doc.m_internal).table = *t;
+	}
+
+	fallback.x = doc.Value("x", fallback.x);
+	fallback.y = doc.Value("y", fallback.y);
+
+	return fallback;
+}
+
+template <>
+toml_document &toml_document::Set(const char *key, glm::vec2 value) {
+	toml_document doc;
+	doc.Set("x", value.x).Set("y", value.y);
+	Set(key, doc);
+	return *this;
+}
+
+template <>
+toml_document &toml_document::Set(const char *key, const char *value) {
+	toml_document_data::get(m_internal).table.insert_or_assign(key, value);
 	return *this;
 }
 
