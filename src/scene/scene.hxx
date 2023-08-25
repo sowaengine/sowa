@@ -15,6 +15,9 @@ class Scene {
 	virtual void UpdateScene();
 	virtual void EndScene();
 
+	Error Load(const char *path);
+	Error Save(const char *path);
+
   private:
 	std::vector<Node *> m_nodes;
 };

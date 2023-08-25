@@ -12,8 +12,7 @@ message("Building in ${CMAKE_BUILD_TYPE}")
 
 set(CMAKE_CXX_FLAGS
     "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
-# set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -51,7 +50,7 @@ target_include_directories(
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 target_compile_options(sowa PRIVATE "-Werror")
-target_link_libraries(sowa PRIVATE glfw eventpp::eventpp freetype lunasvg)
+target_link_libraries(sowa PRIVATE glfw eventpp::eventpp freetype lunasvg yaml-cpp)
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(
     sowa

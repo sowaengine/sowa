@@ -1,0 +1,1909 @@
+resources:
+  103:
+    type: ImageTexture
+    path: res://assets/tileGrass1.png
+  102:
+    type: ImageTexture
+    path: res://assets/shotThin.png
+  101:
+    type: ImageTexture
+    path: res://assets/tankGreen_barrel2_outline.png
+  100:
+    type: ImageTexture
+    path: res://assets/tankBody_green_outline.png
+  1000000:
+    type: ImageTexture
+    path: res://assets/shotThin.png
+nodes:
+  Player:
+    type: Sprite2D
+    props:
+      texture:
+        int: 100
+      position:
+        vec2:
+          x: 200
+          y: 200
+      name:
+        str: Player
+  Barrel:
+    type: Sprite2D
+    props:
+      name:
+        str: Barrel
+      texture:
+        int: 101
+      position:
+        vec2:
+          x: 200
+          y: 200
+  sand0:
+    type: Sprite2D
+    props:
+      name:
+        str: sand0
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 0
+  sand1:
+    type: Sprite2D
+    props:
+      name:
+        str: sand1
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 128
+  sand2:
+    type: Sprite2D
+    props:
+      name:
+        str: sand2
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 256
+  sand3:
+    type: Sprite2D
+    props:
+      name:
+        str: sand3
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 384
+  sand4:
+    type: Sprite2D
+    props:
+      name:
+        str: sand4
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 512
+  sand5:
+    type: Sprite2D
+    props:
+      name:
+        str: sand5
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 640
+  sand6:
+    type: Sprite2D
+    props:
+      name:
+        str: sand6
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 768
+  sand7:
+    type: Sprite2D
+    props:
+      name:
+        str: sand7
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 896
+  sand8:
+    type: Sprite2D
+    props:
+      name:
+        str: sand8
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 1024
+  sand9:
+    type: Sprite2D
+    props:
+      name:
+        str: sand9
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 0
+          y: 1152
+  sand10:
+    type: Sprite2D
+    props:
+      name:
+        str: sand10
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 0
+  sand11:
+    type: Sprite2D
+    props:
+      name:
+        str: sand11
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 128
+  sand12:
+    type: Sprite2D
+    props:
+      name:
+        str: sand12
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 256
+  sand13:
+    type: Sprite2D
+    props:
+      name:
+        str: sand13
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 384
+  sand14:
+    type: Sprite2D
+    props:
+      name:
+        str: sand14
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 512
+  sand15:
+    type: Sprite2D
+    props:
+      name:
+        str: sand15
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 640
+  sand16:
+    type: Sprite2D
+    props:
+      name:
+        str: sand16
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 768
+  sand17:
+    type: Sprite2D
+    props:
+      name:
+        str: sand17
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 896
+  sand18:
+    type: Sprite2D
+    props:
+      name:
+        str: sand18
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 1024
+  sand19:
+    type: Sprite2D
+    props:
+      name:
+        str: sand19
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 128
+          y: 1152
+  sand20:
+    type: Sprite2D
+    props:
+      name:
+        str: sand20
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 0
+  sand21:
+    type: Sprite2D
+    props:
+      name:
+        str: sand21
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 128
+  sand22:
+    type: Sprite2D
+    props:
+      name:
+        str: sand22
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 256
+  sand23:
+    type: Sprite2D
+    props:
+      name:
+        str: sand23
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 384
+  sand24:
+    type: Sprite2D
+    props:
+      name:
+        str: sand24
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 512
+  sand25:
+    type: Sprite2D
+    props:
+      name:
+        str: sand25
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 640
+  sand26:
+    type: Sprite2D
+    props:
+      name:
+        str: sand26
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 768
+  sand27:
+    type: Sprite2D
+    props:
+      name:
+        str: sand27
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 896
+  sand28:
+    type: Sprite2D
+    props:
+      name:
+        str: sand28
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 1024
+  sand29:
+    type: Sprite2D
+    props:
+      name:
+        str: sand29
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 256
+          y: 1152
+  sand30:
+    type: Sprite2D
+    props:
+      name:
+        str: sand30
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 0
+  sand31:
+    type: Sprite2D
+    props:
+      name:
+        str: sand31
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 128
+  sand32:
+    type: Sprite2D
+    props:
+      name:
+        str: sand32
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 256
+  sand33:
+    type: Sprite2D
+    props:
+      name:
+        str: sand33
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 384
+  sand34:
+    type: Sprite2D
+    props:
+      name:
+        str: sand34
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 512
+  sand35:
+    type: Sprite2D
+    props:
+      name:
+        str: sand35
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 640
+  sand36:
+    type: Sprite2D
+    props:
+      name:
+        str: sand36
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 768
+  sand37:
+    type: Sprite2D
+    props:
+      name:
+        str: sand37
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 896
+  sand38:
+    type: Sprite2D
+    props:
+      name:
+        str: sand38
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 1024
+  sand39:
+    type: Sprite2D
+    props:
+      name:
+        str: sand39
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 384
+          y: 1152
+  sand40:
+    type: Sprite2D
+    props:
+      name:
+        str: sand40
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 0
+  sand41:
+    type: Sprite2D
+    props:
+      name:
+        str: sand41
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 128
+  sand42:
+    type: Sprite2D
+    props:
+      name:
+        str: sand42
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 256
+  sand43:
+    type: Sprite2D
+    props:
+      name:
+        str: sand43
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 384
+  sand44:
+    type: Sprite2D
+    props:
+      name:
+        str: sand44
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 512
+  sand45:
+    type: Sprite2D
+    props:
+      name:
+        str: sand45
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 640
+  sand46:
+    type: Sprite2D
+    props:
+      name:
+        str: sand46
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 768
+  sand47:
+    type: Sprite2D
+    props:
+      name:
+        str: sand47
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 896
+  sand48:
+    type: Sprite2D
+    props:
+      name:
+        str: sand48
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 1024
+  sand49:
+    type: Sprite2D
+    props:
+      name:
+        str: sand49
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 512
+          y: 1152
+  sand50:
+    type: Sprite2D
+    props:
+      name:
+        str: sand50
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 0
+  sand51:
+    type: Sprite2D
+    props:
+      name:
+        str: sand51
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 128
+  sand52:
+    type: Sprite2D
+    props:
+      name:
+        str: sand52
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 256
+  sand53:
+    type: Sprite2D
+    props:
+      name:
+        str: sand53
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 384
+  sand54:
+    type: Sprite2D
+    props:
+      name:
+        str: sand54
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 512
+  sand55:
+    type: Sprite2D
+    props:
+      name:
+        str: sand55
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 640
+  sand56:
+    type: Sprite2D
+    props:
+      name:
+        str: sand56
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 768
+  sand57:
+    type: Sprite2D
+    props:
+      name:
+        str: sand57
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 896
+  sand58:
+    type: Sprite2D
+    props:
+      name:
+        str: sand58
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 1024
+  sand59:
+    type: Sprite2D
+    props:
+      name:
+        str: sand59
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 640
+          y: 1152
+  sand60:
+    type: Sprite2D
+    props:
+      name:
+        str: sand60
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 0
+  sand61:
+    type: Sprite2D
+    props:
+      name:
+        str: sand61
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 128
+  sand62:
+    type: Sprite2D
+    props:
+      name:
+        str: sand62
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 256
+  sand63:
+    type: Sprite2D
+    props:
+      name:
+        str: sand63
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 384
+  sand64:
+    type: Sprite2D
+    props:
+      name:
+        str: sand64
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 512
+  sand65:
+    type: Sprite2D
+    props:
+      name:
+        str: sand65
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 640
+  sand66:
+    type: Sprite2D
+    props:
+      name:
+        str: sand66
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 768
+  sand67:
+    type: Sprite2D
+    props:
+      name:
+        str: sand67
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 896
+  sand68:
+    type: Sprite2D
+    props:
+      name:
+        str: sand68
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 1024
+  sand69:
+    type: Sprite2D
+    props:
+      name:
+        str: sand69
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 768
+          y: 1152
+  sand70:
+    type: Sprite2D
+    props:
+      name:
+        str: sand70
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 0
+  sand71:
+    type: Sprite2D
+    props:
+      name:
+        str: sand71
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 128
+  sand72:
+    type: Sprite2D
+    props:
+      name:
+        str: sand72
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 256
+  sand73:
+    type: Sprite2D
+    props:
+      name:
+        str: sand73
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 384
+  sand74:
+    type: Sprite2D
+    props:
+      name:
+        str: sand74
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 512
+  sand75:
+    type: Sprite2D
+    props:
+      name:
+        str: sand75
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 640
+  sand76:
+    type: Sprite2D
+    props:
+      name:
+        str: sand76
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 768
+  sand77:
+    type: Sprite2D
+    props:
+      name:
+        str: sand77
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 896
+  sand78:
+    type: Sprite2D
+    props:
+      name:
+        str: sand78
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 1024
+  sand79:
+    type: Sprite2D
+    props:
+      name:
+        str: sand79
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 896
+          y: 1152
+  sand80:
+    type: Sprite2D
+    props:
+      name:
+        str: sand80
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 0
+  sand81:
+    type: Sprite2D
+    props:
+      name:
+        str: sand81
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 128
+  sand82:
+    type: Sprite2D
+    props:
+      name:
+        str: sand82
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 256
+  sand83:
+    type: Sprite2D
+    props:
+      name:
+        str: sand83
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 384
+  sand84:
+    type: Sprite2D
+    props:
+      name:
+        str: sand84
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 512
+  sand85:
+    type: Sprite2D
+    props:
+      name:
+        str: sand85
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 640
+  sand86:
+    type: Sprite2D
+    props:
+      name:
+        str: sand86
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 768
+  sand87:
+    type: Sprite2D
+    props:
+      name:
+        str: sand87
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 896
+  sand88:
+    type: Sprite2D
+    props:
+      name:
+        str: sand88
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 1024
+  sand89:
+    type: Sprite2D
+    props:
+      name:
+        str: sand89
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1024
+          y: 1152
+  sand90:
+    type: Sprite2D
+    props:
+      name:
+        str: sand90
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 0
+  sand91:
+    type: Sprite2D
+    props:
+      name:
+        str: sand91
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 128
+  sand92:
+    type: Sprite2D
+    props:
+      name:
+        str: sand92
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 256
+  sand93:
+    type: Sprite2D
+    props:
+      name:
+        str: sand93
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 384
+  sand94:
+    type: Sprite2D
+    props:
+      name:
+        str: sand94
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 512
+  sand95:
+    type: Sprite2D
+    props:
+      name:
+        str: sand95
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 640
+  sand96:
+    type: Sprite2D
+    props:
+      name:
+        str: sand96
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 768
+  sand97:
+    type: Sprite2D
+    props:
+      name:
+        str: sand97
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 896
+  sand98:
+    type: Sprite2D
+    props:
+      name:
+        str: sand98
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 1024
+  sand99:
+    type: Sprite2D
+    props:
+      name:
+        str: sand99
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1152
+          y: 1152
+  sand100:
+    type: Sprite2D
+    props:
+      name:
+        str: sand100
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 0
+  sand101:
+    type: Sprite2D
+    props:
+      name:
+        str: sand101
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 128
+  sand102:
+    type: Sprite2D
+    props:
+      name:
+        str: sand102
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 256
+  sand103:
+    type: Sprite2D
+    props:
+      name:
+        str: sand103
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 384
+  sand104:
+    type: Sprite2D
+    props:
+      name:
+        str: sand104
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 512
+  sand105:
+    type: Sprite2D
+    props:
+      name:
+        str: sand105
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 640
+  sand106:
+    type: Sprite2D
+    props:
+      name:
+        str: sand106
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 768
+  sand107:
+    type: Sprite2D
+    props:
+      name:
+        str: sand107
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 896
+  sand108:
+    type: Sprite2D
+    props:
+      name:
+        str: sand108
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 1024
+  sand109:
+    type: Sprite2D
+    props:
+      name:
+        str: sand109
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1280
+          y: 1152
+  sand110:
+    type: Sprite2D
+    props:
+      name:
+        str: sand110
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 0
+  sand111:
+    type: Sprite2D
+    props:
+      name:
+        str: sand111
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 128
+  sand112:
+    type: Sprite2D
+    props:
+      name:
+        str: sand112
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 256
+  sand113:
+    type: Sprite2D
+    props:
+      name:
+        str: sand113
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 384
+  sand114:
+    type: Sprite2D
+    props:
+      name:
+        str: sand114
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 512
+  sand115:
+    type: Sprite2D
+    props:
+      name:
+        str: sand115
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 640
+  sand116:
+    type: Sprite2D
+    props:
+      name:
+        str: sand116
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 768
+  sand117:
+    type: Sprite2D
+    props:
+      name:
+        str: sand117
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 896
+  sand118:
+    type: Sprite2D
+    props:
+      name:
+        str: sand118
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 1024
+  sand119:
+    type: Sprite2D
+    props:
+      name:
+        str: sand119
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1408
+          y: 1152
+  sand120:
+    type: Sprite2D
+    props:
+      name:
+        str: sand120
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 0
+  sand121:
+    type: Sprite2D
+    props:
+      name:
+        str: sand121
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 128
+  sand122:
+    type: Sprite2D
+    props:
+      name:
+        str: sand122
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 256
+  sand123:
+    type: Sprite2D
+    props:
+      name:
+        str: sand123
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 384
+  sand124:
+    type: Sprite2D
+    props:
+      name:
+        str: sand124
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 512
+  sand125:
+    type: Sprite2D
+    props:
+      name:
+        str: sand125
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 640
+  sand126:
+    type: Sprite2D
+    props:
+      name:
+        str: sand126
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 768
+  sand127:
+    type: Sprite2D
+    props:
+      name:
+        str: sand127
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 896
+  sand128:
+    type: Sprite2D
+    props:
+      name:
+        str: sand128
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 1024
+  sand129:
+    type: Sprite2D
+    props:
+      name:
+        str: sand129
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1536
+          y: 1152
+  sand130:
+    type: Sprite2D
+    props:
+      name:
+        str: sand130
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 0
+  sand131:
+    type: Sprite2D
+    props:
+      name:
+        str: sand131
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 128
+  sand132:
+    type: Sprite2D
+    props:
+      name:
+        str: sand132
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 256
+  sand133:
+    type: Sprite2D
+    props:
+      name:
+        str: sand133
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 384
+  sand134:
+    type: Sprite2D
+    props:
+      name:
+        str: sand134
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 512
+  sand135:
+    type: Sprite2D
+    props:
+      name:
+        str: sand135
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 640
+  sand136:
+    type: Sprite2D
+    props:
+      name:
+        str: sand136
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 768
+  sand137:
+    type: Sprite2D
+    props:
+      name:
+        str: sand137
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 896
+  sand138:
+    type: Sprite2D
+    props:
+      name:
+        str: sand138
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 1024
+  sand139:
+    type: Sprite2D
+    props:
+      name:
+        str: sand139
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1664
+          y: 1152
+  sand140:
+    type: Sprite2D
+    props:
+      name:
+        str: sand140
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 0
+  sand141:
+    type: Sprite2D
+    props:
+      name:
+        str: sand141
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 128
+  sand142:
+    type: Sprite2D
+    props:
+      name:
+        str: sand142
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 256
+  sand143:
+    type: Sprite2D
+    props:
+      name:
+        str: sand143
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 384
+  sand144:
+    type: Sprite2D
+    props:
+      name:
+        str: sand144
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 512
+  sand145:
+    type: Sprite2D
+    props:
+      name:
+        str: sand145
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 640
+  sand146:
+    type: Sprite2D
+    props:
+      name:
+        str: sand146
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 768
+  sand147:
+    type: Sprite2D
+    props:
+      name:
+        str: sand147
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 896
+  sand148:
+    type: Sprite2D
+    props:
+      name:
+        str: sand148
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 1024
+  sand149:
+    type: Sprite2D
+    props:
+      name:
+        str: sand149
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1792
+          y: 1152
+  sand150:
+    type: Sprite2D
+    props:
+      name:
+        str: sand150
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 0
+  sand151:
+    type: Sprite2D
+    props:
+      name:
+        str: sand151
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 128
+  sand152:
+    type: Sprite2D
+    props:
+      name:
+        str: sand152
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 256
+  sand153:
+    type: Sprite2D
+    props:
+      name:
+        str: sand153
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 384
+  sand154:
+    type: Sprite2D
+    props:
+      name:
+        str: sand154
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 512
+  sand155:
+    type: Sprite2D
+    props:
+      name:
+        str: sand155
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 640
+  sand156:
+    type: Sprite2D
+    props:
+      name:
+        str: sand156
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 768
+  sand157:
+    type: Sprite2D
+    props:
+      name:
+        str: sand157
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 896
+  sand158:
+    type: Sprite2D
+    props:
+      name:
+        str: sand158
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 1024
+  sand159:
+    type: Sprite2D
+    props:
+      name:
+        str: sand159
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 1920
+          y: 1152
+  sand160:
+    type: Sprite2D
+    props:
+      name:
+        str: sand160
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 0
+  sand161:
+    type: Sprite2D
+    props:
+      name:
+        str: sand161
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 128
+  sand162:
+    type: Sprite2D
+    props:
+      name:
+        str: sand162
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 256
+  sand163:
+    type: Sprite2D
+    props:
+      name:
+        str: sand163
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 384
+  sand164:
+    type: Sprite2D
+    props:
+      name:
+        str: sand164
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 512
+  sand165:
+    type: Sprite2D
+    props:
+      name:
+        str: sand165
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 640
+  sand166:
+    type: Sprite2D
+    props:
+      name:
+        str: sand166
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 768
+  sand167:
+    type: Sprite2D
+    props:
+      name:
+        str: sand167
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 896
+  sand168:
+    type: Sprite2D
+    props:
+      name:
+        str: sand168
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 1024
+  sand169:
+    type: Sprite2D
+    props:
+      name:
+        str: sand169
+      texture:
+        int: 103
+      position:
+        vec2:
+          x: 2048
+          y: 1152

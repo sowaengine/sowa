@@ -1,5 +1,82 @@
 #include "scene.hxx"
 
+#include "core/error/error.hxx"
+#include "resource/resource_manager.hxx"
+#include "scene/node_db.hxx"
+#include "servers/file_server.hxx"
+#include <any>
+#include <iostream>
+
+#include "yaml-cpp/yaml.h"
+
+namespace YAML {
+template <>
+struct convert<glm::vec2> {
+	static Node encode(const glm::vec2 &rhs) {
+		Node node;
+		node["x"] = (rhs.x);
+		node["y"] = (rhs.y);
+		return node;
+	}
+
+	static bool decode(const Node &node, glm::vec2 &rhs) {
+		if (!node.IsMap() || node.size() != 2) {
+			return false;
+		}
+
+		rhs.x = node["x"].as<double>();
+		rhs.y = node["y"].as<double>();
+		return true;
+	}
+};
+} // namespace YAML
+
+namespace YAML {
+template <>
+struct convert<std::any> {
+	static Node encode(const std::any &rhs) {
+		Node node;
+
+		if (const std::string *p = std::any_cast<std::string>(&rhs)) {
+			node["str"] = *p;
+		}
+		if (const glm::vec2 *p = std::any_cast<glm::vec2>(&rhs)) {
+			node["vec2"] = *p;
+		}
+		if (const int *p = std::any_cast<int>(&rhs)) {
+			node["int"] = *p;
+		}
+
+		return node;
+	}
+
+	static bool decode(const Node &node, std::any &rhs) {
+		if (!node.IsMap()) {
+			return false;
+		}
+
+		std::string type = "";
+		for (const auto &pair : node) {
+			type = pair.first.as<std::string>();
+		}
+
+		if (type == "") {
+			return false;
+		}
+
+		if (type == "str") {
+			rhs = node["str"].as<std::string>("");
+		} else if (type == "vec2") {
+			rhs = node["vec2"].as<glm::vec2>(glm::vec2{0.f, 0.f});
+		} else if (type == "int") {
+			rhs = node["int"].as<int>(0);
+		}
+
+		return true;
+	}
+};
+} // namespace YAML
+
 void Scene::BeginScene() {
 	for (Node *node : m_nodes) {
 		node->Start();
@@ -14,4 +91,112 @@ void Scene::UpdateScene() {
 
 void Scene::EndScene() {
 	// todo
+}
+
+Error Scene::Load(const char *path) {
+	NodeDB &db = NodeDB::GetInstance();
+	m_nodes.clear();
+
+	YAML::Node node;
+
+	std::string buffer;
+	Error err = FileServer::GetInstance().ReadFileString(path, buffer);
+	if (err != OK) {
+		return err;
+	}
+
+	YAML::Node scene = YAML::Load(buffer);
+
+	YAML::Node resources = scene["resources"];
+	for (const auto &resource : resources) {
+		std::string type = resource.second["type"].as<std::string>("");
+		std::string path = resource.second["path"].as<std::string>("");
+		if (type == "" || path == "") {
+			continue;
+		}
+		RID id = resource.first.as<RID>(0);
+
+		Resource *res = nullptr;
+		if (type == "ImageTexture") {
+			res = ResourceManager::GetInstance().Load(path, id, ResourceType_ImageTexture);
+		}
+
+		if (nullptr == res)
+			continue;
+
+		std::cout << "Loaded resource (" << path << ") id: " << res->ResourceID() << std::endl;
+	}
+
+	YAML::Node nodes = scene["nodes"];
+	for (const auto &node : nodes) {
+		std::string name = node.first.as<std::string>("New Node");
+
+		YAML::Node nodeData = node.second;
+		std::string type = nodeData["type"].as<std::string>("Node");
+
+		Node *pNode = db.Construct(db.GetNodeType(type));
+		pNode->Name() = name;
+		m_nodes.push_back(pNode);
+
+		for (const auto &prop : nodeData["props"]) {
+			std::string propName = prop.first.as<std::string>();
+			std::any value = prop.second.as<std::any>();
+
+			NodeProperty propSetter = db.GetProperty(pNode->TypeHash(), propName);
+			if (propSetter.set) {
+				propSetter.set(pNode, value);
+			}
+		}
+	}
+
+	return OK;
+}
+
+Error Scene::Save(const char *path) {
+	NodeDB &db = NodeDB::GetInstance();
+
+	YAML::Node doc;
+
+	YAML::Node resources;
+	for (auto &[id, resource] : ResourceManager::GetInstance().Resources()) {
+		YAML::Node res;
+
+		res["type"] = "ImageTexture";
+		res["path"] = resource->Filepath();
+		if (resource->Type() == ResourceType_ImageTexture) {
+		}
+
+		resources[id] = res;
+	}
+
+	doc["resources"] = resources;
+
+	YAML::Node nodes;
+	for (Node *pNode : Nodes()) {
+		YAML::Node node;
+		node["type"] = db.GetNodeTypeName(pNode->TypeHash());
+
+		YAML::Node props;
+		std::vector<std::string> propNames;
+		db.GetPropertyNames(pNode->TypeHash(), propNames);
+		for (const auto &name : propNames) {
+			props[name] = db.GetProperty(pNode->TypeHash(), name).get(pNode);
+		}
+		node["props"] = props;
+
+		nodes[pNode->Name()] = node;
+	}
+	doc["nodes"] = nodes;
+
+	std::string s;
+	std::stringstream ss;
+	ss << doc;
+	s = ss.str();
+
+	Error err = FileServer::GetInstance().WriteFileString(path, s);
+	if (err != OK) {
+		return err;
+	}
+
+	return OK;
 }
