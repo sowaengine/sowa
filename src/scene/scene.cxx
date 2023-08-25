@@ -147,6 +147,14 @@ Error Scene::Load(const char *path) {
 				propSetter.set(pNode, value);
 			}
 		}
+
+		for (const auto &behaviour : nodeData["behaviours"]) {
+			std::string name = behaviour.as<std::string>("");
+			if (name == "")
+				continue;
+
+			pNode->AddBehaviour(name);
+		}
 	}
 
 	return OK;
@@ -183,6 +191,16 @@ Error Scene::Save(const char *path) {
 			props[name] = db.GetProperty(pNode->TypeHash(), name).get(pNode);
 		}
 		node["props"] = props;
+
+		auto behaviourList = pNode->GetBehaviours();
+		if (behaviourList.size() > 0) {
+			YAML::Node behaviours;
+
+			for (auto &[id, behaviour] : behaviourList) {
+				behaviours.push_back(behaviour.GetBehaviourName());
+			}
+			node["behaviours"] = behaviours;
+		}
 
 		nodes[pNode->Name()] = node;
 	}

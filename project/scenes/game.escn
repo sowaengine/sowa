@@ -26,6 +26,8 @@ nodes:
           y: 200
       name:
         str: Player
+    behaviours:
+      - Rotate Sprite
   Barrel:
     type: Sprite2D
     props:
