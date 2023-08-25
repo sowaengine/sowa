@@ -4,7 +4,7 @@
 
 #include "node_2d.hxx"
 
-#include "core/rendering/texture.hxx"
+#include "resource/resource_type.hxx"
 #include <memory>
 
 class Sprite2D : public Node2D {
@@ -12,10 +12,10 @@ class Sprite2D : public Node2D {
 	void Update() override;
 	virtual ~Sprite2D() = default;
 
-	inline std::shared_ptr<Texture> &GetTexture() { return m_texture; }
+	inline RID &GetTexture() { return m_texture; }
 
   protected:
-	std::shared_ptr<Texture> m_texture = nullptr;
+	RID m_texture;
 };
 
 #endif // SW_SPRITE_2D_HXX

@@ -5,7 +5,7 @@
 #include <string>
 
 #include "new_tree.hxx"
-#include "resource/font.hxx"
+#include "resource/font/font.hxx"
 
 class UICanvas {
   public:

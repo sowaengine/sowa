@@ -5,8 +5,10 @@
 #include <stdint.h>
 
 #include "core/error/error.hxx"
+#include "core/rendering/gl.hxx"
 #include "data/file_buffer.hxx"
-#include "gl.hxx"
+
+#include "resource/resource.hxx"
 
 typedef int texture_type_t;
 

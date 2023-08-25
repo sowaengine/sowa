@@ -7,17 +7,21 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "resource/resource_manager.hxx"
+
 void Sprite2D::Update() {
-	if (nullptr == m_texture)
+
+	Texture *texture = ResourceManager::GetInstance().GetAs<Texture>(m_texture);
+	if (nullptr == texture)
 		return;
 
-	uint32_t textureID = m_texture->ID();
+	uint32_t textureID = texture->ID();
 
 	glm::mat4 model(1.f);
 	model = glm::translate(model, {m_position.x, m_position.y, 0.f});
 	model = glm::rotate(model, glm::radians(m_rotation), {0.f, 0.f, 1.f});
 	model = glm::scale(model, {m_scale.x, m_scale.y, 1.f});
-	model = glm::scale(model, {m_texture->Width(), m_texture->Height(), 1.f});
+	model = glm::scale(model, {texture->Width(), texture->Height(), 1.f});
 
 	glm::vec4 points[4] = {
 		{-0.5f, 0.5f, 0.f, 1.f},

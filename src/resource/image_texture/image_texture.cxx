@@ -1,8 +1,8 @@
-#include "texture.hxx"
+#include "image_texture.hxx"
 
 #include "lunasvg.h"
 
-#include "gl.hxx"
+#include "core/rendering/gl.hxx"
 #include "servers/file_server.hxx"
 #include "servers/rendering_server.hxx"
 
@@ -23,6 +23,7 @@ void Texture::Unbind() {
 
 Error Texture::Load(texture_type_t type, const char *path) {
 	Delete();
+	// m_filepath = path;
 
 	file_buffer buffer;
 	Error err = FileServer::GetInstance().ReadFileBytes(path, buffer);
@@ -41,6 +42,7 @@ Error Texture::Load(texture_type_t type, const char *path) {
 
 Error Texture::Load2DUByteRGBA(unsigned char *data, int width, int height) {
 	Delete();
+	// m_filepath = "";
 
 	m_pixels = nullptr;
 	m_shouldFree = false;

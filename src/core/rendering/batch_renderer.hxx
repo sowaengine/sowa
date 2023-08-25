@@ -9,9 +9,9 @@
 #include "core/error/error.hxx"
 #include "gfx/buffer.hxx"
 #include "gfx/vertex_array.hxx"
-#include "resource/font.hxx"
+#include "resource/font/font.hxx"
+#include "resource/image_texture/image_texture.hxx"
 #include "shader.hxx"
-#include "texture.hxx"
 
 struct BatchVertex {
 	float x = 0.f;

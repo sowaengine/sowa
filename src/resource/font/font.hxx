@@ -9,7 +9,9 @@
 #include "data/file_buffer.hxx"
 #include "glm/glm.hpp"
 
-class Font {
+#include "resource/resource.hxx"
+
+class Font : public Resource {
   public:
 	Font() = default;
 	~Font();

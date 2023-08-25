@@ -54,7 +54,6 @@ Error FileServer::WriteFileString(const char *p, const std::string &buffer) {
 		return ERR_FILE_NOT_FOUND;
 	}
 	ofstream << buffer << std::endl;
-	std::cout << buffer << std::endl;
 
 	return OK;
 }
