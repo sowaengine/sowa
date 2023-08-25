@@ -3,8 +3,10 @@
 #include <iostream>
 
 #include "core/app.hxx"
-#include "core/rendering/texture.hxx"
 #include "core/time.hxx"
+#include "resource/image_texture/image_texture.hxx"
+#include "resource/resource_manager.hxx"
+#include "scene/node_db.hxx"
 #include "scene/scene.hxx"
 #include "scene/sprite_2d.hxx"
 #include "scene/text.hxx"
@@ -23,8 +25,8 @@ float bulletSpeed = 200.f;
 int score = 0;
 
 std::vector<Sprite2D *> bullets;
-std::shared_ptr<Texture> bulletTexture;
-std::shared_ptr<Texture> sandTexture;
+RID bulletTexture;
+RID sandTexture;
 
 float lerp(float from, float to, float t) {
 	return from + ((to - from) * t);
@@ -44,9 +46,12 @@ class MainScene : public Scene {
 	}
 
 	void UpdateScene() override {
+
 		for (Node *node : Nodes()) {
 			node->Update();
 		}
+
+		return;
 
 		glm::vec2 input(0.f, 0.f);
 
@@ -99,7 +104,7 @@ class MainScene : public Scene {
 			bullet->Position().y += y * bulletSpeed * Time::Delta();
 		}
 
-		scoreText->GetText() = "Score: " + std::to_string(score);
+		// scoreText->GetText() = "Score: " + std::to_string(score);
 	}
 };
 
@@ -107,35 +112,41 @@ void OnInput(InputEventMouseButton event);
 
 void Main() {
 	scene = new MainScene;
-	player = new Sprite2D();
-	player->GetTexture() = std::make_shared<Texture>();
-	player->GetTexture()->Load(TextureType::Texture2D, "res://assets/tankBody_green_outline.png");
+	// Error err = scene->Load("res://scenes/game.escn");
+	// if (err != OK) {
+	// 	std::cout << "Failed to load scene" << std::endl;
+	// }
+	// App::GetInstance().SetCurrentScene(scene);
+	// return;
+
+	Node *node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+	player = dynamic_cast<Sprite2D *>(node);
+	player->GetTexture() = ResourceManager::GetInstance().Load("res://assets/tankBody_green_outline.png", 100)->ResourceID();
 	player->Position() = {200.f, 200.f};
 	player->Name() = "Player";
 	scene->Nodes().push_back(player);
 
-	barrel = new Sprite2D();
-	barrel->GetTexture() = std::make_shared<Texture>();
-	barrel->GetTexture()->Load(TextureType::Texture2D, "res://assets/tankGreen_barrel2_outline.png");
+	node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+	barrel = dynamic_cast<Sprite2D *>(node);
+	barrel->GetTexture() = ResourceManager::GetInstance().Load("res://assets/tankGreen_barrel2_outline.png", 101)->ResourceID();
 	barrel->Position() = {200.f, 200.f};
 	barrel->ZIndex() = 2.f;
 	barrel->Name() = "Barrel";
 	scene->Nodes().push_back(barrel);
 
-	scoreText = new Text;
-	scoreText->Position() = glm::vec2(10.f, 1000.f);
-	scene->Nodes().push_back(scoreText);
+	// scoreText = new Text;
+	// scoreText->Position() = glm::vec2(10.f, 1000.f);
+	// scene->Nodes().push_back(scoreText);
 
-	bulletTexture = std::make_shared<Texture>();
-	bulletTexture->Load(TextureType::Texture2D, "res://assets/shotThin.png");
+	bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png", 102)->ResourceID();
 
-	sandTexture = std::make_shared<Texture>();
-	sandTexture->Load(TextureType::Texture2D, "res://assets/tileGrass1.png");
+	sandTexture = ResourceManager::GetInstance().Load("res://assets/tileGrass1.png", 103)->ResourceID();
 
 	int index = 0;
-	for (int x = 0;; x += sandTexture->Width()) {
-		for (int y = 0;; y += sandTexture->Height()) {
-			Sprite2D *sand = new Sprite2D;
+	for (int x = 0;; x += ResourceManager::GetInstance().GetAs<Texture>(sandTexture)->Width()) {
+		for (int y = 0;; y += ResourceManager::GetInstance().GetAs<Texture>(sandTexture)->Height()) {
+			Node *node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+			Sprite2D *sand = dynamic_cast<Sprite2D *>(node);
 			sand->Position() = {x, y};
 			sand->GetTexture() = sandTexture;
 			sand->ZIndex() = -1.f;
@@ -157,7 +168,8 @@ void Main() {
 
 void OnInput(InputEventMouseButton event) {
 	if (event.action == PRESSED && event.button == MB_LEFT) {
-		Sprite2D *bullet = new Sprite2D;
+		Node *bulletNode = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+		Sprite2D *bullet = dynamic_cast<Sprite2D *>(bulletNode);
 		bullet->GetTexture() = bulletTexture;
 		bullets.push_back(bullet);
 		bullet->Position() = barrel->Position();
@@ -175,10 +187,10 @@ void OnInput(InputEventMouseButton event) {
 	}
 	if (event.action == PRESSED && event.button == MB_RIGHT) {
 
-		// Error err = scene->Save("res://scenes/game.scn");
-		// if (err != OK) {
-		// 	std::cout << err << std::endl;
-		// }
+		Error err = scene->Save("res://scenes/game.escn");
+		if (err != OK) {
+			std::cout << err << std::endl;
+		}
 
 		bullets.clear();
 		for (auto it = scene->Nodes().begin(); it != scene->Nodes().end();) {

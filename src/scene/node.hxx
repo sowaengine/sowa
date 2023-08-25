@@ -12,8 +12,14 @@ class Node {
 	virtual void Start() {}
 	virtual void Update() {}
 
+	inline size_t TypeHash() { return m_typeHash; }
+
   protected:
 	std::string m_name = "";
+
+  private:
+	friend class NodeDB;
+	size_t m_typeHash = 0;
 };
 
 #endif // SW_NODE_HXX

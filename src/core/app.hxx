@@ -10,7 +10,7 @@
 
 #include "data/input_event/input_event.hxx"
 #include "data/lrtb_flags.hxx"
-#include "resource/font.hxx"
+#include "resource/font/font.hxx"
 #include "ui/new_tree.hxx"
 
 #include "scene/scene.hxx"
@@ -42,7 +42,7 @@ class App {
 
 	void SetCurrentScene(Scene *scene);
 
-	Font& TestFont() { return m_testFont; }
+	Font &TestFont() { return m_testFont; }
 
   private:
 	void mainLoop();

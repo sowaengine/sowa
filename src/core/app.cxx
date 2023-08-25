@@ -18,7 +18,13 @@
 #include "ui/new_tree.hxx"
 #include "ui/ui_canvas.hxx"
 
+#include "scene/node_2d.hxx"
+#include "scene/node_db.hxx"
 #include "scene/sprite_2d.hxx"
+#include "scene/text.hxx"
+
+#include "resource/resource.hxx"
+#include "resource/resource_manager.hxx"
 
 #include "game/game.hxx"
 
@@ -159,6 +165,90 @@ Error App::Init() {
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
+
+	ResourceFactory imageTexture;
+	imageTexture.typeName = "ImageTexture";
+	imageTexture.type = ResourceType_ImageTexture;
+	imageTexture.loadFunc = [](Resource *res, std::string path) {
+		res->Data() = Texture();
+		if (Texture *tex = res->As<Texture>(); nullptr != tex) {
+			Error err = tex->Load(TextureType::Texture2D, path.c_str());
+			if (err != OK) {
+				std::cout << "Failed to load texture: " << err << std::endl;
+			}
+		}
+	};
+	ResourceManager::GetInstance().RegisterResource(".png", imageTexture);
+
+	Resource *res = ResourceManager::GetInstance().Load("res://assets/shotThin.png");
+
+	NodeDB &db = NodeDB::GetInstance();
+	{
+		{
+			NodeFactory factory;
+			factory.constructor = []() -> Node * {
+				return new Node;
+			};
+
+			factory.destructor = [](Node *node) {
+				delete node;
+			};
+
+			db.BindNodeType<Node>("Node", 0, factory);
+
+			NodeProperty nameProp;
+			nameProp.get = [](Node *node) -> Property {
+				return node->Name();
+			};
+			nameProp.set = [](Node *node, Property value) {
+				if (std::string *p = std::any_cast<std::string>(&value)) {
+					node->Name() = *p;
+				}
+			};
+
+			db.BindProperty(db.GetNodeType("Node"), "name", nameProp);
+		}
+
+		{
+			NodeFactory factory;
+			factory.constructor = []() -> Node * {
+				return new Sprite2D;
+			};
+
+			factory.destructor = [](Node *node) {
+				delete reinterpret_cast<Sprite2D *>(node);
+			};
+
+			db.BindNodeType<Sprite2D>("Sprite2D", db.GetNodeType("Node"), factory);
+
+			{
+				NodeProperty positionProp;
+				positionProp.get = [](Node *node) -> Property {
+					return dynamic_cast<Sprite2D *>(node)->Position();
+				};
+				positionProp.set = [](Node *node, Property value) {
+					if (glm::vec2 *p = std::any_cast<glm::vec2>(&value)) {
+						dynamic_cast<Sprite2D *>(node)->Position() = *p;
+					}
+				};
+
+				db.BindProperty(db.GetNodeType("Sprite2D"), "position", positionProp);
+			}
+			{
+				NodeProperty textureProp;
+				textureProp.get = [](Node *node) -> Property {
+					return dynamic_cast<Sprite2D *>(node)->GetTexture();
+				};
+				textureProp.set = [](Node *node, Property value) {
+					if (RID *p = std::any_cast<RID>(&value)) {
+						dynamic_cast<Sprite2D *>(node)->GetTexture() = *p;
+					}
+				};
+
+				db.BindProperty(db.GetNodeType("Sprite2D"), "texture", textureProp);
+			}
+		}
+	}
 
 	Main();
 
