@@ -26,6 +26,9 @@
 #include "resource/resource.hxx"
 #include "resource/resource_manager.hxx"
 
+#include "behaviour/behaviour.hxx"
+#include "behaviour/behaviour_db.hxx"
+
 #include "game/game.hxx"
 
 #include <filesystem>
@@ -249,6 +252,18 @@ Error App::Init() {
 			}
 		}
 	}
+
+	Behaviour rotationBehaviour = Behaviour::New(nullptr, [](Node *node) {
+		Sprite2D *sprite = dynamic_cast<Sprite2D *>(node);
+		if (nullptr == sprite) {
+			std::cout << "Behaviour (Rotate Sprite) invalid typename: " << NodeDB::GetInstance().GetNodeTypeName(node->TypeHash()) << std::endl;
+			return;
+		}
+
+		sprite->Rotation() += 0.5f;
+	});
+
+	BehaviourDB::GetInstance().RegisterBehaviour("Rotate Sprite", rotationBehaviour);
 
 	Main();
 

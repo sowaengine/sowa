@@ -49,6 +49,7 @@ class MainScene : public Scene {
 
 		for (Node *node : Nodes()) {
 			node->Update();
+			node->UpdateBehaviours();
 		}
 
 		return;
@@ -124,7 +125,9 @@ void Main() {
 	player->GetTexture() = ResourceManager::GetInstance().Load("res://assets/tankBody_green_outline.png", 100)->ResourceID();
 	player->Position() = {200.f, 200.f};
 	player->Name() = "Player";
-	scene->Nodes().push_back(player);
+	player->AddBehaviour("Rotate Sprite");
+	scene->Nodes()
+		.push_back(player);
 
 	node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 	barrel = dynamic_cast<Sprite2D *>(node);

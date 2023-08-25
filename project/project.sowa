@@ -9,6 +9,6 @@ version = '1.0'
 icon = 'res://icon.png'
 
 [window]
-height = 600
-width = 800
+width = 1280
+height = 720
 
