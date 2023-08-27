@@ -15,17 +15,42 @@ resources:
     type: ImageTexture
     path: res://assets/shotThin.png
 nodes:
-  Player:
+  New Node:
     type: Sprite2D
     props:
       texture:
         int: 100
       position:
         vec2:
-          x: 200
-          y: 200
+          x: 600
+          y: 600
+      name:
+        str: New Node
+    behaviours:
+      - Rotate Sprite
+    children:
+      New Node:
+        type: Sprite2D
+        props:
+          name:
+            str: New Node
+          texture:
+            int: 100
+          position:
+            vec2:
+              x: 100
+              y: 100
+  Player:
+    type: Sprite2D
+    props:
       name:
         str: Player
+      texture:
+        int: 100
+      position:
+        vec2:
+          x: 200
+          y: 200
     behaviours:
       - Rotate Sprite
   Barrel:

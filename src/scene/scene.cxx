@@ -180,7 +180,9 @@ Error Scene::Save(const char *path) {
 	doc["resources"] = resources;
 
 	YAML::Node nodes;
-	for (Node *pNode : Nodes()) {
+
+	std::function<void(Node *, YAML::Node &)> serializeNode;
+	serializeNode = [&](Node *pNode, YAML::Node &doc) {
 		YAML::Node node;
 		node["type"] = db.GetNodeTypeName(pNode->TypeHash());
 
@@ -202,7 +204,17 @@ Error Scene::Save(const char *path) {
 			node["behaviours"] = behaviours;
 		}
 
-		nodes[pNode->Name()] = node;
+		doc[pNode->Name()] = node;
+
+		for (Node *child : pNode->GetChildren()) {
+			YAML::Node childrenDoc;
+			serializeNode(child, childrenDoc);
+			node["children"] = childrenDoc;
+		}
+	};
+
+	for (Node *pNode : Nodes()) {
+		serializeNode(pNode, nodes);
 	}
 	doc["nodes"] = nodes;
 

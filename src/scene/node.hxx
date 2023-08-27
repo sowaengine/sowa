@@ -4,6 +4,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "core/behaviour/behaviour.hxx"
 
@@ -22,6 +23,15 @@ class Node {
 	void UpdateBehaviours();
 	inline std::unordered_map<size_t, Behaviour> &GetBehaviours() { return m_behaviours; }
 
+	//
+	inline std::vector<Node *> &GetChildren() { return m_children; }
+	inline Node *GetParent() { return m_parent; }
+
+	void AddChild(Node *child);
+	Node *GetChild(std::string name);
+	Node *GetChildIndex(size_t index);
+	void RemoveChild(std::string name);
+
   protected:
 	std::string m_name = "";
 
@@ -30,6 +40,9 @@ class Node {
 	size_t m_typeHash = 0;
 
 	std::unordered_map<size_t, Behaviour> m_behaviours;
+
+	Node *m_parent = nullptr;
+	std::vector<Node *> m_children;
 };
 
 #endif // SW_NODE_HXX

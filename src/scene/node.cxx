@@ -24,3 +24,37 @@ void Node::UpdateBehaviours() {
 		behaviour.Update(this);
 	}
 }
+
+void Node::AddChild(Node *child) {
+	if (child->m_parent != nullptr) {
+		child->m_parent->RemoveChild(child->Name());
+	}
+
+	m_children.push_back(child);
+	child->m_parent = this;
+}
+
+Node *Node::GetChild(std::string name) {
+	for (auto *child : m_children) {
+		if (child->Name() == name) {
+			return child;
+		}
+	}
+
+	return nullptr;
+}
+
+Node *Node::GetChildIndex(size_t index) {
+	if (m_children.size() <= index)
+		return nullptr;
+	return m_children[index];
+}
+
+void Node::RemoveChild(std::string name) {
+	for (auto it = m_children.begin(); it != m_children.end(); ++it) {
+		if ((*it)->Name() == name) {
+			m_children.erase(it);
+			return;
+		}
+	}
+}

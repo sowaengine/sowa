@@ -45,10 +45,20 @@ class MainScene : public Scene {
 		}
 	}
 
+	void UpdateNode(Node *node) {
+		node->Update();
+
+		for (Node *child : node->GetChildren()) {
+			child->Update();
+
+			UpdateNode(child);
+		}
+	}
+
 	void UpdateScene() override {
 
 		for (Node *node : Nodes()) {
-			node->Update();
+			UpdateNode(node);
 			node->UpdateBehaviours();
 		}
 
@@ -119,6 +129,22 @@ void Main() {
 	// }
 	// App::GetInstance().SetCurrentScene(scene);
 	// return;
+
+	Node *centerNode = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+	Sprite2D *centerSprite = dynamic_cast<Sprite2D *>(centerNode);
+	centerSprite->GetTexture() = 100;
+	centerSprite->Position() = {600.f, 600.f};
+	scene->Nodes().push_back(centerSprite);
+
+	{
+		Node *node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+		Sprite2D *sprite = dynamic_cast<Sprite2D *>(node);
+		sprite->GetTexture() = 100;
+		sprite->Position() = {100.f, 100.f};
+		sprite->Scale() = {0.75f, 0.75f};
+		centerSprite->AddChild(sprite);
+		centerSprite->AddBehaviour("Rotate Sprite");
+	}
 
 	Node *node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 	player = dynamic_cast<Sprite2D *>(node);

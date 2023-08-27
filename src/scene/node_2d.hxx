@@ -15,6 +15,8 @@ class Node2D : public Node {
 	inline float &Rotation() { return m_rotation; }
 	inline float &ZIndex() { return m_zIndex; }
 
+	glm::mat4 CalculateTransform();
+
   protected:
 	glm::vec2 m_position = glm::vec2(0.f, 0.f);
 	glm::vec2 m_scale = glm::vec2(1.f, 1.f);

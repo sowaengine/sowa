@@ -17,10 +17,7 @@ void Sprite2D::Update() {
 
 	uint32_t textureID = texture->ID();
 
-	glm::mat4 model(1.f);
-	model = glm::translate(model, {m_position.x, m_position.y, 0.f});
-	model = glm::rotate(model, glm::radians(m_rotation), {0.f, 0.f, 1.f});
-	model = glm::scale(model, {m_scale.x, m_scale.y, 1.f});
+	glm::mat4 model = CalculateTransform();
 	model = glm::scale(model, {texture->Width(), texture->Height(), 1.f});
 
 	glm::vec4 points[4] = {
