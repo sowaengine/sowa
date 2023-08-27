@@ -16,6 +16,7 @@
 /* Temporary */
 
 Scene *scene;
+Scene *newScene;
 Sprite2D *player = nullptr;
 Sprite2D *barrel = nullptr;
 Text *scoreText = nullptr;
@@ -123,6 +124,7 @@ void OnInput(InputEventMouseButton event);
 
 void Main() {
 	scene = new MainScene;
+	newScene = new MainScene;
 	// Error err = scene->Load("res://scenes/game.escn");
 	// if (err != OK) {
 	// 	std::cout << "Failed to load scene" << std::endl;
@@ -214,7 +216,19 @@ void OnInput(InputEventMouseButton event) {
 
 		scene->Nodes().push_back(bullet);
 	}
+	if (event.action == PRESSED && event.button == MB_MIDDLE) {
+		Scene::copy(scene, newScene);
+	}
+
 	if (event.action == PRESSED && event.button == MB_RIGHT) {
+		static bool a = false;
+		if (!a)
+			App::GetInstance().SetCurrentScene(newScene);
+		else
+			App::GetInstance().SetCurrentScene(scene);
+
+		a = !a;
+		return;
 
 		Error err = scene->Save("res://scenes/game.escn");
 		if (err != OK) {

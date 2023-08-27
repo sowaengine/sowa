@@ -230,3 +230,32 @@ Error Scene::Save(const char *path) {
 
 	return OK;
 }
+
+void Scene::copy(Scene *src, Scene *dst) {
+	std::function<Node *(Node *)> copyNode;
+
+	copyNode = [&](Node *node) -> Node * {
+		Node *newNode = NodeDB::GetInstance().Construct(node->TypeHash());
+		std::vector<std::string> props;
+		NodeDB::GetInstance().GetPropertyNames(node->TypeHash(), props);
+		for (auto &propName : props) {
+			NodeProperty prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName);
+			prop.set(newNode, prop.get(node));
+		}
+		for (auto &[id, behaviour] : node->GetBehaviours()) {
+			newNode->AddBehaviour(behaviour.GetBehaviourName());
+		}
+
+		for (Node *child : node->GetChildren()) {
+			newNode->AddChild(copyNode(child));
+		}
+
+		return newNode;
+	};
+
+	dst->Nodes().clear();
+	for (Node *node : src->Nodes()) {
+		Node *newNode = copyNode(node);
+		dst->Nodes().push_back(newNode);
+	}
+}

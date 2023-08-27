@@ -18,6 +18,8 @@ class Scene {
 	Error Load(const char *path);
 	Error Save(const char *path);
 
+	static void copy(Scene *src, Scene *dst);
+
   private:
 	std::vector<Node *> m_nodes;
 };
