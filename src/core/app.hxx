@@ -38,11 +38,13 @@ class App {
 
 	inline eventpp::CallbackList<void(int, int)> &WindowResizeCallback() { return m_windowResizeCallback; }
 
-	inline int HoveredItem() { return m_hoveredItem; }
-
 	void SetCurrentScene(Scene *scene);
 
 	Font &TestFont() { return m_testFont; }
+
+	inline bool IsRunning() const { return m_running; }
+	void Start();
+	void Stop();
 
   private:
 	void mainLoop();
@@ -53,6 +55,7 @@ class App {
 	Shader mainShader;
 
 	Scene *m_pCurrentScene = nullptr;
+	Scene m_backgroundScene;
 
 	Texture m_testTexture;
 	Font m_testFont;
@@ -74,10 +77,7 @@ class App {
 
 	eventpp::CallbackList<void(int, int)> m_windowResizeCallback;
 
-	int m_hoveredItem = 0;
-	LRTBFlags m_resizeFlags;
-	int m_resizeContainerID = 0;
-	bool m_resizing = false;
+	bool m_running = false;
 
 	friend class FileServer;
 	std::filesystem::path m_appPath = "";

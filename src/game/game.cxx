@@ -60,7 +60,8 @@ class MainScene : public Scene {
 
 		for (Node *node : Nodes()) {
 			UpdateNode(node);
-			node->UpdateBehaviours();
+			if (App::GetInstance().IsRunning())
+				node->UpdateBehaviours();
 		}
 
 		return;

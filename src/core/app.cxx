@@ -327,11 +327,11 @@ void App::mainLoop() {
 	RenderingServer::GetInstance().GetWindowSize(w, h);
 	glViewport(0, 0, w, h);
 
-	double x, y;
-	InputServer::GetInstance().GetMousePosition(x, y);
-	x *= (1920.f / (float)w);
-	y *= (1080.f / (float)h);
-	m_hoveredItem = m_layer2D.ReadAttachmentInt(1, x, y);
+	// double x, y;
+	// InputServer::GetInstance().GetMousePosition(x, y);
+	// x *= (1920.f / (float)w);
+	// y *= (1080.f / (float)h);
+	// m_hoveredItem = m_layer2D.ReadAttachmentInt(1, x, y);
 
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(w), 0.f, static_cast<float>(h)));
 	// m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
@@ -343,6 +343,19 @@ void App::mainLoop() {
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f, -128.f, 128.f));
 	Renderer().Reset();
 	glEnable(GL_DEPTH_TEST);
+
+	static bool toggled = false;
+	if (!InputServer::GetInstance().IsKeyDown(GLFW_KEY_F5)) {
+		toggled = false;
+	}
+
+	if (InputServer::GetInstance().IsKeyDown(GLFW_KEY_F5) && !toggled) {
+		toggled = true;
+		if (m_running)
+			Stop();
+		else
+			Start();
+	}
 
 	if (m_pCurrentScene != nullptr) {
 		m_pCurrentScene->UpdateScene();
@@ -378,6 +391,26 @@ void App::SetCurrentScene(Scene *scene) {
 
 	m_pCurrentScene = scene;
 	m_pCurrentScene->BeginScene();
+}
+
+void App::Start() {
+	if (m_running)
+		return;
+
+	if (nullptr != m_pCurrentScene)
+		Scene::copy(m_pCurrentScene, &m_backgroundScene);
+
+	m_running = true;
+}
+
+void App::Stop() {
+	if (!m_running)
+		return;
+
+	if (nullptr != m_pCurrentScene)
+		Scene::copy(&m_backgroundScene, m_pCurrentScene);
+
+	m_running = false;
 }
 
 extern "C" void Unload() {
