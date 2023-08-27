@@ -96,6 +96,7 @@ class NodeDB {
 		if (constructor) {
 			Node *node = constructor();
 			node->m_typeHash = type;
+			node->Name() = "New Node";
 
 			return node;
 		}
