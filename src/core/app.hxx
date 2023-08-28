@@ -39,6 +39,7 @@ class App {
 	inline eventpp::CallbackList<void(int, int)> &WindowResizeCallback() { return m_windowResizeCallback; }
 
 	void SetCurrentScene(Scene *scene);
+	inline Scene *GetCurrentScene() { return m_pCurrentScene; }
 
 	Font &TestFont() { return m_testFont; }
 

@@ -52,18 +52,23 @@ nodes:
           x: 200
           y: 200
     behaviours:
-      - Rotate Sprite
-  Barrel:
-    type: Sprite2D
-    props:
-      name:
-        str: Barrel
-      texture:
-        int: 101
-      position:
-        vec2:
-          x: 200
-          y: 200
+      - Tank Movement
+    children:
+      Barrel:
+        type: Sprite2D
+        props:
+          name:
+            str: Barrel
+          texture:
+            int: 101
+          position:
+            vec2:
+              x: 0
+              y: 0
+        behaviours:
+          - Tank Barrel
+        groups:
+          - Barrel
   sand0:
     type: Sprite2D
     props:
