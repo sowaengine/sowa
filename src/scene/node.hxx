@@ -32,6 +32,9 @@ class Node {
 	Node *GetChildIndex(size_t index);
 	void RemoveChild(std::string name);
 
+	//
+	inline std::vector<std::string> &get_groups() { return m_groups; }
+
   protected:
 	std::string m_name = "";
 
@@ -43,6 +46,8 @@ class Node {
 
 	Node *m_parent = nullptr;
 	std::vector<Node *> m_children;
+
+	std::vector<std::string> m_groups;
 };
 
 #endif // SW_NODE_HXX

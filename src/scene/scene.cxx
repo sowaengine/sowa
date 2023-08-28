@@ -128,15 +128,20 @@ Error Scene::Load(const char *path) {
 	}
 
 	YAML::Node nodes = scene["nodes"];
-	for (const auto &node : nodes) {
-		std::string name = node.first.as<std::string>("New Node");
+	std::function<void(Node *, const std::pair<YAML::Node, YAML::Node> &)> deserializeNode;
 
-		YAML::Node nodeData = node.second;
+	deserializeNode = [&](Node *parent, const std::pair<YAML::Node, YAML::Node> &doc) {
+		std::string name = doc.first.as<std::string>("New doc");
+
+		YAML::Node nodeData = doc.second;
 		std::string type = nodeData["type"].as<std::string>("Node");
 
 		Node *pNode = db.Construct(db.GetNodeType(type));
 		pNode->Name() = name;
-		m_nodes.push_back(pNode);
+		if (parent == nullptr)
+			this->Nodes().push_back(pNode);
+		else
+			parent->AddChild(pNode);
 
 		for (const auto &prop : nodeData["props"]) {
 			std::string propName = prop.first.as<std::string>();
@@ -155,6 +160,21 @@ Error Scene::Load(const char *path) {
 
 			pNode->AddBehaviour(name);
 		}
+
+		for (const auto &group : nodeData["groups"]) {
+			std::string name = group.as<std::string>("");
+			if (name == "")
+				continue;
+			pNode->get_groups().push_back(name);
+		}
+
+		for (const auto &child : nodeData["children"]) {
+			deserializeNode(pNode, child);
+		}
+	};
+
+	for (const auto &node : nodes) {
+		deserializeNode(nullptr, node);
 	}
 
 	return OK;
@@ -204,6 +224,16 @@ Error Scene::Save(const char *path) {
 			node["behaviours"] = behaviours;
 		}
 
+		auto groupList = pNode->get_groups();
+		if (groupList.size() > 0) {
+			YAML::Node groups;
+
+			for (auto &group : groupList) {
+				groups.push_back(group);
+			}
+			node["groups"] = groups;
+		}
+
 		doc[pNode->Name()] = node;
 
 		for (Node *child : pNode->GetChildren()) {
@@ -229,6 +259,32 @@ Error Scene::Save(const char *path) {
 	}
 
 	return OK;
+}
+
+static Node *search_node_in_group(Node *node, std::string group) {
+	for (std::string &groupName : node->get_groups()) {
+		if (groupName == group) {
+			return node;
+		}
+	}
+
+	for (Node *child : node->GetChildren()) {
+		Node *find = search_node_in_group(child, group);
+		if (nullptr != find)
+			return find;
+	}
+
+	return nullptr;
+}
+
+Node *Scene::get_node_in_group(std::string group) {
+	for (Node *node : Nodes()) {
+		Node *find = search_node_in_group(node, group);
+		if (nullptr != find)
+			return find;
+	}
+
+	return nullptr;
 }
 
 void Scene::copy(Scene *src, Scene *dst) {

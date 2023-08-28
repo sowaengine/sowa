@@ -18,6 +18,8 @@ class Scene {
 	Error Load(const char *path);
 	Error Save(const char *path);
 
+	Node* get_node_in_group(std::string group);
+
 	static void copy(Scene *src, Scene *dst);
 
   private:
