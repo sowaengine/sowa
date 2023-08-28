@@ -29,6 +29,8 @@
 #include "behaviour/behaviour.hxx"
 #include "behaviour/behaviour_db.hxx"
 
+#include "behaviour/builtin/top_down_eight_dir.hxx"
+
 #include "game/game.hxx"
 
 #include <filesystem>
@@ -264,6 +266,7 @@ Error App::Init() {
 	});
 
 	BehaviourDB::GetInstance().RegisterBehaviour("Rotate Sprite", rotationBehaviour);
+	BehaviourDB::GetInstance().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
 	Main();
 
