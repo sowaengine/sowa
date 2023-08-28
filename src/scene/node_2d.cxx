@@ -1,6 +1,7 @@
 #include "node_2d.hxx"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 glm::mat4 Node2D::CalculateTransform() {
 	glm::mat4 model(1.f);
@@ -16,4 +17,13 @@ glm::mat4 Node2D::CalculateTransform() {
 	model = glm::scale(model, {m_scale.x, m_scale.y, 1.f});
 
 	return model;
+}
+
+glm::vec2 Node2D::GlobalPosition() {
+	glm::vec3 pos = CalculateTransform()[3];
+	return glm::vec2(pos.x, pos.y);
+}
+float Node2D::GlobalRotation() {
+	glm::quat rot = glm::quat_cast(CalculateTransform());
+	return glm::degrees(glm::eulerAngles(rot).z);
 }

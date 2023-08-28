@@ -17,6 +17,9 @@ class Node2D : public Node {
 
 	glm::mat4 CalculateTransform();
 
+	glm::vec2 GlobalPosition();
+	float GlobalRotation();
+
   protected:
 	glm::vec2 m_position = glm::vec2(0.f, 0.f);
 	glm::vec2 m_scale = glm::vec2(1.f, 1.f);
