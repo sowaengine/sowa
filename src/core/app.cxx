@@ -33,9 +33,11 @@
 
 #include "game/game.hxx"
 
+#include <codecvt>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <locale>
 
 #ifdef SW_WEB
 #include <emscripten.h>
@@ -212,6 +214,42 @@ Error App::Init() {
 					SetCommandInterface(nullptr);
 				}
 			}
+		}
+
+		if ((event.action == KEY_PRESSED || event.action == KEY_REPEAT) && event.key == KEY_BACKSPACE && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
+			if (this->m_commandInterface->text.size() > 0) {
+				if (event.modifiers.control) {
+					std::size_t index = std::string::npos;
+					if (this->m_commandInterface->text[this->m_commandInterface->text.size() - 1] == ' ') {
+						index = this->m_commandInterface->text.find_last_not_of(' ');
+
+						if (index != std::string::npos && index + 1 < this->m_commandInterface->text.size()) {
+							index += 1;
+						}
+					} else {
+						index = this->m_commandInterface->text.find_last_of(' ');
+					}
+
+					if (index == std::string::npos) {
+						// has no space
+						this->m_commandInterface->text = "";
+					} else {
+						this->m_commandInterface->text = this->m_commandInterface->text.substr(0, index);
+					}
+				} else {
+					this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text.size() - 1);
+				}
+			}
+		}
+	});
+
+	CharCallback().append([&](InputEventChar event) {
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		std::wstring wstr = {static_cast<wchar_t>(event.codepoint)};
+		std::string str = converter.to_bytes(wstr);
+
+		if (nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
+			this->m_commandInterface->text += str;
 		}
 	});
 
@@ -404,15 +442,32 @@ void App::mainLoop() {
 		glm::vec3 normalColor(0.12f, 0.12f, 0.12f);
 		glm::vec3 hoveredColor(0.2f, 0.2f, 0.2f);
 
-		int index = -1;
+		const float padding = 8.f;
+		const float xPos = w / 3.f;
+		const float width = w / 3.f;
+
 		float cursorY = h;
+
+		if (interface->text_input) {
+			float textHeight = m_testFont.CalcTextSize("I").y * 0.4f;
+			float height = textHeight + (padding * 2);
+			cursorY -= height;
+
+			float textX = xPos + padding;
+			float textY = cursorY + padding;
+
+			const float outlineSize = 2.f;
+
+			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, 0.6, 0.6, 0.6, 1.f, 0.f, 0.f);
+			Renderer().PushQuad(xPos + outlineSize, cursorY + outlineSize, 0.f, width - (outlineSize * 2), height - (outlineSize * 2), normalColor.x, normalColor.y, normalColor.z, 1.f, 0.f, 0.f);
+			Renderer().DrawText(interface->text, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, 0.4f);
+		}
+
+		int index = -1;
 		for (CommandOption &opt : interface->options) {
 			index++;
-			glm::vec2 size = m_testFont.CalcTextSize(opt.label) * 0.5f;
-			float padding = 5.f;
+			glm::vec2 size = m_testFont.CalcTextSize("I") * 0.4f;
 
-			float xPos = w / 3.f;
-			float width = w / 3.f;
 			float height = size.y + (padding * 2);
 			cursorY -= height;
 
@@ -424,7 +479,7 @@ void App::mainLoop() {
 				color = hoveredColor;
 
 			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, color.x, color.y, color.z, 1.f, 0.f, 0.f);
-			Renderer().DrawText(opt.label, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, 0.5f);
+			Renderer().DrawText(opt.label, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, 0.4f);
 		}
 	}
 

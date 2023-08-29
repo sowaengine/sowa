@@ -19,6 +19,9 @@ class CommandInterface {
 	std::vector<CommandOption> options;
 	int currentIndex = 0;
 
+	bool text_input = false;
+	std::string text = "";
+
   private:
 };
 
