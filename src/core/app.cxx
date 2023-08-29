@@ -11,7 +11,6 @@
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
 
-#include "data/lrtb_flags.hxx"
 #include "data/toml_document.hxx"
 
 #include "ui/new_container.hxx"

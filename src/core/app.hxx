@@ -9,7 +9,6 @@
 #include <filesystem>
 
 #include "data/input_event/input_event.hxx"
-#include "data/lrtb_flags.hxx"
 #include "resource/font/font.hxx"
 #include "ui/new_tree.hxx"
 

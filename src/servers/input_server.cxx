@@ -1,5 +1,5 @@
 #include "input_server.hxx"
-#include "input.hxx"
+#include "core/input.hxx"
 #include "rendering_server.hxx"
 
 InputServer::InputServer() {
