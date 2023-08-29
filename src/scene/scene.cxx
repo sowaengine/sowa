@@ -94,6 +94,8 @@ void Scene::EndScene() {
 }
 
 Error Scene::Load(const char *path) {
+	m_path = "";
+
 	NodeDB &db = NodeDB::GetInstance();
 	m_nodes.clear();
 
@@ -177,6 +179,7 @@ Error Scene::Load(const char *path) {
 		deserializeNode(nullptr, node);
 	}
 
+	m_path = path;
 	return OK;
 }
 

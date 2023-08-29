@@ -4,6 +4,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/projection.hpp"
 
+#include "core/command/interfaces/command_palette.hxx"
 #include "core/graphics.hxx"
 #include "core/time.hxx"
 
@@ -172,6 +173,46 @@ Error App::Init() {
 			else
 				Start();
 		}
+
+		if (event.action == KEY_PRESSED && event.key == KEY_P && event.modifiers.control && event.modifiers.shift && nullptr == this->m_commandInterface) {
+			SetCommandInterface(new CommandPaletteInterface);
+		}
+
+		if (event.action == KEY_PRESSED && event.key == KEY_ESCAPE) {
+			if (nullptr != this->m_commandInterface) {
+				SetCommandInterface(nullptr);
+			} else {
+				exit(0);
+			}
+		}
+
+		if (event.action == KEY_PRESSED && event.key == KEY_DOWN && nullptr != this->m_commandInterface) {
+			this->m_commandInterface->currentIndex += 1;
+
+			this->m_commandInterface->currentIndex %= this->m_commandInterface->options.size();
+		}
+
+		if (event.action == KEY_PRESSED && event.key == KEY_UP && nullptr != this->m_commandInterface) {
+			this->m_commandInterface->currentIndex -= 1;
+
+			if (this->m_commandInterface->currentIndex == -1)
+				this->m_commandInterface->currentIndex = this->m_commandInterface->options.size() - 1;
+		}
+
+		if (event.action == KEY_PRESSED && event.key == KEY_ENTER && nullptr != this->m_commandInterface) {
+			if (this->m_commandInterface->options.size() > static_cast<size_t>(this->m_commandInterface->currentIndex)) {
+				std::function<void()> func = this->m_commandInterface->options[this->m_commandInterface->currentIndex].action;
+
+				CommandInterface *oldInterface = this->m_commandInterface;
+				if (func)
+					func();
+
+				// if user did not set command interface to another, delete it.
+				if (oldInterface == this->m_commandInterface) {
+					SetCommandInterface(nullptr);
+				}
+			}
+		}
 	});
 
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
@@ -278,6 +319,22 @@ Error App::Init() {
 
 	Main();
 
+	RegisterCommand("Start/Stop Game", [&]() {
+		if (IsRunning())
+			Stop();
+		else
+			Start();
+	});
+	RegisterCommand("Save Scene", [&]() {
+		if (nullptr == GetCurrentScene() || GetCurrentScene()->Path() == "")
+			return;
+
+		GetCurrentScene()->Save(GetCurrentScene()->Path().c_str());
+	});
+	RegisterCommand("Exit", [&]() {
+		exit(0);
+	});
+
 	return OK;
 }
 
@@ -338,15 +395,40 @@ void App::mainLoop() {
 	RenderingServer::GetInstance().GetWindowSize(w, h);
 	glViewport(0, 0, w, h);
 
-	// double x, y;
-	// InputServer::GetInstance().GetMousePosition(x, y);
-	// x *= (1920.f / (float)w);
-	// y *= (1080.f / (float)h);
-	// m_hoveredItem = m_layer2D.ReadAttachmentInt(1, x, y);
-
-	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(w), 0.f, static_cast<float>(h)));
-	// m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f));
+	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(w), 0.f, static_cast<float>(h), -128.f, 128.f));
 	Renderer().Reset();
+
+	if (nullptr != m_commandInterface) {
+		CommandInterface *interface = m_commandInterface;
+
+		glm::vec3 normalColor(0.12f, 0.12f, 0.12f);
+		glm::vec3 hoveredColor(0.2f, 0.2f, 0.2f);
+
+		int index = -1;
+		float cursorY = h;
+		for (CommandOption &opt : interface->options) {
+			index++;
+			glm::vec2 size = m_testFont.CalcTextSize(opt.label) * 0.5f;
+			float padding = 5.f;
+
+			float xPos = w / 3.f;
+			float width = w / 3.f;
+			float height = size.y + (padding * 2);
+			cursorY -= height;
+
+			float textX = xPos + padding;
+			float textY = cursorY + padding;
+
+			glm::vec3 color = normalColor;
+			if (index == interface->currentIndex)
+				color = hoveredColor;
+
+			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, color.x, color.y, color.z, 1.f, 0.f, 0.f);
+			Renderer().DrawText(opt.label, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, 0.5f);
+		}
+	}
+
+	Renderer().End();
 
 	SetRenderLayer(&m_layer2D);
 	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f, true);
@@ -358,7 +440,6 @@ void App::mainLoop() {
 	if (m_pCurrentScene != nullptr) {
 		m_pCurrentScene->UpdateScene();
 	}
-
 	Renderer().DrawText("Sowa Engine", &m_testFont, 10.f, 10.f, glm::mat4(1.f), 0.f, 1.f);
 	Renderer().End();
 
@@ -367,11 +448,11 @@ void App::mainLoop() {
 
 	fullscreenShader.Bind();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_layerUI.GetTargetTextureID(0));
+	glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
 	fullscreenModel.Draw();
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
+	glBindTexture(GL_TEXTURE_2D, m_layerUI.GetTargetTextureID(0));
 	fullscreenModel.Draw();
 
 	RenderingServer::GetInstance().SwapBuffers();
@@ -409,6 +490,21 @@ void App::Stop() {
 		Scene::copy(&m_backgroundScene, m_pCurrentScene);
 
 	m_running = false;
+}
+
+void App::RegisterCommand(std::string command, std::function<void()> action) {
+	CommandOption opt;
+	opt.label = command;
+	opt.action = action;
+
+	m_commands.push_back(opt);
+}
+
+void App::SetCommandInterface(CommandInterface *interface) {
+	if (nullptr != m_commandInterface)
+		delete m_commandInterface;
+
+	m_commandInterface = interface;
 }
 
 extern "C" void Unload() {

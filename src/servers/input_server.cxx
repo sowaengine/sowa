@@ -10,8 +10,8 @@ InputServer &InputServer::GetInstance() {
 }
 
 void InputServer::ProcessInput() {
-	if (glfwGetKey(RenderingServer::GetInstance().m_pWindowHandle, KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(RenderingServer::GetInstance().m_pWindowHandle, true);
+	// if (glfwGetKey(RenderingServer::GetInstance().m_pWindowHandle, KEY_ESCAPE) == GLFW_PRESS)
+	// 	glfwSetWindowShouldClose(RenderingServer::GetInstance().m_pWindowHandle, true);
 }
 
 void InputServer::PollEvents() {

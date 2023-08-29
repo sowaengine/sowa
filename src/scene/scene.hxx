@@ -18,12 +18,15 @@ class Scene {
 	Error Load(const char *path);
 	Error Save(const char *path);
 
-	Node* get_node_in_group(std::string group);
+	Node *get_node_in_group(std::string group);
+	inline const std::string &Path() { return m_path; }
 
 	static void copy(Scene *src, Scene *dst);
 
   private:
 	std::vector<Node *> m_nodes;
+
+	std::string m_path = "";
 };
 
 #endif // SW_SCENE_HXX

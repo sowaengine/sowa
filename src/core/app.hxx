@@ -2,8 +2,10 @@
 #define SW_APP_HXX
 #pragma once
 
+#include "core/command/command_interface.hxx"
 #include "core/error/error.hxx"
 #include "core/graphics.hxx"
+
 #include "data/project_settings.hxx"
 
 #include <filesystem>
@@ -47,6 +49,10 @@ class App {
 	void Start();
 	void Stop();
 
+	void RegisterCommand(std::string command, std::function<void()> action);
+	inline const std::vector<CommandOption> &Commands() { return m_commands; }
+	void SetCommandInterface(CommandInterface *interface);
+
   private:
 	void mainLoop();
 	static void mainLoopCaller(void *self);
@@ -69,6 +75,9 @@ class App {
 	RenderLayer m_layerUI;
 
 	project_settings m_projectSettings;
+
+	CommandInterface *m_commandInterface = nullptr;
+	std::vector<CommandOption> m_commands;
 
 	BatchRenderer m_batchRenderer;
 	NewTree m_uiTree;
