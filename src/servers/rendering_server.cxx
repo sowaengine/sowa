@@ -27,6 +27,10 @@ struct CallbackBridge {
 	void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
 		RenderingServer::GetInstance().key_callback(window, key, scancode, action, mods);
 	}
+
+	void CharCallback(GLFWwindow *window, unsigned int codepoint) {
+		RenderingServer::GetInstance().char_callback(window, codepoint);
+	}
 };
 
 static void CallbackWrapperFramebufferSizeCallback(GLFWwindow *window, int width, int height) {
@@ -45,7 +49,8 @@ static void CallbackWrapperKeyCallback(GLFWwindow *window, int key, int scancode
 	CallbackBridge().KeyCallback(window, key, scancode, action, mods);
 }
 
-static void char_callback(GLFWwindow *window, unsigned int codepoint) {
+static void CallbackWrapperCharCallback(GLFWwindow *window, unsigned int codepoint) {
+	CallbackBridge().CharCallback(window, codepoint);
 }
 
 RenderingServer::RenderingServer() {
@@ -98,7 +103,7 @@ void RenderingServer::CreateWindow(int width, int height, const std::string &tit
 #endif
 
 	glfwSetFramebufferSizeCallback(m_pWindowHandle, CallbackWrapperFramebufferSizeCallback);
-	glfwSetCharCallback(m_pWindowHandle, char_callback);
+	glfwSetCharCallback(m_pWindowHandle, CallbackWrapperCharCallback);
 	glfwSetKeyCallback(m_pWindowHandle, CallbackWrapperKeyCallback);
 	glfwSetMouseButtonCallback(m_pWindowHandle, CallbackWrapperMouseButtonCallback);
 	glfwSetCursorPosCallback(m_pWindowHandle, CallbackWrapperCursorPosCallback);
@@ -204,4 +209,11 @@ void RenderingServer::key_callback(GLFWwindow *window, int key, int scancode, in
 		event.modifiers.super = true;
 
 	App::GetInstance().KeyCallback()(event);
+}
+
+void RenderingServer::char_callback(GLFWwindow *window, unsigned int codepoint) {
+	InputEventChar event;
+	event.codepoint = codepoint;
+
+	App::GetInstance().CharCallback()(event);
 }
