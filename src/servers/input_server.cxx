@@ -1,4 +1,5 @@
 #include "input_server.hxx"
+#include "input.hxx"
 #include "rendering_server.hxx"
 
 InputServer::InputServer() {
@@ -9,7 +10,7 @@ InputServer &InputServer::GetInstance() {
 }
 
 void InputServer::ProcessInput() {
-	if (glfwGetKey(RenderingServer::GetInstance().m_pWindowHandle, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	if (glfwGetKey(RenderingServer::GetInstance().m_pWindowHandle, KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(RenderingServer::GetInstance().m_pWindowHandle, true);
 }
 

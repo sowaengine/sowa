@@ -166,6 +166,15 @@ Error App::Init() {
 		this->m_layerUI.Resize(width, height);
 	});
 
+	KeyCallback().append([this](InputEventKey event) {
+		if (event.action == KEY_PRESSED && event.key == KEY_F5) {
+			if (IsRunning())
+				Stop();
+			else
+				Start();
+		}
+	});
+
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -346,19 +355,6 @@ void App::mainLoop() {
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f, -128.f, 128.f));
 	Renderer().Reset();
 	glEnable(GL_DEPTH_TEST);
-
-	static bool toggled = false;
-	if (!InputServer::GetInstance().IsKeyDown(GLFW_KEY_F5)) {
-		toggled = false;
-	}
-
-	if (InputServer::GetInstance().IsKeyDown(GLFW_KEY_F5) && !toggled) {
-		toggled = true;
-		if (m_running)
-			Stop();
-		else
-			Start();
-	}
 
 	if (m_pCurrentScene != nullptr) {
 		m_pCurrentScene->UpdateScene();

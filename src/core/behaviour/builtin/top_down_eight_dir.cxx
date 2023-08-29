@@ -1,5 +1,6 @@
 #include "top_down_eight_dir.hxx"
 
+#include "core/input.hxx"
 #include "core/rendering/gl.hxx"
 #include "core/time.hxx"
 #include "glm/glm.hpp"
@@ -26,16 +27,16 @@ void TopDownEightDirMovement::Update(Node *node) {
 
 	glm::vec2 input(0.f, 0.f);
 
-	if (InputServer::GetInstance().IsKeyDown(GLFW_KEY_W)) {
+	if (InputServer::GetInstance().IsKeyDown(KEY_W)) {
 		input.y += 1.f;
 	}
-	if (InputServer::GetInstance().IsKeyDown(GLFW_KEY_S)) {
+	if (InputServer::GetInstance().IsKeyDown(KEY_S)) {
 		input.y -= 1.f;
 	}
-	if (InputServer::GetInstance().IsKeyDown(GLFW_KEY_D)) {
+	if (InputServer::GetInstance().IsKeyDown(KEY_D)) {
 		input.x += 1.f;
 	}
-	if (InputServer::GetInstance().IsKeyDown(GLFW_KEY_A)) {
+	if (InputServer::GetInstance().IsKeyDown(KEY_A)) {
 		input.x -= 1.f;
 	}
 

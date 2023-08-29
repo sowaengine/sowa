@@ -23,6 +23,10 @@ struct CallbackBridge {
 	void CursorPosCalllback(GLFWwindow *window, double x, double y) {
 		RenderingServer::GetInstance().cursor_pos_callback(window, x, y);
 	}
+
+	void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+		RenderingServer::GetInstance().key_callback(window, key, scancode, action, mods);
+	}
 };
 
 static void CallbackWrapperFramebufferSizeCallback(GLFWwindow *window, int width, int height) {
@@ -37,9 +41,8 @@ static void CallbackWrapperCursorPosCallback(GLFWwindow *window, double x, doubl
 	CallbackBridge().CursorPosCalllback(window, x, y);
 }
 
-static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-	if (action == GLFW_PRESS) {
-	}
+static void CallbackWrapperKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	CallbackBridge().KeyCallback(window, key, scancode, action, mods);
 }
 
 static void char_callback(GLFWwindow *window, unsigned int codepoint) {
@@ -96,7 +99,7 @@ void RenderingServer::CreateWindow(int width, int height, const std::string &tit
 
 	glfwSetFramebufferSizeCallback(m_pWindowHandle, CallbackWrapperFramebufferSizeCallback);
 	glfwSetCharCallback(m_pWindowHandle, char_callback);
-	glfwSetKeyCallback(m_pWindowHandle, key_callback);
+	glfwSetKeyCallback(m_pWindowHandle, CallbackWrapperKeyCallback);
 	glfwSetMouseButtonCallback(m_pWindowHandle, CallbackWrapperMouseButtonCallback);
 	glfwSetCursorPosCallback(m_pWindowHandle, CallbackWrapperCursorPosCallback);
 }
@@ -182,4 +185,23 @@ void RenderingServer::cursor_pos_callback(GLFWwindow *window, double x, double y
 	event.mouseY = y;
 
 	App::GetInstance().MouseMoveCallback()(event);
+}
+
+void RenderingServer::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+	InputEventKey event;
+	event.key = key;
+	event.action = action == GLFW_PRESS	   ? KEY_PRESSED
+				   : action == GLFW_REPEAT ? KEY_REPEAT
+										   : KEY_RELEASED;
+
+	if (mods & GLFW_MOD_SHIFT)
+		event.modifiers.shift = true;
+	if (mods & GLFW_MOD_CONTROL)
+		event.modifiers.control = true;
+	if (mods & GLFW_MOD_ALT)
+		event.modifiers.alt = true;
+	if (mods & GLFW_MOD_SUPER)
+		event.modifiers.super = true;
+
+	App::GetInstance().KeyCallback()(event);
 }
