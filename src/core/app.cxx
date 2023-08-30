@@ -217,29 +217,61 @@ Error App::Init() {
 		}
 
 		if ((event.action == KEY_PRESSED || event.action == KEY_REPEAT) && event.key == KEY_BACKSPACE && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
-			if (this->m_commandInterface->text.size() > 0) {
+			if (this->m_commandInterface->text.size() > 0 && this->m_commandInterface->text_cursor != 0) {
 				if (event.modifiers.control) {
 					std::size_t index = std::string::npos;
-					if (this->m_commandInterface->text[this->m_commandInterface->text.size() - 1] == ' ') {
-						index = this->m_commandInterface->text.find_last_not_of(' ');
+					if (this->m_commandInterface->text[this->m_commandInterface->text_cursor - 1] == ' ') {
+						index = this->m_commandInterface->text.find_last_not_of(' ', this->m_commandInterface->text_cursor - 1);
 
-						if (index != std::string::npos && index + 1 < this->m_commandInterface->text.size()) {
-							index += 1;
-						}
 					} else {
-						index = this->m_commandInterface->text.find_last_of(' ');
+						index = this->m_commandInterface->text.find_last_of(' ', this->m_commandInterface->text_cursor - 1);
 					}
+					if (index != std::string::npos && index + 1 < this->m_commandInterface->text.size()) {
+						index += 1;
+					}
+
+					std::string remaining = this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
 
 					if (index == std::string::npos) {
 						// has no space
-						this->m_commandInterface->text = "";
+						this->m_commandInterface->text = remaining;
+						this->m_commandInterface->text_cursor = 0;
 					} else {
-						this->m_commandInterface->text = this->m_commandInterface->text.substr(0, index);
+						this->m_commandInterface->text = this->m_commandInterface->text.substr(0, index) + remaining;
+						this->m_commandInterface->text_cursor = index;
 					}
 				} else {
-					this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text.size() - 1);
+					if (this->m_commandInterface->text_cursor == this->m_commandInterface->text.size())
+						this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text.size() - 1);
+					else
+						this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor - 1) + this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
+
+					if (this->m_commandInterface->text_cursor > 0)
+						this->m_commandInterface->text_cursor -= 1;
 				}
 			}
+		}
+
+		if ((event.action == KEY_PRESSED || event.action == KEY_REPEAT) && event.key == KEY_RIGHT && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
+			if (this->m_commandInterface->text.size() > 0) {
+				this->m_commandInterface->text_cursor += 1;
+
+				if (this->m_commandInterface->text_cursor > this->m_commandInterface->text.size())
+					this->m_commandInterface->text_cursor = this->m_commandInterface->text.size();
+			}
+		}
+
+		if ((event.action == KEY_PRESSED || event.action == KEY_REPEAT) && event.key == KEY_LEFT && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
+			if (this->m_commandInterface->text_cursor > 0)
+				this->m_commandInterface->text_cursor -= 1;
+		}
+
+		if (event.action == KEY_PRESSED && event.key == KEY_HOME && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
+			this->m_commandInterface->text_cursor = 0;
+		}
+
+		if (event.action == KEY_PRESSED && event.key == KEY_END && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
+			this->m_commandInterface->text_cursor = this->m_commandInterface->text.size();
 		}
 	});
 
@@ -249,7 +281,12 @@ Error App::Init() {
 		std::string str = converter.to_bytes(wstr);
 
 		if (nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
-			this->m_commandInterface->text += str;
+			if (this->m_commandInterface->text_cursor == this->m_commandInterface->text.size())
+				this->m_commandInterface->text += str;
+			else
+				this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor) + str + this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
+
+			this->m_commandInterface->text_cursor += 1;
 		}
 	});
 
@@ -445,12 +482,13 @@ void App::mainLoop() {
 		const float padding = 8.f;
 		const float xPos = w / 3.f;
 		const float width = w / 3.f;
+		const float textScale = 0.4f;
 
 		float cursorY = h;
 
 		if (interface->text_input) {
-			float textHeight = m_testFont.CalcTextSize("I").y * 0.4f;
-			float height = textHeight + (padding * 2);
+			glm::vec2 textSize = m_testFont.CalcTextSize("I") * textScale;
+			float height = textSize.y + (padding * 2);
 			cursorY -= height;
 
 			float textX = xPos + padding;
@@ -460,13 +498,22 @@ void App::mainLoop() {
 
 			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, 0.6, 0.6, 0.6, 1.f, 0.f, 0.f);
 			Renderer().PushQuad(xPos + outlineSize, cursorY + outlineSize, 0.f, width - (outlineSize * 2), height - (outlineSize * 2), normalColor.x, normalColor.y, normalColor.z, 1.f, 0.f, 0.f);
-			Renderer().DrawText(interface->text, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, 0.4f);
+			Renderer().DrawText(interface->text, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, textScale);
+
+			static float f = 0.f;
+			f += 0.5 * Time::Delta();
+			float opacity = (std::sin(f) + 1.f) * 0.5f;
+
+			const float cursorPadding = 5.f;
+			const float cursorWidth = 2.f;
+			float textCursorX = m_testFont.CalcTextSize(this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor)).x * textScale;
+			Renderer().PushQuad(xPos + textCursorX + textSize.x + 2.f, cursorY + cursorPadding, 0.f, cursorWidth, height - (cursorPadding * 2), 0.8f, 0.8f, 0.8f, opacity, 0.f, 0.f);
 		}
 
 		int index = -1;
 		for (CommandOption &opt : interface->options) {
 			index++;
-			glm::vec2 size = m_testFont.CalcTextSize("I") * 0.4f;
+			glm::vec2 size = m_testFont.CalcTextSize("I") * textScale;
 
 			float height = size.y + (padding * 2);
 			cursorY -= height;
@@ -479,7 +526,7 @@ void App::mainLoop() {
 				color = hoveredColor;
 
 			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, color.x, color.y, color.z, 1.f, 0.f, 0.f);
-			Renderer().DrawText(opt.label, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, 0.4f);
+			Renderer().DrawText(opt.label, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, textScale);
 		}
 	}
 

@@ -21,6 +21,7 @@ class CommandInterface {
 
 	bool text_input = false;
 	std::string text = "";
+	size_t text_cursor = 0;
 
   private:
 };
