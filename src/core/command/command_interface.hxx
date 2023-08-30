@@ -20,8 +20,9 @@ class CommandInterface {
 	int currentIndex = 0;
 
 	bool text_input = false;
-	std::string text = "";
+	std::wstring text = L"";
 	size_t text_cursor = 0;
+	std::wstring text_placeholder = L"";
 
 	std::function<void()> action;
 

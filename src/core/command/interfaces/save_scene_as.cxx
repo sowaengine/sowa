@@ -7,15 +7,26 @@
 
 SceneSaveAsInterface::SceneSaveAsInterface(std::string path) {
 	if (path == "") {
-		text = "res://scene.escn";
+		text = L"res://scene.escn";
 	} else {
-		text = path;
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		std::wstring wide_string = converter.from_bytes(path);
+
+		text = wide_string;
 	}
 	text_input = true;
 	text_cursor = text.size();
 
+	std::filesystem::path p = text;
+	if (p.has_extension()) {
+		text_cursor -= p.extension().string().size();
+	}
+
 	action = [this]() {
-		Error err = App::GetInstance().GetCurrentScene()->Save(this->text.c_str());
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		std::string str = converter.to_bytes(this->text);
+
+		Error err = App::GetInstance().GetCurrentScene()->Save(str.c_str());
 		if (err != OK) {
 			std::cout << "Failed to save scene " << err << std::endl;
 		}

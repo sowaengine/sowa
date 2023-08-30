@@ -239,7 +239,7 @@ Error App::Init() {
 						index += 1;
 					}
 
-					std::string remaining = this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
+					std::wstring remaining = this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
 
 					if (index == std::string::npos) {
 						// has no space
@@ -285,17 +285,17 @@ Error App::Init() {
 	});
 
 	CharCallback().append([&](InputEventChar event) {
-		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+		// std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 		std::wstring wstr = {static_cast<wchar_t>(event.codepoint)};
-		std::string str = converter.to_bytes(wstr);
+		// std::string str = converter.to_bytes(wstr);
 
 		if (nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
 			if (this->m_commandInterface->text_cursor == this->m_commandInterface->text.size())
-				this->m_commandInterface->text += str;
+				this->m_commandInterface->text += wstr;
 			else
-				this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor) + str + this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
+				this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor) + wstr + this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
 
-			this->m_commandInterface->text_cursor += 1;
+			this->m_commandInterface->text_cursor += wstr.size();
 		}
 	});
 
@@ -493,7 +493,17 @@ void App::mainLoop() {
 
 			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, 0.6, 0.6, 0.6, 1.f, 0.f, 0.f);
 			Renderer().PushQuad(xPos + outlineSize, cursorY + outlineSize, 0.f, width - (outlineSize * 2), height - (outlineSize * 2), normalColor.x, normalColor.y, normalColor.z, 1.f, 0.f, 0.f);
-			Renderer().DrawText(interface->text, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, textScale);
+			if (interface->text.size() > 0) {
+				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+				std::string str = converter.to_bytes(interface->text);
+
+				Renderer().DrawText(str, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, textScale);
+			} else if (interface->text_placeholder.size() > 0) {
+				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+				std::string str = converter.to_bytes(interface->text_placeholder);
+
+				Renderer().DrawText(str, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, textScale, 0.f, 0.f, 1.f, 1.f, 1.f, 0.6f);
+			}
 
 			static float f = 0.f;
 			f += 0.5 * Time::Delta();
@@ -501,7 +511,10 @@ void App::mainLoop() {
 
 			const float cursorPadding = 5.f;
 			const float cursorWidth = 2.f;
-			float textCursorX = m_testFont.CalcTextSize(this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor)).x * textScale;
+
+			std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+			std::string str = converter.to_bytes(this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor));
+			float textCursorX = m_testFont.CalcTextSize(str).x * textScale;
 			Renderer().PushQuad(xPos + textCursorX + textSize.x + 2.f, cursorY + cursorPadding, 0.f, cursorWidth, height - (cursorPadding * 2), 0.8f, 0.8f, 0.8f, opacity, 0.f, 0.f);
 		}
 

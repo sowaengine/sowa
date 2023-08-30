@@ -129,7 +129,7 @@ void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float 
 	PushQuad(vertices);
 }
 
-void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float y, glm::mat4 transform, float draw_id, float scale, float maxWidth, float maxHeight) {
+void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float y, glm::mat4 transform, float draw_id, float scale, float maxWidth, float maxHeight, float r, float g, float b, float a) {
 	glm::vec2 textSize = font->CalcTextSize(text);
 
 	if (maxWidth > 0.f) {
@@ -180,10 +180,10 @@ void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float
 			vertices[i].x = points[i].x;
 			vertices[i].y = points[i].y;
 			vertices[i].z = 0.f;
-			vertices[i].r = 1.f;
-			vertices[i].g = 1.f;
-			vertices[i].b = 1.f;
-			vertices[i].a = 1.f;
+			vertices[i].r = r;
+			vertices[i].g = g;
+			vertices[i].b = b;
+			vertices[i].a = a;
 			vertices[i].u = uvs[i].x;
 			vertices[i].v = uvs[i].y;
 			vertices[i].t_id = ch.textureID;
