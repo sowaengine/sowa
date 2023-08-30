@@ -5,6 +5,7 @@
 #include "glm/gtx/projection.hpp"
 
 #include "core/command/interfaces/command_palette.hxx"
+#include "core/command/interfaces/scene_save_as.hxx"
 #include "core/graphics.hxx"
 #include "core/time.hxx"
 
@@ -202,17 +203,21 @@ Error App::Init() {
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_ENTER && nullptr != this->m_commandInterface) {
+			CommandInterface *oldInterface = this->m_commandInterface;
+
+			if (this->m_commandInterface->action) {
+				this->m_commandInterface->action();
+			}
+
 			if (this->m_commandInterface->options.size() > static_cast<size_t>(this->m_commandInterface->currentIndex)) {
 				std::function<void()> func = this->m_commandInterface->options[this->m_commandInterface->currentIndex].action;
-
-				CommandInterface *oldInterface = this->m_commandInterface;
 				if (func)
 					func();
+			}
 
-				// if user did not set command interface to another, delete it.
-				if (oldInterface == this->m_commandInterface) {
-					SetCommandInterface(nullptr);
-				}
+			// if user did not set command interface to another, delete it.
+			if (oldInterface == this->m_commandInterface) {
+				SetCommandInterface(nullptr);
 			}
 		}
 
@@ -401,10 +406,20 @@ Error App::Init() {
 			Start();
 	});
 	RegisterCommand("Save Scene", [&]() {
-		if (nullptr == GetCurrentScene() || GetCurrentScene()->Path() == "")
+		if (nullptr == GetCurrentScene())
 			return;
+		if (GetCurrentScene()->Path() == "") {
+			SetCommandInterface(new SceneSaveAsInterface(""));
+			return;
+		}
 
 		GetCurrentScene()->Save(GetCurrentScene()->Path().c_str());
+	});
+	RegisterCommand("Save Scene As", [&]() {
+		if (nullptr == GetCurrentScene())
+			return;
+
+		SetCommandInterface(new SceneSaveAsInterface(GetCurrentScene()->Path()));
 	});
 	RegisterCommand("Exit", [&]() {
 		exit(0);

@@ -21,8 +21,6 @@ Scene *scene;
 RID bulletTexture;
 RID sandTexture;
 
-Sprite2D *barrelSprite = nullptr;
-
 static void load_scene();
 
 float lerp(float from, float to, float t) {
@@ -69,7 +67,7 @@ void Main() {
 	BehaviourDB::GetInstance().RegisterBehaviour("Bullet Movement", Behaviour::New(BulletMovement::Start, BulletMovement::Update));
 
 	scene = new MainScene;
-	if (true) {
+	if (false) {
 		Error err = scene->Load("res://scenes/game.escn");
 		if (err != OK) {
 			std::cout << "Failed to load scene" << std::endl;
@@ -78,7 +76,6 @@ void Main() {
 	} else
 		load_scene();
 
-	barrelSprite = dynamic_cast<Sprite2D *>(scene->get_node_in_group("Barrel"));
 	bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png")->ResourceID();
 
 	App::GetInstance().MouseInputCallback().append(OnInput);
@@ -87,7 +84,15 @@ void Main() {
 }
 
 void OnInput(InputEventMouseButton event) {
+	if (!App::GetInstance().IsRunning())
+		return;
+
 	if (event.action == PRESSED && event.button == MB_LEFT) {
+		Sprite2D *barrelSprite = dynamic_cast<Sprite2D *>(App::GetInstance().GetCurrentScene()->get_node_in_group("Barrel"));
+		if (nullptr == barrelSprite) {
+			return;
+		}
+
 		Node *bulletNode = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 		Sprite2D *bullet = dynamic_cast<Sprite2D *>(bulletNode);
 		bullet->GetTexture() = bulletTexture;

@@ -23,6 +23,8 @@ class CommandInterface {
 	std::string text = "";
 	size_t text_cursor = 0;
 
+	std::function<void()> action;
+
   private:
 };
 
