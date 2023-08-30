@@ -46,6 +46,9 @@ struct convert<std::any> {
 		if (const int *p = std::any_cast<int>(&rhs)) {
 			node["int"] = *p;
 		}
+		if (const float *p = std::any_cast<float>(&rhs)) {
+			node["float"] = *p;
+		}
 
 		return node;
 	}
@@ -70,6 +73,8 @@ struct convert<std::any> {
 			rhs = node["vec2"].as<glm::vec2>(glm::vec2{0.f, 0.f});
 		} else if (type == "int") {
 			rhs = node["int"].as<int>(0);
+		} else if (type == "float") {
+			rhs = node["float"].as<float>(0.f);
 		}
 
 		return true;
@@ -184,6 +189,7 @@ Error Scene::Load(const char *path) {
 }
 
 Error Scene::Save(const char *path) {
+	m_path = "";
 	NodeDB &db = NodeDB::GetInstance();
 
 	YAML::Node doc;
@@ -261,6 +267,7 @@ Error Scene::Save(const char *path) {
 		return err;
 	}
 
+	m_path = path;
 	return OK;
 }
 
@@ -308,6 +315,8 @@ void Scene::copy(Scene *src, Scene *dst) {
 		for (Node *child : node->GetChildren()) {
 			newNode->AddChild(copyNode(child));
 		}
+
+		newNode->get_groups() = node->get_groups();
 
 		return newNode;
 	};
