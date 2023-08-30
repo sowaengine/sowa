@@ -68,6 +68,9 @@ class NodeDB {
 	}
 
 	NodeType GetNodeType(std::string nodeType) {
+		if (nodeType == "") {
+			return 0;
+		}
 		return m_nodeTypeHashes[nodeType];
 	}
 

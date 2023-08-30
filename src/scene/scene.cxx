@@ -99,8 +99,6 @@ void Scene::EndScene() {
 }
 
 Error Scene::Load(const char *path) {
-	m_path = "";
-
 	NodeDB &db = NodeDB::GetInstance();
 	m_nodes.clear();
 
@@ -189,7 +187,6 @@ Error Scene::Load(const char *path) {
 }
 
 Error Scene::Save(const char *path) {
-	m_path = "";
 	NodeDB &db = NodeDB::GetInstance();
 
 	YAML::Node doc;

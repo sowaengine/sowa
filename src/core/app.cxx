@@ -190,16 +190,20 @@ Error App::Init() {
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_DOWN && nullptr != this->m_commandInterface) {
-			this->m_commandInterface->currentIndex += 1;
+			if (this->m_commandInterface->options.size() > 0) {
+				this->m_commandInterface->currentIndex += 1;
 
-			this->m_commandInterface->currentIndex %= this->m_commandInterface->options.size();
+				this->m_commandInterface->currentIndex %= this->m_commandInterface->options.size();
+			}
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_UP && nullptr != this->m_commandInterface) {
-			this->m_commandInterface->currentIndex -= 1;
+			if (this->m_commandInterface->options.size() > 0) {
+				this->m_commandInterface->currentIndex -= 1;
 
-			if (this->m_commandInterface->currentIndex == -1)
-				this->m_commandInterface->currentIndex = this->m_commandInterface->options.size() - 1;
+				if (this->m_commandInterface->currentIndex == -1)
+					this->m_commandInterface->currentIndex = this->m_commandInterface->options.size() - 1;
+			}
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_ENTER && nullptr != this->m_commandInterface) {
@@ -317,72 +321,45 @@ Error App::Init() {
 	Resource *res = ResourceManager::GetInstance().Load("res://assets/shotThin.png");
 
 	NodeDB &db = NodeDB::GetInstance();
-	{
-		{
-			NodeFactory factory;
-			factory.constructor = []() -> Node * {
-				return new Node;
-			};
 
-			factory.destructor = [](Node *node) {
-				delete node;
-			};
+#define REGISTER_NODE_TYPE(type, extends)                                \
+	do {                                                                 \
+		NodeFactory factory;                                             \
+		factory.constructor = []() -> Node * {                           \
+			return new type;                                             \
+		};                                                               \
+		factory.destructor = [](Node *node) {                            \
+			delete reinterpret_cast<type *>(node);                       \
+		};                                                               \
+                                                                         \
+		db.BindNodeType<type>(#type, db.GetNodeType(#extends), factory); \
+	} while (0);
 
-			db.BindNodeType<Node>("Node", 0, factory);
+#define REGISTER_NODE_PROPERTY(type, propName, propAccessor, propType) \
+	do {                                                               \
+		NodeProperty prop;                                             \
+		prop.get = [](Node *node) -> Property {                        \
+			return dynamic_cast<type *>(node)->propAccessor;           \
+		};                                                             \
+		prop.set = [](Node *node, Property value) {                    \
+			if (propType *v = std::any_cast<propType>(&value)) {       \
+				dynamic_cast<type *>(node)->propAccessor = *v;         \
+			}                                                          \
+		};                                                             \
+		db.BindProperty(db.GetNodeType(#type), propName, prop);        \
+	} while (0);
 
-			NodeProperty nameProp;
-			nameProp.get = [](Node *node) -> Property {
-				return node->Name();
-			};
-			nameProp.set = [](Node *node, Property value) {
-				if (std::string *p = std::any_cast<std::string>(&value)) {
-					node->Name() = *p;
-				}
-			};
+	REGISTER_NODE_TYPE(Node, );
+	REGISTER_NODE_PROPERTY(Node, "name", Name(), std::string);
 
-			db.BindProperty(db.GetNodeType("Node"), "name", nameProp);
-		}
+	REGISTER_NODE_TYPE(Node2D, Node);
+	REGISTER_NODE_PROPERTY(Node2D, "position", Position(), glm::vec2);
+	REGISTER_NODE_PROPERTY(Node2D, "scale", Scale(), glm::vec2);
+	REGISTER_NODE_PROPERTY(Node2D, "rotation", Rotation(), float);
+	REGISTER_NODE_PROPERTY(Node2D, "z_index", ZIndex(), float);
 
-		{
-			NodeFactory factory;
-			factory.constructor = []() -> Node * {
-				return new Sprite2D;
-			};
-
-			factory.destructor = [](Node *node) {
-				delete reinterpret_cast<Sprite2D *>(node);
-			};
-
-			db.BindNodeType<Sprite2D>("Sprite2D", db.GetNodeType("Node"), factory);
-
-			{
-				NodeProperty positionProp;
-				positionProp.get = [](Node *node) -> Property {
-					return dynamic_cast<Sprite2D *>(node)->Position();
-				};
-				positionProp.set = [](Node *node, Property value) {
-					if (glm::vec2 *p = std::any_cast<glm::vec2>(&value)) {
-						dynamic_cast<Sprite2D *>(node)->Position() = *p;
-					}
-				};
-
-				db.BindProperty(db.GetNodeType("Sprite2D"), "position", positionProp);
-			}
-			{
-				NodeProperty textureProp;
-				textureProp.get = [](Node *node) -> Property {
-					return dynamic_cast<Sprite2D *>(node)->GetTexture();
-				};
-				textureProp.set = [](Node *node, Property value) {
-					if (RID *p = std::any_cast<RID>(&value)) {
-						dynamic_cast<Sprite2D *>(node)->GetTexture() = *p;
-					}
-				};
-
-				db.BindProperty(db.GetNodeType("Sprite2D"), "texture", textureProp);
-			}
-		}
-	}
+	REGISTER_NODE_TYPE(Sprite2D, Node2D);
+	REGISTER_NODE_PROPERTY(Sprite2D, "texture", GetTexture(), RID);
 
 	Behaviour rotationBehaviour = Behaviour::New(nullptr, [](Node *node) {
 		Sprite2D *sprite = dynamic_cast<Sprite2D *>(node);
@@ -413,7 +390,10 @@ Error App::Init() {
 			return;
 		}
 
-		GetCurrentScene()->Save(GetCurrentScene()->Path().c_str());
+		Error err = GetCurrentScene()->Save(GetCurrentScene()->Path().c_str());
+		if (err != OK) {
+			std::cout << "Failed to save scene " << err << std::endl;
+		}
 	});
 	RegisterCommand("Save Scene As", [&]() {
 		if (nullptr == GetCurrentScene())
