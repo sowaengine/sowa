@@ -150,6 +150,8 @@ static void asGetProperty(asIScriptGeneric *gen) {
 	int propTypeID = gen->GetReturnTypeId();
 	if (propTypeID == asTYPEID_INT32) {
 		typeName = "int";
+	} else if (propTypeID == asTYPEID_FLOAT) {
+		typeName = "float";
 	} else {
 		asITypeInfo *propType = gen->GetEngine()->GetTypeInfoById(propTypeID);
 		if (nullptr == propType) {
@@ -166,12 +168,61 @@ static void asGetProperty(asIScriptGeneric *gen) {
 			gen->SetReturnDWord(*v);
 			return;
 		}
+	} else if (typeName == "float") {
+		if (float *v = std::any_cast<float>(&prop)) {
+			gen->SetReturnFloat(*v);
+			return;
+		}
 	} else if (typeName == "string") {
 		if (std::string *v = std::any_cast<std::string>(&prop)) {
 			*reinterpret_cast<std::string *>(ret) = *v;
 			gen->SetReturnObject(ret);
 			return;
 		}
+	}
+
+	std::cout << "INVALID PROP" << std::endl;
+}
+
+static void asSetProperty(asIScriptGeneric *gen) {
+	Node *node = reinterpret_cast<Node *>(gen->GetObject());
+
+	asIScriptFunction *func = gen->GetFunction();
+	std::string propName = std::string(func->GetName()).substr(4);
+
+	NodeProperty prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName);
+
+	std::string typeName;
+
+	int propTypeID = gen->GetArgTypeId(0);
+	if (propTypeID == asTYPEID_INT32) {
+		typeName = "int";
+	} else if (propTypeID == asTYPEID_FLOAT) {
+		typeName = "float";
+	} else {
+		asITypeInfo *propType = gen->GetEngine()->GetTypeInfoById(propTypeID);
+		if (nullptr == propType) {
+			std::cout << "Invalid error: " << __FILE__ << " : " << __LINE__ << std::endl;
+			return;
+		}
+
+		typeName = propType->GetName();
+	}
+
+	if (typeName == "int") {
+		int arg = gen->GetArgDWord(0);
+		prop.set(node, arg);
+		return;
+
+	} else if (typeName == "float") {
+		float arg = gen->GetArgFloat(0);
+		prop.set(node, arg);
+		return;
+
+	} else if (typeName == "string") {
+		std::string *v = reinterpret_cast<std::string *>(gen->GetArgObject(0));
+		prop.set(node, *v);
+		return;
 	}
 
 	std::cout << "INVALID PROP" << std::endl;
@@ -218,13 +269,14 @@ ScriptServer::ScriptServer() {
 		for (const auto &[propName, prop] : data.properties) {
 			std::string typeName = prop.typeName;
 
-			if (typeName == "glm::vec2")
+			if (typeName == "" || typeName == "glm::vec2")
 				continue;
 
 			if (typeName == "std::string")
 				typeName = "string";
 
 			AS_REGISTER_METHOD_STR(name.c_str(), (typeName + " get_" + propName + "() property").c_str(), asFUNCTION(asGetProperty), asCALL_GENERIC);
+			AS_REGISTER_METHOD_STR(name.c_str(), ("void set_" + propName + "(" + typeName + ") property").c_str(), asFUNCTION(asSetProperty), asCALL_GENERIC);
 		}
 	}
 }
@@ -270,7 +322,6 @@ void ScriptServer::register_script_behaviour() {
 		auto tags = s_data.builder.GetMetadataForType(t_info->GetTypeId());
 		for (const std::string &tag : tags) {
 			if (tag == "behaviour") {
-				std::cout << "found script behaviour " << t_info->GetName() << std::endl;
 
 				Behaviour b;
 				b.SetStartFunc([typeID](Node *node, Behaviour *self) {

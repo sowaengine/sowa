@@ -58,11 +58,17 @@ class NodeDB {
 	}
 
 	NodeProperty GetProperty(NodeType type, std::string propertyName) {
-		NodeProperty prop = m_db[type].properties[propertyName];
+		if (m_db.find(type) == m_db.end())
+			return NodeProperty();
+
+		NodeData &data = m_db[type];
+		if (data.properties.find(propertyName) == data.properties.end())
+			return GetProperty(data.extends, propertyName);
+
+		NodeProperty &prop = data.properties[propertyName];
 		if (!prop.get && !prop.set) {
-			NodeType extends = m_db[type].extends;
-			if (extends != 0) {
-				return GetProperty(extends, propertyName);
+			if (data.extends != 0) {
+				return GetProperty(data.extends, propertyName);
 			}
 		}
 
