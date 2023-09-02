@@ -19,6 +19,12 @@ void Node::RemoveBehaviour(std::string name) {
 	m_behaviours[id] = Behaviour();
 }
 
+void Node::StartBehaviours() {
+	for (auto &[id, behaviour] : m_behaviours) {
+		behaviour.Start(this);
+	}
+}
+
 void Node::UpdateBehaviours() {
 	for (auto &[id, behaviour] : m_behaviours) {
 		behaviour.Update(this);

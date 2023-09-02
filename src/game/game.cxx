@@ -34,9 +34,18 @@ float lerpAngle(float from, float to, float t) {
 }
 
 class MainScene : public Scene {
+	void StartNode(Node *node) {
+		node->Start();
+		node->StartBehaviours();
+
+		for (Node *child : node->GetChildren()) {
+			StartNode(child);
+		}
+	}
+
 	void BeginScene() override {
 		for (Node *node : Nodes()) {
-			node->Start();
+			StartNode(node);
 		}
 	}
 
@@ -46,7 +55,6 @@ class MainScene : public Scene {
 		node->Update();
 
 		for (Node *child : node->GetChildren()) {
-			child->Update();
 
 			UpdateNode(child);
 		}

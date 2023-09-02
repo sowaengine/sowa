@@ -20,6 +20,7 @@ class Node {
 
 	void AddBehaviour(std::string name);
 	void RemoveBehaviour(std::string name);
+	void StartBehaviours();
 	void UpdateBehaviours();
 	inline std::unordered_map<size_t, Behaviour> &GetBehaviours() { return m_behaviours; }
 
