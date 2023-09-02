@@ -13,11 +13,11 @@ Behaviour Behaviour::New(BehaviourFunc startFunc, BehaviourFunc updateFunc) {
 
 void Behaviour::Start(Node *node) {
 	if (m_startFunc)
-		m_startFunc(node);
+		m_startFunc(node, this);
 }
 void Behaviour::Update(Node *node) {
 	if (m_updateFunc)
-		m_updateFunc(node);
+		m_updateFunc(node, this);
 }
 
 std::string Behaviour::GetBehaviourName() {

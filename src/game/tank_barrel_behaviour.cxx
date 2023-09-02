@@ -16,10 +16,10 @@ static float lerpAngle(float from, float to, float t) {
 
 static float speed = 20;
 
-void TankBarrelBehaviour::Start(Node *node) {
+void TankBarrelBehaviour::Start(Node *node, Behaviour *) {
 }
 
-void TankBarrelBehaviour::Update(Node *node) {
+void TankBarrelBehaviour::Update(Node *node, Behaviour *) {
 	Node2D *barrel = dynamic_cast<Node2D *>(node);
 	if (nullptr == barrel) {
 		return;

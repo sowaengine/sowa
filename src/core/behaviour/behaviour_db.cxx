@@ -16,6 +16,8 @@ void BehaviourDB::RegisterBehaviour(std::string name, Behaviour behaviour) {
 
 	m_behaviourNames[id] = name;
 	m_behaviourIDs[name] = id;
+
+	std::cout << "Register behaviour " << name << " with id " << idCounter << std::endl;
 }
 
 Behaviour BehaviourDB::Construct(std::string name) {

@@ -4,10 +4,12 @@
 
 #include "scene/node.hxx"
 
+class Behaviour;
+
 class TopDownEightDirMovement {
   public:
-	static void Start(Node *);
-	static void Update(Node *);
+	static void Start(Node *, Behaviour *);
+	static void Update(Node *, Behaviour *);
 };
 
 #endif // SW_TOP_DOWN_EIGHT_DIR_HXX

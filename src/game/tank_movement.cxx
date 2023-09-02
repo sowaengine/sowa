@@ -21,10 +21,10 @@ static float lerpAngle(float from, float to, float t) {
 	return from + dist * t;
 }
 
-void TankMovement::Start(Node *node) {
+void TankMovement::Start(Node *node, Behaviour *) {
 }
 
-void TankMovement::Update(Node *node) {
+void TankMovement::Update(Node *node, Behaviour *) {
 	Node2D *player = dynamic_cast<Node2D *>(node);
 	if (nullptr == player) {
 		return;

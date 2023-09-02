@@ -16,10 +16,10 @@ static float lerpAngle(float from, float to, float t) {
 	return from + dist * t;
 }
 
-void TopDownEightDirMovement::Start(Node *) {
+void TopDownEightDirMovement::Start(Node *, Behaviour *) {
 }
 
-void TopDownEightDirMovement::Update(Node *node) {
+void TopDownEightDirMovement::Update(Node *node, Behaviour *) {
 	Node2D *player = dynamic_cast<Node2D *>(node);
 	if (nullptr == player) {
 		return;

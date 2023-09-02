@@ -2,12 +2,15 @@
 #define SW_BEHAVIOUR_HXX
 #pragma once
 
+#include <any>
 #include <functional>
 #include <string>
+#include <unordered_map>
 
 class Node;
+class Behaviour;
 
-using BehaviourFunc = std::function<void(Node *)>;
+using BehaviourFunc = std::function<void(Node *, Behaviour *)>;
 
 class Behaviour {
   public:
@@ -15,6 +18,11 @@ class Behaviour {
 
 	void Start(Node *);
 	void Update(Node *);
+
+	inline void SetStartFunc(BehaviourFunc func) { m_startFunc = func; }
+	inline void SetUpdateFunc(BehaviourFunc func) { m_updateFunc = func; }
+
+	inline std::unordered_map<std::string, std::any> &DataTable() { return m_dataTable; }
 
 	std::string GetBehaviourName();
 	size_t GetBehaviourID();
@@ -25,8 +33,7 @@ class Behaviour {
 	BehaviourFunc m_startFunc;
 	BehaviourFunc m_updateFunc;
 
-	// todo: Behaviour data table
-	// unordered_map<string, any>
+	std::unordered_map<std::string, std::any> m_dataTable;
 
 	size_t m_behaviourID = 0;
 };

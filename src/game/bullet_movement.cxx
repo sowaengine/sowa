@@ -4,10 +4,10 @@
 
 static float bulletSpeed = 200.f;
 
-void BulletMovement::Start(Node *) {
+void BulletMovement::Start(Node *, Behaviour *) {
 }
 
-void BulletMovement::Update(Node *node) {
+void BulletMovement::Update(Node *node, Behaviour *) {
 	Node2D *bullet = dynamic_cast<Node2D *>(node);
 	if (nullptr == bullet) {
 		return;
