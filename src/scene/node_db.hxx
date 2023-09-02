@@ -5,6 +5,7 @@
 #include <any>
 #include <functional>
 #include <iostream>
+#include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
@@ -23,6 +24,7 @@ struct NodeFactory {
 struct NodeProperty {
 	std::function<Property(Node *)> get;
 	std::function<void(Node *, Property)> set;
+	std::string typeName = "";
 };
 
 struct NodeData {
@@ -115,6 +117,7 @@ class NodeDB {
 	}
 
   private:
+	friend class ScriptServer;
 	NodeDB();
 	~NodeDB();
 

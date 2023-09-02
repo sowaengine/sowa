@@ -12,6 +12,7 @@
 #include "servers/file_server.hxx"
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
+#include "servers/script_server.hxx"
 
 #include "data/toml_document.hxx"
 
@@ -346,6 +347,7 @@ Error App::Init() {
 				dynamic_cast<type *>(node)->propAccessor = *v;         \
 			}                                                          \
 		};                                                             \
+		prop.typeName = #propType;                                     \
 		db.BindProperty(db.GetNodeType(#type), propName, prop);        \
 	} while (0);
 
@@ -361,17 +363,6 @@ Error App::Init() {
 	REGISTER_NODE_TYPE(Sprite2D, Node2D);
 	REGISTER_NODE_PROPERTY(Sprite2D, "texture", GetTexture(), RID);
 
-	Behaviour rotationBehaviour = Behaviour::New(nullptr, [](Node *node) {
-		Sprite2D *sprite = dynamic_cast<Sprite2D *>(node);
-		if (nullptr == sprite) {
-			std::cout << "Behaviour (Rotate Sprite) invalid typename: " << NodeDB::GetInstance().GetNodeTypeName(node->TypeHash()) << std::endl;
-			return;
-		}
-
-		sprite->Rotation() += 0.5f;
-	});
-
-	BehaviourDB::GetInstance().RegisterBehaviour("Rotate Sprite", rotationBehaviour);
 	BehaviourDB::GetInstance().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
 	Main();
@@ -404,6 +395,14 @@ Error App::Init() {
 	RegisterCommand("Exit", [&]() {
 		exit(0);
 	});
+
+	ScriptServer::GetInstance().BeginBuild();
+	ScriptServer::GetInstance().LoadScriptFile("res://scripts/bullet.as");
+	ScriptServer::GetInstance().LoadScriptFile("res://scripts/main.as");
+	ScriptServer::GetInstance().LoadScriptFile("res://scripts/tank.as");
+	ScriptServer::GetInstance().EndBuild();
+
+	// GetCurrentScene()->get_node_in_group("Barrel")->AddBehaviour("");
 
 	return OK;
 }
@@ -579,7 +578,8 @@ void App::SetCurrentScene(Scene *scene) {
 	}
 
 	m_pCurrentScene = scene;
-	m_pCurrentScene->BeginScene();
+	if (m_running)
+		m_pCurrentScene->BeginScene();
 }
 
 void App::Start() {
@@ -590,6 +590,8 @@ void App::Start() {
 		Scene::copy(m_pCurrentScene, &m_backgroundScene);
 
 	m_running = true;
+
+	GetCurrentScene()->BeginScene();
 }
 
 void App::Stop() {
