@@ -4,8 +4,10 @@
 
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "core/app.hxx"
+#include "data/file/file_entry.hxx"
 #include "data/file_buffer.hxx"
 
 class FileServer {
@@ -21,8 +23,10 @@ class FileServer {
 
 	Error ReadFileBytes(const char *path, file_buffer &buffer);
 
+	std::vector<FileEntry> ReadDir(const char *path, bool recursive = false);
+
   private:
-	std::string getFilepath(const std::string &path);
+	std::filesystem::path getFilepath(const std::string &path);
 
 	App *m_pApp = nullptr;
 };

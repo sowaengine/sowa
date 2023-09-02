@@ -365,6 +365,17 @@ Error App::Init() {
 
 	BehaviourDB::GetInstance().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
+	//
+	ScriptServer::GetInstance().BeginBuild();
+
+	auto files = FileServer::GetInstance().ReadDir("res://scripts/", true);
+	for (FileEntry &file : files) {
+		if (file.IsFile() && file.Path().extension() == ".as")
+			ScriptServer::GetInstance().LoadScriptFile(file.Path().string().c_str());
+	}
+
+	ScriptServer::GetInstance().EndBuild();
+
 	Main();
 
 	RegisterCommand("Start/Stop Game", [&]() {
@@ -395,14 +406,6 @@ Error App::Init() {
 	RegisterCommand("Exit", [&]() {
 		exit(0);
 	});
-
-	ScriptServer::GetInstance().BeginBuild();
-	ScriptServer::GetInstance().LoadScriptFile("res://scripts/bullet.as");
-	ScriptServer::GetInstance().LoadScriptFile("res://scripts/main.as");
-	ScriptServer::GetInstance().LoadScriptFile("res://scripts/tank.as");
-	ScriptServer::GetInstance().EndBuild();
-
-	// GetCurrentScene()->get_node_in_group("Barrel")->AddBehaviour("");
 
 	return OK;
 }

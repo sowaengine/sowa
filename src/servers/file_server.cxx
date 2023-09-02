@@ -20,7 +20,7 @@ FileServer &FileServer::GetInstance() {
 }
 
 Error FileServer::ReadFileString(const char *p, std::stringstream &stream) {
-	std::string path = getFilepath(p);
+	std::filesystem::path path = getFilepath(p);
 	if (path == "") {
 		return ERR_FILE_NOT_FOUND;
 	}
@@ -44,7 +44,7 @@ Error FileServer::ReadFileString(const char *p, std::string &buffer) {
 }
 
 Error FileServer::WriteFileString(const char *p, const std::string &buffer) {
-	std::string path = getFilepath(p);
+	std::filesystem::path path = getFilepath(p);
 	if (path == "") {
 		return ERR_FILE_NOT_FOUND;
 	}
@@ -59,7 +59,7 @@ Error FileServer::WriteFileString(const char *p, const std::string &buffer) {
 }
 
 Error FileServer::ReadFileBytes(const char *p, file_buffer &buffer) {
-	std::string path = getFilepath(p);
+	std::filesystem::path path = getFilepath(p);
 	if (path == "") {
 		return ERR_FILE_NOT_FOUND;
 	}
@@ -93,16 +93,54 @@ Error FileServer::ReadFileBytes(const char *p, file_buffer &buffer) {
 	return OK;
 }
 
-std::string FileServer::getFilepath(const std::string &path) {
+std::vector<FileEntry> FileServer::ReadDir(const char *p, bool recursive) {
+	std::filesystem::path base = getFilepath("res://");
+
+	std::vector<FileEntry> files;
+	std::string path = getFilepath(p);
+	if (path == "")
+		return files;
+
+	if (recursive) {
+		for (auto &entry : std::filesystem::recursive_directory_iterator(path)) {
+			FileEntry file;
+			file.m_isDirectory = entry.is_directory();
+			file.m_path = std::filesystem::path("res://") / (std::filesystem::relative(entry.path(), base));
+
+			files.push_back(file);
+		}
+	} else {
+		for (auto &entry : std::filesystem::directory_iterator(path)) {
+			FileEntry file;
+			file.m_isDirectory = entry.is_directory();
+			file.m_path = std::filesystem::path("res://") / (std::filesystem::relative(entry.path(), base));
+
+			files.push_back(file);
+		}
+	}
+
+	return files;
+}
+
+std::filesystem::path FileServer::getFilepath(const std::string &path) {
 	// scheme://path/to/file
 	auto tokens = Split(path, "://");
+	if (tokens.size() == 1) {
+		tokens.push_back("");
+	}
 	if (tokens.size() < 2) {
 		return "";
 	}
 
 	const std::string &scheme = tokens[0];
 	if (scheme == "res") {
-		return (m_pApp->m_appPath / std::filesystem::path(tokens[1])).string();
+		std::filesystem::path p = m_pApp->m_appPath / std::filesystem::path(tokens[1]);
+		std::string r = std::filesystem::relative(p, m_pApp->m_appPath).string();
+		if (r.length() >= 3 && (r[0] == '.' && r[1] == '.' && (r[2] == '/' || r[2] == '\\'))) {
+			return "";
+		}
+
+		return p;
 	}
 
 	return "";
