@@ -329,6 +329,11 @@ void ScriptServer::register_script_behaviour() {
 					asIScriptObject *obj = (asIScriptObject *)s_data.engine->CreateScriptObject(t_info);
 					self->DataTable()["m_obj"] = obj;
 
+					bool *o = std::any_cast<bool>(&self->DataTable()["m_noStart"]);
+					if (nullptr != o && *o == true) {
+						return;
+					}
+
 					asIScriptFunction *func = obj->GetObjectType()->GetMethodByName("_start");
 					if (func == 0) {
 						return;

@@ -20,9 +20,11 @@ class Node {
 
 	void AddBehaviour(std::string name);
 	void RemoveBehaviour(std::string name);
+	void ReloadBehaviours();
 	void StartBehaviours();
 	void UpdateBehaviours();
 	inline std::unordered_map<size_t, Behaviour> &GetBehaviours() { return m_behaviours; }
+	inline std::vector<std::string> &GetBehaviourNames() { return m_behaviourNames; }
 
 	//
 	inline std::vector<Node *> &GetChildren() { return m_children; }
@@ -41,8 +43,12 @@ class Node {
 
   private:
 	friend class NodeDB;
+
+	void register_behaviour(const std::string &behaviour, bool callStart = false);
+
 	size_t m_typeHash = 0;
 
+	std::vector<std::string> m_behaviourNames;
 	std::unordered_map<size_t, Behaviour> m_behaviours;
 
 	Node *m_parent = nullptr;

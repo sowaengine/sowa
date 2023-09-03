@@ -9,7 +9,12 @@ BehaviourDB &BehaviourDB::GetInstance() {
 
 void BehaviourDB::RegisterBehaviour(std::string name, Behaviour behaviour) {
 	static size_t idCounter = 0;
-	size_t id = ++idCounter;
+	size_t id;
+	if (m_behaviourIDs.find(name) != m_behaviourIDs.end()) {
+		id = m_behaviourIDs[name];
+	} else {
+		id = ++idCounter;
+	}
 
 	behaviour.m_behaviourID = id;
 	m_behaviours[id] = behaviour;
@@ -17,7 +22,7 @@ void BehaviourDB::RegisterBehaviour(std::string name, Behaviour behaviour) {
 	m_behaviourNames[id] = name;
 	m_behaviourIDs[name] = id;
 
-	std::cout << "Register behaviour " << name << " with id " << idCounter << std::endl;
+	std::cout << "Register behaviour " << name << " with id " << id << std::endl;
 }
 
 Behaviour BehaviourDB::Construct(std::string name) {

@@ -58,6 +58,8 @@ class App {
 	void mainLoop();
 	static void mainLoopCaller(void *self);
 
+	void reload_scripts();
+
   private:
 	Model rectModel;
 	Shader mainShader;

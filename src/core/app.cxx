@@ -365,17 +365,7 @@ Error App::Init() {
 
 	BehaviourDB::GetInstance().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
-	//
-	ScriptServer::GetInstance().BeginBuild();
-
-	auto files = FileServer::GetInstance().ReadDir("res://scripts/", true);
-	for (FileEntry &file : files) {
-		if (file.IsFile() && file.Path().extension() == ".as")
-			ScriptServer::GetInstance().LoadScriptFile(file.Path().string().c_str());
-	}
-
-	ScriptServer::GetInstance().EndBuild();
-
+	reload_scripts();
 	Main();
 
 	RegisterCommand("Start/Stop Game", [&]() {
@@ -383,6 +373,24 @@ Error App::Init() {
 			Stop();
 		else
 			Start();
+	});
+	RegisterCommand("Rebuild Scripts", [&]() {
+		reload_scripts();
+
+		if (IsRunning() && nullptr != GetCurrentScene()) {
+			std::function<void(Node *)> func;
+			func = [&func](Node *node) {
+				node->ReloadBehaviours();
+
+				for (Node *child : node->GetChildren()) {
+					func(child);
+				}
+			};
+
+			for (Node *node : GetCurrentScene()->Nodes()) {
+				func(node);
+			}
+		}
 	});
 	RegisterCommand("Save Scene", [&]() {
 		if (nullptr == GetCurrentScene())
@@ -620,6 +628,19 @@ void App::SetCommandInterface(CommandInterface *interface) {
 		delete m_commandInterface;
 
 	m_commandInterface = interface;
+}
+
+void App::reload_scripts() {
+	//
+	ScriptServer::GetInstance().BeginBuild();
+
+	auto files = FileServer::GetInstance().ReadDir("res://scripts/", true);
+	for (FileEntry &file : files) {
+		if (file.IsFile() && file.Path().extension() == ".as")
+			ScriptServer::GetInstance().LoadScriptFile(file.Path().string().c_str());
+	}
+
+	ScriptServer::GetInstance().EndBuild();
 }
 
 extern "C" void Unload() {

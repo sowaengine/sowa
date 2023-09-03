@@ -305,9 +305,8 @@ void Scene::copy(Scene *src, Scene *dst) {
 			NodeProperty prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName);
 			prop.set(newNode, prop.get(node));
 		}
-		for (auto &[id, behaviour] : node->GetBehaviours()) {
-			newNode->AddBehaviour(behaviour.GetBehaviourName());
-		}
+
+		newNode->GetBehaviourNames() = node->GetBehaviourNames();
 
 		for (Node *child : node->GetChildren()) {
 			newNode->AddChild(copyNode(child));
