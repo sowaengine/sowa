@@ -55,7 +55,7 @@ target_include_directories(
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 target_compile_options(sowa PRIVATE "-Werror")
-target_link_libraries(sowa PRIVATE thirdparty glfw eventpp::eventpp freetype lunasvg yaml-cpp angelscript)
+target_link_libraries(sowa PRIVATE thirdparty glfw eventpp::eventpp freetype lunasvg yaml-cpp angelscript fmt)
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(
     sowa

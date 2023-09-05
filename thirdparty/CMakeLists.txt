@@ -30,6 +30,7 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.8.0/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/angelscript/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/add_on"
+    "${CMAKE_CURRENT_SOURCE_DIR}/fmt-10.1.1/include"
 )
 
 set(SOWA_THIRDPARTY_INCLUDES
@@ -45,3 +46,4 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.13.1" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/lunasvg-2.3.8" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.8.0" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/angelscript/projects/cmake" EXCLUDE_FROM_ALL)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/fmt-10.1.1" EXCLUDE_FROM_ALL)
