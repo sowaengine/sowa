@@ -115,6 +115,8 @@ Error Scene::Load(const char *path) {
 
 	YAML::Node scene = YAML::Load(buffer);
 
+	m_activeCamera2D = scene["active_camera_2d"].as<size_t>(0);
+
 	YAML::Node resources = scene["resources"];
 	for (const auto &resource : resources) {
 		std::string type = resource.second["type"].as<std::string>("");
@@ -195,6 +197,8 @@ Error Scene::Save(const char *path) {
 	NodeDB &db = NodeDB::GetInstance();
 
 	YAML::Node doc;
+
+	doc["active_camera_2d"] = m_activeCamera2D;
 
 	YAML::Node resources;
 	for (const RID &id : SceneResources()) {
@@ -288,8 +292,8 @@ Resource *Scene::LoadResource(const std::string &path, RID id, ResourceType type
 	return res;
 }
 
-Node *Scene::get_active_camera2d() {
-	return get_node_by_id(m_activeCamera2D);
+Camera2D *Scene::get_active_camera2d() {
+	return dynamic_cast<Camera2D *>(get_node_by_id(m_activeCamera2D));
 }
 
 static Node *search_node_in_group(Node *node, std::string group) {

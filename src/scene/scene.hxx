@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "camera_2d.hxx"
 #include "core/error/error.hxx"
 #include "node.hxx"
 #include "node_db.hxx"
@@ -28,7 +29,7 @@ class Scene {
 	inline const std::vector<RID> &SceneResources() { return m_resources; }
 
 	inline void set_active_camera2d(size_t id) { m_activeCamera2D = id; }
-	Node *get_active_camera2d();
+	Camera2D *get_active_camera2d();
 
 	Node *get_node_in_group(std::string group);
 	Node *get_node_by_id(size_t id);

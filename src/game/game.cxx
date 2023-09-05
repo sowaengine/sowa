@@ -83,8 +83,6 @@ void Main() {
 		if (err != OK) {
 			std::cout << "Failed to load scene" << std::endl;
 		}
-		scene->set_active_camera2d(2025263758);
-
 	} else
 		load_scene();
 
