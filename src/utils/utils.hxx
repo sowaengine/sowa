@@ -2,6 +2,7 @@
 #define SW_UTILS_HXX
 #pragma once
 
+#include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -97,6 +98,55 @@ float RandFloat();
 /// max >= min, swaps min and max
 /// max == min, returns min
 float RandRangeFloat(float min, float max);
+
+//-------------------------   Timer  -------------------------//
+
+enum class TimeUnit {
+	Milliseconds = 0,
+	Seconds,
+	Microseconds
+};
+
+class ScopeTimer {
+	using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
+
+  public:
+	ScopeTimer(const std::string &name, TimeUnit unit = TimeUnit::Milliseconds)
+		: m_name(name),
+		  m_start(std::chrono::high_resolution_clock::now()),
+		  m_unit(unit) {
+	}
+
+	~ScopeTimer() {
+		TimePoint now = std::chrono::high_resolution_clock::now();
+
+		float dt = 0.f;
+		if (m_unit == TimeUnit::Seconds) {
+			dt = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_start).count() * 0.001f;
+		} else if (m_unit == TimeUnit::Milliseconds) {
+			dt = std::chrono::duration_cast<std::chrono::microseconds>(now - m_start).count() * 0.001f;
+		} else if (m_unit == TimeUnit::Microseconds) {
+			dt = std::chrono::duration_cast<std::chrono::nanoseconds>(now - m_start).count() * 0.001f;
+		}
+		Log("Timer {}: {}{}", m_name, dt, get_unit());
+	};
+
+  private:
+	std::string m_name;
+	TimePoint m_start;
+	TimeUnit m_unit = TimeUnit::Milliseconds;
+
+	const char *get_unit() {
+		if (m_unit == TimeUnit::Milliseconds)
+			return "ms";
+		if (m_unit == TimeUnit::Seconds)
+			return "s";
+		if (m_unit == TimeUnit::Microseconds)
+			return "μs";
+
+		return "";
+	}
+};
 
 } // namespace Utils
 

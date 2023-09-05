@@ -76,6 +76,8 @@ void Main() {
 
 	scene = new MainScene;
 	if (true) {
+		auto _ = Utils::ScopeTimer("Load Scene");
+
 		Error err = scene->Load("res://scenes/game.escn");
 		if (err != OK) {
 			std::cout << "Failed to load scene" << std::endl;
