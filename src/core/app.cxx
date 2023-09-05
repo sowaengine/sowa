@@ -58,7 +58,6 @@ App::App() {
 	Utils::Randomize();
 
 	Tweens::GetInstance().RegisterTween(2.f, [](float f) {
-		// Utils::Log("YOOO: State: {}", f);
 		posX = 200.f + (f * 1000.f);
 	});
 }
@@ -183,6 +182,12 @@ Error App::Init() {
 	});
 
 	KeyCallback().append([this](InputEventKey event) {
+		if (event.action == KEY_PRESSED && event.key == KEY_Z) {
+			Tweens::GetInstance().RegisterTween(2.f, [](float f) {
+				App::GetInstance().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
+			});
+		}
+
 		if (event.action == KEY_PRESSED && event.key == KEY_F5) {
 			if (IsRunning())
 				Stop();
@@ -577,13 +582,15 @@ void App::mainLoop() {
 		Camera2D *cam = dynamic_cast<Camera2D *>(GetCurrentScene()->get_active_camera2d());
 		if (cam) {
 			vec2 pos = cam->GlobalPosition();
-			pos.x -= 1920.f * cam->CenterPoint().x;
-			pos.y -= 1080.f * cam->CenterPoint().y;
+			vec2 zoom = cam->Zoom();
+
+			pos.x -= 1920.f * cam->CenterPoint().x * zoom.x;
+			pos.y -= 1080.f * cam->CenterPoint().y * zoom.y;
 			view = glm::translate(view, {pos.x, pos.y, 0.f});
 			if (cam->Rotatable()) {
 				view = glm::rotate(view, glm::radians(cam->GlobalRotation()), {0.f, 0.f, 1.f});
 			}
-			// view = glm::scale(view, {x, y, 1.f});
+			view = glm::scale(view, {zoom.x, zoom.y, 1.f});
 			view = glm::inverse(view);
 		}
 	}
