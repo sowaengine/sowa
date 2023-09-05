@@ -126,7 +126,7 @@ Error Scene::Load(const char *path) {
 
 		Resource *res = nullptr;
 		if (type == "ImageTexture") {
-			res = ResourceManager::GetInstance().Load(path, id, ResourceType_ImageTexture);
+			res = LoadResource(path, id, ResourceType_ImageTexture);
 		}
 
 		if (nullptr == res)
@@ -195,7 +195,8 @@ Error Scene::Save(const char *path) {
 	YAML::Node doc;
 
 	YAML::Node resources;
-	for (auto &[id, resource] : ResourceManager::GetInstance().Resources()) {
+	for (const RID &id : SceneResources()) {
+		Resource *resource = ResourceManager::GetInstance().Get(id);
 		YAML::Node res;
 
 		res["type"] = "ImageTexture";
@@ -274,6 +275,13 @@ Node *Scene::New(NodeType type, const std::string &name, size_t id) {
 	m_allocatedNodes[node->ID()] = node;
 
 	return node;
+}
+
+Resource *Scene::LoadResource(const std::string &path, RID id, ResourceType type) {
+	Resource *res = ResourceManager::GetInstance().Load(path, id, type);
+	m_resources.push_back(res->ResourceID());
+
+	return res;
 }
 
 static Node *search_node_in_group(Node *node, std::string group) {

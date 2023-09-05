@@ -86,8 +86,7 @@ void Main() {
 	} else
 		load_scene();
 
-	// bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png")->ResourceID();
-	bulletTexture = 570192181;
+	bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png")->ResourceID();
 
 	App::GetInstance().MouseInputCallback().append(OnInput);
 
