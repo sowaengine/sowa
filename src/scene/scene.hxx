@@ -27,7 +27,11 @@ class Scene {
 
 	inline const std::vector<RID> &SceneResources() { return m_resources; }
 
+	inline void set_active_camera2d(size_t id) { m_activeCamera2D = id; }
+	Node *get_active_camera2d();
+
 	Node *get_node_in_group(std::string group);
+	Node *get_node_by_id(size_t id);
 	inline const std::string &Path() { return m_path; }
 
 	static void copy(Scene *src, Scene *dst);
@@ -37,6 +41,7 @@ class Scene {
 	std::vector<RID> m_resources;
 
 	std::vector<Node *> m_nodes;
+	size_t m_activeCamera2D;
 
 	std::string m_path = "";
 };

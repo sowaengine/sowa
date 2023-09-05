@@ -139,11 +139,10 @@ Error Scene::Load(const char *path) {
 	std::function<void(Node *, const std::pair<YAML::Node, YAML::Node> &)> deserializeNode;
 
 	deserializeNode = [&](Node *parent, const std::pair<YAML::Node, YAML::Node> &doc) {
-		std::string name = doc.first.as<std::string>("New doc");
-
+		size_t id = doc.first.as<size_t>(0);
 		YAML::Node nodeData = doc.second;
 		std::string type = nodeData["type"].as<std::string>("Node");
-		size_t id = nodeData["id"].as<size_t>(0);
+		std::string name = nodeData["name"].as<std::string>("New Node");
 
 		Node *pNode = New(db.GetNodeType(type), name, id);
 		if (parent == nullptr)
@@ -153,6 +152,9 @@ Error Scene::Load(const char *path) {
 
 		for (const auto &prop : nodeData["props"]) {
 			std::string propName = prop.first.as<std::string>();
+			if (propName == "name")
+				continue;
+
 			std::any value = prop.second.as<std::any>();
 
 			NodeProperty propSetter = db.GetProperty(pNode->TypeHash(), propName);
@@ -215,12 +217,15 @@ Error Scene::Save(const char *path) {
 	serializeNode = [&](Node *pNode, YAML::Node &doc) {
 		YAML::Node node;
 		node["type"] = db.GetNodeTypeName(pNode->TypeHash());
-		node["id"] = pNode->ID();
+		node["name"] = pNode->Name();
 
 		YAML::Node props;
 		std::vector<std::string> propNames;
 		db.GetPropertyNames(pNode->TypeHash(), propNames);
 		for (const auto &name : propNames) {
+			if (name == "name")
+				continue;
+
 			props[name] = db.GetProperty(pNode->TypeHash(), name).get(pNode);
 		}
 		node["props"] = props;
@@ -235,20 +240,19 @@ Error Scene::Save(const char *path) {
 		auto groupList = pNode->get_groups();
 		if (groupList.size() > 0) {
 			YAML::Node groups;
+			groups = groupList;
 
-			for (auto &group : groupList) {
-				groups.push_back(group);
-			}
 			node["groups"] = groups;
 		}
 
-		doc[pNode->Name()] = node;
+		doc[pNode->ID()] = (node);
 
+		YAML::Node childrenDoc;
 		for (Node *child : pNode->GetChildren()) {
-			YAML::Node childrenDoc;
 			serializeNode(child, childrenDoc);
-			node["children"] = childrenDoc;
 		}
+		if (childrenDoc.size() > 0)
+			node["children"] = childrenDoc;
 	};
 
 	for (Node *pNode : Nodes()) {
@@ -284,6 +288,10 @@ Resource *Scene::LoadResource(const std::string &path, RID id, ResourceType type
 	return res;
 }
 
+Node *Scene::get_active_camera2d() {
+	return get_node_by_id(m_activeCamera2D);
+}
+
 static Node *search_node_in_group(Node *node, std::string group) {
 	for (std::string &groupName : node->get_groups()) {
 		if (groupName == group) {
@@ -310,11 +318,18 @@ Node *Scene::get_node_in_group(std::string group) {
 	return nullptr;
 }
 
+Node *Scene::get_node_by_id(size_t id) {
+	if (m_allocatedNodes.find(id) == m_allocatedNodes.end())
+		return nullptr;
+
+	return m_allocatedNodes[id];
+}
+
 void Scene::copy(Scene *src, Scene *dst) {
 	std::function<Node *(Node *)> copyNode;
 
 	copyNode = [&](Node *node) -> Node * {
-		Node *newNode = NodeDB::GetInstance().Construct(node->TypeHash());
+		Node *newNode = dst->New(node->TypeHash(), node->Name(), node->ID());
 		std::vector<std::string> props;
 		NodeDB::GetInstance().GetPropertyNames(node->TypeHash(), props);
 		for (auto &propName : props) {

@@ -2,8 +2,10 @@
 
 #include <iostream>
 
+#include "core/app.hxx"
 #include "core/rendering/gl.hxx"
 #include "core/time.hxx"
+#include "scene/camera_2d.hxx"
 #include "scene/node_2d.hxx"
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
@@ -39,7 +41,8 @@ void TankBarrelBehaviour::Update(Node *node, Behaviour *) {
 	x = x * (1920.f / float(w));
 	y = y * (1080.f / float(h));
 
-	float targetRot = atan2(y - barrel->GlobalPosition().y, x - barrel->GlobalPosition().x);
+	vec2 midPoint = vec2(1920.f, 1080.f) * 0.5f;
+	float targetRot = atan2(y - midPoint.y, x - midPoint.x);
 	targetRot = targetRot - glm::radians(tank->GlobalRotation());
 
 	barrel->Rotation() = glm::degrees(lerpAngle(glm::radians(barrel->Rotation()), targetRot, 0.2f));

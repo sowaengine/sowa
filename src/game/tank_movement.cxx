@@ -22,6 +22,7 @@ static float lerpAngle(float from, float to, float t) {
 }
 
 void TankMovement::Start(Node *node, Behaviour *) {
+	curAcceleration = 0.f;
 }
 
 void TankMovement::Update(Node *node, Behaviour *) {

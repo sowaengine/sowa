@@ -7,6 +7,7 @@
 #include "core/time.hxx"
 #include "resource/image_texture/image_texture.hxx"
 #include "resource/resource_manager.hxx"
+#include "scene/camera_2d.hxx"
 #include "scene/node_db.hxx"
 #include "scene/scene.hxx"
 #include "scene/sprite_2d.hxx"
@@ -82,6 +83,7 @@ void Main() {
 		if (err != OK) {
 			std::cout << "Failed to load scene" << std::endl;
 		}
+		scene->set_active_camera2d(2025263758);
 
 	} else
 		load_scene();
@@ -103,7 +105,7 @@ void OnInput(InputEventMouseButton event) {
 			return;
 		}
 
-		Node *bulletNode = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+		Node *bulletNode = scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 		Sprite2D *bullet = dynamic_cast<Sprite2D *>(bulletNode);
 		bullet->GetTexture() = bulletTexture;
 		bullet->Position() = barrelSprite->GlobalPosition();
@@ -120,14 +122,14 @@ void OnInput(InputEventMouseButton event) {
 }
 
 void load_scene() {
-	Node *centerNode = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+	Node *centerNode = scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 	Sprite2D *centerSprite = dynamic_cast<Sprite2D *>(centerNode);
 	centerSprite->GetTexture() = 100;
 	centerSprite->Position() = {600.f, 600.f};
 	scene->Nodes().push_back(centerSprite);
 
 	{
-		Node *node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+		Node *node = scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 		Sprite2D *sprite = dynamic_cast<Sprite2D *>(node);
 		sprite->GetTexture() = 100;
 		sprite->Position() = {100.f, 100.f};
@@ -136,9 +138,9 @@ void load_scene() {
 		centerSprite->AddBehaviour("Rotate Sprite");
 	}
 
-	Node *node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+	Node *node = scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 	Sprite2D *player = dynamic_cast<Sprite2D *>(node);
-	player->GetTexture() = ResourceManager::GetInstance().Load("res://assets/tankBody_green_outline.png", 100)->ResourceID();
+	player->GetTexture() = scene->LoadResource("res://assets/tankBody_green_outline.png", 100)->ResourceID();
 	player->Position() = {200.f, 200.f};
 	player->Name() = "Player";
 	player->AddBehaviour("Tank Movement");
@@ -146,23 +148,27 @@ void load_scene() {
 	scene->Nodes()
 		.push_back(player);
 
-	node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+	node = scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 	Sprite2D *barrel = dynamic_cast<Sprite2D *>(node);
-	barrel->GetTexture() = ResourceManager::GetInstance().Load("res://assets/tankGreen_barrel2_outline.png", 101)->ResourceID();
+	barrel->GetTexture() = scene->LoadResource("res://assets/tankGreen_barrel2_outline.png", 101)->ResourceID();
 	barrel->ZIndex() = 2.f;
 	barrel->Name() = "Barrel";
 	barrel->AddBehaviour("Tank Barrel");
 	barrel->get_groups() = {"Barrel"};
 	player->AddChild(barrel);
 
-	bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png", 102)->ResourceID();
+	Camera2D *cam = dynamic_cast<Camera2D *>(scene->New(NodeDB::GetInstance().GetNodeType("Camera2D"), "Camera"));
+	player->AddChild(cam);
+	scene->set_active_camera2d(cam->ID());
 
-	sandTexture = ResourceManager::GetInstance().Load("res://assets/tileGrass1.png", 103)->ResourceID();
+	bulletTexture = scene->LoadResource("res://assets/shotThin.png", 102)->ResourceID();
+
+	sandTexture = scene->LoadResource("res://assets/tileGrass1.png", 103)->ResourceID();
 
 	int index = 0;
 	for (int x = 0;; x += ResourceManager::GetInstance().GetAs<Texture>(sandTexture)->Width()) {
 		for (int y = 0;; y += ResourceManager::GetInstance().GetAs<Texture>(sandTexture)->Height()) {
-			Node *node = NodeDB::GetInstance().Construct(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+			Node *node = scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"));
 			Sprite2D *sand = dynamic_cast<Sprite2D *>(node);
 			sand->Position() = {x, y};
 			sand->GetTexture() = sandTexture;
