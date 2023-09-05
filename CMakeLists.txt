@@ -43,14 +43,19 @@ set(SOWA_THIRDPARTY_SOURCES "")
 set(SOWA_THIRDPARTY_INCLUDES "")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty" EXCLUDE_FROM_ALL)
 
-add_executable(sowa ${SOWA_SOURCES} ${SOWA_THIRDPARTY_SOURCES})
+add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
+target_include_directories(
+  thirdparty
+  PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
+
+add_executable(sowa ${SOWA_SOURCES})
 target_include_directories(
   sowa
   PUBLIC ${SOWA_INCLUDES}
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 target_compile_options(sowa PRIVATE "-Werror")
-target_link_libraries(sowa PRIVATE glfw eventpp::eventpp freetype lunasvg yaml-cpp)
+target_link_libraries(sowa PRIVATE thirdparty glfw eventpp::eventpp freetype lunasvg yaml-cpp angelscript)
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(
     sowa
