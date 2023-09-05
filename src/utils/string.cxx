@@ -1,6 +1,6 @@
-#include "string.hxx"
+#include "utils.hxx"
 
-std::vector<std::string> Split(std::string str, std::string delimiter) {
+std::vector<std::string> Utils::Split(std::string str, std::string delimiter) {
 	std::vector<std::string> tokens;
 
 	size_t pos = 0;

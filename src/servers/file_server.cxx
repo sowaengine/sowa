@@ -124,7 +124,7 @@ std::vector<FileEntry> FileServer::ReadDir(const char *p, bool recursive) {
 
 std::filesystem::path FileServer::getFilepath(const std::string &path) {
 	// scheme://path/to/file
-	auto tokens = Split(path, "://");
+	auto tokens = Utils::Split(path, "://");
 	if (tokens.size() == 1) {
 		tokens.push_back("");
 	}

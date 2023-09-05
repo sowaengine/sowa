@@ -75,7 +75,7 @@ void Main() {
 	BehaviourDB::GetInstance().RegisterBehaviour("Bullet Movement", Behaviour::New(BulletMovement::Start, BulletMovement::Update));
 
 	scene = new MainScene;
-	if (false) {
+	if (true) {
 		Error err = scene->Load("res://scenes/game.escn");
 		if (err != OK) {
 			std::cout << "Failed to load scene" << std::endl;
@@ -84,7 +84,8 @@ void Main() {
 	} else
 		load_scene();
 
-	bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png")->ResourceID();
+	// bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png")->ResourceID();
+	bulletTexture = 570192181;
 
 	App::GetInstance().MouseInputCallback().append(OnInput);
 

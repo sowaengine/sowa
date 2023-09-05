@@ -35,6 +35,8 @@
 
 #include "game/game.hxx"
 
+#include "utils/utils.hxx"
+
 #include <codecvt>
 #include <filesystem>
 #include <fstream>
@@ -49,6 +51,7 @@ static App *s_instance;
 
 App::App() {
 	s_instance = this;
+	Utils::Randomize();
 }
 
 App::~App() {
