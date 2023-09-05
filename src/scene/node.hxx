@@ -11,6 +11,8 @@
 class Node {
   public:
 	inline std::string &Name() { return m_name; }
+	size_t ID() { return m_id; }
+
 	virtual ~Node() = default;
 
 	virtual void Start() {}
@@ -40,6 +42,7 @@ class Node {
 
   protected:
 	std::string m_name = "";
+	size_t m_id = 0;
 
   private:
 	friend class NodeDB;

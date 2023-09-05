@@ -143,9 +143,9 @@ Error Scene::Load(const char *path) {
 
 		YAML::Node nodeData = doc.second;
 		std::string type = nodeData["type"].as<std::string>("Node");
+		size_t id = nodeData["id"].as<size_t>(0);
 
-		Node *pNode = db.Construct(db.GetNodeType(type));
-		pNode->Name() = name;
+		Node *pNode = New(db.GetNodeType(type), name, id);
 		if (parent == nullptr)
 			this->Nodes().push_back(pNode);
 		else
@@ -214,6 +214,7 @@ Error Scene::Save(const char *path) {
 	serializeNode = [&](Node *pNode, YAML::Node &doc) {
 		YAML::Node node;
 		node["type"] = db.GetNodeTypeName(pNode->TypeHash());
+		node["id"] = pNode->ID();
 
 		YAML::Node props;
 		std::vector<std::string> propNames;
@@ -266,6 +267,13 @@ Error Scene::Save(const char *path) {
 
 	m_path = path;
 	return OK;
+}
+
+Node *Scene::New(NodeType type, const std::string &name, size_t id) {
+	Node *node = NodeDB::GetInstance().Construct(type, name, id);
+	m_allocatedNodes[node->ID()] = node;
+
+	return node;
 }
 
 static Node *search_node_in_group(Node *node, std::string group) {

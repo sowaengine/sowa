@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "node.hxx"
+#include "utils/utils.hxx"
 
 // using Property = std::variant<std::string>;
 using Property = std::any;
@@ -102,13 +103,17 @@ class NodeDB {
 		}
 	}
 
-	Node *Construct(NodeType type) {
+	Node *Construct(NodeType type, const std::string &name = "", size_t id = 0) {
 		std::function<Node *()> constructor = m_db[type].factory.constructor;
 
 		if (constructor) {
 			Node *node = constructor();
 			node->m_typeHash = type;
-			node->Name() = "New Node";
+			node->Name() = name == "" ? "New Node" : name;
+			if (id == 0) {
+				id = Utils::Rand();
+			}
+			node->m_id = id;
 
 			return node;
 		}

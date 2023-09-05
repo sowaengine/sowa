@@ -17,6 +17,7 @@ resources:
 nodes:
   Player:
     type: Sprite2D
+    id: 1879054144
     props:
       texture:
         int: 100
@@ -39,6 +40,7 @@ nodes:
     children:
       Barrel:
         type: Sprite2D
+        id: 780211278
         props:
           texture:
             int: 101
@@ -62,6 +64,7 @@ nodes:
           - Barrel
   sand0:
     type: Sprite2D
+    id: 2050945741
     props:
       texture:
         int: 103
@@ -81,6 +84,7 @@ nodes:
         str: sand0
   sand1:
     type: Sprite2D
+    id: 1944587262
     props:
       texture:
         int: 103
@@ -100,6 +104,7 @@ nodes:
         str: sand1
   sand2:
     type: Sprite2D
+    id: 20448188
     props:
       texture:
         int: 103
@@ -119,6 +124,7 @@ nodes:
         str: sand2
   sand3:
     type: Sprite2D
+    id: 1621393580
     props:
       texture:
         int: 103
@@ -138,6 +144,7 @@ nodes:
         str: sand3
   sand4:
     type: Sprite2D
+    id: 91677097
     props:
       texture:
         int: 103
@@ -157,6 +164,7 @@ nodes:
         str: sand4
   sand5:
     type: Sprite2D
+    id: 212611685
     props:
       texture:
         int: 103
@@ -176,6 +184,7 @@ nodes:
         str: sand5
   sand6:
     type: Sprite2D
+    id: 1101387130
     props:
       texture:
         int: 103
@@ -195,6 +204,7 @@ nodes:
         str: sand6
   sand7:
     type: Sprite2D
+    id: 373155197
     props:
       texture:
         int: 103
@@ -214,6 +224,7 @@ nodes:
         str: sand7
   sand8:
     type: Sprite2D
+    id: 1821312151
     props:
       texture:
         int: 103
@@ -233,6 +244,7 @@ nodes:
         str: sand8
   sand9:
     type: Sprite2D
+    id: 1402827746
     props:
       texture:
         int: 103
@@ -252,6 +264,7 @@ nodes:
         str: sand9
   sand10:
     type: Sprite2D
+    id: 696182880
     props:
       texture:
         int: 103
@@ -271,6 +284,7 @@ nodes:
         str: sand10
   sand11:
     type: Sprite2D
+    id: 464817732
     props:
       texture:
         int: 103
@@ -290,6 +304,7 @@ nodes:
         str: sand11
   sand12:
     type: Sprite2D
+    id: 2095239223
     props:
       texture:
         int: 103
@@ -309,6 +324,7 @@ nodes:
         str: sand12
   sand13:
     type: Sprite2D
+    id: 1142406739
     props:
       texture:
         int: 103
@@ -328,6 +344,7 @@ nodes:
         str: sand13
   sand14:
     type: Sprite2D
+    id: 367938589
     props:
       texture:
         int: 103
@@ -347,6 +364,7 @@ nodes:
         str: sand14
   sand15:
     type: Sprite2D
+    id: 1257902553
     props:
       texture:
         int: 103
@@ -366,6 +384,7 @@ nodes:
         str: sand15
   sand16:
     type: Sprite2D
+    id: 215520003
     props:
       texture:
         int: 103
@@ -385,6 +404,7 @@ nodes:
         str: sand16
   sand17:
     type: Sprite2D
+    id: 481569127
     props:
       texture:
         int: 103
@@ -404,6 +424,7 @@ nodes:
         str: sand17
   sand18:
     type: Sprite2D
+    id: 1488030097
     props:
       texture:
         int: 103
@@ -423,6 +444,7 @@ nodes:
         str: sand18
   sand19:
     type: Sprite2D
+    id: 1035488440
     props:
       texture:
         int: 103
@@ -442,6 +464,7 @@ nodes:
         str: sand19
   sand20:
     type: Sprite2D
+    id: 1997205624
     props:
       texture:
         int: 103
@@ -461,6 +484,7 @@ nodes:
         str: sand20
   sand21:
     type: Sprite2D
+    id: 1420472466
     props:
       texture:
         int: 103
@@ -480,6 +504,7 @@ nodes:
         str: sand21
   sand22:
     type: Sprite2D
+    id: 883873087
     props:
       texture:
         int: 103
@@ -499,6 +524,7 @@ nodes:
         str: sand22
   sand23:
     type: Sprite2D
+    id: 356225035
     props:
       texture:
         int: 103
@@ -518,6 +544,7 @@ nodes:
         str: sand23
   sand24:
     type: Sprite2D
+    id: 875293309
     props:
       texture:
         int: 103
@@ -537,6 +564,7 @@ nodes:
         str: sand24
   sand25:
     type: Sprite2D
+    id: 1021811283
     props:
       texture:
         int: 103
@@ -556,6 +584,7 @@ nodes:
         str: sand25
   sand26:
     type: Sprite2D
+    id: 252047646
     props:
       texture:
         int: 103
@@ -575,6 +604,7 @@ nodes:
         str: sand26
   sand27:
     type: Sprite2D
+    id: 717379186
     props:
       texture:
         int: 103
@@ -594,6 +624,7 @@ nodes:
         str: sand27
   sand28:
     type: Sprite2D
+    id: 2053936433
     props:
       texture:
         int: 103
@@ -613,6 +644,7 @@ nodes:
         str: sand28
   sand29:
     type: Sprite2D
+    id: 2131101791
     props:
       texture:
         int: 103
@@ -632,6 +664,7 @@ nodes:
         str: sand29
   sand30:
     type: Sprite2D
+    id: 1497590456
     props:
       texture:
         int: 103
@@ -651,6 +684,7 @@ nodes:
         str: sand30
   sand31:
     type: Sprite2D
+    id: 1957399526
     props:
       texture:
         int: 103
@@ -670,6 +704,7 @@ nodes:
         str: sand31
   sand32:
     type: Sprite2D
+    id: 1928205405
     props:
       texture:
         int: 103
@@ -689,6 +724,7 @@ nodes:
         str: sand32
   sand33:
     type: Sprite2D
+    id: 1518038644
     props:
       texture:
         int: 103
@@ -708,6 +744,7 @@ nodes:
         str: sand33
   sand34:
     type: Sprite2D
+    id: 1431309458
     props:
       texture:
         int: 103
@@ -727,6 +764,7 @@ nodes:
         str: sand34
   sand35:
     type: Sprite2D
+    id: 2019882502
     props:
       texture:
         int: 103
@@ -746,6 +784,7 @@ nodes:
         str: sand35
   sand36:
     type: Sprite2D
+    id: 1730650329
     props:
       texture:
         int: 103
@@ -765,6 +804,7 @@ nodes:
         str: sand36
   sand37:
     type: Sprite2D
+    id: 385212940
     props:
       texture:
         int: 103
@@ -784,6 +824,7 @@ nodes:
         str: sand37
   sand38:
     type: Sprite2D
+    id: 245554051
     props:
       texture:
         int: 103
@@ -803,6 +844,7 @@ nodes:
         str: sand38
   sand39:
     type: Sprite2D
+    id: 1404478833
     props:
       texture:
         int: 103
@@ -822,6 +864,7 @@ nodes:
         str: sand39
   sand40:
     type: Sprite2D
+    id: 1788040686
     props:
       texture:
         int: 103
@@ -841,6 +884,7 @@ nodes:
         str: sand40
   sand41:
     type: Sprite2D
+    id: 941736931
     props:
       texture:
         int: 103
@@ -860,6 +904,7 @@ nodes:
         str: sand41
   sand42:
     type: Sprite2D
+    id: 1869296565
     props:
       texture:
         int: 103
@@ -879,6 +924,7 @@ nodes:
         str: sand42
   sand43:
     type: Sprite2D
+    id: 1735796262
     props:
       texture:
         int: 103
@@ -898,6 +944,7 @@ nodes:
         str: sand43
   sand44:
     type: Sprite2D
+    id: 2084143670
     props:
       texture:
         int: 103
@@ -917,6 +964,7 @@ nodes:
         str: sand44
   sand45:
     type: Sprite2D
+    id: 89751506
     props:
       texture:
         int: 103
@@ -936,6 +984,7 @@ nodes:
         str: sand45
   sand46:
     type: Sprite2D
+    id: 846215167
     props:
       texture:
         int: 103
@@ -955,6 +1004,7 @@ nodes:
         str: sand46
   sand47:
     type: Sprite2D
+    id: 152180025
     props:
       texture:
         int: 103
@@ -974,6 +1024,7 @@ nodes:
         str: sand47
   sand48:
     type: Sprite2D
+    id: 571320633
     props:
       texture:
         int: 103
@@ -993,6 +1044,7 @@ nodes:
         str: sand48
   sand49:
     type: Sprite2D
+    id: 186761616
     props:
       texture:
         int: 103
@@ -1012,6 +1064,7 @@ nodes:
         str: sand49
   sand50:
     type: Sprite2D
+    id: 1187668465
     props:
       texture:
         int: 103
@@ -1031,6 +1084,7 @@ nodes:
         str: sand50
   sand51:
     type: Sprite2D
+    id: 421042609
     props:
       texture:
         int: 103
@@ -1050,6 +1104,7 @@ nodes:
         str: sand51
   sand52:
     type: Sprite2D
+    id: 1607234082
     props:
       texture:
         int: 103
@@ -1069,6 +1124,7 @@ nodes:
         str: sand52
   sand53:
     type: Sprite2D
+    id: 2071541553
     props:
       texture:
         int: 103
@@ -1088,6 +1144,7 @@ nodes:
         str: sand53
   sand54:
     type: Sprite2D
+    id: 777267645
     props:
       texture:
         int: 103
@@ -1107,6 +1164,7 @@ nodes:
         str: sand54
   sand55:
     type: Sprite2D
+    id: 335043743
     props:
       texture:
         int: 103
@@ -1126,6 +1184,7 @@ nodes:
         str: sand55
   sand56:
     type: Sprite2D
+    id: 945869188
     props:
       texture:
         int: 103
@@ -1145,6 +1204,7 @@ nodes:
         str: sand56
   sand57:
     type: Sprite2D
+    id: 1029315291
     props:
       texture:
         int: 103
@@ -1164,6 +1224,7 @@ nodes:
         str: sand57
   sand58:
     type: Sprite2D
+    id: 1052422929
     props:
       texture:
         int: 103
@@ -1183,6 +1244,7 @@ nodes:
         str: sand58
   sand59:
     type: Sprite2D
+    id: 852321973
     props:
       texture:
         int: 103
@@ -1202,6 +1264,7 @@ nodes:
         str: sand59
   sand60:
     type: Sprite2D
+    id: 1012933434
     props:
       texture:
         int: 103
@@ -1221,6 +1284,7 @@ nodes:
         str: sand60
   sand61:
     type: Sprite2D
+    id: 402529737
     props:
       texture:
         int: 103
@@ -1240,6 +1304,7 @@ nodes:
         str: sand61
   sand62:
     type: Sprite2D
+    id: 662237851
     props:
       texture:
         int: 103
@@ -1259,6 +1324,7 @@ nodes:
         str: sand62
   sand63:
     type: Sprite2D
+    id: 793655191
     props:
       texture:
         int: 103
@@ -1278,6 +1344,7 @@ nodes:
         str: sand63
   sand64:
     type: Sprite2D
+    id: 1920568381
     props:
       texture:
         int: 103
@@ -1297,6 +1364,7 @@ nodes:
         str: sand64
   sand65:
     type: Sprite2D
+    id: 2093547310
     props:
       texture:
         int: 103
@@ -1316,6 +1384,7 @@ nodes:
         str: sand65
   sand66:
     type: Sprite2D
+    id: 666054045
     props:
       texture:
         int: 103
@@ -1335,6 +1404,7 @@ nodes:
         str: sand66
   sand67:
     type: Sprite2D
+    id: 1503735063
     props:
       texture:
         int: 103
@@ -1354,6 +1424,7 @@ nodes:
         str: sand67
   sand68:
     type: Sprite2D
+    id: 331276602
     props:
       texture:
         int: 103
@@ -1373,6 +1444,7 @@ nodes:
         str: sand68
   sand69:
     type: Sprite2D
+    id: 911608096
     props:
       texture:
         int: 103
@@ -1392,6 +1464,7 @@ nodes:
         str: sand69
   sand70:
     type: Sprite2D
+    id: 760730248
     props:
       texture:
         int: 103
@@ -1411,6 +1484,7 @@ nodes:
         str: sand70
   sand71:
     type: Sprite2D
+    id: 2119317289
     props:
       texture:
         int: 103
@@ -1430,6 +1504,7 @@ nodes:
         str: sand71
   sand72:
     type: Sprite2D
+    id: 1853345027
     props:
       texture:
         int: 103
@@ -1449,6 +1524,7 @@ nodes:
         str: sand72
   sand73:
     type: Sprite2D
+    id: 482543165
     props:
       texture:
         int: 103
@@ -1468,6 +1544,7 @@ nodes:
         str: sand73
   sand74:
     type: Sprite2D
+    id: 1707629903
     props:
       texture:
         int: 103
@@ -1487,6 +1564,7 @@ nodes:
         str: sand74
   sand75:
     type: Sprite2D
+    id: 1790005049
     props:
       texture:
         int: 103
@@ -1506,6 +1584,7 @@ nodes:
         str: sand75
   sand76:
     type: Sprite2D
+    id: 572294671
     props:
       texture:
         int: 103
@@ -1525,6 +1604,7 @@ nodes:
         str: sand76
   sand77:
     type: Sprite2D
+    id: 406361422
     props:
       texture:
         int: 103
@@ -1544,6 +1624,7 @@ nodes:
         str: sand77
   sand78:
     type: Sprite2D
+    id: 1942185075
     props:
       texture:
         int: 103
@@ -1563,6 +1644,7 @@ nodes:
         str: sand78
   sand79:
     type: Sprite2D
+    id: 1143615305
     props:
       texture:
         int: 103
@@ -1582,6 +1664,7 @@ nodes:
         str: sand79
   sand80:
     type: Sprite2D
+    id: 593123038
     props:
       texture:
         int: 103
@@ -1601,6 +1684,7 @@ nodes:
         str: sand80
   sand81:
     type: Sprite2D
+    id: 982369892
     props:
       texture:
         int: 103
@@ -1620,6 +1704,7 @@ nodes:
         str: sand81
   sand82:
     type: Sprite2D
+    id: 1564657914
     props:
       texture:
         int: 103
@@ -1639,6 +1724,7 @@ nodes:
         str: sand82
   sand83:
     type: Sprite2D
+    id: 52873472
     props:
       texture:
         int: 103
@@ -1658,6 +1744,7 @@ nodes:
         str: sand83
   sand84:
     type: Sprite2D
+    id: 906427797
     props:
       texture:
         int: 103
@@ -1677,6 +1764,7 @@ nodes:
         str: sand84
   sand85:
     type: Sprite2D
+    id: 194441911
     props:
       texture:
         int: 103
@@ -1696,6 +1784,7 @@ nodes:
         str: sand85
   sand86:
     type: Sprite2D
+    id: 387917215
     props:
       texture:
         int: 103
@@ -1715,6 +1804,7 @@ nodes:
         str: sand86
   sand87:
     type: Sprite2D
+    id: 1852296985
     props:
       texture:
         int: 103
@@ -1734,6 +1824,7 @@ nodes:
         str: sand87
   sand88:
     type: Sprite2D
+    id: 1223757203
     props:
       texture:
         int: 103
@@ -1753,6 +1844,7 @@ nodes:
         str: sand88
   sand89:
     type: Sprite2D
+    id: 1440340144
     props:
       texture:
         int: 103
@@ -1772,6 +1864,7 @@ nodes:
         str: sand89
   sand90:
     type: Sprite2D
+    id: 557135310
     props:
       texture:
         int: 103
@@ -1791,6 +1884,7 @@ nodes:
         str: sand90
   sand91:
     type: Sprite2D
+    id: 89206989
     props:
       texture:
         int: 103
@@ -1810,6 +1904,7 @@ nodes:
         str: sand91
   sand92:
     type: Sprite2D
+    id: 1842869881
     props:
       texture:
         int: 103
@@ -1829,6 +1924,7 @@ nodes:
         str: sand92
   sand93:
     type: Sprite2D
+    id: 1219373162
     props:
       texture:
         int: 103
@@ -1848,6 +1944,7 @@ nodes:
         str: sand93
   sand94:
     type: Sprite2D
+    id: 882862181
     props:
       texture:
         int: 103
@@ -1867,6 +1964,7 @@ nodes:
         str: sand94
   sand95:
     type: Sprite2D
+    id: 1615954614
     props:
       texture:
         int: 103
@@ -1886,6 +1984,7 @@ nodes:
         str: sand95
   sand96:
     type: Sprite2D
+    id: 1165436824
     props:
       texture:
         int: 103
@@ -1905,6 +2004,7 @@ nodes:
         str: sand96
   sand97:
     type: Sprite2D
+    id: 1548916226
     props:
       texture:
         int: 103
@@ -1924,6 +2024,7 @@ nodes:
         str: sand97
   sand98:
     type: Sprite2D
+    id: 972206029
     props:
       texture:
         int: 103
@@ -1943,6 +2044,7 @@ nodes:
         str: sand98
   sand99:
     type: Sprite2D
+    id: 1496713426
     props:
       texture:
         int: 103
@@ -1962,6 +2064,7 @@ nodes:
         str: sand99
   sand100:
     type: Sprite2D
+    id: 313040675
     props:
       texture:
         int: 103
@@ -1981,6 +2084,7 @@ nodes:
         str: sand100
   sand101:
     type: Sprite2D
+    id: 1732936277
     props:
       texture:
         int: 103
@@ -2000,6 +2104,7 @@ nodes:
         str: sand101
   sand102:
     type: Sprite2D
+    id: 1468547067
     props:
       texture:
         int: 103
@@ -2019,6 +2124,7 @@ nodes:
         str: sand102
   sand103:
     type: Sprite2D
+    id: 18902054
     props:
       texture:
         int: 103
@@ -2038,6 +2144,7 @@ nodes:
         str: sand103
   sand104:
     type: Sprite2D
+    id: 67995794
     props:
       texture:
         int: 103
@@ -2057,6 +2164,7 @@ nodes:
         str: sand104
   sand105:
     type: Sprite2D
+    id: 1028693322
     props:
       texture:
         int: 103
@@ -2076,6 +2184,7 @@ nodes:
         str: sand105
   sand106:
     type: Sprite2D
+    id: 1808907104
     props:
       texture:
         int: 103
@@ -2095,6 +2204,7 @@ nodes:
         str: sand106
   sand107:
     type: Sprite2D
+    id: 640290466
     props:
       texture:
         int: 103
@@ -2114,6 +2224,7 @@ nodes:
         str: sand107
   sand108:
     type: Sprite2D
+    id: 1435054744
     props:
       texture:
         int: 103
@@ -2133,6 +2244,7 @@ nodes:
         str: sand108
   sand109:
     type: Sprite2D
+    id: 1603608531
     props:
       texture:
         int: 103
@@ -2152,6 +2264,7 @@ nodes:
         str: sand109
   sand110:
     type: Sprite2D
+    id: 1783905771
     props:
       texture:
         int: 103
@@ -2171,6 +2284,7 @@ nodes:
         str: sand110
   sand111:
     type: Sprite2D
+    id: 2028177782
     props:
       texture:
         int: 103
@@ -2190,6 +2304,7 @@ nodes:
         str: sand111
   sand112:
     type: Sprite2D
+    id: 438494775
     props:
       texture:
         int: 103
@@ -2209,6 +2324,7 @@ nodes:
         str: sand112
   sand113:
     type: Sprite2D
+    id: 1201080037
     props:
       texture:
         int: 103
@@ -2228,6 +2344,7 @@ nodes:
         str: sand113
   sand114:
     type: Sprite2D
+    id: 2081051254
     props:
       texture:
         int: 103
@@ -2247,6 +2364,7 @@ nodes:
         str: sand114
   sand115:
     type: Sprite2D
+    id: 1344922573
     props:
       texture:
         int: 103
@@ -2266,6 +2384,7 @@ nodes:
         str: sand115
   sand116:
     type: Sprite2D
+    id: 1395521949
     props:
       texture:
         int: 103
@@ -2285,6 +2404,7 @@ nodes:
         str: sand116
   sand117:
     type: Sprite2D
+    id: 321484821
     props:
       texture:
         int: 103
@@ -2304,6 +2424,7 @@ nodes:
         str: sand117
   sand118:
     type: Sprite2D
+    id: 1049735910
     props:
       texture:
         int: 103
@@ -2323,6 +2444,7 @@ nodes:
         str: sand118
   sand119:
     type: Sprite2D
+    id: 471795504
     props:
       texture:
         int: 103
@@ -2342,6 +2464,7 @@ nodes:
         str: sand119
   sand120:
     type: Sprite2D
+    id: 1761824965
     props:
       texture:
         int: 103
@@ -2361,6 +2484,7 @@ nodes:
         str: sand120
   sand121:
     type: Sprite2D
+    id: 1606871221
     props:
       texture:
         int: 103
@@ -2380,6 +2504,7 @@ nodes:
         str: sand121
   sand122:
     type: Sprite2D
+    id: 561002493
     props:
       texture:
         int: 103
@@ -2399,6 +2524,7 @@ nodes:
         str: sand122
   sand123:
     type: Sprite2D
+    id: 1457211198
     props:
       texture:
         int: 103
@@ -2418,6 +2544,7 @@ nodes:
         str: sand123
   sand124:
     type: Sprite2D
+    id: 678760735
     props:
       texture:
         int: 103
@@ -2437,6 +2564,7 @@ nodes:
         str: sand124
   sand125:
     type: Sprite2D
+    id: 1443864674
     props:
       texture:
         int: 103
@@ -2456,6 +2584,7 @@ nodes:
         str: sand125
   sand126:
     type: Sprite2D
+    id: 925682165
     props:
       texture:
         int: 103
@@ -2475,6 +2604,7 @@ nodes:
         str: sand126
   sand127:
     type: Sprite2D
+    id: 1844197559
     props:
       texture:
         int: 103
@@ -2494,6 +2624,7 @@ nodes:
         str: sand127
   sand128:
     type: Sprite2D
+    id: 845297253
     props:
       texture:
         int: 103
@@ -2513,6 +2644,7 @@ nodes:
         str: sand128
   sand129:
     type: Sprite2D
+    id: 1897888194
     props:
       texture:
         int: 103
@@ -2532,6 +2664,7 @@ nodes:
         str: sand129
   sand130:
     type: Sprite2D
+    id: 1193427337
     props:
       texture:
         int: 103
@@ -2551,6 +2684,7 @@ nodes:
         str: sand130
   sand131:
     type: Sprite2D
+    id: 1158337928
     props:
       texture:
         int: 103
@@ -2570,6 +2704,7 @@ nodes:
         str: sand131
   sand132:
     type: Sprite2D
+    id: 1483340824
     props:
       texture:
         int: 103
@@ -2589,6 +2724,7 @@ nodes:
         str: sand132
   sand133:
     type: Sprite2D
+    id: 514490757
     props:
       texture:
         int: 103
@@ -2608,6 +2744,7 @@ nodes:
         str: sand133
   sand134:
     type: Sprite2D
+    id: 1177239982
     props:
       texture:
         int: 103
@@ -2627,6 +2764,7 @@ nodes:
         str: sand134
   sand135:
     type: Sprite2D
+    id: 1551336618
     props:
       texture:
         int: 103
@@ -2646,6 +2784,7 @@ nodes:
         str: sand135
   sand136:
     type: Sprite2D
+    id: 1543184079
     props:
       texture:
         int: 103
@@ -2665,6 +2804,7 @@ nodes:
         str: sand136
   sand137:
     type: Sprite2D
+    id: 838663438
     props:
       texture:
         int: 103
@@ -2684,6 +2824,7 @@ nodes:
         str: sand137
   sand138:
     type: Sprite2D
+    id: 44143436
     props:
       texture:
         int: 103
@@ -2703,6 +2844,7 @@ nodes:
         str: sand138
   sand139:
     type: Sprite2D
+    id: 830755176
     props:
       texture:
         int: 103
@@ -2722,6 +2864,7 @@ nodes:
         str: sand139
   sand140:
     type: Sprite2D
+    id: 294788321
     props:
       texture:
         int: 103
@@ -2741,6 +2884,7 @@ nodes:
         str: sand140
   sand141:
     type: Sprite2D
+    id: 1828049207
     props:
       texture:
         int: 103
@@ -2760,6 +2904,7 @@ nodes:
         str: sand141
   sand142:
     type: Sprite2D
+    id: 711449310
     props:
       texture:
         int: 103
@@ -2779,6 +2924,7 @@ nodes:
         str: sand142
   sand143:
     type: Sprite2D
+    id: 733283097
     props:
       texture:
         int: 103
@@ -2798,6 +2944,7 @@ nodes:
         str: sand143
   sand144:
     type: Sprite2D
+    id: 881645597
     props:
       texture:
         int: 103
@@ -2817,6 +2964,7 @@ nodes:
         str: sand144
   sand145:
     type: Sprite2D
+    id: 645016917
     props:
       texture:
         int: 103
@@ -2836,6 +2984,7 @@ nodes:
         str: sand145
   sand146:
     type: Sprite2D
+    id: 2078205670
     props:
       texture:
         int: 103
@@ -2855,6 +3004,7 @@ nodes:
         str: sand146
   sand147:
     type: Sprite2D
+    id: 129683898
     props:
       texture:
         int: 103
@@ -2874,6 +3024,7 @@ nodes:
         str: sand147
   sand148:
     type: Sprite2D
+    id: 966501738
     props:
       texture:
         int: 103
@@ -2893,6 +3044,7 @@ nodes:
         str: sand148
   sand149:
     type: Sprite2D
+    id: 980457932
     props:
       texture:
         int: 103
@@ -2912,6 +3064,7 @@ nodes:
         str: sand149
   sand150:
     type: Sprite2D
+    id: 601479402
     props:
       texture:
         int: 103
@@ -2931,6 +3084,7 @@ nodes:
         str: sand150
   sand151:
     type: Sprite2D
+    id: 580843056
     props:
       texture:
         int: 103
@@ -2950,6 +3104,7 @@ nodes:
         str: sand151
   sand152:
     type: Sprite2D
+    id: 439845505
     props:
       texture:
         int: 103
@@ -2969,6 +3124,7 @@ nodes:
         str: sand152
   sand153:
     type: Sprite2D
+    id: 1162481895
     props:
       texture:
         int: 103
@@ -2988,6 +3144,7 @@ nodes:
         str: sand153
   sand154:
     type: Sprite2D
+    id: 2038054254
     props:
       texture:
         int: 103
@@ -3007,6 +3164,7 @@ nodes:
         str: sand154
   sand155:
     type: Sprite2D
+    id: 1118606240
     props:
       texture:
         int: 103
@@ -3026,6 +3184,7 @@ nodes:
         str: sand155
   sand156:
     type: Sprite2D
+    id: 458862922
     props:
       texture:
         int: 103
@@ -3045,6 +3204,7 @@ nodes:
         str: sand156
   sand157:
     type: Sprite2D
+    id: 816252771
     props:
       texture:
         int: 103
@@ -3064,6 +3224,7 @@ nodes:
         str: sand157
   sand158:
     type: Sprite2D
+    id: 815320151
     props:
       texture:
         int: 103
@@ -3083,6 +3244,7 @@ nodes:
         str: sand158
   sand159:
     type: Sprite2D
+    id: 1304160175
     props:
       texture:
         int: 103
@@ -3102,6 +3264,7 @@ nodes:
         str: sand159
   sand160:
     type: Sprite2D
+    id: 566657318
     props:
       texture:
         int: 103
@@ -3121,6 +3284,7 @@ nodes:
         str: sand160
   sand161:
     type: Sprite2D
+    id: 2008747489
     props:
       texture:
         int: 103
@@ -3140,6 +3304,7 @@ nodes:
         str: sand161
   sand162:
     type: Sprite2D
+    id: 315014455
     props:
       texture:
         int: 103
@@ -3159,6 +3324,7 @@ nodes:
         str: sand162
   sand163:
     type: Sprite2D
+    id: 2049998142
     props:
       texture:
         int: 103
@@ -3178,6 +3344,7 @@ nodes:
         str: sand163
   sand164:
     type: Sprite2D
+    id: 375754598
     props:
       texture:
         int: 103
@@ -3197,6 +3364,7 @@ nodes:
         str: sand164
   sand165:
     type: Sprite2D
+    id: 1495254437
     props:
       texture:
         int: 103
@@ -3216,6 +3384,7 @@ nodes:
         str: sand165
   sand166:
     type: Sprite2D
+    id: 1453851112
     props:
       texture:
         int: 103
@@ -3235,6 +3404,7 @@ nodes:
         str: sand166
   sand167:
     type: Sprite2D
+    id: 1918438677
     props:
       texture:
         int: 103
@@ -3254,6 +3424,7 @@ nodes:
         str: sand167
   sand168:
     type: Sprite2D
+    id: 183434228
     props:
       texture:
         int: 103
@@ -3273,6 +3444,7 @@ nodes:
         str: sand168
   sand169:
     type: Sprite2D
+    id: 1497994549
     props:
       texture:
         int: 103
