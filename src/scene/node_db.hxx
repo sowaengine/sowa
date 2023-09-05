@@ -111,7 +111,7 @@ class NodeDB {
 			node->m_typeHash = type;
 			node->Name() = name == "" ? "New Node" : name;
 			if (id == 0) {
-				id = Utils::Rand();
+				id = Utils::RandRange(1, RAND_MAX);
 			}
 			node->m_id = id;
 

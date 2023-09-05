@@ -15,7 +15,7 @@ void ResourceManager::RegisterResource(std::string extension, ResourceFactory fa
 Resource *ResourceManager::Load(const std::string &path, RID id, ResourceType type) {
 	ResourceFactory factory;
 	if (id == 0) {
-		id = Utils::Rand();
+		id = Utils::RandRange(1, RAND_MAX);
 	}
 
 	if (type == ResourceType_None) {

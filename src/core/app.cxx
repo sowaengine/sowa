@@ -8,6 +8,7 @@
 #include "core/command/interfaces/scene_save_as.hxx"
 #include "core/graphics.hxx"
 #include "core/time.hxx"
+#include "core/tweens.hxx"
 
 #include "servers/file_server.hxx"
 #include "servers/input_server.hxx"
@@ -20,6 +21,7 @@
 #include "ui/new_tree.hxx"
 #include "ui/ui_canvas.hxx"
 
+#include "scene/camera_2d.hxx"
 #include "scene/node_2d.hxx"
 #include "scene/node_db.hxx"
 #include "scene/sprite_2d.hxx"
@@ -49,9 +51,16 @@
 
 static App *s_instance;
 
+static float posX = 200.f;
+
 App::App() {
 	s_instance = this;
 	Utils::Randomize();
+
+	Tweens::GetInstance().RegisterTween(2.f, [](float f) {
+		// Utils::Log("YOOO: State: {}", f);
+		posX = 200.f + (f * 1000.f);
+	});
 }
 
 App::~App() {
@@ -369,6 +378,9 @@ Error App::Init() {
 	REGISTER_NODE_TYPE(Sprite2D, Node2D);
 	REGISTER_NODE_PROPERTY(Sprite2D, "texture", GetTexture(), RID);
 
+	REGISTER_NODE_TYPE(Camera2D, Node2D);
+	REGISTER_NODE_PROPERTY(Camera2D, "zoom", Zoom(), vec2);
+
 	BehaviourDB::GetInstance().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
 	reload_scripts();
@@ -482,6 +494,7 @@ void App::mainLoop() {
 	glViewport(0, 0, w, h);
 
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(w), 0.f, static_cast<float>(h), -128.f, 128.f));
+	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 	Renderer().Reset();
 
 	if (nullptr != m_commandInterface) {
@@ -559,14 +572,32 @@ void App::mainLoop() {
 	SetRenderLayer(&m_layer2D);
 	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f, true);
 
+	glm::mat4 view = glm::mat4(1.f);
+	if (GetCurrentScene() && IsRunning()) {
+		Camera2D *cam = dynamic_cast<Camera2D *>(GetCurrentScene()->get_active_camera2d());
+		if (cam) {
+			vec2 pos = cam->GlobalPosition();
+			pos.x -= 1920.f * cam->CenterPoint().x;
+			pos.y -= 1080.f * cam->CenterPoint().y;
+			view = glm::translate(view, {pos.x, pos.y, 0.f});
+			if (cam->Rotatable()) {
+				view = glm::rotate(view, glm::radians(cam->GlobalRotation()), {0.f, 0.f, 1.f});
+			}
+			// view = glm::scale(view, {x, y, 1.f});
+			view = glm::inverse(view);
+		}
+	}
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f, -128.f, 128.f));
+	m_batchRenderer.GetShader().UniformMat4("uView", view);
 	Renderer().Reset();
 	glEnable(GL_DEPTH_TEST);
 
 	if (m_pCurrentScene != nullptr) {
 		m_pCurrentScene->UpdateScene();
 	}
-	Renderer().DrawText("Sowa Engine", &m_testFont, 10.f, 10.f, glm::mat4(1.f), 0.f, 1.f);
+	Tweens::GetInstance().Poll(Time::Delta());
+
+	Renderer().DrawText("Sowa Engine", &m_testFont, posX, 10.f, glm::mat4(1.f), 0.f, 1.f);
 	Renderer().End();
 
 	glDisable(GL_DEPTH_TEST);
