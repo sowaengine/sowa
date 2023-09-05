@@ -11,7 +11,7 @@ void Time::update() {
 	std::chrono::time_point now = std::chrono::system_clock::now();
 
 	std::chrono::duration<double, std::milli> ms = now - Time::lastUpdate;
-	Time::delta = ms.count() * 0.01;
+	Time::delta = ms.count() * 0.001;
 
 	Time::lastUpdate = now;
 }

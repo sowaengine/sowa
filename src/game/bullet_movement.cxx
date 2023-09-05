@@ -2,7 +2,7 @@
 #include "game.hxx"
 #include "scene/node_2d.hxx"
 
-static float bulletSpeed = 200.f;
+static float bulletSpeed = 2000.f;
 
 void BulletMovement::Start(Node *, Behaviour *) {
 }

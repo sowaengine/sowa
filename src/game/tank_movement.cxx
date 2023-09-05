@@ -9,11 +9,11 @@
 #include "scene/node_2d.hxx"
 #include "servers/input_server.hxx"
 
-static float acceleration = 5.f;
-static float deceleration = 10.f;
+static float acceleration = 500.f;
+static float deceleration = 1000.f;
 
 static float curAcceleration = 0.f;
-static float maxAcceleration = 35.f;
+static float maxAcceleration = 350.f;
 
 static float lerpAngle(float from, float to, float t) {
 	float diff = fmod(to - from, 3.141592653589 * 2);
@@ -48,7 +48,7 @@ void TankMovement::Update(Node *node, Behaviour *) {
 	if (glm::length(input) > 0.5f) {
 		input = glm::normalize(input);
 
-		curAcceleration = std::max(curAcceleration, 5.f);
+		curAcceleration = std::max(curAcceleration, 50.f);
 		curAcceleration += acceleration * Time::Delta();
 		curAcceleration = std::min(curAcceleration, maxAcceleration);
 	} else {
