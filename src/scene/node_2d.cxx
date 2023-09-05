@@ -19,9 +19,9 @@ glm::mat4 Node2D::CalculateTransform() {
 	return model;
 }
 
-glm::vec2 Node2D::GlobalPosition() {
+vec2 Node2D::GlobalPosition() {
 	glm::vec3 pos = CalculateTransform()[3];
-	return glm::vec2(pos.x, pos.y);
+	return vec2(pos.x, pos.y);
 }
 float Node2D::GlobalRotation() {
 	glm::quat rot = glm::quat_cast(CalculateTransform());

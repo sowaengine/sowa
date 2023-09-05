@@ -1,6 +1,7 @@
 #include "scene.hxx"
 
 #include "core/error/error.hxx"
+#include "math/math.hxx"
 #include "resource/resource_manager.hxx"
 #include "scene/node_db.hxx"
 #include "servers/file_server.hxx"
@@ -11,15 +12,15 @@
 
 namespace YAML {
 template <>
-struct convert<glm::vec2> {
-	static Node encode(const glm::vec2 &rhs) {
+struct convert<vec2> {
+	static Node encode(const vec2 &rhs) {
 		Node node;
 		node["x"] = (rhs.x);
 		node["y"] = (rhs.y);
 		return node;
 	}
 
-	static bool decode(const Node &node, glm::vec2 &rhs) {
+	static bool decode(const Node &node, vec2 &rhs) {
 		if (!node.IsMap() || node.size() != 2) {
 			return false;
 		}
@@ -40,7 +41,7 @@ struct convert<std::any> {
 		if (const std::string *p = std::any_cast<std::string>(&rhs)) {
 			node["str"] = *p;
 		}
-		if (const glm::vec2 *p = std::any_cast<glm::vec2>(&rhs)) {
+		if (const vec2 *p = std::any_cast<vec2>(&rhs)) {
 			node["vec2"] = *p;
 		}
 		if (const int *p = std::any_cast<int>(&rhs)) {
@@ -70,7 +71,7 @@ struct convert<std::any> {
 		if (type == "str") {
 			rhs = node["str"].as<std::string>("");
 		} else if (type == "vec2") {
-			rhs = node["vec2"].as<glm::vec2>(glm::vec2{0.f, 0.f});
+			rhs = node["vec2"].as<vec2>(vec2{0.f, 0.f});
 		} else if (type == "int") {
 			rhs = node["int"].as<int>(0);
 		} else if (type == "float") {
@@ -220,14 +221,11 @@ Error Scene::Save(const char *path) {
 		}
 		node["props"] = props;
 
-		auto behaviourList = pNode->GetBehaviours();
+		auto &behaviourList = pNode->GetBehaviourNames();
 		if (behaviourList.size() > 0) {
 			YAML::Node behaviours;
 
-			for (auto &[id, behaviour] : behaviourList) {
-				behaviours.push_back(behaviour.GetBehaviourName());
-			}
-			node["behaviours"] = behaviours;
+			node["behaviours"] = behaviourList;
 		}
 
 		auto groupList = pNode->get_groups();
