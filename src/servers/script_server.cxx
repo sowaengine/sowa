@@ -4,6 +4,7 @@
 
 #include "core/behaviour/behaviour_db.hxx"
 #include "file_server.hxx"
+#include "math/math.hxx"
 #include "scene/node_2d.hxx"
 #include "scene/node_db.hxx"
 #include "scene/sprite_2d.hxx"
@@ -44,6 +45,45 @@ struct ScriptServerData {
 };
 
 static ScriptServerData s_data;
+
+namespace ASRef {
+// ref -1: app allocated object
+static std::unordered_map<void *, int> refs;
+
+template <typename T>
+void AddRef(T *o) {
+	if (refs[(void *)o] == -1)
+		return;
+
+	refs[(void *)o]++;
+}
+
+template <typename T>
+void Release(T *o) {
+	if (refs[(void *)o] == -1)
+		return;
+
+	if (--refs[(void *)o] == 0) {
+		delete o;
+	}
+}
+
+template <typename T, typename... Args>
+T *Create(Args... args) {
+	return new T(args...);
+}
+template <typename T>
+T *Create(float v) {
+	return new T(v);
+}
+
+// Stores script object without allocating it. (used for app allocated objects)
+template <typename T>
+T *CreateNoAlloc(T *o) {
+	refs[(void *)o] = -1;
+	return o;
+}
+} // namespace ASRef
 
 // Implement a simple message callback function
 void message_callback(const asSMessageInfo *msg, void *param) {
@@ -142,8 +182,6 @@ static void asGetProperty(asIScriptGeneric *gen) {
 	asIScriptFunction *func = gen->GetFunction();
 	std::string propName = std::string(func->GetName()).substr(4);
 
-	std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get(node);
-
 	std::string typeName;
 	void *ret = nullptr;
 
@@ -164,19 +202,28 @@ static void asGetProperty(asIScriptGeneric *gen) {
 	}
 
 	if (typeName == "int") {
+		std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get(node);
 		if (int *v = std::any_cast<int>(&prop)) {
 			gen->SetReturnDWord(*v);
 			return;
 		}
 	} else if (typeName == "float") {
+		std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get(node);
 		if (float *v = std::any_cast<float>(&prop)) {
 			gen->SetReturnFloat(*v);
 			return;
 		}
 	} else if (typeName == "string") {
+		std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get(node);
 		if (std::string *v = std::any_cast<std::string>(&prop)) {
 			*reinterpret_cast<std::string *>(ret) = *v;
 			gen->SetReturnObject(ret);
+			return;
+		}
+	} else if (typeName == "vec2") {
+		std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get_ref(node);
+		if (vec2 **v = std::any_cast<vec2 *>(&prop)) {
+			gen->SetReturnObject(ASRef::CreateNoAlloc(*v));
 			return;
 		}
 	}
@@ -223,12 +270,44 @@ static void asSetProperty(asIScriptGeneric *gen) {
 		std::string *v = reinterpret_cast<std::string *>(gen->GetArgObject(0));
 		prop.set(node, *v);
 		return;
+	} else if (typeName == "vec2") {
+		vec2 *v = reinterpret_cast<vec2 *>(gen->GetArgObject(0));
+		prop.set(node, *v);
+		return;
 	}
 
 	std::cout << "INVALID PROP" << std::endl;
 }
 
+template <typename T>
+void asConstruct(void *memory) {
+	new (memory) T();
+}
+
+template <typename T>
+void asConstruct(void *memory, float v) {
+	new (memory) T(v);
+}
+
+template <typename T>
+void asConstruct(void *memory, float v1, float v2) {
+	new (memory) T(v1, v2);
+}
+
+template <typename T>
+void asConstruct(void *memory, const vec2 &v) {
+	new (memory) T(v);
+}
+
+template <typename T>
+void asDestruct(void *memory) {
+	((T *)memory)->~T();
+}
+
 ScriptServer::ScriptServer() {
+	vec2 v;
+	asConstruct<vec2>(&v, 0.f);
+
 	s_data.engine = asCreateScriptEngine();
 
 	AS_BEGIN();
@@ -256,7 +335,18 @@ ScriptServer::ScriptServer() {
 		AS_ASSERT();
 	};
 
+	// Register types
 	s_data.engine->RegisterTypedef("RID", "int");
+	s_data.engine->RegisterObjectType("vec2", sizeof(vec2), asOBJ_REF);
+	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_ADDREF, "void f()", asFUNCTION(ASRef::AddRef<vec2>), asCALL_CDECL_OBJFIRST);
+	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_RELEASE, "void f()", asFUNCTION(ASRef::Release<vec2>), asCALL_CDECL_OBJFIRST);
+	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_FACTORY, "vec2@ f()", asFUNCTIONPR(ASRef::Create<vec2>, (), vec2 *), asCALL_CDECL);
+	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_FACTORY, "vec2@ f(float)", asFUNCTIONPR(ASRef::Create<vec2>, (float), vec2 *), asCALL_CDECL);
+	s_data.engine->RegisterObjectMethod("vec2", "vec2 &opAssign(vec2 &in) const", asMETHODPR(vec2, operator=, (const vec2 &), vec2 &), asCALL_THISCALL);
+	s_data.engine->RegisterObjectProperty("vec2", "float x", asOFFSET(vec2, x));
+	s_data.engine->RegisterObjectProperty("vec2", "float y", asOFFSET(vec2, y));
+
+	// Register nodes
 	for (const auto &[type, data] : db.m_db) {
 		std::string name = db.GetNodeTypeName(type);
 		AS_REGISTER_TYPE_STR(name.c_str(), asOBJ_REF | asOBJ_NOCOUNT);
@@ -269,8 +359,11 @@ ScriptServer::ScriptServer() {
 		for (const auto &[propName, prop] : data.properties) {
 			std::string typeName = prop.typeName;
 
-			if (typeName == "" || typeName == "glm::vec2")
+			if (typeName == "")
 				continue;
+
+			if (typeName == "vec2")
+				typeName += "@";
 
 			if (typeName == "std::string")
 				typeName = "string";

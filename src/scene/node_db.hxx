@@ -23,6 +23,7 @@ struct NodeFactory {
 
 struct NodeProperty {
 	std::function<Property(Node *)> get;
+	std::function<Property(Node *)> get_ref;
 	std::function<void(Node *, Property)> set;
 	std::string typeName = "";
 };

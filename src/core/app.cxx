@@ -342,6 +342,9 @@ Error App::Init() {
 		prop.get = [](Node *node) -> Property {                        \
 			return dynamic_cast<type *>(node)->propAccessor;           \
 		};                                                             \
+		prop.get_ref = [](Node *node) -> Property {                    \
+			return &(dynamic_cast<type *>(node)->propAccessor);        \
+		};                                                             \
 		prop.set = [](Node *node, Property value) {                    \
 			if (propType *v = std::any_cast<propType>(&value)) {       \
 				dynamic_cast<type *>(node)->propAccessor = *v;         \
@@ -355,8 +358,8 @@ Error App::Init() {
 	REGISTER_NODE_PROPERTY(Node, "name", Name(), std::string);
 
 	REGISTER_NODE_TYPE(Node2D, Node);
-	REGISTER_NODE_PROPERTY(Node2D, "position", Position(), glm::vec2);
-	REGISTER_NODE_PROPERTY(Node2D, "scale", Scale(), glm::vec2);
+	REGISTER_NODE_PROPERTY(Node2D, "position", Position(), vec2);
+	REGISTER_NODE_PROPERTY(Node2D, "scale", Scale(), vec2);
 	REGISTER_NODE_PROPERTY(Node2D, "rotation", Rotation(), float);
 	REGISTER_NODE_PROPERTY(Node2D, "z_index", ZIndex(), float);
 
