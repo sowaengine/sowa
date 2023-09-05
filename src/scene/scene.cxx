@@ -10,6 +10,8 @@
 
 #include "yaml-cpp/yaml.h"
 
+#include "utils/utils.hxx"
+
 namespace YAML {
 template <>
 struct convert<vec2> {
@@ -130,7 +132,7 @@ Error Scene::Load(const char *path) {
 		if (nullptr == res)
 			continue;
 
-		std::cout << "Loaded resource (" << path << ") id: " << res->ResourceID() << std::endl;
+		Utils::Info("Loaded resource ({}) id: {}", path, res->ResourceID());
 	}
 
 	YAML::Node nodes = scene["nodes"];

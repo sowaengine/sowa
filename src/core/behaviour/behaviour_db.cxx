@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "utils/utils.hxx"
+
 BehaviourDB &BehaviourDB::GetInstance() {
 	static BehaviourDB *db = new BehaviourDB;
 	return *db;
@@ -22,7 +24,7 @@ void BehaviourDB::RegisterBehaviour(std::string name, Behaviour behaviour) {
 	m_behaviourNames[id] = name;
 	m_behaviourIDs[name] = id;
 
-	std::cout << "Register behaviour " << name << " with id " << id << std::endl;
+	Utils::Info("Register behaviour {} with id {}", name, id);
 }
 
 Behaviour BehaviourDB::Construct(std::string name) {
