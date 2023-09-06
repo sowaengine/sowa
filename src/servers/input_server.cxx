@@ -21,6 +21,10 @@ struct InputCallbackBridge {
 	void CharCallback(GLFWwindow *window, unsigned int codepoint) {
 		InputServer::GetInstance().char_callback(window, codepoint);
 	}
+
+	void ScrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
+		InputServer::GetInstance().scroll_callback(window, xOffset, yOffset);
+	}
 };
 
 static void CallbackWrapperMouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
@@ -37,6 +41,10 @@ static void CallbackWrapperKeyCallback(GLFWwindow *window, int key, int scancode
 
 static void CallbackWrapperCharCallback(GLFWwindow *window, unsigned int codepoint) {
 	InputCallbackBridge().CharCallback(window, codepoint);
+}
+
+static void CallbackWrapperSrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
+	InputCallbackBridge().ScrollCallback(window, xOffset, yOffset);
 }
 
 InputServer::InputServer() {
@@ -124,12 +132,12 @@ ActionState InputServer::GetButtonState(int button) {
 
 bool InputServer::IsButtonDown(int button) {
 	ActionState state = GetButtonState(button);
-	return state == ActionState::JUST_PRESSED && state == ActionState::DOWN;
+	return state == ActionState::JUST_PRESSED || state == ActionState::DOWN;
 }
 
 bool InputServer::IsButtonUp(int button) {
 	ActionState state = GetButtonState(button);
-	return state == ActionState::JUST_RELEASED && state == ActionState::UP;
+	return state == ActionState::JUST_RELEASED || state == ActionState::UP;
 }
 
 bool InputServer::IsButtonJustPressed(int button) {
@@ -151,6 +159,7 @@ void InputServer::initialize() {
 	glfwSetKeyCallback(window, CallbackWrapperKeyCallback);
 	glfwSetMouseButtonCallback(window, CallbackWrapperMouseButtonCallback);
 	glfwSetCursorPosCallback(window, CallbackWrapperCursorPosCallback);
+	glfwSetScrollCallback(window, CallbackWrapperSrollCallback);
 }
 
 void InputServer::mouse_button_callback(GLFWwindow *window, int button, int action, int mods) {
@@ -234,4 +243,12 @@ void InputServer::char_callback(GLFWwindow *window, unsigned int codepoint) {
 	event.codepoint = codepoint;
 
 	App::GetInstance().CharCallback()(event);
+}
+
+void InputServer::scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
+	InputEventScroll event;
+	event.xOffset = xOffset;
+	event.yOffset = yOffset;
+
+	App::GetInstance().ScrollCallback()(event);
 }

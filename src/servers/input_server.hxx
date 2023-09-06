@@ -55,6 +55,7 @@ class InputServer {
 	void cursor_pos_callback(GLFWwindow *window, double x, double y);
 	void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 	void char_callback(GLFWwindow *window, unsigned int codepoint);
+	void scroll_callback(GLFWwindow *window, double xOffset, double yOffset);
 
 	void initialize();
 };
