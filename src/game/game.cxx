@@ -19,7 +19,6 @@
 
 Scene *scene;
 
-RID bulletTexture;
 RID sandTexture;
 
 static void load_scene();
@@ -55,15 +54,14 @@ class MainScene : public Scene {
 			node->UpdateBehaviours();
 		node->Update();
 
-		for (Node *child : node->GetChildren()) {
-
-			UpdateNode(child);
+		for (size_t i = 0; i < node->GetChildren().size(); i++) {
+			UpdateNode(node->GetChildIndex(i));
 		}
 	}
 
 	void UpdateScene() override {
-		for (Node *node : Nodes()) {
-			UpdateNode(node);
+		for (size_t i = 0; i < Nodes().size(); i++) {
+			UpdateNode(Nodes()[i]);
 		}
 	}
 };
@@ -74,6 +72,7 @@ void Main() {
 	BehaviourDB::GetInstance().RegisterBehaviour("Tank Movement", Behaviour::New(TankMovement::Start, TankMovement::Update));
 	BehaviourDB::GetInstance().RegisterBehaviour("Tank Barrel", Behaviour::New(TankBarrelBehaviour::Start, TankBarrelBehaviour::Update));
 	BehaviourDB::GetInstance().RegisterBehaviour("Bullet Movement", Behaviour::New(BulletMovement::Start, BulletMovement::Update));
+	BehaviourDB::GetInstance().RegisterBehaviour("Mouse Shooter", Behaviour::New(MouseShooter::Start, MouseShooter::Update));
 
 	scene = new MainScene;
 	if (true) {
@@ -83,10 +82,30 @@ void Main() {
 		if (err != OK) {
 			std::cout << "Failed to load scene" << std::endl;
 		}
+
+		Node *crates = scene->New(NodeDB::GetInstance().GetNodeType("Node"), "Crates", 300);
+		for (int i = 0; i < 10; i++) {
+			Sprite2D *sprite = dynamic_cast<Sprite2D *>(scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"), Utils::Format("wood {}", i), 301 + i));
+			sprite->Position().x = 300;
+			sprite->Position().y = i * 120;
+			sprite->Scale() = 1.5f;
+			sprite->GetTexture() = 51;
+
+			crates->AddChild(sprite);
+		}
+
+		for (int i = 0; i < 10; i++) {
+			Sprite2D *sprite = dynamic_cast<Sprite2D *>(scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"), Utils::Format("metal {}", i), 311 + i));
+			sprite->Position().x = 1200;
+			sprite->Position().y = i * 120;
+			sprite->Scale() = 1.5f;
+			sprite->GetTexture() = 52;
+
+			crates->AddChild(sprite);
+		}
+		scene->Nodes().push_back(crates);
 	} else
 		load_scene();
-
-	bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png")->ResourceID();
 
 	App::GetInstance().MouseInputCallback().append(OnInput);
 
@@ -96,23 +115,6 @@ void Main() {
 void OnInput(InputEventMouseButton event) {
 	if (!App::GetInstance().IsRunning())
 		return;
-
-	if (event.action == PRESSED && event.button == MB_LEFT) {
-		Sprite2D *barrelSprite = dynamic_cast<Sprite2D *>(App::GetInstance().GetCurrentScene()->get_node_in_group("Barrel"));
-		if (nullptr == barrelSprite) {
-			return;
-		}
-
-		Node *bulletNode = scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"));
-		Sprite2D *bullet = dynamic_cast<Sprite2D *>(bulletNode);
-		bullet->GetTexture() = bulletTexture;
-		bullet->Position() = barrelSprite->GlobalPosition();
-		bullet->Rotation() = barrelSprite->GlobalRotation();
-		bullet->ZIndex() = 1.f;
-
-		bullet->AddBehaviour("Bullet Movement");
-		App::GetInstance().GetCurrentScene()->Nodes().push_back(bullet);
-	}
 
 	if (event.action == PRESSED && event.button == MB_RIGHT) {
 		scene->Save("res://scenes/game.escn");
@@ -152,14 +154,13 @@ void load_scene() {
 	barrel->ZIndex() = 2.f;
 	barrel->Name() = "Barrel";
 	barrel->AddBehaviour("Tank Barrel");
+	barrel->AddBehaviour("Mouse Shooter");
 	barrel->get_groups() = {"Barrel"};
 	player->AddChild(barrel);
 
 	Camera2D *cam = dynamic_cast<Camera2D *>(scene->New(NodeDB::GetInstance().GetNodeType("Camera2D"), "Camera"));
 	player->AddChild(cam);
 	scene->set_active_camera2d(cam->ID());
-
-	bulletTexture = scene->LoadResource("res://assets/shotThin.png", 102)->ResourceID();
 
 	sandTexture = scene->LoadResource("res://assets/tileGrass1.png", 103)->ResourceID();
 

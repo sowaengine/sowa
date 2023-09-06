@@ -2,6 +2,8 @@
 #define SW_INPUT_HXX
 #pragma once
 
+#include "servers/input_server.hxx"
+
 static const int NONE = -1;
 
 typedef int MouseButton;
@@ -157,5 +159,24 @@ static const Key KEY_RIGHT_CONTROL = 345;
 static const Key KEY_RIGHT_ALT = 346;
 static const Key KEY_RIGHT_SUPER = 347;
 static const Key KEY_MENU = 348;
+
+class Input {
+  public:
+	static void GetMousePosition(double &x, double &y);
+	static void GetWindowMousePosition(double &x, double &y);
+	static int GetPressedChar();
+
+	static ActionState GetKeyState(int key);
+	static bool IsKeyDown(int key);
+	static bool IsKeyUp(int key);
+	static bool IsKeyJustPressed(int key);
+	static bool IsKeyJustReleased(int key);
+
+	static ActionState GetButtonState(int button);
+	static bool IsButtonDown(int button);
+	static bool IsButtonUp(int button);
+	static bool IsButtonJustPressed(int button);
+	static bool IsButtonJustReleased(int button);
+};
 
 #endif // SW_INPUT_HXX

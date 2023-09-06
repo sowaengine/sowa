@@ -33,16 +33,16 @@ void TankMovement::Update(Node *node, Behaviour *) {
 
 	glm::vec2 input(0.f, 0.f);
 
-	if (InputServer::GetInstance().IsKeyDown(KEY_W)) {
+	if (Input::IsKeyDown(KEY_W)) {
 		input.y += 1.f;
 	}
-	if (InputServer::GetInstance().IsKeyDown(KEY_S)) {
+	if (Input::IsKeyDown(KEY_S)) {
 		input.y -= 1.f;
 	}
-	if (InputServer::GetInstance().IsKeyDown(KEY_D)) {
+	if (Input::IsKeyDown(KEY_D)) {
 		input.x += 1.f;
 	}
-	if (InputServer::GetInstance().IsKeyDown(KEY_A)) {
+	if (Input::IsKeyDown(KEY_A)) {
 		input.x -= 1.f;
 	}
 

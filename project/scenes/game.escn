@@ -8,13 +8,16 @@ resources:
     path: res://assets/shotThin.png
   101:
     type: ImageTexture
-    path: res://assets/tankGreen_barrel2_outline.png
+    path: res://assets/tankBlue_barrel2_outline.png
   100:
     type: ImageTexture
-    path: res://assets/tankBody_green_outline.png
-  570192181:
+    path: res://assets/tankBody_blue_outline.png
+  51:
     type: ImageTexture
-    path: res://assets/shotThin.png
+    path: res://assets/crateWood.png
+  52:
+    type: ImageTexture
+    path: res://assets/crateMetal.png
 nodes:
   1879054144:
     type: Sprite2D
@@ -57,6 +60,7 @@ nodes:
               y: 0
         behaviours:
           - Tank Barrel
+          - Mouse Shooter
         groups:
           - Barrel
       2025263758:

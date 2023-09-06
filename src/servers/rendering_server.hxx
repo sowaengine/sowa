@@ -32,7 +32,7 @@ class RenderingServer {
 	inline bool Active() { return m_serverActive; }
 
   private:
-	friend struct CallbackBridge;
+	friend class WindowCallbackBridge;
 	friend class InputServer;
 	GLFWwindow *m_pWindowHandle = nullptr;
 
@@ -42,14 +42,10 @@ class RenderingServer {
 	GLFWcursor *m_pResizeYCursor = nullptr;
 	GLFWcursor *m_pResizeCursor = nullptr;
 
-	double m_input_mouseX = 0.f;
-	double m_input_mouseY = 0.f;
+	int m_windowWidth = 0;
+	int m_windowHeight = 0;
 
 	void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-	void mouse_button_callback(GLFWwindow *window, int button, int action, int pressed);
-	void cursor_pos_callback(GLFWwindow *window, double x, double y);
-	void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-	void char_callback(GLFWwindow *window, unsigned int codepoint);
 
 	bool m_serverActive = false;
 };
