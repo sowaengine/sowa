@@ -181,6 +181,41 @@ Error App::Init() {
 		this->m_layerUI.Resize(width, height);
 	});
 
+	ScrollCallback().append([this](InputEventScroll event) {
+		if (!IsRunning()) {
+			int w, h;
+			RenderingServer::GetInstance().GetWindowSize(w, h);
+
+			float oldZoom = this->m_editorCameraZoom2d;
+
+			this->m_editorCameraZoom2d -= (0.1f * event.yOffset);
+			this->m_editorCameraZoom2d = std::max(this->m_editorCameraZoom2d, 0.1f);
+
+			vec2 midPoint(1920.f * 0.5f, 1080.f * 0.5f);
+			double x, y;
+			Input::GetWindowMousePosition(x, y);
+			x *= (1920.f / (float)w);
+			y *= (1080.f / (float)h);
+
+			this->m_editorCameraPos2d.x += (x - midPoint.x) * (oldZoom - this->m_editorCameraZoom2d);
+			this->m_editorCameraPos2d.y -= (y - midPoint.y) * (oldZoom - this->m_editorCameraZoom2d);
+		}
+	});
+
+	MouseMoveCallback().append([this](InputEventMouseMove event) {
+		if (!IsRunning()) {
+			if (Input::IsButtonDown(MB_RIGHT)) {
+				int w, h;
+				RenderingServer::GetInstance().GetWindowSize(w, h);
+				event.deltaX *= (1920.f / w);
+				event.deltaY *= (1080.f / h);
+
+				this->m_editorCameraPos2d.x -= event.deltaX * this->m_editorCameraZoom2d;
+				this->m_editorCameraPos2d.y += event.deltaY * this->m_editorCameraZoom2d;
+			}
+		}
+	});
+
 	KeyCallback().append([this](InputEventKey event) {
 		if (event.action == KEY_PRESSED && event.key == KEY_Z) {
 			Tweens::GetInstance().RegisterTween(2.f, [](float f) {
@@ -578,22 +613,34 @@ void App::mainLoop() {
 	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f, true);
 
 	glm::mat4 view = glm::mat4(1.f);
-	if (GetCurrentScene() && IsRunning()) {
-		Camera2D *cam = dynamic_cast<Camera2D *>(GetCurrentScene()->get_active_camera2d());
-		if (cam) {
-			vec2 pos = cam->GlobalPosition();
-			vec2 zoom = cam->Zoom();
+	vec2 centerPoint(0.5f);
+	vec2 position(0.f);
+	vec2 zoom(1.f);
+	float rotation = 0.f;
+	if (IsRunning()) {
+		if (GetCurrentScene()) {
+			Camera2D *cam = dynamic_cast<Camera2D *>(GetCurrentScene()->get_active_camera2d());
+			if (cam) {
+				centerPoint = cam->CenterPoint();
 
-			pos.x -= 1920.f * cam->CenterPoint().x * zoom.x;
-			pos.y -= 1080.f * cam->CenterPoint().y * zoom.y;
-			view = glm::translate(view, {pos.x, pos.y, 0.f});
-			if (cam->Rotatable()) {
-				view = glm::rotate(view, glm::radians(cam->GlobalRotation()), {0.f, 0.f, 1.f});
+				position = cam->GlobalPosition();
+				zoom = cam->Zoom();
+				if (cam->Rotatable()) {
+					rotation = glm::radians(cam->GlobalRotation());
+				}
 			}
-			view = glm::scale(view, {zoom.x, zoom.y, 1.f});
-			view = glm::inverse(view);
 		}
+	} else {
+		position = m_editorCameraPos2d;
+		zoom = m_editorCameraZoom2d;
 	}
+	view = glm::translate(view, {position.x, position.y, 0.f});
+	view = glm::rotate(view, glm::radians(rotation), {0.f, 0.f, 1.f});
+	view = glm::scale(view, {zoom.x, zoom.y, 1.f});
+	view = glm::translate(view, {-(1920.f * 0.5f), -(1080.f * 0.5f), 0.f});
+
+	view = glm::inverse(view);
+
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, 1920.f, 0.f, 1080.f, -128.f, 128.f));
 	m_batchRenderer.GetShader().UniformMat4("uView", view);
 	Renderer().Reset();
@@ -603,6 +650,37 @@ void App::mainLoop() {
 		m_pCurrentScene->UpdateScene();
 	}
 	Tweens::GetInstance().Poll(Time::Delta());
+
+	if (!IsRunning()) {
+		double x, y;
+		Input::GetWindowMousePosition(x, y);
+		int w, h;
+		RenderingServer::GetInstance().GetWindowSize(w, h);
+
+		x *= (1920.f / static_cast<float>(w));
+		y *= (1080.f / static_cast<float>(h));
+
+		size_t id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(x), static_cast<int>(y));
+		if (GetCurrentScene() && nullptr != GetCurrentScene()->get_node_by_id(id)) {
+			m_hoveredNode = id;
+			if (Input::IsButtonJustPressed(MB_LEFT)) {
+				m_selectedNode = m_hoveredNode;
+			}
+		}
+	}
+	{
+		Sprite2D *selectedNode = dynamic_cast<Sprite2D *>(GetCurrentScene()->get_node_by_id(m_selectedNode));
+		if (nullptr != selectedNode) {
+			int w, h;
+			RenderingServer::GetInstance().GetWindowSize(w, h);
+
+			Renderer().PushQuad(selectedNode->GlobalPosition().x, selectedNode->GlobalPosition().y, 2, 128, 128, 1.f, 1.f, 1.f, 1.f, 0, 0);
+		}
+	}
+
+	// Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2, 0.6, 0.8, 1.f);
+	Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), 5.f, 0.6, 0.2, 0.2, 1.f);
+	Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2, 0.8, 0.4, 1.f);
 
 	Renderer().DrawText("Sowa Engine", &m_testFont, posX, 10.f, glm::mat4(1.f), 0.f, 1.f);
 	Renderer().End();
@@ -645,6 +723,8 @@ void App::Start() {
 		Scene::copy(m_pCurrentScene, &m_backgroundScene);
 
 	m_running = true;
+	m_editorCameraPos2d = vec2(0.f);
+	m_editorCameraZoom2d = 1.f;
 
 	GetCurrentScene()->BeginScene();
 }

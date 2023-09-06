@@ -68,6 +68,12 @@ class App {
 	Scene *m_pCurrentScene = nullptr;
 	Scene m_backgroundScene;
 
+	size_t m_selectedNode = 0;
+	size_t m_hoveredNode = 0;
+
+	vec2 m_editorCameraPos2d = vec2(0.f, 0.f);
+	float m_editorCameraZoom2d = 1.f;
+
 	Texture m_testTexture;
 	Font m_testFont;
 

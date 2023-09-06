@@ -45,7 +45,7 @@ void Sprite2D::Update() {
 		vertices[i].u = uvs[i].x;
 		vertices[i].v = uvs[i].y;
 		vertices[i].t_id = textureID;
-		vertices[i].d_id = 0.f;
+		vertices[i].d_id = static_cast<float>(ID());
 		vertices[i].draw_mode = 0.f;
 	}
 
