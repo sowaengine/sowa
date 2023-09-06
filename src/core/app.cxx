@@ -188,7 +188,7 @@ Error App::Init() {
 
 			float oldZoom = this->m_editorCameraZoom2d;
 
-			this->m_editorCameraZoom2d -= (0.1f * event.yOffset);
+			this->m_editorCameraZoom2d -= (0.05f * event.yOffset);
 			this->m_editorCameraZoom2d = std::max(this->m_editorCameraZoom2d, 0.1f);
 
 			vec2 midPoint(1920.f * 0.5f, 1080.f * 0.5f);
@@ -652,6 +652,61 @@ void App::mainLoop() {
 	Tweens::GetInstance().Poll(Time::Delta());
 
 	if (!IsRunning()) {
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), 5.f, 0.6f, 0.2f, 0.2f, 100.f, 0.f);
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2f, 0.8f, 0.4f, 100.f, 0.f);
+
+		Sprite2D *selectedNode = dynamic_cast<Sprite2D *>(GetCurrentScene()->get_node_by_id(m_selectedNode));
+		if (nullptr != selectedNode) {
+			int w, h;
+			RenderingServer::GetInstance().GetWindowSize(w, h);
+
+			Texture *texture = ResourceManager::GetInstance().GetAs<Texture>(selectedNode->GetTexture());
+			float width = 128.f;
+			float height = 128.f;
+			if (texture) {
+				width = texture->Width();
+				height = texture->Height();
+			}
+			glm::mat4 model = glm::scale(selectedNode->CalculateTransform(), {width, height, 1.f});
+
+			glm::vec4 points[4] = {
+				{-0.5f, 0.5f, 0.f, 1.f},
+				{-0.5f, -0.5f, 0.f, 1.f},
+				{0.5f, -0.5f, 0.f, 1.f},
+				{0.5f, 0.5f, 0.f, 1.f}};
+
+			for (int i = 0; i < 4; i++) {
+				points[i] = model * points[i];
+			}
+
+			float minX = points[0].x;
+			float minY = points[0].y;
+			float maxX = points[0].x;
+			float maxY = points[0].y;
+			for (size_t i = 0; i < 4; i++) {
+				minX = std::min(minX, points[i].x);
+				minY = std::min(minY, points[i].y);
+				maxX = std::max(maxX, points[i].x);
+				maxY = std::max(maxY, points[i].y);
+			}
+			float padding = 10.f * m_editorCameraZoom2d;
+			minX -= padding;
+			maxX += padding;
+			minY -= padding;
+			maxY += padding;
+
+			float thickness = m_editorCameraZoom2d * 5;
+			Renderer().PushLine(vec2(minX, minY), vec2(maxX, minY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(maxX, minY), vec2(maxX, maxY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
+		}
+	}
+
+	Renderer().DrawText("Sowa Engine", &m_testFont, posX, 10.f, glm::mat4(1.f), 0.f, 1.f);
+	Renderer().End();
+
+	if (!IsRunning()) {
 		double x, y;
 		Input::GetWindowMousePosition(x, y);
 		int w, h;
@@ -660,30 +715,17 @@ void App::mainLoop() {
 		x *= (1920.f / static_cast<float>(w));
 		y *= (1080.f / static_cast<float>(h));
 
-		size_t id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(x), static_cast<int>(y));
-		if (GetCurrentScene() && nullptr != GetCurrentScene()->get_node_by_id(id)) {
-			m_hoveredNode = id;
+		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(x), static_cast<int>(y));
+		if (id == 0)
+			m_hoveredNode = 0;
+
+		if (id != 0 && GetCurrentScene() && nullptr != GetCurrentScene()->get_node_by_id(id)) {
+			m_hoveredNode = static_cast<size_t>(id);
 			if (Input::IsButtonJustPressed(MB_LEFT)) {
 				m_selectedNode = m_hoveredNode;
 			}
 		}
 	}
-	{
-		Sprite2D *selectedNode = dynamic_cast<Sprite2D *>(GetCurrentScene()->get_node_by_id(m_selectedNode));
-		if (nullptr != selectedNode) {
-			int w, h;
-			RenderingServer::GetInstance().GetWindowSize(w, h);
-
-			Renderer().PushQuad(selectedNode->GlobalPosition().x, selectedNode->GlobalPosition().y, 2, 128, 128, 1.f, 1.f, 1.f, 1.f, 0, 0);
-		}
-	}
-
-	// Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2, 0.6, 0.8, 1.f);
-	Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), 5.f, 0.6, 0.2, 0.2, 1.f);
-	Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2, 0.8, 0.4, 1.f);
-
-	Renderer().DrawText("Sowa Engine", &m_testFont, posX, 10.f, glm::mat4(1.f), 0.f, 1.f);
-	Renderer().End();
 
 	glDisable(GL_DEPTH_TEST);
 	SetRenderLayer(nullptr);
@@ -723,8 +765,6 @@ void App::Start() {
 		Scene::copy(m_pCurrentScene, &m_backgroundScene);
 
 	m_running = true;
-	m_editorCameraPos2d = vec2(0.f);
-	m_editorCameraZoom2d = 1.f;
 
 	GetCurrentScene()->BeginScene();
 }

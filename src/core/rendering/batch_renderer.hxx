@@ -39,7 +39,7 @@ class BatchRenderer {
 	void Reset();
 	void PushQuad(BatchVertex vertices[4]);
 	void PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID, float drawMode = 0.f);
-	void PushLine(const vec2 &p1, const vec2 &p2, float thickness, float r = 1.f, float g = 1.f, float b = 1.f, float a = 1.f);
+	void PushLine(const vec2 &p1, const vec2 &p2, float thickness, float r = 1.f, float g = 1.f, float b = 1.f, float a = 1.f, float z = 0.f);
 	void DrawText(const std::string &text, Font *font, float x, float y, glm::mat4 transform, float draw_id = 0.f, float scale = 1.0f, float maxWidth = 0.f, float maxHeight = 0.f, float r = 1.f, float g = 1.f, float b = 1.f, float a = 1.f);
 	void End();
 

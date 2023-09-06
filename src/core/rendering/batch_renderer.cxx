@@ -132,7 +132,7 @@ void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float 
 	PushQuad(vertices);
 }
 
-void BatchRenderer::PushLine(const vec2 &p1, const vec2 &p2, float thickness, float r, float g, float b, float a) {
+void BatchRenderer::PushLine(const vec2 &p1, const vec2 &p2, float thickness, float r, float g, float b, float a, float z) {
 	float rot = atan2(p1.y - p2.y, p1.x - p2.x) + M_PI;
 
 	glm::vec2 sub = {p2.x - p1.x, p2.y - p1.y};
@@ -164,7 +164,7 @@ void BatchRenderer::PushLine(const vec2 &p1, const vec2 &p2, float thickness, fl
 
 		vertices[i].x = points[i].x;
 		vertices[i].y = points[i].y;
-		vertices[i].z = 0.f;
+		vertices[i].z = z;
 		vertices[i].r = r;
 		vertices[i].g = g;
 		vertices[i].b = b;

@@ -88,6 +88,7 @@ void Main() {
 			Sprite2D *sprite = dynamic_cast<Sprite2D *>(scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"), Utils::Format("wood {}", i), 301 + i));
 			sprite->Position().x = 300;
 			sprite->Position().y = i * 120;
+			sprite->Rotation() = Utils::RandRangeFloat(-20.f, 20.f);
 			sprite->Scale() = 1.5f;
 			sprite->GetTexture() = 51;
 
@@ -98,6 +99,7 @@ void Main() {
 			Sprite2D *sprite = dynamic_cast<Sprite2D *>(scene->New(NodeDB::GetInstance().GetNodeType("Sprite2D"), Utils::Format("metal {}", i), 311 + i));
 			sprite->Position().x = 1200;
 			sprite->Position().y = i * 120;
+			sprite->Rotation() = Utils::RandRangeFloat(-20.f, 20.f);
 			sprite->Scale() = 1.5f;
 			sprite->GetTexture() = 52;
 
@@ -117,7 +119,7 @@ void OnInput(InputEventMouseButton event) {
 		return;
 
 	if (event.action == PRESSED && event.button == MB_RIGHT) {
-		scene->Save("res://scenes/game.escn");
+		// scene->Save("res://scenes/game.escn");
 	}
 }
 
