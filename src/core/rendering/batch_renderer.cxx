@@ -6,6 +6,9 @@
 #include <locale>
 #include <string>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 #include "core/graphics.hxx"
 
 #define BATCH2D_MAX_RECT (1000)
@@ -124,6 +127,53 @@ void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float 
 		vertices[i].t_id = textureID;
 		vertices[i].d_id = drawID;
 		vertices[i].draw_mode = drawMode;
+	}
+
+	PushQuad(vertices);
+}
+
+void BatchRenderer::PushLine(const vec2 &p1, const vec2 &p2, float thickness, float r, float g, float b, float a) {
+	float rot = atan2(p1.y - p2.y, p1.x - p2.x) + M_PI;
+
+	glm::vec2 sub = {p2.x - p1.x, p2.y - p1.y};
+	float len = sqrt((sub.x * sub.x) + (sub.y * sub.y));
+
+	glm::mat4 transform = glm::translate(glm::mat4(1.f), {p1.x, p1.y, 0.f});
+	transform = glm::rotate(transform, rot, {0.f, 0.f, 1.f});
+	transform = glm::scale(transform, {len, thickness, 1.f});
+
+	float xPos = 0.f;
+	float yPos = 0.f;
+	float w = 1.f;
+	float h = 1.f;
+	glm::vec4 points[4] = {
+		{xPos, yPos + h, 0.f, 1.f},
+		{xPos, yPos, 0.f, 1.f},
+		{xPos + w, yPos, 0.f, 1.f},
+		{xPos + w, yPos + h, 0.f, 1.f}};
+
+	glm::vec2 uvs[4] = {
+		{0.f, 0.f},
+		{0.f, 1.f},
+		{1.f, 1.f},
+		{1.f, 0.f}};
+
+	BatchVertex vertices[4];
+	for (int i = 0; i < 4; i++) {
+		points[i] = transform * points[i];
+
+		vertices[i].x = points[i].x;
+		vertices[i].y = points[i].y;
+		vertices[i].z = 0.f;
+		vertices[i].r = r;
+		vertices[i].g = g;
+		vertices[i].b = b;
+		vertices[i].a = a;
+		vertices[i].u = uvs[i].x;
+		vertices[i].v = uvs[i].y;
+		vertices[i].t_id = 0;
+		vertices[i].d_id = 0;
+		vertices[i].draw_mode = 0.f;
 	}
 
 	PushQuad(vertices);
