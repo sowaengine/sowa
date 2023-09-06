@@ -105,6 +105,11 @@ void RenderLayer::Clear(float r, float g, float b, float a, bool depth) {
 	if (depth)
 		glClear(GL_DEPTH_BUFFER_BIT);
 
+	GLenum color = GL_COLOR_ATTACHMENT1;
+	glDrawBuffers(1, &color);
+	glClearColor(0.f, 0.f, 0.f, 0.f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	attachments.clear();
 	for (auto &[slot, target] : m_targets) {
 		if (target.type == RenderLayerTargetType::Vec4 || target.type == RenderLayerTargetType::Int) {
