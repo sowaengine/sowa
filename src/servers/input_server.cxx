@@ -3,6 +3,8 @@
 #include "core/input.hxx"
 #include "rendering_server.hxx"
 
+static bool s_blockMoveMoveEvent = false;
+
 struct InputCallbackBridge {
 	InputCallbackBridge() = default;
 
@@ -76,8 +78,42 @@ void InputServer::PollEvents() {
 			action = ActionState::UP;
 	}
 
+	if (RenderingServer::GetInstance().m_currentCursorMode == CursorMode::Tiled) {
+		int w, h;
+		RenderingServer::GetInstance().GetWindowSize(w, h);
+
+		bool setCursor = false;
+		double x, y;
+		glfwGetCursorPos(RenderingServer::GetInstance().m_pWindowHandle, &x, &y);
+
+		const float padding = 2.f;
+		if (x < padding) {
+			x = w - padding;
+			setCursor = true;
+		} else if (x > w - padding) {
+			x = padding;
+			setCursor = true;
+		}
+
+		if (y < padding) {
+			y = h - padding;
+			setCursor = true;
+		} else if (y > h - padding) {
+			y = padding;
+			setCursor = true;
+		}
+
+		if (setCursor) {
+			s_blockMoveMoveEvent = true;
+			glfwSetCursorPos(RenderingServer::GetInstance().m_pWindowHandle, x, y);
+			m_input_mouseX = x;
+			m_input_mouseY = y;
+		}
+	}
+
 	//
 	glfwPollEvents();
+	s_blockMoveMoveEvent = false;
 }
 
 void InputServer::GetMousePosition(double &x, double &y) {
@@ -111,7 +147,7 @@ bool InputServer::IsKeyDown(int key) {
 
 bool InputServer::IsKeyUp(int key) {
 	ActionState state = GetKeyState(key);
-	return state == ActionState::JUST_RELEASED || state == ActionState::UP;
+	return state == ActionState::JUST_RELEASED || state == ActionState::UP || state == ActionState::NONE;
 }
 
 bool InputServer::IsKeyJustPressed(int key) {
@@ -137,7 +173,7 @@ bool InputServer::IsButtonDown(int button) {
 
 bool InputServer::IsButtonUp(int button) {
 	ActionState state = GetButtonState(button);
-	return state == ActionState::JUST_RELEASED || state == ActionState::UP;
+	return state == ActionState::JUST_RELEASED || state == ActionState::UP || state == ActionState::NONE;
 }
 
 bool InputServer::IsButtonJustPressed(int button) {
@@ -199,6 +235,10 @@ void InputServer::mouse_button_callback(GLFWwindow *window, int button, int acti
 }
 
 void InputServer::cursor_pos_callback(GLFWwindow *window, double x, double y) {
+	if (s_blockMoveMoveEvent) {
+		return;
+	}
+
 	InputEventMouseMove event;
 
 	double deltaX = x - m_input_mouseX;

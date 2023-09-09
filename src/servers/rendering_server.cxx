@@ -91,17 +91,33 @@ void RenderingServer::GetWindowSize(int &width, int &height) {
 	glfwGetFramebufferSize(m_pWindowHandle, &width, &height);
 }
 
+void RenderingServer::SetCursorStyle(CursorStyle style) {
+	if (style == CursorStyle::Normal) {
+		glfwSetCursor(m_pWindowHandle, m_pStandartCursor);
+	} else if (style == CursorStyle::Pointer) {
+		glfwSetCursor(m_pWindowHandle, m_pPointerCursor);
+	} else if (style == CursorStyle::ResizeX) {
+		glfwSetCursor(m_pWindowHandle, m_pResizeXCursor);
+	} else if (style == CursorStyle::ResizeY) {
+		glfwSetCursor(m_pWindowHandle, m_pResizeYCursor);
+	} else if (style == CursorStyle::Resize) {
+		glfwSetCursor(m_pWindowHandle, m_pResizeCursor);
+	}
+}
+
 void RenderingServer::SetCursorMode(CursorMode mode) {
 	if (mode == CursorMode::Normal) {
-		glfwSetCursor(m_pWindowHandle, m_pStandartCursor);
-	} else if (mode == CursorMode::Pointer) {
-		glfwSetCursor(m_pWindowHandle, m_pPointerCursor);
-	} else if (mode == CursorMode::ResizeX) {
-		glfwSetCursor(m_pWindowHandle, m_pResizeXCursor);
-	} else if (mode == CursorMode::ResizeY) {
-		glfwSetCursor(m_pWindowHandle, m_pResizeYCursor);
-	} else if (mode == CursorMode::Resize) {
-		glfwSetCursor(m_pWindowHandle, m_pResizeCursor);
+		glfwSetInputMode(m_pWindowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		m_currentCursorMode = CursorMode::Normal;
+	} else if (mode == CursorMode::Hidden) {
+		glfwSetInputMode(m_pWindowHandle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		m_currentCursorMode = CursorMode::Hidden;
+	} else if (mode == CursorMode::Disabled) {
+		glfwSetInputMode(m_pWindowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		m_currentCursorMode = CursorMode::Disabled;
+	} else if (mode == CursorMode::Tiled) {
+		glfwSetInputMode(m_pWindowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		m_currentCursorMode = CursorMode::Tiled;
 	}
 }
 

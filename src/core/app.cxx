@@ -140,26 +140,14 @@ Error App::Init() {
 #endif
 
 	// Initialize rendering
-	ModelBuilder::Quad2D(rectModel);
 	ModelBuilder::Quad2D(fullscreenModel, 2.f);
-
-	err = mainShader.Load("res://shaders/main.vs", "res://shaders/main.fs");
-	if (err != OK) {
-		std::cerr << "Failed to load main shader" << err << std::endl;
-	}
 
 	err = fullscreenShader.Load("res://shaders/fullscreen.vs", "res://shaders/fullscreen.fs");
 	if (err != OK) {
 		std::cerr << "Failed to load fullscreen shader" << std::endl;
 	}
 
-	err = uiShader.Load("res://shaders/ui_panel.vs", "res://shaders/ui_panel.fs");
-	if (err != OK) {
-		std::cerr << "Failed to load ui shader" << std::endl;
-	}
-
-	// err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
-	err = m_testTexture.Load(TextureType::Vector2D, "res://tanks.svg");
+	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
 	if (err != OK) {
 		std::cout << "Failed to load texture: " << err << std::endl;
 	}
@@ -183,40 +171,21 @@ Error App::Init() {
 
 	ScrollCallback().append([this](InputEventScroll event) {
 		if (!IsRunning()) {
-			int w, h;
-			RenderingServer::GetInstance().GetWindowSize(w, h);
-
-			float oldZoom = this->m_editorCameraZoom2d;
-
-			this->m_editorCameraZoom2d -= (0.05f * event.yOffset);
-			this->m_editorCameraZoom2d = std::max(this->m_editorCameraZoom2d, 0.1f);
-
-			vec2 midPoint(1920.f * 0.5f, 1080.f * 0.5f);
-			double x, y;
-			Input::GetWindowMousePosition(x, y);
-			x *= (1920.f / (float)w);
-			y *= (1080.f / (float)h);
-
-			this->m_editorCameraPos2d.x += (x - midPoint.x) * (oldZoom - this->m_editorCameraZoom2d);
-			this->m_editorCameraPos2d.y -= (y - midPoint.y) * (oldZoom - this->m_editorCameraZoom2d);
+			editor_scroll_event(event);
 		}
 	});
 
 	MouseMoveCallback().append([this](InputEventMouseMove event) {
 		if (!IsRunning()) {
-			if (Input::IsButtonDown(MB_RIGHT)) {
-				int w, h;
-				RenderingServer::GetInstance().GetWindowSize(w, h);
-				event.deltaX *= (1920.f / w);
-				event.deltaY *= (1080.f / h);
-
-				this->m_editorCameraPos2d.x -= event.deltaX * this->m_editorCameraZoom2d;
-				this->m_editorCameraPos2d.y += event.deltaY * this->m_editorCameraZoom2d;
-			}
+			editor_mouse_move_event(event);
 		}
 	});
 
 	KeyCallback().append([this](InputEventKey event) {
+		if (!IsRunning()) {
+			editor_key_event(event);
+		}
+
 		if (event.action == KEY_PRESSED && event.key == KEY_Z) {
 			Tweens::GetInstance().RegisterTween(2.f, [](float f) {
 				App::GetInstance().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
@@ -230,126 +199,11 @@ Error App::Init() {
 				Start();
 		}
 
-		if (event.action == KEY_PRESSED && event.key == KEY_P && event.modifiers.control && event.modifiers.shift && nullptr == this->m_commandInterface) {
-			SetCommandInterface(new CommandPaletteInterface);
-		}
-
-		if (event.action == KEY_PRESSED && event.key == KEY_ESCAPE) {
-			if (nullptr != this->m_commandInterface) {
-				SetCommandInterface(nullptr);
-			} else {
-				exit(0);
-			}
-		}
-
-		if (event.action == KEY_PRESSED && event.key == KEY_DOWN && nullptr != this->m_commandInterface) {
-			if (this->m_commandInterface->options.size() > 0) {
-				this->m_commandInterface->currentIndex += 1;
-
-				this->m_commandInterface->currentIndex %= this->m_commandInterface->options.size();
-			}
-		}
-
-		if (event.action == KEY_PRESSED && event.key == KEY_UP && nullptr != this->m_commandInterface) {
-			if (this->m_commandInterface->options.size() > 0) {
-				this->m_commandInterface->currentIndex -= 1;
-
-				if (this->m_commandInterface->currentIndex == -1)
-					this->m_commandInterface->currentIndex = this->m_commandInterface->options.size() - 1;
-			}
-		}
-
-		if (event.action == KEY_PRESSED && event.key == KEY_ENTER && nullptr != this->m_commandInterface) {
-			CommandInterface *oldInterface = this->m_commandInterface;
-
-			if (this->m_commandInterface->action) {
-				this->m_commandInterface->action();
-			}
-
-			if (this->m_commandInterface->options.size() > static_cast<size_t>(this->m_commandInterface->currentIndex)) {
-				std::function<void()> func = this->m_commandInterface->options[this->m_commandInterface->currentIndex].action;
-				if (func)
-					func();
-			}
-
-			// if user did not set command interface to another, delete it.
-			if (oldInterface == this->m_commandInterface) {
-				SetCommandInterface(nullptr);
-			}
-		}
-
-		if ((event.action == KEY_PRESSED || event.action == KEY_REPEAT) && event.key == KEY_BACKSPACE && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
-			if (this->m_commandInterface->text.size() > 0 && this->m_commandInterface->text_cursor != 0) {
-				if (event.modifiers.control) {
-					std::size_t index = std::string::npos;
-					if (this->m_commandInterface->text[this->m_commandInterface->text_cursor - 1] == ' ') {
-						index = this->m_commandInterface->text.find_last_not_of(' ', this->m_commandInterface->text_cursor - 1);
-
-					} else {
-						index = this->m_commandInterface->text.find_last_of(' ', this->m_commandInterface->text_cursor - 1);
-					}
-					if (index != std::string::npos && index + 1 < this->m_commandInterface->text.size()) {
-						index += 1;
-					}
-
-					std::wstring remaining = this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
-
-					if (index == std::string::npos) {
-						// has no space
-						this->m_commandInterface->text = remaining;
-						this->m_commandInterface->text_cursor = 0;
-					} else {
-						this->m_commandInterface->text = this->m_commandInterface->text.substr(0, index) + remaining;
-						this->m_commandInterface->text_cursor = index;
-					}
-				} else {
-					if (this->m_commandInterface->text_cursor == this->m_commandInterface->text.size())
-						this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text.size() - 1);
-					else
-						this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor - 1) + this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
-
-					if (this->m_commandInterface->text_cursor > 0)
-						this->m_commandInterface->text_cursor -= 1;
-				}
-			}
-		}
-
-		if ((event.action == KEY_PRESSED || event.action == KEY_REPEAT) && event.key == KEY_RIGHT && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
-			if (this->m_commandInterface->text.size() > 0) {
-				this->m_commandInterface->text_cursor += 1;
-
-				if (this->m_commandInterface->text_cursor > this->m_commandInterface->text.size())
-					this->m_commandInterface->text_cursor = this->m_commandInterface->text.size();
-			}
-		}
-
-		if ((event.action == KEY_PRESSED || event.action == KEY_REPEAT) && event.key == KEY_LEFT && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
-			if (this->m_commandInterface->text_cursor > 0)
-				this->m_commandInterface->text_cursor -= 1;
-		}
-
-		if (event.action == KEY_PRESSED && event.key == KEY_HOME && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
-			this->m_commandInterface->text_cursor = 0;
-		}
-
-		if (event.action == KEY_PRESSED && event.key == KEY_END && nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
-			this->m_commandInterface->text_cursor = this->m_commandInterface->text.size();
-		}
+		command_interface_key_callback(event);
 	});
 
 	CharCallback().append([&](InputEventChar event) {
-		// std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-		std::wstring wstr = {static_cast<wchar_t>(event.codepoint)};
-		// std::string str = converter.to_bytes(wstr);
-
-		if (nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
-			if (this->m_commandInterface->text_cursor == this->m_commandInterface->text.size())
-				this->m_commandInterface->text += wstr;
-			else
-				this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor) + wstr + this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
-
-			this->m_commandInterface->text_cursor += wstr.size();
-		}
+		command_interface_char_callback(event);
 	});
 
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
@@ -718,12 +572,19 @@ void App::mainLoop() {
 		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(x), static_cast<int>(y));
 		if (id == 0)
 			m_hoveredNode = 0;
+		if (id == 0 && Input::IsButtonJustPressed(MB_LEFT) && this->m_editorState == EditorState::None)
+			m_selectedNode = 0;
 
 		if (id != 0 && GetCurrentScene() && nullptr != GetCurrentScene()->get_node_by_id(id)) {
 			m_hoveredNode = static_cast<size_t>(id);
-			if (Input::IsButtonJustPressed(MB_LEFT)) {
+			if (m_editorState == EditorState::None && Input::IsButtonJustPressed(MB_LEFT)) {
 				m_selectedNode = m_hoveredNode;
 			}
+		}
+
+		if (Input::IsButtonJustPressed(MB_LEFT) && this->m_editorState != EditorState::None) {
+			m_editorState = EditorState::None;
+			RenderingServer::GetInstance().SetCursorMode(CursorMode::Normal);
 		}
 	}
 

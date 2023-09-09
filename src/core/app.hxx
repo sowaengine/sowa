@@ -62,22 +62,36 @@ class App {
 	void reload_scripts();
 
   private:
-	Model rectModel;
-	Shader mainShader;
-
 	Scene *m_pCurrentScene = nullptr;
 	Scene m_backgroundScene;
 
+	// Editor
+	enum class EditorState {
+		None = 0,
+		Dragging,
+		Scaling
+	};
+	enum class EditorActionAxis {
+		None = 0b11,
+		X = 0b01,
+		Y = 0b10
+	};
 	size_t m_selectedNode = 0;
 	size_t m_hoveredNode = 0;
 
 	vec2 m_editorCameraPos2d = vec2(0.f, 0.f);
 	float m_editorCameraZoom2d = 1.f;
+	EditorState m_editorState = EditorState::None;
+	EditorActionAxis m_actionAxis;
+	vec2 m_actionDeltaVec2 = vec2(0.f);
+
+	void editor_mouse_move_event(InputEventMouseMove event);
+	void editor_key_event(InputEventKey event);
+	void editor_scroll_event(InputEventScroll event);
+	//
 
 	Texture m_testTexture;
 	Font m_testFont;
-
-	Shader uiShader;
 
 	Model fullscreenModel;
 	Shader fullscreenShader;
@@ -88,6 +102,9 @@ class App {
 
 	CommandInterface *m_commandInterface = nullptr;
 	std::vector<CommandOption> m_commands;
+
+	void command_interface_char_callback(InputEventChar event);
+	void command_interface_key_callback(InputEventKey event);
 
 	BatchRenderer m_batchRenderer;
 	NewTree m_uiTree;
