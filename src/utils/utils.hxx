@@ -148,6 +148,13 @@ class ScopeTimer {
 	}
 };
 
+//-------------------------   Algorithm  -------------------------//
+
+template <typename T>
+T Map(T v, T input_min, T input_max, T output_min, T output_max) {
+	return (v - input_min) * (output_max - output_min) / (input_max - input_min) + output_min;
+}
+
 } // namespace Utils
 
 #endif // SW_UTILS_HXX
