@@ -17,9 +17,18 @@ class Node2D : public Node {
 	inline float &ZIndex() { return m_zIndex; }
 
 	glm::mat4 CalculateTransform();
+	glm::mat4 CalculateLocalTransform();
 
 	vec2 GlobalPosition();
 	float GlobalRotation();
+	vec2 GlobalScale();
+
+	void SetGlobalTransform(const glm::mat4 &transform);
+
+	bool DecomposeTransform(vec2 *position, float *rotation, vec2 *scale);
+
+  private:
+	glm::mat4 get_parent_transform();
 
   protected:
 	vec2 m_position = vec2(0.f, 0.f);
