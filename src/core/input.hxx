@@ -177,6 +177,9 @@ class Input {
 	static bool IsButtonUp(int button);
 	static bool IsButtonJustPressed(int button);
 	static bool IsButtonJustReleased(int button);
+
+	static bool IsButtonJustClicked(int button);
+	static bool IsButtonJustDoubleClicked(int button);
 };
 
 #endif // SW_INPUT_HXX

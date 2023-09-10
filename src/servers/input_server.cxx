@@ -63,6 +63,8 @@ void InputServer::ProcessInput() {
 void InputServer::PollEvents() {
 	//
 	m_pressedChar = 0;
+	m_buttonSingleClicked.clear();
+	m_buttonDoubleClicked.clear();
 
 	for (auto &[key, action] : m_keyStates) {
 		if (action == ActionState::JUST_PRESSED)
@@ -184,6 +186,14 @@ bool InputServer::IsButtonJustReleased(int button) {
 	return GetButtonState(button) == ActionState::JUST_RELEASED;
 }
 
+bool InputServer::IsButtonJustClicked(int button) {
+	return m_buttonSingleClicked[button];
+}
+
+bool InputServer::IsButtonJustDoubleClicked(int button) {
+	return m_buttonDoubleClicked[button];
+}
+
 //-------------------------------------------------------//
 //------------------ Input Server -----------------------//
 //-------------------------------------------------------//
@@ -216,6 +226,42 @@ void InputServer::mouse_button_callback(GLFWwindow *window, int button, int acti
 
 	InputEventMouseButton event;
 	event.button = buttons[button];
+	MouseButton btn = event.button;
+
+	static std::unordered_map<MouseButton, std::chrono::high_resolution_clock::time_point> pressTimes;
+	const std::chrono::milliseconds doubleClickDelay = std::chrono::milliseconds(200);
+	const std::chrono::milliseconds clickDelay = std::chrono::milliseconds(100);
+
+	auto now = std::chrono::high_resolution_clock::now();
+
+	if (action == GLFW_PRESS) {
+		std::chrono::milliseconds delay = std::chrono::duration_cast<std::chrono::milliseconds>(now - pressTimes[event.button]);
+
+		if (delay < doubleClickDelay) {
+			InputEventClick event;
+			event.button = btn;
+			event.doubleClick = true;
+
+			m_buttonDoubleClicked[btn] = true;
+			App::GetInstance().ClickCallback()(event);
+		}
+	}
+	if (action == GLFW_RELEASE) {
+		std::chrono::milliseconds delay = std::chrono::duration_cast<std::chrono::milliseconds>(now - pressTimes[event.button]);
+
+		if (delay < clickDelay) {
+			InputEventClick event;
+			event.button = btn;
+			event.doubleClick = false;
+
+			m_buttonSingleClicked[btn] = true;
+			App::GetInstance().ClickCallback()(event);
+		}
+	}
+
+	if (action == GLFW_PRESS) {
+		pressTimes[event.button] = now;
+	}
 
 	if (action == GLFW_PRESS)
 		event.action = PRESSED;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "char.hxx"
+#include "click.hxx"
 #include "key.hxx"
 #include "mouse_button.hxx"
 #include "mouse_move.hxx"

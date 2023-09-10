@@ -609,12 +609,12 @@ void App::mainLoop() {
 		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(cursorPos.x), static_cast<int>(cursorPos.y));
 		if (id == 0)
 			m_hoveredNode = 0;
-		if (id == 0 && Input::IsButtonJustPressed(MB_LEFT) && this->m_editorState == EditorState::None)
+		if (id == 0 && Input::IsButtonJustClicked(MB_LEFT) && this->m_editorState == EditorState::None)
 			m_selectedNode = 0;
 
 		if (id != 0 && GetCurrentScene() && nullptr != GetCurrentScene()->get_node_by_id(id)) {
 			m_hoveredNode = static_cast<size_t>(id);
-			if (m_editorState == EditorState::None && Input::IsButtonJustPressed(MB_LEFT)) {
+			if (m_editorState == EditorState::None && Input::IsButtonJustClicked(MB_LEFT)) {
 				if (m_selectedNode == m_hoveredNode)
 					m_selectedNode = 0;
 				else
@@ -622,7 +622,7 @@ void App::mainLoop() {
 			}
 		}
 
-		if (Input::IsButtonJustPressed(MB_LEFT) && this->m_editorState != EditorState::None) {
+		if (Input::IsButtonJustClicked(MB_LEFT) && this->m_editorState != EditorState::None) {
 			m_editorState = EditorState::None;
 			RenderingServer::GetInstance().SetCursorMode(CursorMode::Normal);
 		}

@@ -39,6 +39,7 @@ class App {
 	inline eventpp::CallbackList<void(InputEventKey)> &KeyCallback() { return m_keyCallback; }
 	inline eventpp::CallbackList<void(InputEventChar)> &CharCallback() { return m_charCallback; }
 	inline eventpp::CallbackList<void(InputEventScroll)> &ScrollCallback() { return m_scrollCallback; }
+	inline eventpp::CallbackList<void(InputEventClick)> &ClickCallback() { return m_clickCallback; }
 
 	inline eventpp::CallbackList<void(int, int)> &WindowResizeCallback() { return m_windowResizeCallback; }
 
@@ -115,6 +116,7 @@ class App {
 	eventpp::CallbackList<void(InputEventKey)> m_keyCallback;
 	eventpp::CallbackList<void(InputEventChar)> m_charCallback;
 	eventpp::CallbackList<void(InputEventScroll)> m_scrollCallback;
+	eventpp::CallbackList<void(InputEventClick)> m_clickCallback;
 
 	eventpp::CallbackList<void(int, int)> m_windowResizeCallback;
 

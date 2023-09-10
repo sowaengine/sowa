@@ -43,3 +43,9 @@ bool Input::IsButtonJustPressed(int button) {
 bool Input::IsButtonJustReleased(int button) {
 	return InputServer::GetInstance().IsButtonJustReleased(button);
 }
+bool Input::IsButtonJustClicked(int button) {
+	return InputServer::GetInstance().IsButtonJustClicked(button);
+}
+bool Input::IsButtonJustDoubleClicked(int button) {
+	return InputServer::GetInstance().IsButtonJustDoubleClicked(button);
+}

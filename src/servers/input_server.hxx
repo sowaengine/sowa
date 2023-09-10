@@ -38,12 +38,18 @@ class InputServer {
 	bool IsButtonJustPressed(int button);
 	bool IsButtonJustReleased(int button);
 
+	bool IsButtonJustClicked(int button);
+	bool IsButtonJustDoubleClicked(int button);
+
   private:
 	friend struct InputCallbackBridge;
 	friend class RenderingServer;
 
 	std::unordered_map<int, ActionState> m_keyStates;
 	std::unordered_map<int, ActionState> m_buttonStates;
+
+	std::unordered_map<int, bool> m_buttonSingleClicked;
+	std::unordered_map<int, bool> m_buttonDoubleClicked;
 
 	/// @brief Stores currently active character input (now keydown) (gets value from character event)
 	int m_pressedChar = 0;
