@@ -358,6 +358,7 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 
 			float x = gap / 2.f;
 			glViewport(x, 0.f, width, height);
+			m_viewportRect = rect(x, 0.f, width, height);
 
 		} else {
 			float width = w;
@@ -365,7 +366,8 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 			float gap = h - height;
 
 			float y = gap / 2.f;
-			glViewport(0, y, width, height);
+			glViewport(0.f, y, width, height);
+			m_viewportRect = rect(0.f, y, width, height);
 		}
 
 		return;
@@ -554,6 +556,11 @@ void App::mainLoop() {
 			Renderer().PushLine(vec2(maxX, minY), vec2(maxX, maxY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
 			Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
 			Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
+
+			vec2 pos = selectedNode->GlobalPosition();
+			float length = 20.f * m_editorCameraZoom2d;
+			Renderer().PushLine(vec2(pos.x - length, pos.y), vec2(pos.x + length, pos.y), thickness, 0.83f, 0.62f, 0.3f, 2.f, 100.f);
+			Renderer().PushLine(vec2(pos.x, pos.y - length), vec2(pos.x, pos.y + length), thickness, 0.83f, 0.62f, 0.3f, 2.f, 100.f);
 		}
 	}
 
@@ -565,11 +572,9 @@ void App::mainLoop() {
 		Input::GetWindowMousePosition(x, y);
 		int w, h;
 		RenderingServer::GetInstance().GetWindowSize(w, h);
+		vec2 cursorPos = ViewportRect().map_point(vec2(x, y), rect(0.f, 0.f, 1920.f, 1080.f));
 
-		x *= (1920.f / static_cast<float>(w));
-		y *= (1080.f / static_cast<float>(h));
-
-		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(x), static_cast<int>(y));
+		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(cursorPos.x), static_cast<int>(cursorPos.y));
 		if (id == 0)
 			m_hoveredNode = 0;
 		if (id == 0 && Input::IsButtonJustPressed(MB_LEFT) && this->m_editorState == EditorState::None)

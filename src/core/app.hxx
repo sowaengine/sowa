@@ -48,6 +48,7 @@ class App {
 	Font &TestFont() { return m_testFont; }
 
 	inline bool IsRunning() const { return m_running; }
+	rect ViewportRect() const { return m_viewportRect; }
 	void Start();
 	void Stop();
 
@@ -118,6 +119,7 @@ class App {
 	eventpp::CallbackList<void(int, int)> m_windowResizeCallback;
 
 	bool m_running = false;
+	rect m_viewportRect{};
 
 	friend class FileServer;
 	std::filesystem::path m_appPath = "";

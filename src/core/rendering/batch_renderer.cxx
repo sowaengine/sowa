@@ -143,7 +143,7 @@ void BatchRenderer::PushLine(const vec2 &p1, const vec2 &p2, float thickness, fl
 	transform = glm::scale(transform, {len, thickness, 1.f});
 
 	float xPos = 0.f;
-	float yPos = 0.f;
+	float yPos = -0.5f;
 	float w = 1.f;
 	float h = 1.f;
 	glm::vec4 points[4] = {
