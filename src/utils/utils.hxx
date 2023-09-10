@@ -3,6 +3,7 @@
 #pragma once
 
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -154,6 +155,59 @@ template <typename T>
 T Map(T v, T input_min, T input_max, T output_min, T output_max) {
 	return (v - input_min) * (output_max - output_min) / (input_max - input_min) + output_min;
 }
+
+//-------------------------   Easing  -------------------------//
+
+enum class Easing {
+	LINEAR = 0,
+
+	SINE_EASE_IN,
+	SINE_EASE_OUT,
+	SINE_EASE_IN_OUT,
+
+	CUBIC_EASE_IN,
+	CUBIC_EASE_OUT,
+	CUBIC_EASE_IN_OUT,
+
+	QUINT_IN,
+	QUINT_OUT,
+	QUINT_IN_OUT,
+
+	CIRC_IN,
+	CIRC_OUT,
+	CIRC_IN_OUT,
+
+	ELASTIC_IN,
+	ELASTIC_OUT,
+	ELASTIC_IN_OUT,
+
+	QUAD_IN,
+	QUAD_OUT,
+	QUAD_IN_OUT,
+
+	QUART_IN,
+	QUART_OUT,
+	QUART_IN_OUT,
+
+	EXPO_IN,
+	EXPO_OUT,
+	EXPO_IN_OUT,
+
+	BACK_IN,
+	BACK_OUT,
+	BACK_IN_OUT,
+
+	BOUNCE_IN,
+	BOUNCE_OUT,
+	BOUNCE_IN_OUT,
+
+	EASING_COUNT
+};
+
+/// @brief maps t in range(0, 1) to given easing function
+float LerpMap(float t, Easing easing = Easing::LINEAR);
+
+float Lerp(float from, float to, float t, Easing easing = Easing::LINEAR);
 
 } // namespace Utils
 

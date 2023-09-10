@@ -51,15 +51,9 @@
 
 static App *s_instance;
 
-static float posX = 200.f;
-
 App::App() {
 	s_instance = this;
 	Utils::Randomize();
-
-	Tweens::GetInstance().RegisterTween(2.f, [](float f) {
-		posX = 200.f + (f * 1000.f);
-	});
 }
 
 App::~App() {
@@ -378,7 +372,7 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 
 void App::mainLoop() {
 	InputServer::GetInstance().ProcessInput();
-	glClearColor(0.3f, 0.3f, 0.5f, 1.0f);
+	glClearColor(0.28f, 0.28f, 0.28f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	Time::update();
 
@@ -564,7 +558,45 @@ void App::mainLoop() {
 		}
 	}
 
-	Renderer().DrawText("Sowa Engine", &m_testFont, posX, 10.f, glm::mat4(1.f), 0.f, 1.f);
+	static std::vector<float> values;
+	int easingCount = (int)Utils::Easing::EASING_COUNT;
+	if (values.size() == 0) {
+		for (int i = 0; i < easingCount; i++) {
+			values.push_back(0.f);
+		}
+	}
+
+	if (Input::IsKeyJustPressed(KEY_Z)) {
+		values.clear();
+
+		for (int i = 0; i < easingCount; i++) {
+			values.push_back(0.f);
+			Tweens::GetInstance().RegisterTween(
+				2.f, [i](float f) {
+					values[i] = f;
+				},
+				(Utils::Easing)i);
+		}
+	}
+	for (size_t i = 0; i < values.size(); i++) {
+		static std::vector<std::string> names = {
+			"Linear",
+			"Sine in", "Sine out", "Sine in/out",
+			"Cubic in", "Cubic out", "Cubic in/out",
+			"Quint in", "Quint out", "Quint in/out",
+			"Circ in", "Circ out", "Circ in/out",
+			"Elastic in", "Elastic out", "Elastic in/out",
+			"Quad in", "Quad out", "Quad in/out",
+			"Quart in", "Quart out", "Quart in/out",
+			"Expo in", "Expo out", "Expo in/out",
+			"Back in", "Back out", "Back in/out",
+			"Bounce in", "Bounce out", "Bounce in/out"};
+
+		Renderer().DrawText(names.at(i), &m_testFont, -100.f, -280 - (i * 60.f), glm::mat4(1.f), 0.f, 1.f);
+
+		Renderer().PushQuad(200.f + (values[i] * 1000.f), -300 - (i * 60.f), 0.f, 64.f, 64.f, 1.f, 1.f, 1.f, 1.f, 0.f, static_cast<float>(m_testTexture.ID()));
+	}
+
 	Renderer().End();
 
 	if (!IsRunning()) {
@@ -583,7 +615,10 @@ void App::mainLoop() {
 		if (id != 0 && GetCurrentScene() && nullptr != GetCurrentScene()->get_node_by_id(id)) {
 			m_hoveredNode = static_cast<size_t>(id);
 			if (m_editorState == EditorState::None && Input::IsButtonJustPressed(MB_LEFT)) {
-				m_selectedNode = m_hoveredNode;
+				if (m_selectedNode == m_hoveredNode)
+					m_selectedNode = 0;
+				else
+					m_selectedNode = m_hoveredNode;
 			}
 		}
 
