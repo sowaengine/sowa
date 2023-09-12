@@ -8,6 +8,26 @@
 
 #include "math/math.hxx"
 
+enum class GuiCursorState {
+	None = 0,
+	Resize,
+	Resize_X,
+	Resize_Y
+};
+
+enum GuiWindowFlag : uint32_t {
+	GuiWindowFlag_None = 0,
+	GuiWindowFlag_TitleCentered = 1 << 0,
+	GuiWindowFlag_Movable = 1 << 1,
+	GuiWindowFlag_ResizableX = 1 << 2,
+	GuiWindowFlag_ResizableY = 1 << 3,
+
+	GuiWindowFlag_Resizable = GuiWindowFlag_ResizableX | GuiWindowFlag_ResizableY,
+	GuiWindowFlag_Default = GuiWindowFlag_Movable | GuiWindowFlag_Resizable
+};
+
+typedef uint32_t GuiWindowFlags;
+
 struct GuiColor {
 	float r;
 	float g;
@@ -37,7 +57,7 @@ class Gui {
   public:
 	using ID = std::string;
 
-	void BeginWindow(const std::string &title);
+	void BeginWindow(const std::string &title, GuiWindowFlags flags = GuiWindowFlag_Default);
 	void EndWindow();
 
 	void Text(const std::string &text);
@@ -51,6 +71,8 @@ class Gui {
 	vec2 state_mouse_pos = vec2(0.f);
 	vec2 state_mouse_motion = vec2(0.f);
 
+	GuiCursorState GetCursorState() { return m_cursorState; }
+
   private:
 	struct WindowData {
 		ID id;
@@ -62,6 +84,7 @@ class Gui {
 		float cursorX; // in pixels
 		float cursorY; // in pixels
 		bool active;
+		GuiWindowFlags flags;
 	};
 
 	bool has_window(ID id);
@@ -76,11 +99,20 @@ class Gui {
 	ID m_currentWindow;
 
 	enum class ActiveWindowOperation {
-		Move = 0,
-		Resize
+		None = 0,
+		Move,
+		Resize,
+		Resize_X,
+		Resize_Y
 	};
 	ID m_activeWindow;
 	ActiveWindowOperation m_activeWindowOperation;
+	ActiveWindowOperation m_possibleWindowOperation;
+
+	GuiCursorState m_cursorState = GuiCursorState::None;
+
+	// if true, resize operation will both resize and move the window (e.g. to resize bottom left corner, window both needs to be resized and moved in x axis)
+	bool m_activeWindowResize_Move_X = false;
 
 	float m_stateTitleHeight = 24.f;
 	GuiColor m_windowBgColor = GuiColor::RGBA255(20, 20, 20);

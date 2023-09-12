@@ -470,6 +470,14 @@ void App::mainLoop() {
 	m_gui.EndWindow();
 
 	m_gui.Update();
+	GuiCursorState state = m_gui.GetCursorState();
+	if (state == GuiCursorState::Resize) {
+		m_cursorStyle = CursorStyle::Resize;
+	} else if (state == GuiCursorState::Resize_X) {
+		m_cursorStyle = CursorStyle::ResizeX;
+	} else if (state == GuiCursorState::Resize_Y) {
+		m_cursorStyle = CursorStyle::ResizeY;
+	}
 
 	Renderer().End();
 
@@ -654,6 +662,9 @@ void App::mainLoop() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_layerUI.GetTargetTextureID(0));
 	fullscreenModel.Draw();
+
+	RenderingServer::GetInstance().SetCursorStyle(m_cursorStyle);
+	m_cursorStyle = CursorStyle::Normal;
 
 	RenderingServer::GetInstance().SwapBuffers();
 	InputServer::GetInstance().PollEvents();

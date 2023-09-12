@@ -14,6 +14,7 @@
 #include "data/input_event/input_event.hxx"
 #include "gui/gui.hxx"
 #include "resource/font/font.hxx"
+#include "servers/rendering_server.hxx"
 #include "ui/new_tree.hxx"
 
 #include "scene/scene.hxx"
@@ -128,6 +129,7 @@ class App {
 	eventpp::CallbackList<void(int, int)> m_windowResizeCallback;
 
 	Gui m_gui;
+	CursorStyle m_cursorStyle = CursorStyle::Normal;
 
 	bool m_running = false;
 	rect m_viewportRect{};
