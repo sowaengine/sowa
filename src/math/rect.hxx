@@ -21,6 +21,8 @@ class rect {
 	 */
 	vec2 map_point(const vec2 &point, const rect &target);
 
+	bool is_point_in(const vec2 &point);
+
   private:
 };
 

@@ -45,10 +45,12 @@ std::string Format(const std::string &format, Args... args) {
 
 //-------------------------   Logging  -------------------------//
 
+void WriteStdout(const std::string &);
+
 template <typename... Args>
 void Print(const std::string levelText, const std::string &format, Args... args) {
 	std::string time = GetTime("%Y-%m-%d %H:%M:%S");
-	std::cout << Format("[{}] [{}] ", levelText, time) << Format(format, args...) << std::endl;
+	WriteStdout(Format("[{}] [{}] ", levelText, time) + Format(format, args...));
 }
 
 template <typename... Args>

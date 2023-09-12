@@ -182,7 +182,7 @@ Error App::Init() {
 
 		if (event.action == KEY_PRESSED && event.key == KEY_Z) {
 			Tweens::GetInstance().RegisterTween(2.f, [](float f) {
-				App::GetInstance().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
+				// App::GetInstance().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
 			});
 		}
 
@@ -416,12 +416,12 @@ void App::mainLoop() {
 				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 				std::string str = converter.to_bytes(interface->text);
 
-				Renderer().DrawText(str, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, textScale);
+				Renderer().DrawText(str, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale);
 			} else if (interface->text_placeholder.size() > 0) {
 				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 				std::string str = converter.to_bytes(interface->text_placeholder);
 
-				Renderer().DrawText(str, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, textScale, 0.f, 0.f, 1.f, 1.f, 1.f, 0.6f);
+				Renderer().DrawText(str, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale, 0.f, 0.f, 1.f, 1.f, 1.f, 0.6f);
 			}
 
 			static float f = 0.f;
@@ -453,9 +453,23 @@ void App::mainLoop() {
 				color = hoveredColor;
 
 			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, color.x, color.y, color.z, 1.f, 0.f, 0.f);
-			Renderer().DrawText(opt.label, &m_testFont, textX, textY, glm::mat4(1.f), 0.f, textScale);
+			Renderer().DrawText(opt.label, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale);
 		}
 	}
+
+	m_gui.PutWindowSize(w, h);
+	m_gui.state_lmouse_just_pressed = Input::IsButtonJustPressed(MB_LEFT);
+	m_gui.state_lmouse_down = Input::IsButtonDown(MB_LEFT);
+	m_gui.state_mouse_pos = Input::GetMousePosition();
+	m_gui.state_mouse_motion = Input::GetMouseMotion();
+
+	m_gui.BeginWindow("Console");
+	for (auto &line : m_consoleBuffer) {
+		m_gui.Text(line);
+	}
+	m_gui.EndWindow();
+
+	m_gui.Update();
 
 	Renderer().End();
 
@@ -592,7 +606,7 @@ void App::mainLoop() {
 			"Back in", "Back out", "Back in/out",
 			"Bounce in", "Bounce out", "Bounce in/out"};
 
-		Renderer().DrawText(names.at(i), &m_testFont, -100.f, -280 - (i * 60.f), glm::mat4(1.f), 0.f, 1.f);
+		Renderer().DrawText(names.at(i), &m_testFont, -100.f, -280 - (i * 60.f), 0.f, glm::mat4(1.f), 0.f, 1.f);
 
 		Renderer().PushQuad(200.f + (values[i] * 1000.f), -300 - (i * 60.f), 0.f, 64.f, 64.f, 1.f, 1.f, 1.f, 1.f, 0.f, static_cast<float>(m_testTexture.ID()));
 	}
@@ -636,6 +650,7 @@ void App::mainLoop() {
 	glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
 	fullscreenModel.Draw();
 
+	glViewport(0, 0, w, h);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_layerUI.GetTargetTextureID(0));
 	fullscreenModel.Draw();
@@ -693,6 +708,13 @@ void App::SetCommandInterface(CommandInterface *interface) {
 		delete m_commandInterface;
 
 	m_commandInterface = interface;
+}
+
+void App::Log(const std::string &message) {
+	m_consoleBuffer.emplace_back(message);
+	if (m_consoleBuffer.size() > m_consoleBufferSize) {
+		m_consoleBuffer.pop_front();
+	}
 }
 
 void App::reload_scripts() {

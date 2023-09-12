@@ -98,7 +98,7 @@ float Utils::LerpMap(float t, Easing easing) {
 		float c1 = 1.70158;
 		float c2 = c1 * 1.525;
 
-		return t < 0.5f ? (std::pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) * 0.5f : (std::pow(2 * 2 - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) * 0.5f;
+		return t < 0.5f ? (std::pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) * 0.5f : (std::pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) * 0.5f;
 	}
 	if (easing == Easing::BOUNCE_IN) {
 		return 1.f - LerpMap(1.f - t, Easing::BOUNCE_OUT);

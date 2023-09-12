@@ -65,6 +65,8 @@ void InputServer::PollEvents() {
 	m_pressedChar = 0;
 	m_buttonSingleClicked.clear();
 	m_buttonDoubleClicked.clear();
+	m_mouseMotionX = 0.0;
+	m_mouseMotionY = 0.0;
 
 	for (auto &[key, action] : m_keyStates) {
 		if (action == ActionState::JUST_PRESSED)
@@ -194,6 +196,10 @@ bool InputServer::IsButtonJustDoubleClicked(int button) {
 	return m_buttonDoubleClicked[button];
 }
 
+vec2 InputServer::GetMouseMotion() {
+	return vec2(m_mouseMotionX, m_mouseMotionY);
+}
+
 //-------------------------------------------------------//
 //------------------ Input Server -----------------------//
 //-------------------------------------------------------//
@@ -296,6 +302,9 @@ void InputServer::cursor_pos_callback(GLFWwindow *window, double x, double y) {
 	event.deltaY = deltaY;
 	event.mouseX = x;
 	event.mouseY = y;
+
+	m_mouseMotionX = deltaX;
+	m_mouseMotionY = deltaY;
 
 	App::GetInstance().MouseMoveCallback()(event);
 }

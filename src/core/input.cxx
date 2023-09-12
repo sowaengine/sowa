@@ -8,6 +8,18 @@ void Input::GetMousePosition(double &x, double &y) {
 void Input::GetWindowMousePosition(double &x, double &y) {
 	return InputServer::GetInstance().GetWindowMousePosition(x, y);
 }
+vec2 Input::GetMousePosition() {
+	double x, y;
+	InputServer::GetInstance().GetMousePosition(x, y);
+	vec2 v(x, y);
+	return v;
+}
+vec2 Input::GetWindowMousePosition() {
+	double x, y;
+	InputServer::GetInstance().GetWindowMousePosition(x, y);
+	vec2 v(x, y);
+	return v;
+}
 int Input::GetPressedChar() {
 	return InputServer::GetInstance().GetPressedChar();
 }
@@ -48,4 +60,7 @@ bool Input::IsButtonJustClicked(int button) {
 }
 bool Input::IsButtonJustDoubleClicked(int button) {
 	return InputServer::GetInstance().IsButtonJustDoubleClicked(button);
+}
+vec2 Input::GetMouseMotion() {
+	return InputServer::GetInstance().GetMouseMotion();
 }

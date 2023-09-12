@@ -2,6 +2,7 @@
 #define SW_VEC2_HXX
 #pragma once
 
+#include "glm/glm.hpp"
 #include <initializer_list>
 #include <iostream>
 
@@ -25,6 +26,11 @@ struct vec2 {
 	}
 
 	vec2(const vec2 &v) {
+		this->x = v.x;
+		this->y = v.y;
+	}
+
+	vec2(const glm::vec2 &v) {
 		this->x = v.x;
 		this->y = v.y;
 	}
@@ -68,6 +74,12 @@ struct vec2 {
 	}
 
 	vec2 &operator=(const vec2 &other) {
+		this->x = other.x;
+		this->y = other.y;
+		return *this;
+	}
+
+	vec2 &operator=(const glm::vec2 &other) {
 		this->x = other.x;
 		this->y = other.y;
 		return *this;

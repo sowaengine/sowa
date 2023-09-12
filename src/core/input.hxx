@@ -2,6 +2,7 @@
 #define SW_INPUT_HXX
 #pragma once
 
+#include "math/math.hxx"
 #include "servers/input_server.hxx"
 
 static const int NONE = -1;
@@ -164,6 +165,8 @@ class Input {
   public:
 	static void GetMousePosition(double &x, double &y);
 	static void GetWindowMousePosition(double &x, double &y);
+	static vec2 GetMousePosition();
+	static vec2 GetWindowMousePosition();
 	static int GetPressedChar();
 
 	static ActionState GetKeyState(int key);
@@ -180,6 +183,8 @@ class Input {
 
 	static bool IsButtonJustClicked(int button);
 	static bool IsButtonJustDoubleClicked(int button);
+
+	static vec2 GetMouseMotion();
 };
 
 #endif // SW_INPUT_HXX

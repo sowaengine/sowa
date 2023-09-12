@@ -8,9 +8,11 @@
 
 #include "data/project_settings.hxx"
 
+#include <deque>
 #include <filesystem>
 
 #include "data/input_event/input_event.hxx"
+#include "gui/gui.hxx"
 #include "resource/font/font.hxx"
 #include "ui/new_tree.hxx"
 
@@ -57,6 +59,8 @@ class App {
 	inline const std::vector<CommandOption> &Commands() { return m_commands; }
 	void SetCommandInterface(CommandInterface *interface);
 
+	void Log(const std::string &message);
+
   private:
 	void mainLoop();
 	static void mainLoopCaller(void *self);
@@ -86,6 +90,9 @@ class App {
 	EditorState m_editorState = EditorState::None;
 	EditorActionAxis m_actionAxis;
 	vec2 m_actionDeltaVec2 = vec2(0.f);
+
+	std::deque<std::string> m_consoleBuffer;
+	size_t m_consoleBufferSize = 10;
 
 	void editor_mouse_move_event(InputEventMouseMove event);
 	void editor_key_event(InputEventKey event);
@@ -119,6 +126,8 @@ class App {
 	eventpp::CallbackList<void(InputEventClick)> m_clickCallback;
 
 	eventpp::CallbackList<void(int, int)> m_windowResizeCallback;
+
+	Gui m_gui;
 
 	bool m_running = false;
 	rect m_viewportRect{};

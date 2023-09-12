@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "core/rendering/gl.hxx"
+#include "math/math.hxx"
 
 enum class ActionState {
 	NONE,
@@ -41,6 +42,8 @@ class InputServer {
 	bool IsButtonJustClicked(int button);
 	bool IsButtonJustDoubleClicked(int button);
 
+	vec2 GetMouseMotion();
+
   private:
 	friend struct InputCallbackBridge;
 	friend class RenderingServer;
@@ -56,6 +59,9 @@ class InputServer {
 
 	double m_input_mouseX = 0.f;
 	double m_input_mouseY = 0.f;
+
+	double m_mouseMotionX = 0.f;
+	double m_mouseMotionY = 0.f;
 
 	void mouse_button_callback(GLFWwindow *window, int button, int action, int pressed);
 	void cursor_pos_callback(GLFWwindow *window, double x, double y);
