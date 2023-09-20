@@ -9,6 +9,7 @@ in vec2 vTexCoords;
 in float vTexture;
 in float vDrawId;
 in float vDrawMode;
+in vec4 vClipRect;
 
 const int MODE_SPRITE2D = 0;
 const int MODE_UI_CONTAINER = 1;
@@ -23,6 +24,12 @@ float lerp(float from, float to, float t) {
 }
 
 void main() {
+  if(vClipRect.z > 0.f && vClipRect.w > 0.f) {
+    if(gl_FragCoord.x < vClipRect.x || gl_FragCoord.x > vClipRect.x + vClipRect.z || gl_FragCoord.y < vClipRect.y || gl_FragCoord.y > vClipRect.y + vClipRect.w) {
+      discard;
+    }
+  }
+
   drawId = int(vDrawId);
 
   // diagonal gradient

@@ -7,6 +7,7 @@ layout(location = 2) in vec4 aColor;
 layout(location = 3) in float aDrawId;
 layout(location = 4) in float aTexture;
 layout(location = 5) in float aDrawMode;
+layout(location = 6) in vec4 aClipRect; // xywh
 
 uniform mat4 uProj;
 uniform mat4 uView;
@@ -16,6 +17,7 @@ out vec2 vTexCoords;
 out float vDrawId;
 out float vTexture;
 out float vDrawMode;
+out vec4 vClipRect;
 
 void main() {
   gl_Position = uProj * uView * vec4(aPos.x, aPos.y, aPos.z, 1.0f);
@@ -25,4 +27,5 @@ void main() {
   vDrawId = aDrawId;
   vTexture = aTexture;
   vDrawMode = aDrawMode;
+  vClipRect = aClipRect;
 }

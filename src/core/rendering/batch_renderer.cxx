@@ -43,6 +43,7 @@ Error BatchRenderer::Init(const char *vsPath, const char *fsPath) {
 	m_array.SetAttribute(3, gfx::AttributeType::Float); // draw id
 	m_array.SetAttribute(4, gfx::AttributeType::Float); // texture slot
 	m_array.SetAttribute(5, gfx::AttributeType::Float); // draw mode
+	m_array.SetAttribute(6, gfx::AttributeType::Vec4);	// clip rect
 	m_array.UploadAttributes();
 
 	m_array.Unbind();
@@ -95,6 +96,10 @@ void BatchRenderer::PushQuad(BatchVertex vertices[4]) {
 }
 
 void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID, float drawMode) {
+	PushQuad(x, y, z, w, h, r, g, b, a, drawID, textureID, rect(-1.f, -1.f, -1.f, -1.f), drawMode);
+}
+
+void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float r, float g, float b, float a, float drawID, float textureID, rect clipRect, float drawMode) {
 	/*
 		{ 0.0f, 1.0f,  0.f, 1.f}
 		{ 0.0f, 0.0f,  0.f, 1.f}
@@ -127,6 +132,10 @@ void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float 
 		vertices[i].t_id = textureID;
 		vertices[i].d_id = drawID;
 		vertices[i].draw_mode = drawMode;
+		vertices[i].clipRect_x = clipRect.x;
+		vertices[i].clipRect_y = clipRect.y;
+		vertices[i].clipRect_w = clipRect.w;
+		vertices[i].clipRect_h = clipRect.h;
 	}
 
 	PushQuad(vertices);
@@ -174,12 +183,16 @@ void BatchRenderer::PushLine(const vec2 &p1, const vec2 &p2, float thickness, fl
 		vertices[i].t_id = 0;
 		vertices[i].d_id = 0;
 		vertices[i].draw_mode = 0.f;
+		vertices[i].clipRect_x = -1.f;
+		vertices[i].clipRect_y = -1.f;
+		vertices[i].clipRect_w = -1.f;
+		vertices[i].clipRect_h = -1.f;
 	}
 
 	PushQuad(vertices);
 }
 
-void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float y, float z, glm::mat4 transform, float draw_id, float scale, float maxWidth, float maxHeight, float r, float g, float b, float a) {
+void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float y, float z, glm::mat4 transform, float draw_id, float scale, float maxWidth, float maxHeight, float r, float g, float b, float a, rect clipRect) {
 	glm::vec2 textSize = font->CalcTextSize(text);
 
 	if (maxWidth > 0.f) {
@@ -239,6 +252,10 @@ void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float
 			vertices[i].t_id = ch.textureID;
 			vertices[i].d_id = draw_id;
 			vertices[i].draw_mode = 2.f;
+			vertices[i].clipRect_x = clipRect.x;
+			vertices[i].clipRect_y = clipRect.y;
+			vertices[i].clipRect_w = clipRect.w;
+			vertices[i].clipRect_h = clipRect.h;
 		}
 
 		PushQuad(vertices);
