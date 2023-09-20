@@ -41,7 +41,7 @@ Error project_settings::Save(const char *path) {
 	std::string s;
 	doc.Serialize(s);
 
-	Error err = FileServer::GetInstance().WriteFileString(path, s);
+	Error err = FileServer::get().WriteFileString(path, s);
 	if (err != OK) {
 		return err;
 	}

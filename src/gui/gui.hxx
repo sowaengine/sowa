@@ -94,6 +94,8 @@ class Gui {
 	float percentage_to_px_w(float percentage);
 	float percentage_to_px_h(float percentage);
 
+	rect calculate_bounds(const WindowData &window);
+
 	int m_windowWidth = 0;
 	int m_windowHeight = 0;
 	ID m_currentWindow;

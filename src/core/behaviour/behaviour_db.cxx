@@ -4,7 +4,7 @@
 
 #include "utils/utils.hxx"
 
-BehaviourDB &BehaviourDB::GetInstance() {
+BehaviourDB &BehaviourDB::get() {
 	static BehaviourDB *db = new BehaviourDB;
 	return *db;
 }

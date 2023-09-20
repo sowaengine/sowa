@@ -29,7 +29,7 @@ class App {
 	Error Init();
 	Error Run();
 
-	static App &GetInstance();
+	static App &get();
 
 	inline project_settings &ProjectSettings() { return m_projectSettings; }
 

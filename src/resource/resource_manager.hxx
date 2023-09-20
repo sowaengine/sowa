@@ -16,7 +16,7 @@ struct ResourceFactory {
 
 class ResourceManager {
   public:
-	static ResourceManager &GetInstance();
+	static ResourceManager &get();
 
 	void RegisterResource(std::string extension, ResourceFactory factory);
 	Resource *Load(const std::string &path, RID id = 0, ResourceType type = ResourceType_None);

@@ -59,7 +59,7 @@ App::App() {
 App::~App() {
 }
 
-App &App::GetInstance() {
+App &App::get() {
 	return *s_instance;
 }
 
@@ -109,14 +109,14 @@ Error App::Init() {
 		//
 	}
 
-	RenderingServer::GetInstance().CreateWindow(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
+	RenderingServer::get().CreateWindow(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
 
 	m_layer2D.SetTarget(0, RenderLayerTargetType::Vec4);
 	m_layer2D.SetTarget(1, RenderLayerTargetType::Int);
 	m_layer2D.Create(1920, 1080);
 
 	int w, h;
-	RenderingServer::GetInstance().GetWindowSize(w, h);
+	RenderingServer::get().GetWindowSize(w, h);
 
 	m_layerUI.SetTarget(0, RenderLayerTargetType::Vec4);
 	m_layerUI.SetTarget(1, RenderLayerTargetType::Int);
@@ -181,8 +181,8 @@ Error App::Init() {
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_Z) {
-			Tweens::GetInstance().RegisterTween(2.f, [](float f) {
-				// App::GetInstance().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
+			Tweens::get().RegisterTween(2.f, [](float f) {
+				// App::get().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
 			});
 		}
 
@@ -217,23 +217,23 @@ Error App::Init() {
 			}
 		}
 	};
-	ResourceManager::GetInstance().RegisterResource(".png", imageTexture);
+	ResourceManager::get().RegisterResource(".png", imageTexture);
 
-	Resource *res = ResourceManager::GetInstance().Load("res://assets/shotThin.png");
+	Resource *res = ResourceManager::get().Load("res://assets/shotThin.png");
 
-	NodeDB &db = NodeDB::GetInstance();
+	NodeDB &db = NodeDB::get();
 
-#define REGISTER_NODE_TYPE(type, extends)                                \
-	do {                                                                 \
-		NodeFactory factory;                                             \
-		factory.constructor = []() -> Node * {                           \
-			return new type;                                             \
-		};                                                               \
-		factory.destructor = [](Node *node) {                            \
-			delete reinterpret_cast<type *>(node);                       \
-		};                                                               \
-                                                                         \
-		db.BindNodeType<type>(#type, db.GetNodeType(#extends), factory); \
+#define REGISTER_NODE_TYPE(type, extends)                                    \
+	do {                                                                     \
+		NodeFactory factory;                                                 \
+		factory.constructor = []() -> Node * {                               \
+			return new type;                                                 \
+		};                                                                   \
+		factory.destructor = [](Node *node) {                                \
+			delete reinterpret_cast<type *>(node);                           \
+		};                                                                   \
+                                                                             \
+		db.bind_node_type<type>(#type, db.get_node_type(#extends), factory); \
 	} while (0);
 
 #define REGISTER_NODE_PROPERTY(type, propName, propAccessor, propType) \
@@ -251,25 +251,25 @@ Error App::Init() {
 			}                                                          \
 		};                                                             \
 		prop.typeName = #propType;                                     \
-		db.BindProperty(db.GetNodeType(#type), propName, prop);        \
+		db.bind_property(db.get_node_type(#type), propName, prop);     \
 	} while (0);
 
 	REGISTER_NODE_TYPE(Node, );
-	REGISTER_NODE_PROPERTY(Node, "name", Name(), std::string);
+	REGISTER_NODE_PROPERTY(Node, "name", name(), std::string);
 
 	REGISTER_NODE_TYPE(Node2D, Node);
-	REGISTER_NODE_PROPERTY(Node2D, "position", Position(), vec2);
-	REGISTER_NODE_PROPERTY(Node2D, "scale", Scale(), vec2);
-	REGISTER_NODE_PROPERTY(Node2D, "rotation", Rotation(), float);
-	REGISTER_NODE_PROPERTY(Node2D, "z_index", ZIndex(), float);
+	REGISTER_NODE_PROPERTY(Node2D, "position", position(), vec2);
+	REGISTER_NODE_PROPERTY(Node2D, "scale", scale(), vec2);
+	REGISTER_NODE_PROPERTY(Node2D, "rotation", rotation(), float);
+	REGISTER_NODE_PROPERTY(Node2D, "z_index", z_index(), float);
 
 	REGISTER_NODE_TYPE(Sprite2D, Node2D);
-	REGISTER_NODE_PROPERTY(Sprite2D, "texture", GetTexture(), RID);
+	REGISTER_NODE_PROPERTY(Sprite2D, "texture", texture(), RID);
 
 	REGISTER_NODE_TYPE(Camera2D, Node2D);
-	REGISTER_NODE_PROPERTY(Camera2D, "zoom", Zoom(), vec2);
+	REGISTER_NODE_PROPERTY(Camera2D, "zoom", zoom(), vec2);
 
-	BehaviourDB::GetInstance().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
+	BehaviourDB::get().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
 	reload_scripts();
 	Main();
@@ -286,9 +286,9 @@ Error App::Init() {
 		if (IsRunning() && nullptr != GetCurrentScene()) {
 			std::function<void(Node *)> func;
 			func = [&func](Node *node) {
-				node->ReloadBehaviours();
+				node->reload_behaviours();
 
-				for (Node *child : node->GetChildren()) {
+				for (Node *child : node->get_children()) {
 					func(child);
 				}
 			};
@@ -306,7 +306,7 @@ Error App::Init() {
 			return;
 		}
 
-		Error err = GetCurrentScene()->Save(GetCurrentScene()->Path().c_str());
+		Error err = GetCurrentScene()->save(GetCurrentScene()->Path().c_str());
 		if (err != OK) {
 			std::cout << "Failed to save scene " << err << std::endl;
 		}
@@ -328,7 +328,7 @@ Error App::Run() {
 #ifdef SW_WEB
 	emscripten_set_main_loop_arg(mainLoopCaller, this, 0, 1);
 #else
-	while (!RenderingServer::GetInstance().WindowShouldClose()) {
+	while (!RenderingServer::get().WindowShouldClose()) {
 		mainLoop();
 	}
 #endif
@@ -340,7 +340,7 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		int w, h;
-		RenderingServer::GetInstance().GetWindowSize(w, h);
+		RenderingServer::get().GetWindowSize(w, h);
 
 		float windowRatio = (float)w / h;
 		float videoRatio = (float)1920.f / 1080.f;
@@ -371,7 +371,7 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 }
 
 void App::mainLoop() {
-	InputServer::GetInstance().ProcessInput();
+	InputServer::get().ProcessInput();
 	glClearColor(0.28f, 0.28f, 0.28f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	Time::update();
@@ -380,7 +380,7 @@ void App::mainLoop() {
 	m_layerUI.Clear(0.0f, 0.0f, 0.0f, 0.0f);
 
 	int w, h;
-	RenderingServer::GetInstance().GetWindowSize(w, h);
+	RenderingServer::get().GetWindowSize(w, h);
 	glViewport(0, 0, w, h);
 
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(w), 0.f, static_cast<float>(h), -128.f, 128.f));
@@ -457,6 +457,7 @@ void App::mainLoop() {
 		}
 	}
 
+	/*
 	m_gui.PutWindowSize(w, h);
 	m_gui.state_lmouse_just_pressed = Input::IsButtonJustPressed(MB_LEFT);
 	m_gui.state_lmouse_down = Input::IsButtonDown(MB_LEFT);
@@ -478,6 +479,7 @@ void App::mainLoop() {
 	} else if (state == GuiCursorState::Resize_Y) {
 		m_cursorStyle = CursorStyle::ResizeY;
 	}
+	*/
 
 	Renderer().End();
 
@@ -493,12 +495,12 @@ void App::mainLoop() {
 		if (GetCurrentScene()) {
 			Camera2D *cam = dynamic_cast<Camera2D *>(GetCurrentScene()->get_active_camera2d());
 			if (cam) {
-				centerPoint = cam->CenterPoint();
+				centerPoint = cam->center_point();
 
-				position = cam->GlobalPosition();
-				zoom = cam->Zoom();
-				if (cam->Rotatable()) {
-					rotation = glm::radians(cam->GlobalRotation());
+				position = cam->global_position();
+				zoom = cam->zoom();
+				if (cam->rotatable()) {
+					rotation = glm::radians(cam->global_rotation());
 				}
 			}
 		}
@@ -519,9 +521,9 @@ void App::mainLoop() {
 	glEnable(GL_DEPTH_TEST);
 
 	if (m_pCurrentScene != nullptr) {
-		m_pCurrentScene->UpdateScene();
+		m_pCurrentScene->_update_scene();
 	}
-	Tweens::GetInstance().Poll(Time::Delta());
+	Tweens::get().Poll(Time::Delta());
 
 	if (!IsRunning()) {
 		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), 5.f, 0.6f, 0.2f, 0.2f, 100.f, 0.f);
@@ -530,16 +532,16 @@ void App::mainLoop() {
 		Sprite2D *selectedNode = dynamic_cast<Sprite2D *>(GetCurrentScene()->get_node_by_id(m_selectedNode));
 		if (nullptr != selectedNode) {
 			int w, h;
-			RenderingServer::GetInstance().GetWindowSize(w, h);
+			RenderingServer::get().GetWindowSize(w, h);
 
-			Texture *texture = ResourceManager::GetInstance().GetAs<Texture>(selectedNode->GetTexture());
+			Texture *texture = ResourceManager::get().GetAs<Texture>(selectedNode->texture());
 			float width = 128.f;
 			float height = 128.f;
 			if (texture) {
 				width = texture->Width();
 				height = texture->Height();
 			}
-			glm::mat4 model = glm::scale(selectedNode->CalculateTransform(), {width, height, 1.f});
+			glm::mat4 model = glm::scale(selectedNode->calculate_transform(), {width, height, 1.f});
 
 			glm::vec4 points[4] = {
 				{-0.5f, 0.5f, 0.f, 1.f},
@@ -573,13 +575,14 @@ void App::mainLoop() {
 			Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
 			Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
 
-			vec2 pos = selectedNode->GlobalPosition();
+			vec2 pos = selectedNode->global_position();
 			float length = 20.f * m_editorCameraZoom2d;
 			Renderer().PushLine(vec2(pos.x - length, pos.y), vec2(pos.x + length, pos.y), thickness, 0.83f, 0.62f, 0.3f, 2.f, 100.f);
 			Renderer().PushLine(vec2(pos.x, pos.y - length), vec2(pos.x, pos.y + length), thickness, 0.83f, 0.62f, 0.3f, 2.f, 100.f);
 		}
 	}
 
+#if false
 	static std::vector<float> values;
 	int easingCount = (int)Utils::Easing::EASING_COUNT;
 	if (values.size() == 0) {
@@ -593,7 +596,7 @@ void App::mainLoop() {
 
 		for (int i = 0; i < easingCount; i++) {
 			values.push_back(0.f);
-			Tweens::GetInstance().RegisterTween(
+			Tweens::get().RegisterTween(
 				2.f, [i](float f) {
 					values[i] = f;
 				},
@@ -618,6 +621,7 @@ void App::mainLoop() {
 
 		Renderer().PushQuad(200.f + (values[i] * 1000.f), -300 - (i * 60.f), 0.f, 64.f, 64.f, 1.f, 1.f, 1.f, 1.f, 0.f, static_cast<float>(m_testTexture.ID()));
 	}
+#endif
 
 	Renderer().End();
 
@@ -625,7 +629,7 @@ void App::mainLoop() {
 		double x, y;
 		Input::GetWindowMousePosition(x, y);
 		int w, h;
-		RenderingServer::GetInstance().GetWindowSize(w, h);
+		RenderingServer::get().GetWindowSize(w, h);
 		vec2 cursorPos = ViewportRect().map_point(vec2(x, y), rect(0.f, 0.f, 1920.f, 1080.f));
 
 		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(cursorPos.x), static_cast<int>(cursorPos.y));
@@ -646,7 +650,7 @@ void App::mainLoop() {
 
 		if (Input::IsButtonJustClicked(MB_LEFT) && this->m_editorState != EditorState::None) {
 			m_editorState = EditorState::None;
-			RenderingServer::GetInstance().SetCursorMode(CursorMode::Normal);
+			RenderingServer::get().SetCursorMode(CursorMode::Normal);
 		}
 	}
 
@@ -663,11 +667,11 @@ void App::mainLoop() {
 	glBindTexture(GL_TEXTURE_2D, m_layerUI.GetTargetTextureID(0));
 	fullscreenModel.Draw();
 
-	RenderingServer::GetInstance().SetCursorStyle(m_cursorStyle);
+	RenderingServer::get().SetCursorStyle(m_cursorStyle);
 	m_cursorStyle = CursorStyle::Normal;
 
-	RenderingServer::GetInstance().SwapBuffers();
-	InputServer::GetInstance().PollEvents();
+	RenderingServer::get().SwapBuffers();
+	InputServer::get().PollEvents();
 }
 
 void App::mainLoopCaller(void *self) {
@@ -676,12 +680,12 @@ void App::mainLoopCaller(void *self) {
 
 void App::SetCurrentScene(Scene *scene) {
 	if (m_pCurrentScene != nullptr) {
-		m_pCurrentScene->EndScene();
+		m_pCurrentScene->_end_scene();
 	}
 
 	m_pCurrentScene = scene;
 	if (m_running)
-		m_pCurrentScene->BeginScene();
+		m_pCurrentScene->_begin_scene();
 }
 
 void App::Start() {
@@ -693,7 +697,7 @@ void App::Start() {
 
 	m_running = true;
 
-	GetCurrentScene()->BeginScene();
+	GetCurrentScene()->_begin_scene();
 }
 
 void App::Stop() {
@@ -730,15 +734,15 @@ void App::Log(const std::string &message) {
 
 void App::reload_scripts() {
 	//
-	ScriptServer::GetInstance().BeginBuild();
+	ScriptServer::get().BeginBuild();
 
-	auto files = FileServer::GetInstance().ReadDir("res://scripts/", true);
+	auto files = FileServer::get().ReadDir("res://scripts/", true);
 	for (FileEntry &file : files) {
 		if (file.IsFile() && file.Path().extension() == ".as")
-			ScriptServer::GetInstance().LoadScriptFile(file.Path().string().c_str());
+			ScriptServer::get().LoadScriptFile(file.Path().string().c_str());
 	}
 
-	ScriptServer::GetInstance().EndBuild();
+	ScriptServer::get().EndBuild();
 }
 
 extern "C" void Unload() {

@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <iostream>
 
-ResourceManager &ResourceManager::GetInstance() {
+ResourceManager &ResourceManager::get() {
 	static ResourceManager *manager = new ResourceManager;
 	return *manager;
 }

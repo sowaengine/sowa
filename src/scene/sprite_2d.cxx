@@ -9,15 +9,15 @@
 
 #include "resource/resource_manager.hxx"
 
-void Sprite2D::Update() {
+void Sprite2D::_update() {
 
-	Texture *texture = ResourceManager::GetInstance().GetAs<Texture>(m_texture);
+	Texture *texture = ResourceManager::get().GetAs<Texture>(m_texture);
 	if (nullptr == texture)
 		return;
 
 	uint32_t textureID = texture->ID();
 
-	glm::mat4 model = CalculateTransform();
+	glm::mat4 model = calculate_transform();
 	model = glm::scale(model, {texture->Width(), texture->Height(), 1.f});
 
 	glm::vec4 points[4] = {
@@ -37,7 +37,7 @@ void Sprite2D::Update() {
 
 		vertices[i].x = points[i].x;
 		vertices[i].y = points[i].y;
-		vertices[i].z = m_zIndex;
+		vertices[i].z = m_zindex;
 		vertices[i].r = 1.f;
 		vertices[i].g = 1.f;
 		vertices[i].b = 1.f;
@@ -45,9 +45,9 @@ void Sprite2D::Update() {
 		vertices[i].u = uvs[i].x;
 		vertices[i].v = uvs[i].y;
 		vertices[i].t_id = textureID;
-		vertices[i].d_id = static_cast<float>(ID());
+		vertices[i].d_id = static_cast<float>(id());
 		vertices[i].draw_mode = 0.f;
 	}
 
-	App::GetInstance().Renderer().PushQuad(vertices);
+	App::get().Renderer().PushQuad(vertices);
 }

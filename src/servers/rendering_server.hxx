@@ -25,7 +25,7 @@ class RenderingServer {
   public:
 	RenderingServer();
 
-	static RenderingServer &GetInstance();
+	static RenderingServer &get();
 	void CreateWindow(int width, int height, const std::string &title);
 
 	bool WindowShouldClose();

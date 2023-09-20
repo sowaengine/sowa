@@ -10,32 +10,32 @@
 
 class Node {
   public:
-	inline std::string &Name() { return m_name; }
-	size_t ID() { return m_id; }
+	inline std::string &name() { return m_name; }
+	size_t id() { return m_id; }
 
 	virtual ~Node() = default;
 
-	virtual void Start() {}
-	virtual void Update() {}
+	virtual void _start() {}
+	virtual void _update() {}
 
-	inline size_t TypeHash() { return m_typeHash; }
+	inline size_t type_hash() { return m_type_hash; }
 
-	void AddBehaviour(std::string name);
-	void RemoveBehaviour(std::string name);
-	void ReloadBehaviours();
-	void StartBehaviours();
-	void UpdateBehaviours();
-	inline std::unordered_map<size_t, Behaviour> &GetBehaviours() { return m_behaviours; }
-	inline std::vector<std::string> &GetBehaviourNames() { return m_behaviourNames; }
+	void add_behaviour(std::string name);
+	void remove_behaviour(std::string name);
+	void reload_behaviours();
+	void start_behaviours();
+	void update_behaviours();
+	inline std::unordered_map<size_t, Behaviour> &get_behaviours() { return m_behaviours; }
+	inline std::vector<std::string> &get_behaviour_names() { return m_behaviour_names; }
 
 	//
-	inline std::vector<Node *> &GetChildren() { return m_children; }
-	inline Node *GetParent() { return m_parent; }
+	inline std::vector<Node *> &get_children() { return m_children; }
+	inline Node *get_parent() { return m_parent; }
 
-	void AddChild(Node *child);
-	Node *GetChild(std::string name);
-	Node *GetChildIndex(size_t index);
-	void RemoveChild(std::string name);
+	void add_child(Node *child);
+	Node *get_child(std::string name);
+	Node *get_child_index(size_t index);
+	void remove_child(std::string name);
 
 	//
 	inline std::vector<std::string> &get_groups() { return m_groups; }
@@ -49,9 +49,9 @@ class Node {
 
 	void register_behaviour(const std::string &behaviour, bool callStart = false);
 
-	size_t m_typeHash = 0;
+	size_t m_type_hash = 0;
 
-	std::vector<std::string> m_behaviourNames;
+	std::vector<std::string> m_behaviour_names;
 	std::unordered_map<size_t, Behaviour> m_behaviours;
 
 	Node *m_parent = nullptr;

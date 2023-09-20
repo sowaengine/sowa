@@ -11,10 +11,10 @@ class Text : public Node {
   public:
 	virtual ~Text() = default;
 
-	void Update() override;
+	void _update() override;
 
-	inline std::string &GetText() { return m_text; }
-	inline glm::vec2 &Position() { return m_position; }
+	inline std::string &text() { return m_text; }
+	inline glm::vec2 &position() { return m_position; }
 
   private:
 	std::string m_text = "";

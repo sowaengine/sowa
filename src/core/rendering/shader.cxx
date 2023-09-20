@@ -41,7 +41,7 @@ Shader::~Shader() {
 Error Shader::Load(const char *vertexPath, const char *fragmentPath) {
 	Error err;
 	std::string buf;
-	err = FileServer::GetInstance().ReadFileString(vertexPath, buf);
+	err = FileServer::get().ReadFileString(vertexPath, buf);
 	if (err != OK) {
 		SetVertexSource("");
 		SetFragmentSource("");
@@ -49,7 +49,7 @@ Error Shader::Load(const char *vertexPath, const char *fragmentPath) {
 	}
 	SetVertexSource(buf);
 
-	err = FileServer::GetInstance().ReadFileString(fragmentPath, buf);
+	err = FileServer::get().ReadFileString(fragmentPath, buf);
 	if (err != OK) {
 		SetVertexSource("");
 		SetFragmentSource("");

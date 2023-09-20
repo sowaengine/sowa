@@ -2,7 +2,7 @@
 #include "utils/utils.hxx"
 #include <cmath>
 
-Tweens &Tweens::GetInstance() {
+Tweens &Tweens::get() {
 	static Tweens *tweens = new Tweens;
 	return *tweens;
 }

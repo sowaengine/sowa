@@ -9,7 +9,7 @@
 
 class ScriptServer {
   public:
-	static ScriptServer &GetInstance();
+	static ScriptServer &get();
 
 	void BeginBuild();
 	Error LoadScriptFile(std::string path);

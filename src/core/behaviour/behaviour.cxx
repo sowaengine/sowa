@@ -24,7 +24,7 @@ std::string Behaviour::GetBehaviourName() {
 	if (m_behaviourID == 0)
 		return "";
 
-	return BehaviourDB::GetInstance().GetBehaviourName(m_behaviourID);
+	return BehaviourDB::get().GetBehaviourName(m_behaviourID);
 }
 
 size_t Behaviour::GetBehaviourID() {

@@ -26,7 +26,7 @@ SceneSaveAsInterface::SceneSaveAsInterface(std::string path) {
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 		std::string str = converter.to_bytes(this->text);
 
-		Error err = App::GetInstance().GetCurrentScene()->Save(str.c_str());
+		Error err = App::get().GetCurrentScene()->save(str.c_str());
 		if (err != OK) {
 			std::cout << "Failed to save scene " << err << std::endl;
 		}

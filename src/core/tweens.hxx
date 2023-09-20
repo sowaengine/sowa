@@ -9,7 +9,7 @@
 
 class Tweens {
   public:
-	static Tweens &GetInstance();
+	static Tweens &get();
 
 	void RegisterTween(float duration, std::function<void(float)> callback, Utils::Easing easing = Utils::Easing::SINE_EASE_IN);
 	void Poll(float dt);

@@ -21,15 +21,18 @@ void Gui::BeginWindow(const std::string &title, GuiWindowFlags flags) {
 	data.cursorY = m_stateTitleHeight;
 	m_currentWindow = title;
 
+	data.width = std::max(1.f, data.width);
+	data.height = std::max(1.f + px_to_percentage_h(m_stateTitleHeight), data.height);
+
 	float x = percentage_to_px_w(data.posX);
 	float y = percentage_to_px_h(data.posY);
 	float w = percentage_to_px_w(data.width);
 	float h = percentage_to_px_h(data.height);
 
-	App::GetInstance().Renderer().PushQuad(x, y + h - m_stateTitleHeight, 1.f, w, m_stateTitleHeight, m_windowTitleColor.r, m_windowTitleColor.g, m_windowTitleColor.b, 1.f, 0.f, 0.f);
-	App::GetInstance().Renderer().PushQuad(x, y, 1.f, w, h - m_stateTitleHeight, m_windowBgColor.r, m_windowBgColor.g, m_windowBgColor.b, 1.f, 0.f, 0.f);
+	App::get().Renderer().PushQuad(x, y + h - m_stateTitleHeight, 1.f, w, m_stateTitleHeight, m_windowTitleColor.r, m_windowTitleColor.g, m_windowTitleColor.b, 1.f, 0.f, 0.f);
+	App::get().Renderer().PushQuad(x, y, 1.f, w, h - m_stateTitleHeight, m_windowBgColor.r, m_windowBgColor.g, m_windowBgColor.b, 1.f, 0.f, 0.f);
 
-	vec2 textSize = App::GetInstance().TestFont().CalcTextSize(data.title);
+	vec2 textSize = App::get().TestFont().CalcTextSize(data.title);
 	textSize *= 0.5f;
 	float textY = y + h - m_stateTitleHeight;
 	float textPadding = m_stateTitleHeight * 0.33f;
@@ -38,7 +41,7 @@ void Gui::BeginWindow(const std::string &title, GuiWindowFlags flags) {
 	if (data.flags & GuiWindowFlag_TitleCentered) {
 		textX = x + (w * 0.5f) - (textSize.x * 0.5f);
 	}
-	App::GetInstance().Renderer().DrawText(data.title, &App::GetInstance().TestFont(), textX, textY, 1.f, glm::mat4(1.f), 0.f, 0.4f);
+	App::get().Renderer().DrawText(data.title, &App::get().TestFont(), textX, textY, 1.f, glm::mat4(1.f), 0.f, 0.4f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, calculate_bounds(data));
 }
 void Gui::EndWindow() {
 	m_currentWindow = ID();
@@ -55,12 +58,12 @@ void Gui::Text(const std::string &text) {
 	}
 
 	WindowData &window = get_window_data(m_currentWindow);
-	vec2 textSize = App::GetInstance().TestFont().CalcTextSize(text) * 0.4f;
+	vec2 textSize = App::get().TestFont().CalcTextSize(text) * 0.4f;
 	textSize.y += m_configTextPadding * 2;
 
-	App::GetInstance()
+	App::get()
 		.Renderer()
-		.DrawText(text, &App::GetInstance().TestFont(), percentage_to_px_w(window.posX) + window.cursorX + m_configTextPadding, percentage_to_px_h(window.posY) + percentage_to_px_h(window.height) - window.cursorY - textSize.y + m_configTextPadding, 1.f, glm::mat4(1.f), 0.f, 0.4f);
+		.DrawText(text, &App::get().TestFont(), percentage_to_px_w(window.posX) + window.cursorX + m_configTextPadding, percentage_to_px_h(window.posY) + percentage_to_px_h(window.height) - window.cursorY - textSize.y + m_configTextPadding, 1.f, glm::mat4(1.f), 0.f, 0.4f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, calculate_bounds(window));
 
 	window.cursorX = 0.f;
 	window.cursorY += textSize.y;
@@ -68,6 +71,9 @@ void Gui::Text(const std::string &text) {
 
 void Gui::Update() {
 	m_cursorState = GuiCursorState::None;
+	if (!state_lmouse_down) {
+		m_activeWindowOperation = ActiveWindowOperation::None;
+	}
 
 	for (auto &[id, data] : m_windows) {
 		if (!data.active)
@@ -96,50 +102,52 @@ void Gui::Update() {
 
 		m_possibleWindowOperation = ActiveWindowOperation::None;
 		GuiCursorState possibleCursorState = GuiCursorState::None;
-		if (rect(x, y + h - m_stateTitleHeight, w, m_stateTitleHeight).is_point_in(state_mouse_pos)) {
-			m_activeWindow = data.id;
-			m_possibleWindowOperation = ActiveWindowOperation::Move;
+
+		if (m_activeWindowOperation == ActiveWindowOperation::None) {
+
+			if (rect(x, y + h - m_stateTitleHeight, w, m_stateTitleHeight).is_point_in(state_mouse_pos)) {
+				m_possibleWindowOperation = ActiveWindowOperation::Move;
+			}
+
+			// bottom
+			if (rect(x + 16.f, y - 16.f, w - 32.f, 32.f).is_point_in(state_mouse_pos)) {
+				m_possibleWindowOperation = ActiveWindowOperation::Resize_Y;
+				m_activeWindowResize_Move_X = false;
+				possibleCursorState = GuiCursorState::Resize_Y;
+			}
+			// left
+			if (rect(x - 16.f, y + 16.f, 32.f, h - 32.f).is_point_in(state_mouse_pos)) {
+				m_possibleWindowOperation = ActiveWindowOperation::Resize_X;
+				m_activeWindowResize_Move_X = true;
+				possibleCursorState = GuiCursorState::Resize_X;
+			}
+			// right
+			if (rect(x + w - 16.f, y + 16.f, 32.f, h - 32.f).is_point_in(state_mouse_pos)) {
+				m_possibleWindowOperation = ActiveWindowOperation::Resize_X;
+				m_activeWindowResize_Move_X = false;
+				possibleCursorState = GuiCursorState::Resize_X;
+			}
+			// bottom right
+			if (rect(x + w - 16.f, y - 16.f, 32.f, 32.f).is_point_in(state_mouse_pos)) {
+				m_possibleWindowOperation = ActiveWindowOperation::Resize;
+				m_activeWindowResize_Move_X = false;
+				possibleCursorState = GuiCursorState::Resize;
+			}
+			// bottom left
+			if (rect(x - 16.f, y - 16.f, 32.f, 32.f).is_point_in(state_mouse_pos)) {
+				m_possibleWindowOperation = ActiveWindowOperation::Resize;
+				m_activeWindowResize_Move_X = true;
+				possibleCursorState = GuiCursorState::Resize;
+			}
 		}
 
-		// bottom
-		if (rect(x + 16.f, y - 16.f, w - 32.f, 32.f).is_point_in(state_mouse_pos)) {
-			m_activeWindow = data.id;
-			m_possibleWindowOperation = ActiveWindowOperation::Resize_Y;
-			m_activeWindowResize_Move_X = false;
-			possibleCursorState = GuiCursorState::Resize_Y;
-		}
-		// left
-		if (rect(x - 16.f, y + 16.f, 32.f, h - 32.f).is_point_in(state_mouse_pos)) {
-			m_activeWindow = data.id;
-			m_possibleWindowOperation = ActiveWindowOperation::Resize_X;
-			m_activeWindowResize_Move_X = true;
-			possibleCursorState = GuiCursorState::Resize_X;
-		}
-		// right
-		if (rect(x + w - 16.f, y + 16.f, 32.f, h - 32.f).is_point_in(state_mouse_pos)) {
-			m_activeWindow = data.id;
-			m_possibleWindowOperation = ActiveWindowOperation::Resize_X;
-			m_activeWindowResize_Move_X = false;
-			possibleCursorState = GuiCursorState::Resize_X;
-		}
-		// bottom right
-		if (rect(x + w - 16.f, y - 16.f, 32.f, 32.f).is_point_in(state_mouse_pos)) {
-			m_activeWindow = data.id;
-			m_possibleWindowOperation = ActiveWindowOperation::Resize;
-			m_activeWindowResize_Move_X = false;
-			possibleCursorState = GuiCursorState::Resize;
-		}
-		// bottom left
-		if (rect(x - 16.f, y - 16.f, 32.f, 32.f).is_point_in(state_mouse_pos)) {
-			m_activeWindow = data.id;
-			m_possibleWindowOperation = ActiveWindowOperation::Resize;
-			m_activeWindowResize_Move_X = true;
-			possibleCursorState = GuiCursorState::Resize;
-		}
-
-		if (state_lmouse_just_pressed && m_possibleWindowOperation != ActiveWindowOperation::None) {
-			m_activeWindowOperation = m_possibleWindowOperation;
+		if (possibleCursorState != GuiCursorState::None) {
 			m_cursorState = possibleCursorState;
+		}
+
+		if (state_lmouse_just_pressed && m_possibleWindowOperation != ActiveWindowOperation::None && m_activeWindowOperation == ActiveWindowOperation::None) {
+			m_activeWindow = data.id;
+			m_activeWindowOperation = m_possibleWindowOperation;
 		}
 	}
 
@@ -160,15 +168,19 @@ void Gui::Update() {
 
 			if (window.flags & GuiWindowFlag_ResizableX && m_activeWindowOperation != ActiveWindowOperation::Resize_Y) {
 				if (m_activeWindowResize_Move_X) {
-					window.posX += w;
 					window.width -= w;
+					if (window.width > 1.f) {
+						window.posX += w;
+					}
 				} else {
 					window.width += w;
 				}
 			}
 			if (window.flags & GuiWindowFlag_ResizableY && m_activeWindowOperation != ActiveWindowOperation::Resize_X) {
-				window.posY -= h;
 				window.height += h;
+				if (window.height > 1.f + px_to_percentage_h(m_stateTitleHeight)) {
+					window.posY -= h;
+				}
 			}
 		}
 	}
@@ -196,4 +208,8 @@ float Gui::percentage_to_px_w(float percentage) {
 
 float Gui::percentage_to_px_h(float percentage) {
 	return (float)m_windowHeight / 100.f * percentage;
+}
+
+rect Gui::calculate_bounds(const WindowData &window) {
+	return rect(percentage_to_px_w(window.posX), percentage_to_px_h(window.posY), percentage_to_px_w(window.width), percentage_to_px_h(window.height));
 }

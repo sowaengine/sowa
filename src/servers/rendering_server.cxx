@@ -14,7 +14,7 @@ struct WindowCallbackBridge {
 	WindowCallbackBridge() = default;
 
 	void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
-		RenderingServer::GetInstance().framebuffer_size_callback(window, width, height);
+		RenderingServer::get().framebuffer_size_callback(window, width, height);
 	}
 };
 
@@ -38,7 +38,7 @@ RenderingServer::RenderingServer() {
 	m_serverActive = true;
 }
 
-RenderingServer &RenderingServer::GetInstance() {
+RenderingServer &RenderingServer::get() {
 	static RenderingServer *server = new RenderingServer;
 	return *server;
 }
@@ -74,7 +74,7 @@ void RenderingServer::CreateWindow(int width, int height, const std::string &tit
 
 	m_windowWidth = width;
 	m_windowHeight = height;
-	InputServer::GetInstance().initialize();
+	InputServer::get().initialize();
 
 	glfwSetFramebufferSizeCallback(m_pWindowHandle, CallbackWrapperFramebufferSizeCallback);
 }
@@ -127,5 +127,5 @@ void RenderingServer::Terminate() {
 }
 
 void RenderingServer::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-	App::GetInstance().WindowResizeCallback()(width, height);
+	App::get().WindowResizeCallback()(width, height);
 }

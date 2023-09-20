@@ -44,12 +44,12 @@ void TopDownEightDirMovement::Update(Node *node, Behaviour *) {
 		input = glm::normalize(input);
 	}
 
-	player->Position().x += input.x * speed * Time::Delta();
-	player->Position().y += input.y * speed * Time::Delta();
+	player->position().x += input.x * speed * Time::Delta();
+	player->position().y += input.y * speed * Time::Delta();
 
-	float targetRadians = glm::radians(player->Rotation());
+	float targetRadians = glm::radians(player->rotation());
 	if (glm::length(input) > 0.5f) {
 		targetRadians = atan2(input.y, input.x);
 	}
-	player->Rotation() = glm::degrees(lerpAngle(glm::radians(player->Rotation()), targetRadians, 0.3f));
+	player->rotation() = glm::degrees(lerpAngle(glm::radians(player->rotation()), targetRadians, 0.3f));
 }

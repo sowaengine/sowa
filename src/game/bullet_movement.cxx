@@ -13,10 +13,10 @@ void BulletMovement::Update(Node *node, Behaviour *) {
 		return;
 	}
 
-	float angle = glm::radians(bullet->Rotation());
+	float angle = glm::radians(bullet->rotation());
 	float x = glm::cos(angle);
 	float y = glm::sin(angle);
 
-	bullet->Position().x += x * bulletSpeed * Time::Delta();
-	bullet->Position().y += y * bulletSpeed * Time::Delta();
+	bullet->position().x += x * bulletSpeed * Time::Delta();
+	bullet->position().y += y * bulletSpeed * Time::Delta();
 }

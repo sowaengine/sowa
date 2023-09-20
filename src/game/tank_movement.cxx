@@ -57,16 +57,16 @@ void TankMovement::Update(Node *node, Behaviour *) {
 		curAcceleration = std::max(curAcceleration, 0.f);
 	}
 
-	float targetRadians = glm::radians(player->Rotation());
+	float targetRadians = glm::radians(player->rotation());
 	if (glm::length(input) > 0.5f) {
 		targetRadians = atan2(input.y, input.x);
 	}
-	player->Rotation() = glm::degrees(lerpAngle(glm::radians(player->Rotation()), targetRadians, 0.07f));
+	player->rotation() = glm::degrees(lerpAngle(glm::radians(player->rotation()), targetRadians, 0.07f));
 
-	float angle = glm::radians(player->Rotation());
+	float angle = glm::radians(player->rotation());
 	float x = glm::cos(angle);
 	float y = glm::sin(angle);
 
-	player->Position().x += x * curAcceleration * Time::Delta();
-	player->Position().y += y * curAcceleration * Time::Delta();
+	player->position().x += x * curAcceleration * Time::Delta();
+	player->position().y += y * curAcceleration * Time::Delta();
 }

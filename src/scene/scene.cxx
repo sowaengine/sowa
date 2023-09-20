@@ -85,37 +85,37 @@ struct convert<std::any> {
 };
 } // namespace YAML
 
-void Scene::BeginScene() {
+void Scene::_begin_scene() {
 	for (Node *node : m_nodes) {
-		node->Start();
+		node->_start();
 	}
 }
 
-void Scene::UpdateScene() {
+void Scene::_update_scene() {
 	for (Node *node : m_nodes) {
-		node->Update();
+		node->_update();
 	}
 }
 
-void Scene::EndScene() {
+void Scene::_end_scene() {
 	// todo
 }
 
-Error Scene::Load(const char *path) {
-	NodeDB &db = NodeDB::GetInstance();
+Error Scene::load(const char *path) {
+	NodeDB &db = NodeDB::get();
 	m_nodes.clear();
 
 	YAML::Node node;
 
 	std::string buffer;
-	Error err = FileServer::GetInstance().ReadFileString(path, buffer);
+	Error err = FileServer::get().ReadFileString(path, buffer);
 	if (err != OK) {
 		return err;
 	}
 
 	YAML::Node scene = YAML::Load(buffer);
 
-	m_activeCamera2D = scene["active_camera_2d"].as<size_t>(0);
+	m_active_camera_2d = scene["active_camera_2d"].as<size_t>(0);
 
 	YAML::Node resources = scene["resources"];
 	for (const auto &resource : resources) {
@@ -128,7 +128,7 @@ Error Scene::Load(const char *path) {
 
 		Resource *res = nullptr;
 		if (type == "ImageTexture") {
-			res = LoadResource(path, id, ResourceType_ImageTexture);
+			res = load_resource(path, id, ResourceType_ImageTexture);
 		}
 
 		if (nullptr == res)
@@ -146,11 +146,11 @@ Error Scene::Load(const char *path) {
 		std::string type = nodeData["type"].as<std::string>("Node");
 		std::string name = nodeData["name"].as<std::string>("New Node");
 
-		Node *pNode = New(db.GetNodeType(type), name, id);
+		Node *pNode = create(db.get_node_type(type), name, id);
 		if (parent == nullptr)
 			this->Nodes().push_back(pNode);
 		else
-			parent->AddChild(pNode);
+			parent->add_child(pNode);
 
 		for (const auto &prop : nodeData["props"]) {
 			std::string propName = prop.first.as<std::string>();
@@ -159,7 +159,7 @@ Error Scene::Load(const char *path) {
 
 			std::any value = prop.second.as<std::any>();
 
-			NodeProperty propSetter = db.GetProperty(pNode->TypeHash(), propName);
+			NodeProperty propSetter = db.get_property(pNode->type_hash(), propName);
 			if (propSetter.set) {
 				propSetter.set(pNode, value);
 			}
@@ -170,7 +170,7 @@ Error Scene::Load(const char *path) {
 			if (name == "")
 				continue;
 
-			pNode->AddBehaviour(name);
+			pNode->add_behaviour(name);
 		}
 
 		for (const auto &group : nodeData["groups"]) {
@@ -193,16 +193,16 @@ Error Scene::Load(const char *path) {
 	return OK;
 }
 
-Error Scene::Save(const char *path) {
-	NodeDB &db = NodeDB::GetInstance();
+Error Scene::save(const char *path) {
+	NodeDB &db = NodeDB::get();
 
 	YAML::Node doc;
 
-	doc["active_camera_2d"] = m_activeCamera2D;
+	doc["active_camera_2d"] = m_active_camera_2d;
 
 	YAML::Node resources;
-	for (const RID &id : SceneResources()) {
-		Resource *resource = ResourceManager::GetInstance().Get(id);
+	for (const RID &id : scene_resources()) {
+		Resource *resource = ResourceManager::get().Get(id);
 		YAML::Node res;
 
 		res["type"] = "ImageTexture";
@@ -220,21 +220,21 @@ Error Scene::Save(const char *path) {
 	std::function<void(Node *, YAML::Node &)> serializeNode;
 	serializeNode = [&](Node *pNode, YAML::Node &doc) {
 		YAML::Node node;
-		node["type"] = db.GetNodeTypeName(pNode->TypeHash());
-		node["name"] = pNode->Name();
+		node["type"] = db.get_node_typename(pNode->type_hash());
+		node["name"] = pNode->name();
 
 		YAML::Node props;
 		std::vector<std::string> propNames;
-		db.GetPropertyNames(pNode->TypeHash(), propNames);
+		db.get_property_names(pNode->type_hash(), propNames);
 		for (const auto &name : propNames) {
 			if (name == "name")
 				continue;
 
-			props[name] = db.GetProperty(pNode->TypeHash(), name).get(pNode);
+			props[name] = db.get_property(pNode->type_hash(), name).get(pNode);
 		}
 		node["props"] = props;
 
-		auto &behaviourList = pNode->GetBehaviourNames();
+		auto &behaviourList = pNode->get_behaviour_names();
 		if (behaviourList.size() > 0) {
 			YAML::Node behaviours;
 
@@ -249,10 +249,10 @@ Error Scene::Save(const char *path) {
 			node["groups"] = groups;
 		}
 
-		doc[pNode->ID()] = (node);
+		doc[pNode->id()] = (node);
 
 		YAML::Node childrenDoc;
-		for (Node *child : pNode->GetChildren()) {
+		for (Node *child : pNode->get_children()) {
 			serializeNode(child, childrenDoc);
 		}
 		if (childrenDoc.size() > 0)
@@ -269,7 +269,7 @@ Error Scene::Save(const char *path) {
 	ss << doc;
 	s = ss.str();
 
-	Error err = FileServer::GetInstance().WriteFileString(path, s);
+	Error err = FileServer::get().WriteFileString(path, s);
 	if (err != OK) {
 		return err;
 	}
@@ -278,22 +278,22 @@ Error Scene::Save(const char *path) {
 	return OK;
 }
 
-Node *Scene::New(NodeType type, const std::string &name, size_t id) {
-	Node *node = NodeDB::GetInstance().Construct(type, name, id);
-	m_allocatedNodes[node->ID()] = node;
+Node *Scene::create(NodeType type, const std::string &name, size_t id) {
+	Node *node = NodeDB::get().construct(type, name, id);
+	m_allocated_nodes[node->id()] = node;
 
 	return node;
 }
 
-Resource *Scene::LoadResource(const std::string &path, RID id, ResourceType type) {
-	Resource *res = ResourceManager::GetInstance().Load(path, id, type);
+Resource *Scene::load_resource(const std::string &path, RID id, ResourceType type) {
+	Resource *res = ResourceManager::get().Load(path, id, type);
 	m_resources.push_back(res->ResourceID());
 
 	return res;
 }
 
 Camera2D *Scene::get_active_camera2d() {
-	return dynamic_cast<Camera2D *>(get_node_by_id(m_activeCamera2D));
+	return dynamic_cast<Camera2D *>(get_node_by_id(m_active_camera_2d));
 }
 
 static Node *search_node_in_group(Node *node, std::string group) {
@@ -303,7 +303,7 @@ static Node *search_node_in_group(Node *node, std::string group) {
 		}
 	}
 
-	for (Node *child : node->GetChildren()) {
+	for (Node *child : node->get_children()) {
 		Node *find = search_node_in_group(child, group);
 		if (nullptr != find)
 			return find;
@@ -323,28 +323,28 @@ Node *Scene::get_node_in_group(std::string group) {
 }
 
 Node *Scene::get_node_by_id(size_t id) {
-	if (m_allocatedNodes.find(id) == m_allocatedNodes.end())
+	if (m_allocated_nodes.find(id) == m_allocated_nodes.end())
 		return nullptr;
 
-	return m_allocatedNodes[id];
+	return m_allocated_nodes[id];
 }
 
 void Scene::copy(Scene *src, Scene *dst) {
 	std::function<Node *(Node *)> copyNode;
 
 	copyNode = [&](Node *node) -> Node * {
-		Node *newNode = dst->New(node->TypeHash(), node->Name(), node->ID());
+		Node *newNode = dst->create(node->type_hash(), node->name(), node->id());
 		std::vector<std::string> props;
-		NodeDB::GetInstance().GetPropertyNames(node->TypeHash(), props);
+		NodeDB::get().get_property_names(node->type_hash(), props);
 		for (auto &propName : props) {
-			NodeProperty prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName);
+			NodeProperty prop = NodeDB::get().get_property(node->type_hash(), propName);
 			prop.set(newNode, prop.get(node));
 		}
 
-		newNode->GetBehaviourNames() = node->GetBehaviourNames();
+		newNode->get_behaviour_names() = node->get_behaviour_names();
 
-		for (Node *child : node->GetChildren()) {
-			newNode->AddChild(copyNode(child));
+		for (Node *child : node->get_children()) {
+			newNode->add_child(copyNode(child));
 		}
 
 		newNode->get_groups() = node->get_groups();

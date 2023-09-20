@@ -4,7 +4,7 @@
 
 void App::editor_mouse_move_event(InputEventMouseMove event) {
 	int w, h;
-	RenderingServer::GetInstance().GetWindowSize(w, h);
+	RenderingServer::get().GetWindowSize(w, h);
 	float deltaX = event.deltaX * (1920.f / w);
 	float deltaY = event.deltaY * (1080.f / h);
 
@@ -29,7 +29,7 @@ void App::editor_mouse_move_event(InputEventMouseMove event) {
 					offset.y *= 0.f;
 				}
 
-				selected->Position() += offset;
+				selected->position() += offset;
 				m_actionDeltaVec2 += offset;
 			}
 		}
@@ -40,12 +40,12 @@ void App::editor_key_event(InputEventKey event) {
 	if (event.action == KEY_PRESSED && event.key == KEY_G && this->m_editorState != EditorState::None) {
 		// todo: rollback action
 		m_editorState = EditorState::None;
-		RenderingServer::GetInstance().SetCursorMode(CursorMode::Normal);
+		RenderingServer::get().SetCursorMode(CursorMode::Normal);
 	}
 
 	if (event.action == KEY_PRESSED && event.key == KEY_G && this->m_editorState == EditorState::None) {
 		m_editorState = EditorState::Dragging;
-		RenderingServer::GetInstance().SetCursorMode(CursorMode::Tiled);
+		RenderingServer::get().SetCursorMode(CursorMode::Tiled);
 		m_actionDeltaVec2 = vec2(0.f);
 		m_actionAxis = EditorActionAxis::None;
 	}
@@ -68,7 +68,7 @@ void App::editor_key_event(InputEventKey event) {
 
 void App::editor_scroll_event(InputEventScroll event) {
 	int w, h;
-	RenderingServer::GetInstance().GetWindowSize(w, h);
+	RenderingServer::get().GetWindowSize(w, h);
 
 	float oldZoom = this->m_editorCameraZoom2d;
 

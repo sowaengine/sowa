@@ -21,9 +21,6 @@ int main() {
 		}
 	}
 
-	RenderingServer::GetInstance().Terminate();
+	RenderingServer::get().Terminate();
 	return 0;
-}
-
-extern "C" void Resize(int width, int height) {
 }

@@ -10,7 +10,7 @@
 
 class BehaviourDB {
   public:
-	static BehaviourDB &GetInstance();
+	static BehaviourDB &get();
 
 	void RegisterBehaviour(std::string name, Behaviour behaviour);
 	Behaviour Construct(std::string name);

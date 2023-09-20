@@ -9,13 +9,13 @@ class Camera2D : public Node2D {
   public:
 	virtual ~Camera2D() = default;
 
-	vec2 &Zoom() { return m_zoom; }
-  vec2 &CenterPoint() { return m_centerPoint; }
-	bool &Rotatable() { return m_rotatable; }
+	vec2 &zoom() { return m_zoom; }
+	vec2 &center_point() { return m_center_point; }
+	bool &rotatable() { return m_rotatable; }
 
   private:
 	vec2 m_zoom = vec2(1.f, 1.f);
-	vec2 m_centerPoint = vec2(0.5f, 0.5f);
+	vec2 m_center_point = vec2(0.5f, 0.5f);
 	bool m_rotatable = false;
 };
 

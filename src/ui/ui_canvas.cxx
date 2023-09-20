@@ -31,7 +31,7 @@ void UICanvas::Text(const std::string &text, Font *font, float scale) {
 		NewLine();
 	}
 
-	App::GetInstance().Renderer().DrawText(text, font, container->PosX() + container->CursorX() + m_padding, container->PosY() + container->CursorY() - m_lineSize - m_padding, 0.f, glm::mat4(1.f), 0.f, scale, maxSize.x, maxSize.y);
+	App::get().Renderer().DrawText(text, font, container->PosX() + container->CursorX() + m_padding, container->PosY() + container->CursorY() - m_lineSize - m_padding, 0.f, glm::mat4(1.f), 0.f, scale, maxSize.x, maxSize.y);
 	container->Advance(size.x, 0.f);
 }
 

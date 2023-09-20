@@ -9,23 +9,23 @@ struct InputCallbackBridge {
 	InputCallbackBridge() = default;
 
 	void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods) {
-		InputServer::GetInstance().mouse_button_callback(window, button, action, mods);
+		InputServer::get().mouse_button_callback(window, button, action, mods);
 	}
 
 	void CursorPosCalllback(GLFWwindow *window, double x, double y) {
-		InputServer::GetInstance().cursor_pos_callback(window, x, y);
+		InputServer::get().cursor_pos_callback(window, x, y);
 	}
 
 	void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-		InputServer::GetInstance().key_callback(window, key, scancode, action, mods);
+		InputServer::get().key_callback(window, key, scancode, action, mods);
 	}
 
 	void CharCallback(GLFWwindow *window, unsigned int codepoint) {
-		InputServer::GetInstance().char_callback(window, codepoint);
+		InputServer::get().char_callback(window, codepoint);
 	}
 
 	void ScrollCallback(GLFWwindow *window, double xOffset, double yOffset) {
-		InputServer::GetInstance().scroll_callback(window, xOffset, yOffset);
+		InputServer::get().scroll_callback(window, xOffset, yOffset);
 	}
 };
 
@@ -52,7 +52,7 @@ static void CallbackWrapperSrollCallback(GLFWwindow *window, double xOffset, dou
 InputServer::InputServer() {
 }
 
-InputServer &InputServer::GetInstance() {
+InputServer &InputServer::get() {
 	static InputServer *server = new InputServer;
 	return *server;
 }
@@ -82,13 +82,13 @@ void InputServer::PollEvents() {
 			action = ActionState::UP;
 	}
 
-	if (RenderingServer::GetInstance().m_currentCursorMode == CursorMode::Tiled) {
+	if (RenderingServer::get().m_currentCursorMode == CursorMode::Tiled) {
 		int w, h;
-		RenderingServer::GetInstance().GetWindowSize(w, h);
+		RenderingServer::get().GetWindowSize(w, h);
 
 		bool setCursor = false;
 		double x, y;
-		glfwGetCursorPos(RenderingServer::GetInstance().m_pWindowHandle, &x, &y);
+		glfwGetCursorPos(RenderingServer::get().m_pWindowHandle, &x, &y);
 
 		const float padding = 2.f;
 		if (x < padding) {
@@ -109,7 +109,7 @@ void InputServer::PollEvents() {
 
 		if (setCursor) {
 			s_blockMoveMoveEvent = true;
-			glfwSetCursorPos(RenderingServer::GetInstance().m_pWindowHandle, x, y);
+			glfwSetCursorPos(RenderingServer::get().m_pWindowHandle, x, y);
 			m_input_mouseX = x;
 			m_input_mouseY = y;
 		}
@@ -122,7 +122,7 @@ void InputServer::PollEvents() {
 
 void InputServer::GetMousePosition(double &x, double &y) {
 	int w, h;
-	RenderingServer::GetInstance().GetWindowSize(w, h);
+	RenderingServer::get().GetWindowSize(w, h);
 
 	x = m_input_mouseX;
 	y = h - m_input_mouseY;
@@ -205,7 +205,7 @@ vec2 InputServer::GetMouseMotion() {
 //-------------------------------------------------------//
 
 void InputServer::initialize() {
-	GLFWwindow *window = RenderingServer::GetInstance().m_pWindowHandle;
+	GLFWwindow *window = RenderingServer::get().m_pWindowHandle;
 
 	glfwSetCharCallback(window, CallbackWrapperCharCallback);
 	glfwSetKeyCallback(window, CallbackWrapperKeyCallback);
@@ -249,7 +249,7 @@ void InputServer::mouse_button_callback(GLFWwindow *window, int button, int acti
 			event.doubleClick = true;
 
 			m_buttonDoubleClicked[btn] = true;
-			App::GetInstance().ClickCallback()(event);
+			App::get().ClickCallback()(event);
 		}
 	}
 	if (action == GLFW_RELEASE) {
@@ -261,7 +261,7 @@ void InputServer::mouse_button_callback(GLFWwindow *window, int button, int acti
 			event.doubleClick = false;
 
 			m_buttonSingleClicked[btn] = true;
-			App::GetInstance().ClickCallback()(event);
+			App::get().ClickCallback()(event);
 		}
 	}
 
@@ -283,7 +283,7 @@ void InputServer::mouse_button_callback(GLFWwindow *window, int button, int acti
 	if (mods & GLFW_MOD_SUPER)
 		event.modifiers.super = true;
 
-	App::GetInstance().MouseInputCallback()(event);
+	App::get().MouseInputCallback()(event);
 }
 
 void InputServer::cursor_pos_callback(GLFWwindow *window, double x, double y) {
@@ -306,7 +306,7 @@ void InputServer::cursor_pos_callback(GLFWwindow *window, double x, double y) {
 	m_mouseMotionX = deltaX;
 	m_mouseMotionY = deltaY;
 
-	App::GetInstance().MouseMoveCallback()(event);
+	App::get().MouseMoveCallback()(event);
 }
 
 void InputServer::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
@@ -330,14 +330,14 @@ void InputServer::key_callback(GLFWwindow *window, int key, int scancode, int ac
 	if (mods & GLFW_MOD_SUPER)
 		event.modifiers.super = true;
 
-	App::GetInstance().KeyCallback()(event);
+	App::get().KeyCallback()(event);
 }
 
 void InputServer::char_callback(GLFWwindow *window, unsigned int codepoint) {
 	InputEventChar event;
 	event.codepoint = codepoint;
 
-	App::GetInstance().CharCallback()(event);
+	App::get().CharCallback()(event);
 }
 
 void InputServer::scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
@@ -345,5 +345,5 @@ void InputServer::scroll_callback(GLFWwindow *window, double xOffset, double yOf
 	event.xOffset = xOffset;
 	event.yOffset = yOffset;
 
-	App::GetInstance().ScrollCallback()(event);
+	App::get().ScrollCallback()(event);
 }

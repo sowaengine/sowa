@@ -18,7 +18,7 @@ enum class ActionState {
 class InputServer {
   public:
 	InputServer();
-	static InputServer &GetInstance();
+	static InputServer &get();
 
 	void ProcessInput();
 	void PollEvents();

@@ -26,7 +26,7 @@ Error Texture::Load(texture_type_t type, const char *path) {
 	// m_filepath = path;
 
 	file_buffer buffer;
-	Error err = FileServer::GetInstance().ReadFileBytes(path, buffer);
+	Error err = FileServer::get().ReadFileBytes(path, buffer);
 	if (err != OK) {
 		return err;
 	}
@@ -67,7 +67,7 @@ Error Texture::Load2DUByteRGBA(unsigned char *data, int width, int height) {
 
 void Texture::Delete() {
 	if (m_id != 0)
-		if (RenderingServer::GetInstance().Active())
+		if (RenderingServer::get().Active())
 			glDeleteTextures(1, &m_id);
 
 	if (m_pixels != nullptr && m_shouldFree)

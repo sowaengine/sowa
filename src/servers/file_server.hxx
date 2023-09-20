@@ -15,7 +15,7 @@ class FileServer {
 	FileServer();
 
 	static void Create(App *app);
-	static FileServer &GetInstance();
+	static FileServer &get();
 
 	Error ReadFileString(const char *path, std::stringstream &stream);
 	Error ReadFileString(const char *path, std::string &buffer);

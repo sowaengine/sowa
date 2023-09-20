@@ -9,10 +9,10 @@
 
 class Sprite2D : public Node2D {
   public:
-	void Update() override;
+	void _update() override;
 	virtual ~Sprite2D() = default;
 
-	inline RID &GetTexture() { return m_texture; }
+	inline RID &texture() { return m_texture; }
 
   protected:
 	RID m_texture;

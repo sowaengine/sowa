@@ -23,7 +23,7 @@ Font::~Font() {
 Error Font::LoadTTF(const char *path) {
 	FT_Library freetype = GetFreeType();
 
-	Error err = FileServer::GetInstance().ReadFileBytes(path, m_buffer);
+	Error err = FileServer::get().ReadFileBytes(path, m_buffer);
 	if (err != OK) {
 		return err;
 	}

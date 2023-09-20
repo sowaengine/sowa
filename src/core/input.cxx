@@ -3,64 +3,64 @@
 #include "servers/input_server.hxx"
 
 void Input::GetMousePosition(double &x, double &y) {
-	return InputServer::GetInstance().GetMousePosition(x, y);
+	return InputServer::get().GetMousePosition(x, y);
 }
 void Input::GetWindowMousePosition(double &x, double &y) {
-	return InputServer::GetInstance().GetWindowMousePosition(x, y);
+	return InputServer::get().GetWindowMousePosition(x, y);
 }
 vec2 Input::GetMousePosition() {
 	double x, y;
-	InputServer::GetInstance().GetMousePosition(x, y);
+	InputServer::get().GetMousePosition(x, y);
 	vec2 v(x, y);
 	return v;
 }
 vec2 Input::GetWindowMousePosition() {
 	double x, y;
-	InputServer::GetInstance().GetWindowMousePosition(x, y);
+	InputServer::get().GetWindowMousePosition(x, y);
 	vec2 v(x, y);
 	return v;
 }
 int Input::GetPressedChar() {
-	return InputServer::GetInstance().GetPressedChar();
+	return InputServer::get().GetPressedChar();
 }
 
 ActionState Input::GetKeyState(int key) {
-	return InputServer::GetInstance().GetKeyState(key);
+	return InputServer::get().GetKeyState(key);
 }
 bool Input::IsKeyDown(int key) {
-	return InputServer::GetInstance().IsKeyDown(key);
+	return InputServer::get().IsKeyDown(key);
 }
 bool Input::IsKeyUp(int key) {
-	return InputServer::GetInstance().IsKeyUp(key);
+	return InputServer::get().IsKeyUp(key);
 }
 bool Input::IsKeyJustPressed(int key) {
-	return InputServer::GetInstance().IsKeyJustPressed(key);
+	return InputServer::get().IsKeyJustPressed(key);
 }
 bool Input::IsKeyJustReleased(int key) {
-	return InputServer::GetInstance().IsKeyJustReleased(key);
+	return InputServer::get().IsKeyJustReleased(key);
 }
 
 ActionState Input::GetButtonState(int button) {
-	return InputServer::GetInstance().GetButtonState(button);
+	return InputServer::get().GetButtonState(button);
 }
 bool Input::IsButtonDown(int button) {
-	return InputServer::GetInstance().IsButtonDown(button);
+	return InputServer::get().IsButtonDown(button);
 }
 bool Input::IsButtonUp(int button) {
-	return InputServer::GetInstance().IsButtonUp(button);
+	return InputServer::get().IsButtonUp(button);
 }
 bool Input::IsButtonJustPressed(int button) {
-	return InputServer::GetInstance().IsButtonJustPressed(button);
+	return InputServer::get().IsButtonJustPressed(button);
 }
 bool Input::IsButtonJustReleased(int button) {
-	return InputServer::GetInstance().IsButtonJustReleased(button);
+	return InputServer::get().IsButtonJustReleased(button);
 }
 bool Input::IsButtonJustClicked(int button) {
-	return InputServer::GetInstance().IsButtonJustClicked(button);
+	return InputServer::get().IsButtonJustClicked(button);
 }
 bool Input::IsButtonJustDoubleClicked(int button) {
-	return InputServer::GetInstance().IsButtonJustDoubleClicked(button);
+	return InputServer::get().IsButtonJustDoubleClicked(button);
 }
 vec2 Input::GetMouseMotion() {
-	return InputServer::GetInstance().GetMouseMotion();
+	return InputServer::get().GetMouseMotion();
 }

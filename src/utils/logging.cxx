@@ -6,5 +6,5 @@
 
 void Utils::WriteStdout(const std::string &line) {
 	std::cout << line << std::endl;
-	App::GetInstance().Log(line);
+	App::get().Log(line);
 }

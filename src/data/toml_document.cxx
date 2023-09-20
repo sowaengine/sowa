@@ -35,7 +35,7 @@ toml_document::~toml_document() {
 Error toml_document::LoadFile(const char *path) {
 	try {
 		std::string buf;
-		Error err = FileServer::GetInstance().ReadFileString(path, buf);
+		Error err = FileServer::get().ReadFileString(path, buf);
 		if (err != OK) {
 			return err;
 		}

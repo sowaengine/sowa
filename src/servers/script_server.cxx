@@ -102,16 +102,16 @@ void print(std::string &msg) {
 Node *get() {
 	int a = 1;
 
-	return App::GetInstance().GetCurrentScene()->get_node_in_group("Barrel");
+	return App::get().GetCurrentScene()->get_node_in_group("Barrel");
 }
 std::string get_name(Node *node) {
-	return node->Name();
+	return node->name();
 }
 float get_pos_x(Node2D *node) {
 	return 200.f;
 }
 
-ScriptServer &ScriptServer::GetInstance() {
+ScriptServer &ScriptServer::get() {
 	static ScriptServer *server = new ScriptServer;
 	return *server;
 }
@@ -202,26 +202,26 @@ static void asGetProperty(asIScriptGeneric *gen) {
 	}
 
 	if (typeName == "int") {
-		std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get(node);
+		std::any prop = NodeDB::get().get_property(node->type_hash(), propName).get(node);
 		if (int *v = std::any_cast<int>(&prop)) {
 			gen->SetReturnDWord(*v);
 			return;
 		}
 	} else if (typeName == "float") {
-		std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get(node);
+		std::any prop = NodeDB::get().get_property(node->type_hash(), propName).get(node);
 		if (float *v = std::any_cast<float>(&prop)) {
 			gen->SetReturnFloat(*v);
 			return;
 		}
 	} else if (typeName == "string") {
-		std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get(node);
+		std::any prop = NodeDB::get().get_property(node->type_hash(), propName).get(node);
 		if (std::string *v = std::any_cast<std::string>(&prop)) {
 			*reinterpret_cast<std::string *>(ret) = *v;
 			gen->SetReturnObject(ret);
 			return;
 		}
 	} else if (typeName == "vec2") {
-		std::any prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName).get_ref(node);
+		std::any prop = NodeDB::get().get_property(node->type_hash(), propName).get_ref(node);
 		if (vec2 **v = std::any_cast<vec2 *>(&prop)) {
 			gen->SetReturnObject(ASRef::CreateNoAlloc(*v));
 			return;
@@ -237,7 +237,7 @@ static void asSetProperty(asIScriptGeneric *gen) {
 	asIScriptFunction *func = gen->GetFunction();
 	std::string propName = std::string(func->GetName()).substr(4);
 
-	NodeProperty prop = NodeDB::GetInstance().GetProperty(node->TypeHash(), propName);
+	NodeProperty prop = NodeDB::get().get_property(node->type_hash(), propName);
 
 	std::string typeName;
 
@@ -318,15 +318,15 @@ ScriptServer::ScriptServer() {
 
 	AS_REGISTER_FUNC("void print(const string &in)", asFUNCTION(print), asCALL_CDECL);
 
-	NodeDB &db = NodeDB::GetInstance();
+	NodeDB &db = NodeDB::get();
 
 	std::function<void(NodeType, NodeData)> registerInheritance;
 	registerInheritance = [&](NodeType type, NodeData data) {
 		if (data.extends == 0)
 			return;
 
-		std::string name = db.GetNodeTypeName(type);
-		std::string parent = db.GetNodeTypeName(data.extends);
+		std::string name = db.get_node_typename(type);
+		std::string parent = db.get_node_typename(data.extends);
 
 		AS(s_data.engine->RegisterObjectMethod(parent.c_str(), (name + "@ opCast()").c_str(), asFUNCTION(asOpCastParentToType), asCALL_GENERIC));
 		AS_ASSERT();
@@ -348,12 +348,12 @@ ScriptServer::ScriptServer() {
 
 	// Register nodes
 	for (const auto &[type, data] : db.m_db) {
-		std::string name = db.GetNodeTypeName(type);
+		std::string name = db.get_node_typename(type);
 		AS_REGISTER_TYPE_STR(name.c_str(), asOBJ_REF | asOBJ_NOCOUNT);
 	}
 
 	for (const auto &[type, data] : db.m_db) {
-		std::string name = db.GetNodeTypeName(type);
+		std::string name = db.get_node_typename(type);
 
 		registerInheritance(type, data);
 		for (const auto &[propName, prop] : data.properties) {
@@ -388,7 +388,7 @@ Error ScriptServer::LoadScriptFile(std::string path) {
 	int r;
 
 	std::string buf;
-	Error err = FileServer::GetInstance().ReadFileString(path.c_str(), buf);
+	Error err = FileServer::get().ReadFileString(path.c_str(), buf);
 	if (err != OK)
 		return err;
 
@@ -485,7 +485,7 @@ void ScriptServer::register_script_behaviour() {
 					ctx->Release();
 				});
 
-				BehaviourDB::GetInstance().RegisterBehaviour(t_info->GetName(), b);
+				BehaviourDB::get().RegisterBehaviour(t_info->GetName(), b);
 			}
 		}
 	}

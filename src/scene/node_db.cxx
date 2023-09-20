@@ -1,6 +1,6 @@
 #include "node_db.hxx"
 
-NodeDB &NodeDB::GetInstance() {
+NodeDB &NodeDB::get() {
 	static NodeDB *db = new NodeDB;
 	return *db;
 }

@@ -27,23 +27,23 @@ void TankBarrelBehaviour::Update(Node *node, Behaviour *) {
 		return;
 	}
 
-	Node2D *tank = dynamic_cast<Node2D *>(node->GetParent());
+	Node2D *tank = dynamic_cast<Node2D *>(node->get_parent());
 	if (nullptr == tank) {
 		return;
 	}
 
 	double x, y;
-	InputServer::GetInstance().GetMousePosition(x, y);
+	InputServer::get().GetMousePosition(x, y);
 
 	int w, h;
-	RenderingServer::GetInstance().GetWindowSize(w, h);
+	RenderingServer::get().GetWindowSize(w, h);
 
 	x = x * (1920.f / float(w));
 	y = y * (1080.f / float(h));
 
 	vec2 midPoint = vec2(1920.f, 1080.f) * 0.5f;
 	float targetRot = atan2(y - midPoint.y, x - midPoint.x);
-	targetRot = targetRot - glm::radians(tank->GlobalRotation());
+	targetRot = targetRot - glm::radians(tank->global_rotation());
 
-	barrel->Rotation() = glm::degrees(lerpAngle(glm::radians(barrel->Rotation()), targetRot, 0.2f));
+	barrel->rotation() = glm::degrees(lerpAngle(glm::radians(barrel->rotation()), targetRot, 0.2f));
 }

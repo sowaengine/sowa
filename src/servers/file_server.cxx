@@ -15,7 +15,7 @@ void FileServer::Create(App *app) {
 	s_instance.m_pApp = app;
 }
 
-FileServer &FileServer::GetInstance() {
+FileServer &FileServer::get() {
 	return s_instance;
 }
 

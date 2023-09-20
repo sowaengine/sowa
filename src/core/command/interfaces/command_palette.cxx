@@ -8,7 +8,7 @@ CommandPaletteInterface::CommandPaletteInterface() {
 	text_input = true;
 	text_placeholder = L"Type a command...";
 
-	for (const auto &command : App::GetInstance().Commands()) {
+	for (const auto &command : App::get().Commands()) {
 		options.push_back(command);
 	}
 }

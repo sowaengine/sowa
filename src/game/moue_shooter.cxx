@@ -16,7 +16,7 @@ static RID bulletTexture;
 
 void MouseShooter::Start(Node *node, Behaviour *) {
 	if (bulletTexture == 0)
-		bulletTexture = ResourceManager::GetInstance().Load("res://assets/shotThin.png")->ResourceID();
+		bulletTexture = ResourceManager::get().Load("res://assets/shotThin.png")->ResourceID();
 }
 
 void MouseShooter::Update(Node *node, Behaviour *) {
@@ -27,14 +27,14 @@ void MouseShooter::Update(Node *node, Behaviour *) {
 			return;
 		}
 
-		Node *bulletNode = App::GetInstance().GetCurrentScene()->New(NodeDB::GetInstance().GetNodeType("Sprite2D"));
+		Node *bulletNode = App::get().GetCurrentScene()->create(NodeDB::get().get_node_type("Sprite2D"));
 		Sprite2D *bullet = dynamic_cast<Sprite2D *>(bulletNode);
-		bullet->GetTexture() = bulletTexture;
-		bullet->Position() = barrelSprite->GlobalPosition();
-		bullet->Rotation() = barrelSprite->GlobalRotation();
-		bullet->ZIndex() = 1.f;
+		bullet->texture() = bulletTexture;
+		bullet->position() = barrelSprite->global_position();
+		bullet->rotation() = barrelSprite->global_rotation();
+		bullet->z_index() = 1.f;
 
-		bullet->AddBehaviour("Bullet Movement");
-		App::GetInstance().GetCurrentScene()->Nodes().push_back(bullet);
+		bullet->add_behaviour("Bullet Movement");
+		App::get().GetCurrentScene()->Nodes().push_back(bullet);
 	}
 }

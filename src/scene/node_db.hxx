@@ -38,10 +38,10 @@ struct NodeData {
 
 class NodeDB {
   public:
-	static NodeDB &GetInstance();
+	static NodeDB &get();
 
 	template <typename T>
-	NodeType BindNodeType(std::string nodeType, NodeType extends, NodeFactory factory) {
+	NodeType bind_node_type(std::string nodeType, NodeType extends, NodeFactory factory) {
 		NodeType hash = typeid(T).hash_code();
 
 		NodeData data;
@@ -49,46 +49,46 @@ class NodeDB {
 		data.extends = extends;
 		m_db[hash] = data;
 
-		m_nodeTypeHashes[nodeType] = hash;
-		m_nodeTypeNames[hash] = nodeType;
+		m_node_type_hashes[nodeType] = hash;
+		m_node_typenames[hash] = nodeType;
 
 		return hash;
 	}
 
-	void BindProperty(NodeType type, std::string propertyName, NodeProperty property) {
+	void bind_property(NodeType type, std::string propertyName, NodeProperty property) {
 		m_db[type].properties[propertyName] = property;
 	}
 
-	NodeProperty GetProperty(NodeType type, std::string propertyName) {
+	NodeProperty get_property(NodeType type, std::string propertyName) {
 		if (m_db.find(type) == m_db.end())
 			return NodeProperty();
 
 		NodeData &data = m_db[type];
 		if (data.properties.find(propertyName) == data.properties.end())
-			return GetProperty(data.extends, propertyName);
+			return get_property(data.extends, propertyName);
 
 		NodeProperty &prop = data.properties[propertyName];
 		if (!prop.get && !prop.set) {
 			if (data.extends != 0) {
-				return GetProperty(data.extends, propertyName);
+				return get_property(data.extends, propertyName);
 			}
 		}
 
 		return prop;
 	}
 
-	NodeType GetNodeType(std::string nodeType) {
+	NodeType get_node_type(std::string nodeType) {
 		if (nodeType == "") {
 			return 0;
 		}
-		return m_nodeTypeHashes[nodeType];
+		return m_node_type_hashes[nodeType];
 	}
 
-	std::string GetNodeTypeName(NodeType type) {
-		return m_nodeTypeNames[type];
+	std::string get_node_typename(NodeType type) {
+		return m_node_typenames[type];
 	}
 
-	void GetPropertyNames(NodeType type, std::vector<std::string> &names, bool clear = true) {
+	void get_property_names(NodeType type, std::vector<std::string> &names, bool clear = true) {
 		if (clear) {
 			names.clear();
 		}
@@ -99,17 +99,17 @@ class NodeDB {
 
 		NodeType extends = m_db[type].extends;
 		if (extends != 0) {
-			GetPropertyNames(extends, names, false);
+			get_property_names(extends, names, false);
 		}
 	}
 
-	Node *Construct(NodeType type, const std::string &name = "", size_t id = 0) {
+	Node *construct(NodeType type, const std::string &name = "", size_t id = 0) {
 		std::function<Node *()> constructor = m_db[type].factory.constructor;
 
 		if (constructor) {
 			Node *node = constructor();
-			node->m_typeHash = type;
-			node->Name() = name == "" ? "New Node" : name;
+			node->m_type_hash = type;
+			node->name() = name == "" ? "New Node" : name;
 			if (id == 0) {
 				id = Utils::RandRange(1, 1'000'000);
 			}
@@ -121,8 +121,8 @@ class NodeDB {
 		return nullptr;
 	}
 
-	void Destruct(Node *node) {
-		std::function<void(Node *)> destructor = m_db[node->m_typeHash].factory.destructor;
+	void destruct(Node *node) {
+		std::function<void(Node *)> destructor = m_db[node->m_type_hash].factory.destructor;
 		if (destructor) {
 			destructor(node);
 		}
@@ -134,8 +134,8 @@ class NodeDB {
 	~NodeDB();
 
 	std::unordered_map<NodeType, NodeData> m_db;
-	std::unordered_map<std::string, NodeType> m_nodeTypeHashes;
-	std::unordered_map<NodeType, std::string> m_nodeTypeNames;
+	std::unordered_map<std::string, NodeType> m_node_type_hashes;
+	std::unordered_map<NodeType, std::string> m_node_typenames;
 };
 
 #endif // SW_NODE_DB_HXX
