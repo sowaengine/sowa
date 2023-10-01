@@ -40,6 +40,12 @@
 - Version: 1.2.2
 - License: LGPL-2.1
 
+## Dear ImGui
+- Upstream: https://github.com/ocornut/imgui
+- Branch: docking
+- Version: 1.89.9
+- License: MIT
+
 ## lunasvg
 - Upstream: https://github.com/sammycage/lunasvg
 - Version: 2.3.8
