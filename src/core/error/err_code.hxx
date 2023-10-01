@@ -1,0 +1,14 @@
+#ifndef SW_ERROR_CODE_HXX
+#define SW_ERROR_CODE_HXX
+#pragma once
+
+enum ErrorCode {
+	OK = 0,
+	ERR_FAILED,
+	ERR_NOT_INITIALIZED,
+	ERR_FILE_NOT_FOUND,
+	ERR_INVALID_FILE,
+	MAX_ERROR
+};
+
+#endif // SW_ERROR_HXX

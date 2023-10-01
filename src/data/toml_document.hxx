@@ -13,8 +13,8 @@ struct toml_document {
 	toml_document(const char *path);
 	~toml_document();
 
-	Error LoadFile(const char *path);
-	Error Serialize(std::string &str);
+	ErrorCode LoadFile(const char *path);
+	ErrorCode Serialize(std::string &str);
 
 	template <typename T>
 	T Value(const char *key, T fallback);

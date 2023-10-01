@@ -384,11 +384,11 @@ void ScriptServer::BeginBuild() {
 	AS_CHECK();
 }
 
-Error ScriptServer::LoadScriptFile(std::string path) {
+ErrorCode ScriptServer::LoadScriptFile(std::string path) {
 	int r;
 
 	std::string buf;
-	Error err = FileServer::get().ReadFileString(path.c_str(), buf);
+	ErrorCode err = FileServer::get().ReadFileString(path.c_str(), buf);
 	if (err != OK)
 		return err;
 

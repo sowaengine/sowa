@@ -27,7 +27,7 @@ void MouseShooter::Update(Node *node, Behaviour *) {
 			return;
 		}
 
-		Node *bulletNode = App::get().GetCurrentScene()->create(NodeDB::get().get_node_type("Sprite2D"));
+		Node *bulletNode = App::get().GetCurrentScene()->create(NodeDB::get().get_node_type("Sprite2D"), "Bullet");
 		Sprite2D *bullet = dynamic_cast<Sprite2D *>(bulletNode);
 		bullet->texture() = bulletTexture;
 		bullet->position() = barrelSprite->global_position();

@@ -19,7 +19,7 @@ FileServer &FileServer::get() {
 	return s_instance;
 }
 
-Error FileServer::ReadFileString(const char *p, std::stringstream &stream) {
+ErrorCode FileServer::ReadFileString(const char *p, std::stringstream &stream) {
 	std::filesystem::path path = getFilepath(p);
 	if (path == "") {
 		return ERR_FILE_NOT_FOUND;
@@ -34,16 +34,16 @@ Error FileServer::ReadFileString(const char *p, std::stringstream &stream) {
 	return OK;
 }
 
-Error FileServer::ReadFileString(const char *p, std::string &buffer) {
+ErrorCode FileServer::ReadFileString(const char *p, std::string &buffer) {
 	buffer = "";
 
 	std::stringstream s;
-	Error err = ReadFileString(p, s);
+	ErrorCode err = ReadFileString(p, s);
 	buffer = s.str();
 	return OK;
 }
 
-Error FileServer::WriteFileString(const char *p, const std::string &buffer) {
+ErrorCode FileServer::WriteFileString(const char *p, const std::string &buffer) {
 	std::filesystem::path path = getFilepath(p);
 	if (path == "") {
 		return ERR_FILE_NOT_FOUND;
@@ -58,7 +58,23 @@ Error FileServer::WriteFileString(const char *p, const std::string &buffer) {
 	return OK;
 }
 
-Error FileServer::ReadFileBytes(const char *p, file_buffer &buffer) {
+ErrorCode FileServer::WriteFileBytes(const char *p, file_buffer &buffer) {
+	std::filesystem::path path = getFilepath(p);
+	if (path == "") {
+		return ERR_FILE_NOT_FOUND;
+	}
+
+	std::ofstream ofstream(path);
+	if (!ofstream.is_open()) {
+		return ERR_FILE_NOT_FOUND;
+	}
+	ofstream.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
+
+	return OK;
+}
+
+ErrorCode FileServer::ReadFileBytes(const char *p, file_buffer &buffer) {
+
 	std::filesystem::path path = getFilepath(p);
 	if (path == "") {
 		return ERR_FILE_NOT_FOUND;

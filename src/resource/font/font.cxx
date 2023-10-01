@@ -20,10 +20,10 @@ Font::~Font() {
 	FT_Done_Face(reinterpret_cast<FT_Face>(m_face));
 }
 
-Error Font::LoadTTF(const char *path) {
+ErrorCode Font::LoadTTF(const char *path) {
 	FT_Library freetype = GetFreeType();
 
-	Error err = FileServer::get().ReadFileBytes(path, m_buffer);
+	ErrorCode err = FileServer::get().ReadFileBytes(path, m_buffer);
 	if (err != OK) {
 		return err;
 	}

@@ -12,7 +12,7 @@ class ScriptServer {
 	static ScriptServer &get();
 
 	void BeginBuild();
-	Error LoadScriptFile(std::string path);
+	ErrorCode LoadScriptFile(std::string path);
 	void EndBuild();
 
   private:

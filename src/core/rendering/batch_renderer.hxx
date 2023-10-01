@@ -38,7 +38,7 @@ class BatchRenderer {
 	BatchRenderer();
 	~BatchRenderer();
 
-	Error Init(const char *vsPath, const char *fsPath);
+	ErrorCode Init(const char *vsPath, const char *fsPath);
 
 	void Reset();
 	void PushQuad(BatchVertex vertices[4]);

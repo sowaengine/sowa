@@ -22,8 +22,8 @@ BatchRenderer::BatchRenderer() {
 BatchRenderer::~BatchRenderer() {
 }
 
-Error BatchRenderer::Init(const char *vsPath, const char *fsPath) {
-	Error err = m_shader.Load(vsPath, fsPath);
+ErrorCode BatchRenderer::Init(const char *vsPath, const char *fsPath) {
+	ErrorCode err = m_shader.Load(vsPath, fsPath);
 	if (err != OK) {
 		return err;
 	}
@@ -50,7 +50,7 @@ Error BatchRenderer::Init(const char *vsPath, const char *fsPath) {
 
 	if (m_blankTexture.ID() == 0) {
 		unsigned char data[4] = {255, 255, 255, 255};
-		Error err = m_blankTexture.Load2DUByteRGBA(data, 1, 1);
+		ErrorCode err = m_blankTexture.Load2DUByteRGBA(data, 1, 1);
 		if (err != OK) {
 			std::cout << "Failed to load white texture" << std::endl;
 		}

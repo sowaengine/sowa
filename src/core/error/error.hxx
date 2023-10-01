@@ -2,13 +2,7 @@
 #define SW_ERROR_HXX
 #pragma once
 
-enum Error {
-	OK = 0,
-	ERR_FAILED,
-	ERR_NOT_INITIALIZED,
-	ERR_FILE_NOT_FOUND,
-	ERR_INVALID_FILE,
-	MAX_ERROR
-};
+#include "err_code.hxx"
+#include "result.hxx"
 
 #endif // SW_ERROR_HXX

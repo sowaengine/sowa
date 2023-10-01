@@ -78,11 +78,12 @@ void Main() {
 	if (true) {
 		auto _ = Utils::ScopeTimer("Load Scene");
 
-		Error err = scene->load("res://scenes/game.escn");
+		ErrorCode err = scene->load("res://scenes/game.escn");
 		if (err != OK) {
 			std::cout << "Failed to load scene" << std::endl;
 		}
 
+		/*
 		Node *crates = scene->create(NodeDB::get().get_node_type("Node"), "Crates", 300);
 		for (int i = 0; i < 10; i++) {
 			Sprite2D *sprite = dynamic_cast<Sprite2D *>(scene->create(NodeDB::get().get_node_type("Sprite2D"), Utils::Format("wood {}", i), 301 + i));
@@ -106,6 +107,7 @@ void Main() {
 			crates->add_child(sprite);
 		}
 		scene->Nodes().push_back(crates);
+		*/
 	} else
 		load_scene();
 

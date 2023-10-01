@@ -4,8 +4,8 @@
 
 #include "servers/file_server.hxx"
 
-Error project_settings::Load(const char *path) {
-	Error err = m_doc.LoadFile(path);
+ErrorCode project_settings::Load(const char *path) {
+	ErrorCode err = m_doc.LoadFile(path);
 	if (err != OK) {
 		return err;
 	}
@@ -18,7 +18,7 @@ Error project_settings::Load(const char *path) {
 	return ERR_FAILED;
 }
 
-Error project_settings::Save(const char *path) {
+ErrorCode project_settings::Save(const char *path) {
 	toml_document doc;
 
 	toml_document app;
@@ -41,7 +41,7 @@ Error project_settings::Save(const char *path) {
 	std::string s;
 	doc.Serialize(s);
 
-	Error err = FileServer::get().WriteFileString(path, s);
+	ErrorCode err = FileServer::get().WriteFileString(path, s);
 	if (err != OK) {
 		return err;
 	}
@@ -49,7 +49,7 @@ Error project_settings::Save(const char *path) {
 	return OK;
 }
 
-Error project_settings::loadVersion1(toml_document &doc) {
+ErrorCode project_settings::loadVersion1(toml_document &doc) {
 	toml_document app = doc["app"];
 	app_name = app.Value("name", app_name);
 	app_version = app.Value("version", app_version);

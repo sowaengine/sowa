@@ -4,6 +4,7 @@
 #include <string>
 
 #include "core/app.hxx"
+#include "core/error.hxx"
 
 SceneSaveAsInterface::SceneSaveAsInterface(std::string path) {
 	if (path == "") {
@@ -26,7 +27,7 @@ SceneSaveAsInterface::SceneSaveAsInterface(std::string path) {
 		std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 		std::string str = converter.to_bytes(this->text);
 
-		Error err = App::get().GetCurrentScene()->save(str.c_str());
+		ErrorCode err = App::get().GetCurrentScene()->save(str.c_str());
 		if (err != OK) {
 			std::cout << "Failed to save scene " << err << std::endl;
 		}

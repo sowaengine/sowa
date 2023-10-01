@@ -12,13 +12,13 @@ class Shader {
 	Shader() = default;
 	~Shader();
 
-	Error Load(const char *vertexPath, const char *fragmentPath);
+	ErrorCode Load(const char *vertexPath, const char *fragmentPath);
 
 	void SetVertexSource(const std::string &src);
 	void SetFragmentSource(const std::string &src);
-	Error Build();
+	ErrorCode Build();
 
-	Error New(const std::string &vertexSource, const std::string &fragmentSource);
+	ErrorCode New(const std::string &vertexSource, const std::string &fragmentSource);
 	void Delete();
 
 	void Bind();

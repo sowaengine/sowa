@@ -21,12 +21,11 @@ void Texture::Unbind() {
 	glBindTexture(TextureType::GetType(m_type), 0);
 }
 
-Error Texture::Load(texture_type_t type, const char *path) {
+ErrorCode Texture::Load(texture_type_t type, const char *path) {
 	Delete();
 	// m_filepath = path;
-
 	file_buffer buffer;
-	Error err = FileServer::get().ReadFileBytes(path, buffer);
+	ErrorCode err = FileServer::get().ReadFileBytes(path, buffer);
 	if (err != OK) {
 		return err;
 	}
@@ -40,7 +39,7 @@ Error Texture::Load(texture_type_t type, const char *path) {
 	return ERR_FAILED;
 }
 
-Error Texture::Load2DUByteRGBA(unsigned char *data, int width, int height) {
+ErrorCode Texture::Load2DUByteRGBA(unsigned char *data, int width, int height) {
 	Delete();
 	// m_filepath = "";
 
@@ -77,7 +76,7 @@ void Texture::Delete() {
 	m_pixels = nullptr;
 }
 
-Error Texture::loadTexture2D(file_buffer &buffer) {
+ErrorCode Texture::loadTexture2D(file_buffer &buffer) {
 	stbi_set_flip_vertically_on_load(true);
 	m_pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &m_width, &m_height, &m_channels, 4);
 	m_shouldFree = true;
@@ -101,7 +100,7 @@ Error Texture::loadTexture2D(file_buffer &buffer) {
 	return OK;
 }
 
-Error Texture::loadVector2D(file_buffer &buffer) {
+ErrorCode Texture::loadVector2D(file_buffer &buffer) {
 	using namespace lunasvg;
 
 	std::unique_ptr<Document> document = Document::loadFromData((const char *)buffer.data(), buffer.size());

@@ -40,8 +40,8 @@ class Texture {
 	void Bind(int slot = 0);
 	void Unbind();
 
-	Error Load(texture_type_t type, const char *path);
-	Error Load2DUByteRGBA(unsigned char *data, int width, int height);
+	ErrorCode Load(texture_type_t type, const char *path);
+	ErrorCode Load2DUByteRGBA(unsigned char *data, int width, int height);
 
 	void Delete();
 
@@ -52,8 +52,8 @@ class Texture {
 	inline unsigned char *Pixels() const { return m_pixels; }
 
   private:
-	Error loadTexture2D(file_buffer &buffer);
-	Error loadVector2D(file_buffer &buffer);
+	ErrorCode loadTexture2D(file_buffer &buffer);
+	ErrorCode loadVector2D(file_buffer &buffer);
 
 	uint32_t m_id = 0;
 	int m_width = 0;

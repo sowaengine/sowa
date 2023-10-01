@@ -32,10 +32,10 @@ toml_document::~toml_document() {
 	delete reinterpret_cast<toml_document_data *>(m_internal);
 }
 
-Error toml_document::LoadFile(const char *path) {
+ErrorCode toml_document::LoadFile(const char *path) {
 	try {
 		std::string buf;
-		Error err = FileServer::get().ReadFileString(path, buf);
+		ErrorCode err = FileServer::get().ReadFileString(path, buf);
 		if (err != OK) {
 			return err;
 		}
@@ -47,7 +47,7 @@ Error toml_document::LoadFile(const char *path) {
 	return OK;
 }
 
-Error toml_document::Serialize(std::string &str) {
+ErrorCode toml_document::Serialize(std::string &str) {
 	std::stringstream ss;
 	ss << toml_document_data::get(m_internal).table << std::endl;
 

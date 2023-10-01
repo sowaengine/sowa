@@ -14,7 +14,7 @@ int main() {
 		App app;
 		app.Init();
 
-		if (Error err = app.Run(); err != OK) {
+		if (ErrorCode err = app.Run(); err != OK) {
 			std::cerr << "Runtime error: " << err << std::endl;
 
 			return err;

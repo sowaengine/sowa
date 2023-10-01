@@ -38,8 +38,8 @@ Shader::~Shader() {
 	Delete();
 }
 
-Error Shader::Load(const char *vertexPath, const char *fragmentPath) {
-	Error err;
+ErrorCode Shader::Load(const char *vertexPath, const char *fragmentPath) {
+	ErrorCode err;
 	std::string buf;
 	err = FileServer::get().ReadFileString(vertexPath, buf);
 	if (err != OK) {
@@ -68,7 +68,7 @@ void Shader::SetFragmentSource(const std::string &src) {
 	m_fragmentSource = src;
 }
 
-Error Shader::Build() {
+ErrorCode Shader::Build() {
 	Delete();
 
 	uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -98,7 +98,7 @@ Error Shader::Build() {
 	return OK;
 }
 
-Error Shader::New(const std::string &vertexSource, const std::string &fragmentSource) {
+ErrorCode Shader::New(const std::string &vertexSource, const std::string &fragmentSource) {
 	SetVertexSource(vertexSource);
 	SetFragmentSource(fragmentSource);
 	return Build();

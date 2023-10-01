@@ -17,11 +17,12 @@ class FileServer {
 	static void Create(App *app);
 	static FileServer &get();
 
-	Error ReadFileString(const char *path, std::stringstream &stream);
-	Error ReadFileString(const char *path, std::string &buffer);
-	Error WriteFileString(const char *path, const std::string &buffer);
+	ErrorCode ReadFileString(const char *path, std::stringstream &stream);
+	ErrorCode ReadFileString(const char *path, std::string &buffer);
+	ErrorCode WriteFileString(const char *path, const std::string &buffer);
 
-	Error ReadFileBytes(const char *path, file_buffer &buffer);
+	ErrorCode WriteFileBytes(const char *path, file_buffer &buffer);
+	ErrorCode ReadFileBytes(const char *path, file_buffer &buffer);
 
 	std::vector<FileEntry> ReadDir(const char *path, bool recursive = false);
 
