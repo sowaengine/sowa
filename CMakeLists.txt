@@ -10,6 +10,12 @@ endif()
 
 message("Building in ${CMAKE_BUILD_TYPE}")
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  add_compile_options (-fdiagnostics-color=always)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  add_compile_options (-fcolor-diagnostics)
+endif ()
+
 set(CMAKE_CXX_FLAGS
     "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
@@ -56,6 +62,8 @@ target_include_directories(
 
 target_compile_options(sowa PRIVATE "-Werror")
 target_link_libraries(sowa PRIVATE thirdparty glfw eventpp::eventpp freetype lunasvg yaml-cpp angelscript fmt)
+target_precompile_headers(sowa PRIVATE <algorithm> <any> <cmath> <codecvt> <cstdint> <cstring> <ctime> <deque> <filesystem> <fstream> <iomanip> <iostream> <locale> <memory.h> <memory> <sstream> <stdexcept> <stdio.h> <string> <vector>)
+
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(
     sowa
