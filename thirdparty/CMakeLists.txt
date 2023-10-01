@@ -31,15 +31,19 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/angelscript/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/add_on"
     "${CMAKE_CURRENT_SOURCE_DIR}/fmt-10.1.1/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/openal-soft-1.23.1/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/libsndfile-1.2.2/include"
+
+    PARENT_SCOPE
 )
 
-set(SOWA_THIRDPARTY_INCLUDES
-    ${SOWA_THIRDPARTY_INCLUDES}
-    PARENT_SCOPE)
+
 set(SOWA_THIRDPARTY_SOURCES
     ${SOWA_THIRDPARTY_SOURCES}
     PARENT_SCOPE)
 
+
+set(ALSOFT_INSTALL_EXAMPLES OFF)
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/eventpp-0.1.2" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.13.1" EXCLUDE_FROM_ALL)
@@ -47,3 +51,5 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/lunasvg-2.3.8" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-0.8.0" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/angelscript/projects/cmake" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/fmt-10.1.1" EXCLUDE_FROM_ALL)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/openal-soft-1.23.1" EXCLUDE_FROM_ALL)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/libsndfile-1.2.2" EXCLUDE_FROM_ALL)

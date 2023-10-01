@@ -15,13 +15,14 @@
 class Scene {
   public:
 	inline std::vector<Node *> &Nodes() { return m_nodes; }
+	virtual ~Scene() = default;
 
 	virtual void _begin_scene();
 	virtual void _update_scene();
 	virtual void _end_scene();
 
-	Error load(const char *path);
-	Error save(const char *path);
+	ErrorCode load(const char *path);
+	ErrorCode save(const char *path);
 
 	Node *create(NodeType type, const std::string &name = "", size_t id = 0);
 	Resource *load_resource(const std::string &path, RID id = 0, ResourceType type = ResourceType_None);

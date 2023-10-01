@@ -42,15 +42,16 @@ struct convert<std::any> {
 
 		if (const std::string *p = std::any_cast<std::string>(&rhs)) {
 			node["str"] = *p;
-		}
-		if (const vec2 *p = std::any_cast<vec2>(&rhs)) {
+		} else if (const vec2 *p = std::any_cast<vec2>(&rhs)) {
 			node["vec2"] = *p;
-		}
-		if (const int *p = std::any_cast<int>(&rhs)) {
+		} else if (const int *p = std::any_cast<int>(&rhs)) {
 			node["int"] = *p;
-		}
-		if (const float *p = std::any_cast<float>(&rhs)) {
+		} else if (const float *p = std::any_cast<float>(&rhs)) {
 			node["float"] = *p;
+		} else if (const bool *p = std::any_cast<bool>(&rhs)) {
+			node["bool"] = *p;
+		} else {
+			assert(false && "unknown type on std::any encode");
 		}
 
 		return node;
@@ -78,6 +79,10 @@ struct convert<std::any> {
 			rhs = node["int"].as<int>(0);
 		} else if (type == "float") {
 			rhs = node["float"].as<float>(0.f);
+		} else if (type == "bool") {
+			rhs = node["bool"].as<bool>(false);
+		} else {
+			assert(false && "unknown type on std::any encode");
 		}
 
 		return true;
@@ -98,17 +103,19 @@ void Scene::_update_scene() {
 }
 
 void Scene::_end_scene() {
-	// todo
+	for (Node *node : m_nodes) {
+		node->_exit();
+	}
 }
 
-Error Scene::load(const char *path) {
+ErrorCode Scene::load(const char *path) {
 	NodeDB &db = NodeDB::get();
 	m_nodes.clear();
 
 	YAML::Node node;
 
 	std::string buffer;
-	Error err = FileServer::get().ReadFileString(path, buffer);
+	ErrorCode err = FileServer::get().ReadFileString(path, buffer);
 	if (err != OK) {
 		return err;
 	}
@@ -129,6 +136,11 @@ Error Scene::load(const char *path) {
 		Resource *res = nullptr;
 		if (type == "ImageTexture") {
 			res = load_resource(path, id, ResourceType_ImageTexture);
+		} else if (type == "AudioStream") {
+			res = load_resource(path, id, ResourceType_AudioStream);
+		} else {
+			res = load_resource(path, id, ResourceType_None);
+			assert(nullptr != res && "unknown resource type");
 		}
 
 		if (nullptr == res)
@@ -193,7 +205,7 @@ Error Scene::load(const char *path) {
 	return OK;
 }
 
-Error Scene::save(const char *path) {
+ErrorCode Scene::save(const char *path) {
 	NodeDB &db = NodeDB::get();
 
 	YAML::Node doc;
@@ -205,10 +217,14 @@ Error Scene::save(const char *path) {
 		Resource *resource = ResourceManager::get().Get(id);
 		YAML::Node res;
 
-		res["type"] = "ImageTexture";
-		res["path"] = resource->Filepath();
 		if (resource->Type() == ResourceType_ImageTexture) {
+			res["type"] = "ImageTexture";
+		} else if (resource->Type() == ResourceType_AudioStream) {
+			res["type"] = "AudioStream";
+		} else {
+			assert(false && "unknown resource type");
 		}
+		res["path"] = resource->Filepath();
 
 		resources[id] = res;
 	}
@@ -269,7 +285,7 @@ Error Scene::save(const char *path) {
 	ss << doc;
 	s = ss.str();
 
-	Error err = FileServer::get().WriteFileString(path, s);
+	ErrorCode err = FileServer::get().WriteFileString(path, s);
 	if (err != OK) {
 		return err;
 	}
