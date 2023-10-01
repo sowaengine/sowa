@@ -17,6 +17,7 @@ class Node {
 
 	virtual void _start() {}
 	virtual void _update() {}
+	virtual void _exit() {}
 
 	inline size_t type_hash() { return m_type_hash; }
 

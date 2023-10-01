@@ -26,8 +26,8 @@ class App {
 	App();
 	~App();
 
-	Error Init();
-	Error Run();
+	ErrorCode Init();
+	ErrorCode Run();
 
 	static App &get();
 
@@ -62,6 +62,9 @@ class App {
 
 	void Log(const std::string &message);
 
+	inline void SelectNode(size_t id) { m_selectedNode = id; }
+	inline size_t GetSelectedNode() { return m_selectedNode; }
+
   private:
 	void mainLoop();
 	static void mainLoopCaller(void *self);
@@ -85,6 +88,7 @@ class App {
 	};
 	size_t m_selectedNode = 0;
 	size_t m_hoveredNode = 0;
+	size_t m_hovered_ui_item = 0;
 
 	vec2 m_editorCameraPos2d = vec2(0.f, 0.f);
 	float m_editorCameraZoom2d = 1.f;

@@ -10,6 +10,7 @@
 #include "core/time.hxx"
 #include "core/tweens.hxx"
 
+#include "servers/audio_server.hxx"
 #include "servers/file_server.hxx"
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
@@ -21,6 +22,7 @@
 #include "ui/new_tree.hxx"
 #include "ui/ui_canvas.hxx"
 
+#include "scene/audio_stream_player.hxx"
 #include "scene/camera_2d.hxx"
 #include "scene/node_2d.hxx"
 #include "scene/node_db.hxx"
@@ -80,7 +82,7 @@ EM_JS(bool, check_timer, (), {
 });
 #endif
 
-Error App::Init() {
+ErrorCode App::Init() {
 #ifndef SW_WEB
 	m_appPath = "./project";
 #else
@@ -104,7 +106,7 @@ Error App::Init() {
 	}
 #endif
 
-	Error err = m_projectSettings.Load("res://project.sowa");
+	ErrorCode err = m_projectSettings.Load("res://project.sowa");
 	if (err != OK) {
 		//
 	}
@@ -211,13 +213,28 @@ Error App::Init() {
 	imageTexture.loadFunc = [](Resource *res, std::string path) {
 		res->Data() = Texture();
 		if (Texture *tex = res->As<Texture>(); nullptr != tex) {
-			Error err = tex->Load(TextureType::Texture2D, path.c_str());
+			ErrorCode err = tex->Load(TextureType::Texture2D, path.c_str());
 			if (err != OK) {
 				std::cout << "Failed to load texture: " << err << std::endl;
 			}
 		}
 	};
 	ResourceManager::get().RegisterResource(".png", imageTexture);
+
+	ResourceFactory audioStream;
+	audioStream.typeName = "AudioStream";
+	audioStream.type = ResourceType_AudioStream;
+	audioStream.loadFunc = [](Resource *res, std::string path) {
+		res->Data() = AudioStream();
+		if (AudioStream *stream = res->As<AudioStream>(); nullptr != stream) {
+			ErrorCode err = stream->Load(path.c_str());
+			if (err != OK) {
+				std::cout << "Failed to load audio stream: " << err << std::endl;
+			}
+		}
+	};
+	ResourceManager::get().RegisterResource(".ogg", audioStream);
+	ResourceManager::get().RegisterResource(".wav", audioStream);
 
 	Resource *res = ResourceManager::get().Load("res://assets/shotThin.png");
 
@@ -256,6 +273,10 @@ Error App::Init() {
 
 	REGISTER_NODE_TYPE(Node, );
 	REGISTER_NODE_PROPERTY(Node, "name", name(), std::string);
+
+	REGISTER_NODE_TYPE(AudioStreamPlayer, Node);
+	REGISTER_NODE_PROPERTY(AudioStreamPlayer, "stream", stream(), RID);
+	REGISTER_NODE_PROPERTY(AudioStreamPlayer, "autoplay", autoplay(), bool);
 
 	REGISTER_NODE_TYPE(Node2D, Node);
 	REGISTER_NODE_PROPERTY(Node2D, "position", position(), vec2);
@@ -306,7 +327,7 @@ Error App::Init() {
 			return;
 		}
 
-		Error err = GetCurrentScene()->save(GetCurrentScene()->Path().c_str());
+		ErrorCode err = GetCurrentScene()->save(GetCurrentScene()->Path().c_str());
 		if (err != OK) {
 			std::cout << "Failed to save scene " << err << std::endl;
 		}
@@ -324,7 +345,7 @@ Error App::Init() {
 	return OK;
 }
 
-Error App::Run() {
+ErrorCode App::Run() {
 #ifdef SW_WEB
 	emscripten_set_main_loop_arg(mainLoopCaller, this, 0, 1);
 #else
@@ -704,8 +725,11 @@ void App::Stop() {
 	if (!m_running)
 		return;
 
-	if (nullptr != m_pCurrentScene)
+	if (nullptr != m_pCurrentScene) {
+		m_pCurrentScene->_end_scene();
+
 		Scene::copy(&m_backgroundScene, m_pCurrentScene);
+	}
 
 	m_running = false;
 }
