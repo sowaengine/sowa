@@ -40,6 +40,11 @@
 - Version: 2.3.8
 - License: MIT
 
+## openal-soft
+- Upstream: https://github.com/kcat/openal-soft
+- Version: 1.23.1
+- License: LGPL
+
 ## stb
 - Upstream: https://github.com/nothings/stb
 - Version: 2.28
