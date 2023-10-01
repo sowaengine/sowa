@@ -35,6 +35,11 @@
 - Version: 0.9.9.8
 - License: MIT
 
+## sndfile
+- Upstream: https://github.com/libsndfile/libsndfile
+- Version: 1.2.2
+- License: LGPL-2.1
+
 ## lunasvg
 - Upstream: https://github.com/sammycage/lunasvg
 - Version: 2.3.8
