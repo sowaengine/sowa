@@ -44,6 +44,9 @@ class InputServer {
 
 	vec2 GetMouseMotion();
 
+	// On editor builds, is cursor on viewport
+	bool IsCursorInside();
+
   private:
 	friend struct InputCallbackBridge;
 	friend class RenderingServer;

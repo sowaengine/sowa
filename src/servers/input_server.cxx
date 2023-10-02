@@ -1,6 +1,7 @@
 #include "input_server.hxx"
 #include "core/app.hxx"
 #include "core/input.hxx"
+#include "gui_server.hxx"
 #include "rendering_server.hxx"
 
 static bool s_blockMoveMoveEvent = false;
@@ -249,7 +250,9 @@ void InputServer::mouse_button_callback(GLFWwindow *window, int button, int acti
 			event.doubleClick = true;
 
 			m_buttonDoubleClicked[btn] = true;
-			App::get().ClickCallback()(event);
+
+			if (GuiServer::get().on_viewport)
+				App::get().ClickCallback()(event);
 		}
 	}
 	if (action == GLFW_RELEASE) {
@@ -261,7 +264,9 @@ void InputServer::mouse_button_callback(GLFWwindow *window, int button, int acti
 			event.doubleClick = false;
 
 			m_buttonSingleClicked[btn] = true;
-			App::get().ClickCallback()(event);
+
+			if (GuiServer::get().on_viewport)
+				App::get().ClickCallback()(event);
 		}
 	}
 
@@ -283,7 +288,8 @@ void InputServer::mouse_button_callback(GLFWwindow *window, int button, int acti
 	if (mods & GLFW_MOD_SUPER)
 		event.modifiers.super = true;
 
-	App::get().MouseInputCallback()(event);
+	if (GuiServer::get().on_viewport)
+		App::get().MouseInputCallback()(event);
 }
 
 void InputServer::cursor_pos_callback(GLFWwindow *window, double x, double y) {
@@ -292,6 +298,15 @@ void InputServer::cursor_pos_callback(GLFWwindow *window, double x, double y) {
 	}
 
 	InputEventMouseMove event;
+
+	vec2 windowSize = RenderingServer::get().GetWindowSize();
+	x -= GuiServer::get().m_viewport_rect.x;
+	y -= GuiServer::get().m_viewport_rect.y;
+
+	rect viewport = GuiServer::get().m_viewport_rect;
+	vec2 point = rect(0.f, 0.f, viewport.w, viewport.h).map_point(vec2(x, y), rect(0.f, 0.f, windowSize.x, windowSize.y));
+	x = point.x;
+	y = point.y;
 
 	double deltaX = x - m_input_mouseX;
 	double deltaY = y - m_input_mouseY;
@@ -341,9 +356,16 @@ void InputServer::char_callback(GLFWwindow *window, unsigned int codepoint) {
 }
 
 void InputServer::scroll_callback(GLFWwindow *window, double xOffset, double yOffset) {
+	if (!GuiServer::get().on_viewport)
+		return;
+
 	InputEventScroll event;
 	event.xOffset = xOffset;
 	event.yOffset = yOffset;
 
 	App::get().ScrollCallback()(event);
+}
+
+bool InputServer::IsCursorInside() {
+	return GuiServer::get().on_viewport;
 }

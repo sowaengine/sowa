@@ -185,6 +185,8 @@ class Input {
 	static bool IsButtonJustDoubleClicked(int button);
 
 	static vec2 GetMouseMotion();
+
+	static bool IsCursorInside();
 };
 
 #endif // SW_INPUT_HXX

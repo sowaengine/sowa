@@ -33,13 +33,23 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/fmt-10.1.1/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/openal-soft-1.23.1/include"
     "${CMAKE_CURRENT_SOURCE_DIR}/libsndfile-1.2.2/include"
-
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/backends"
+    "${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1/include"
     PARENT_SCOPE
 )
 
 
 set(SOWA_THIRDPARTY_SOURCES
     ${SOWA_THIRDPARTY_SOURCES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/backends/imgui_impl_opengl3.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/backends/imgui_impl_glfw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/imgui_demo.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/imgui_draw.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/imgui_tables.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/imgui_widgets.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/imgui.cpp"
+
     PARENT_SCOPE)
 
 

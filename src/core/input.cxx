@@ -64,3 +64,6 @@ bool Input::IsButtonJustDoubleClicked(int button) {
 vec2 Input::GetMouseMotion() {
 	return InputServer::get().GetMouseMotion();
 }
+bool Input::IsCursorInside() {
+	return InputServer::get().IsCursorInside();
+}

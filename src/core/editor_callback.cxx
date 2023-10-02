@@ -8,7 +8,7 @@ void App::editor_mouse_move_event(InputEventMouseMove event) {
 	float deltaX = event.deltaX * (1920.f / w);
 	float deltaY = event.deltaY * (1080.f / h);
 
-	if (Input::IsButtonDown(MB_RIGHT)) {
+	if (Input::IsButtonDown(MB_RIGHT) && Input::IsCursorInside()) {
 		this->m_editorCameraPos2d.x -= deltaX * this->m_editorCameraZoom2d;
 		this->m_editorCameraPos2d.y += deltaY * this->m_editorCameraZoom2d;
 	}

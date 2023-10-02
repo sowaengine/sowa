@@ -12,6 +12,7 @@
 
 #include "servers/audio_server.hxx"
 #include "servers/file_server.hxx"
+#include "servers/gui_server.hxx"
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
 #include "servers/script_server.hxx"
@@ -50,6 +51,10 @@
 #ifdef SW_WEB
 #include <emscripten.h>
 #endif
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 static App *s_instance;
 
@@ -119,6 +124,7 @@ ErrorCode App::Init() {
 
 	int w, h;
 	RenderingServer::get().GetWindowSize(w, h);
+	AudioServer::get();
 
 	m_layerUI.SetTarget(0, RenderLayerTargetType::Vec4);
 	m_layerUI.SetTarget(1, RenderLayerTargetType::Int);
@@ -342,6 +348,8 @@ ErrorCode App::Init() {
 		exit(0);
 	});
 
+	GuiServer::get().Initialize();
+
 	return OK;
 }
 
@@ -407,6 +415,10 @@ void App::mainLoop() {
 	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(w), 0.f, static_cast<float>(h), -128.f, 128.f));
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 	Renderer().Reset();
+
+	GuiServer::get().Begin();
+	GuiServer::get().Update();
+	GuiServer::get().End();
 
 	if (nullptr != m_commandInterface) {
 		CommandInterface *interface = m_commandInterface;
@@ -651,17 +663,20 @@ void App::mainLoop() {
 		Input::GetWindowMousePosition(x, y);
 		int w, h;
 		RenderingServer::get().GetWindowSize(w, h);
-		vec2 cursorPos = ViewportRect().map_point(vec2(x, y), rect(0.f, 0.f, 1920.f, 1080.f));
+		// vec2 cursorPos = ViewportRect().map_point(vec2(x, y), rect(0.f, 0.f, 1920.f, 1080.f));
+		vec2 cursorPos = vec2(x, y);
+		cursorPos.x *= 1920.f / (float)w;
+		cursorPos.y *= 1080.f / (float)h;
 
 		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(cursorPos.x), static_cast<int>(cursorPos.y));
 		if (id == 0)
 			m_hoveredNode = 0;
-		if (id == 0 && Input::IsButtonJustClicked(MB_LEFT) && this->m_editorState == EditorState::None)
+		if (id == 0 && Input::IsButtonJustClicked(MB_LEFT) && this->m_editorState == EditorState::None && Input::IsCursorInside())
 			m_selectedNode = 0;
 
 		if (id != 0 && GetCurrentScene() && nullptr != GetCurrentScene()->get_node_by_id(id)) {
 			m_hoveredNode = static_cast<size_t>(id);
-			if (m_editorState == EditorState::None && Input::IsButtonJustClicked(MB_LEFT)) {
+			if (m_editorState == EditorState::None && Input::IsButtonJustClicked(MB_LEFT) && Input::IsCursorInside()) {
 				if (m_selectedNode == m_hoveredNode)
 					m_selectedNode = 0;
 				else
@@ -679,9 +694,11 @@ void App::mainLoop() {
 	SetRenderLayer(nullptr);
 
 	fullscreenShader.Bind();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
-	fullscreenModel.Draw();
+
+	// on non editors
+	// glActiveTexture(GL_TEXTURE0);
+	// glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
+	// fullscreenModel.Draw();
 
 	glViewport(0, 0, w, h);
 	glActiveTexture(GL_TEXTURE0);
