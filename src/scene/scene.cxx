@@ -138,6 +138,8 @@ ErrorCode Scene::load(const char *path) {
 			res = load_resource(path, id, ResourceType_ImageTexture);
 		} else if (type == "AudioStream") {
 			res = load_resource(path, id, ResourceType_AudioStream);
+		} else if (type == "SpriteSheetAnimation") {
+			res = load_resource(path, id, ResourceType_SpriteSheetAnimation);
 		} else {
 			res = load_resource(path, id, ResourceType_None);
 			assert(nullptr != res && "unknown resource type");
@@ -221,6 +223,8 @@ ErrorCode Scene::save(const char *path) {
 			res["type"] = "ImageTexture";
 		} else if (resource->Type() == ResourceType_AudioStream) {
 			res["type"] = "AudioStream";
+		} else if (resource->Type() == ResourceType_SpriteSheetAnimation) {
+			res["type"] = "SpriteSheetAnimation";
 		} else {
 			assert(false && "unknown resource type");
 		}

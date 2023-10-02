@@ -23,6 +23,7 @@
 #include "ui/new_tree.hxx"
 #include "ui/ui_canvas.hxx"
 
+#include "scene/animated_sprite_2d.hxx"
 #include "scene/audio_stream_player.hxx"
 #include "scene/camera_2d.hxx"
 #include "scene/node_2d.hxx"
@@ -32,6 +33,7 @@
 
 #include "resource/resource.hxx"
 #include "resource/resource_manager.hxx"
+#include "resource/sprite_sheet_animation/sprite_sheet_animation.hxx"
 
 #include "behaviour/behaviour.hxx"
 #include "behaviour/behaviour_db.hxx"
@@ -242,6 +244,20 @@ ErrorCode App::Init() {
 	ResourceManager::get().RegisterResource(".ogg", audioStream);
 	ResourceManager::get().RegisterResource(".wav", audioStream);
 
+	ResourceFactory spriteSheetAnimation;
+	spriteSheetAnimation.typeName = "SpriteSheetAnimation";
+	spriteSheetAnimation.type = ResourceType_SpriteSheetAnimation;
+	spriteSheetAnimation.loadFunc = [](Resource *res, std::string path) {
+		res->Data() = SpriteSheetAnimation();
+		if (SpriteSheetAnimation *anim = res->As<SpriteSheetAnimation>(); nullptr != anim) {
+			ErrorCode err = anim->Load(path.c_str());
+			if (err != OK) {
+				std::cout << "Failed to load sprite sheet animation: " << err << std::endl;
+			}
+		}
+	};
+	ResourceManager::get().RegisterResource(".anim", spriteSheetAnimation);
+
 	Resource *res = ResourceManager::get().Load("res://assets/shotThin.png");
 
 	NodeDB &db = NodeDB::get();
@@ -292,6 +308,11 @@ ErrorCode App::Init() {
 
 	REGISTER_NODE_TYPE(Sprite2D, Node2D);
 	REGISTER_NODE_PROPERTY(Sprite2D, "texture", texture(), RID);
+
+	REGISTER_NODE_TYPE(AnimatedSprite2D, Node2D);
+	REGISTER_NODE_PROPERTY(AnimatedSprite2D, "spritesheet", spritesheet(), RID);
+	REGISTER_NODE_PROPERTY(AnimatedSprite2D, "speed", speed(), float);
+	REGISTER_NODE_PROPERTY(AnimatedSprite2D, "playing", playing(), bool);
 
 	REGISTER_NODE_TYPE(Camera2D, Node2D);
 	REGISTER_NODE_PROPERTY(Camera2D, "zoom", zoom(), vec2);

@@ -88,7 +88,12 @@ void RenderingServer::SwapBuffers() {
 }
 
 void RenderingServer::GetWindowSize(int &width, int &height) {
-	glfwGetFramebufferSize(m_pWindowHandle, &width, &height);
+	width = m_windowWidth;
+	height = m_windowHeight;
+}
+
+vec2 RenderingServer::GetWindowSize() {
+	return vec2(static_cast<float>(m_windowWidth), static_cast<float>(m_windowHeight));
 }
 
 void RenderingServer::SetCursorStyle(CursorStyle style) {
@@ -127,5 +132,8 @@ void RenderingServer::Terminate() {
 }
 
 void RenderingServer::framebuffer_size_callback(GLFWwindow *window, int width, int height) {
+	m_windowWidth = width;
+	m_windowHeight = height;
+
 	App::get().WindowResizeCallback()(width, height);
 }

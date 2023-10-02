@@ -18,6 +18,12 @@ resources:
   52:
     type: ImageTexture
     path: res://assets/crateMetal.png
+  1736439943:
+    type: AudioStream
+    path: res://music.ogg
+  1234:
+    type: SpriteSheetAnimation
+    path: res://resources/player.anim
 nodes:
   987812:
     type: Sprite2D
@@ -35,8 +41,8 @@ nodes:
         float: 15
       position:
         vec2:
-          x: 200
-          y: 200
+          x: 400
+          y: 400
     behaviours:
       - Tank Movement
     children:
@@ -245,3 +251,25 @@ nodes:
         vec2:
           x: 1280
           y: -1280
+  495516:
+    type: AudioStreamPlayer
+    name: music
+    props:
+      autoplay:
+        bool: true
+      stream:
+        int: 1736439943
+  12345:
+    type: AnimatedSprite2D
+    name: animation
+    props:
+      scale:
+        vec2:
+          x: 4
+          y: 4
+      position:
+        vec2:
+          x: 200
+          y: 200
+      spritesheet:
+        int: 1234

@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
+#include "math/math.hxx"
+
 enum class CursorStyle {
 	Normal,
 	Pointer,
@@ -31,6 +33,7 @@ class RenderingServer {
 	bool WindowShouldClose();
 	void SwapBuffers();
 	void GetWindowSize(int &width, int &height);
+	vec2 GetWindowSize();
 
 	void SetCursorStyle(CursorStyle style = CursorStyle::Normal);
 	void SetCursorMode(CursorMode mode = CursorMode::Normal);
@@ -43,6 +46,7 @@ class RenderingServer {
   private:
 	friend class WindowCallbackBridge;
 	friend class InputServer;
+	friend class GuiServer;
 	GLFWwindow *m_pWindowHandle = nullptr;
 
 	GLFWcursor *m_pStandartCursor = nullptr;
