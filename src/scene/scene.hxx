@@ -5,24 +5,26 @@
 #include <unordered_map>
 #include <vector>
 
-#include "camera_2d.hxx"
 #include "core/error/error.hxx"
-#include "node.hxx"
 #include "node_db.hxx"
+#include "nodes/node.hxx"
 #include "resource/resource.hxx"
 #include "resource/resource_type.hxx"
+#include "scene/nodes/2d/camera_2d.hxx"
 
 class Scene {
   public:
 	inline std::vector<Node *> &Nodes() { return m_nodes; }
 	virtual ~Scene() = default;
 
-	virtual void _begin_scene();
-	virtual void _update_scene();
-	virtual void _end_scene();
+	void _begin_scene();
+	void _update_scene();
+	void _end_scene();
 
 	ErrorCode load(const char *path);
 	ErrorCode save(const char *path);
+	void clear();
+
 
 	Node *create(NodeType type, const std::string &name = "", size_t id = 0);
 	Resource *load_resource(const std::string &path, RID id = 0, ResourceType type = ResourceType_None);

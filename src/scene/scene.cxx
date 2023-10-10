@@ -4,13 +4,33 @@
 #include "math/math.hxx"
 #include "resource/resource_manager.hxx"
 #include "scene/node_db.hxx"
+#include "scene/nodes/2d/physics/physics_body_2d.hxx"
 #include "servers/file_server.hxx"
+#include "utils/utils.hxx"
+
 #include <any>
 #include <iostream>
 
 #include "yaml-cpp/yaml.h"
 
-#include "utils/utils.hxx"
+namespace YAML {
+template <>
+struct convert<PhysicsBodyType> {
+	static Node encode(const PhysicsBodyType &o) {
+		Node node = Node(PhysicsBodyTypeToString(o));
+		return node;
+	}
+
+	static bool decode(const Node &node, PhysicsBodyType &o) {
+		if (!node.IsScalar()) {
+			return false;
+		}
+
+		o = StringToPhysicsBodyType(node.as<std::string>(""));
+		return true;
+	}
+};
+} // namespace YAML
 
 namespace YAML {
 template <>
@@ -50,6 +70,8 @@ struct convert<std::any> {
 			node["float"] = *p;
 		} else if (const bool *p = std::any_cast<bool>(&rhs)) {
 			node["bool"] = *p;
+		} else if (const PhysicsBodyType *p = std::any_cast<PhysicsBodyType>(&rhs)) {
+			node["PhysicsBodyType"] = *p;
 		} else {
 			assert(false && "unknown type on std::any encode");
 		}
@@ -81,6 +103,8 @@ struct convert<std::any> {
 			rhs = node["float"].as<float>(0.f);
 		} else if (type == "bool") {
 			rhs = node["bool"].as<bool>(false);
+		} else if (type == "PhysicsBodyType") {
+			rhs = node["PhysicsBodyType"].as<PhysicsBodyType>(PhysicsBodyType::Static);
 		} else {
 			assert(false && "unknown type on std::any encode");
 		}
@@ -91,19 +115,22 @@ struct convert<std::any> {
 } // namespace YAML
 
 void Scene::_begin_scene() {
-	for (Node *node : m_nodes) {
+	for (auto &[id, node] : m_allocated_nodes) {
 		node->_start();
+		node->start_behaviours();
 	}
 }
 
 void Scene::_update_scene() {
-	for (Node *node : m_nodes) {
+	for (auto &[id, node] : m_allocated_nodes) {
 		node->_update();
+		if (App::get().IsRunning())
+			node->update_behaviours();
 	}
 }
 
 void Scene::_end_scene() {
-	for (Node *node : m_nodes) {
+	for (auto &[id, node] : m_allocated_nodes) {
 		node->_exit();
 	}
 }
@@ -298,6 +325,14 @@ ErrorCode Scene::save(const char *path) {
 	return OK;
 }
 
+void Scene::clear() {
+	m_nodes.clear();
+	for (auto &[id, node] : m_allocated_nodes) {
+		NodeDB::get().destruct(node);
+	}
+	m_allocated_nodes.clear();
+}
+
 Node *Scene::create(NodeType type, const std::string &name, size_t id) {
 	Node *node = NodeDB::get().construct(type, name, id);
 	m_allocated_nodes[node->id()] = node;
@@ -372,7 +407,7 @@ void Scene::copy(Scene *src, Scene *dst) {
 		return newNode;
 	};
 
-	dst->Nodes().clear();
+	dst->clear();
 	for (Node *node : src->Nodes()) {
 		Node *newNode = copyNode(node);
 		dst->Nodes().push_back(newNode);
