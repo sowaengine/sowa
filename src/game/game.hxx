@@ -12,18 +12,6 @@ class TankMovement {
 	static void Update(Node *, Behaviour *);
 };
 
-class TankBarrelBehaviour {
-  public:
-	static void Start(Node *, Behaviour *);
-	static void Update(Node *, Behaviour *);
-};
-
-class BulletMovement {
-  public:
-	static void Start(Node *, Behaviour *);
-	static void Update(Node *, Behaviour *);
-};
-
 class MouseShooter {
   public:
 	static void Start(Node *, Behaviour *);

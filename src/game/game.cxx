@@ -7,11 +7,9 @@
 #include "core/time.hxx"
 #include "resource/image_texture/image_texture.hxx"
 #include "resource/resource_manager.hxx"
-#include "scene/camera_2d.hxx"
 #include "scene/node_db.hxx"
+#include "scene/nodes.hxx"
 #include "scene/scene.hxx"
-#include "scene/sprite_2d.hxx"
-#include "scene/text.hxx"
 #include "servers/input_server.hxx"
 #include "servers/rendering_server.hxx"
 
@@ -33,48 +31,13 @@ float lerpAngle(float from, float to, float t) {
 	return from + dist * t;
 }
 
-class MainScene : public Scene {
-	void StartNode(Node *node) {
-		node->_start();
-		node->start_behaviours();
-
-		for (Node *child : node->get_children()) {
-			StartNode(child);
-		}
-	}
-
-	void _begin_scene() override {
-		for (Node *node : Nodes()) {
-			StartNode(node);
-		}
-	}
-
-	void UpdateNode(Node *node) {
-		if (App::get().IsRunning())
-			node->update_behaviours();
-		node->_update();
-
-		for (size_t i = 0; i < node->get_children().size(); i++) {
-			UpdateNode(node->get_child_index(i));
-		}
-	}
-
-	void _update_scene() override {
-		for (size_t i = 0; i < Nodes().size(); i++) {
-			UpdateNode(Nodes()[i]);
-		}
-	}
-};
-
 void OnInput(InputEventMouseButton event);
 
 void Main() {
 	BehaviourDB::get().RegisterBehaviour("Tank Movement", Behaviour::New(TankMovement::Start, TankMovement::Update));
-	BehaviourDB::get().RegisterBehaviour("Tank Barrel", Behaviour::New(TankBarrelBehaviour::Start, TankBarrelBehaviour::Update));
-	BehaviourDB::get().RegisterBehaviour("Bullet Movement", Behaviour::New(BulletMovement::Start, BulletMovement::Update));
 	BehaviourDB::get().RegisterBehaviour("Mouse Shooter", Behaviour::New(MouseShooter::Start, MouseShooter::Update));
 
-	scene = new MainScene;
+	scene = new Scene;
 	if (true) {
 		auto _ = Utils::ScopeTimer("Load Scene");
 
