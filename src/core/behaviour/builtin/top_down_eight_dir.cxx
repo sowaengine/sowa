@@ -4,8 +4,8 @@
 #include "core/rendering/gl.hxx"
 #include "core/time.hxx"
 #include "glm/glm.hpp"
-#include "scene/node.hxx"
-#include "scene/node_2d.hxx"
+#include "scene/nodes/2d/node_2d.hxx"
+#include "scene/nodes/node.hxx"
 #include "servers/input_server.hxx"
 
 static float speed = 30.f;

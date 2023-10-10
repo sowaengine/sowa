@@ -10,7 +10,7 @@
 #include <variant>
 #include <vector>
 
-#include "node.hxx"
+#include "nodes/node.hxx"
 #include "utils/utils.hxx"
 
 // using Property = std::variant<std::string>;

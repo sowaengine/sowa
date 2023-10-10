@@ -2,7 +2,7 @@
 #define SW_TOP_DOWN_EIGHT_DIR_HXX
 #pragma once
 
-#include "scene/node.hxx"
+#include "scene/nodes/node.hxx"
 
 class Behaviour;
 

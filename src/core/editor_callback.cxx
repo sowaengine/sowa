@@ -1,12 +1,12 @@
 #include "app.hxx"
-#include "scene/sprite_2d.hxx"
+#include "scene/nodes/2d/drawable/sprite_2d.hxx"
 #include "servers/rendering_server.hxx"
 
 void App::editor_mouse_move_event(InputEventMouseMove event) {
-	int w, h;
-	RenderingServer::get().GetWindowSize(w, h);
-	float deltaX = event.deltaX * (1920.f / w);
-	float deltaY = event.deltaY * (1080.f / h);
+	vec2 windowSize = RenderingServer::get().GetWindowSize();
+
+	float deltaX = event.deltaX * (1920.f / windowSize.x);
+	float deltaY = event.deltaY * (1080.f / windowSize.y);
 
 	if (Input::IsButtonDown(MB_RIGHT) && Input::IsCursorInside()) {
 		this->m_editorCameraPos2d.x -= deltaX * this->m_editorCameraZoom2d;
@@ -67,8 +67,7 @@ void App::editor_key_event(InputEventKey event) {
 }
 
 void App::editor_scroll_event(InputEventScroll event) {
-	int w, h;
-	RenderingServer::get().GetWindowSize(w, h);
+	vec2 windowSize = RenderingServer::get().GetWindowSize();
 
 	float oldZoom = this->m_editorCameraZoom2d;
 
@@ -76,18 +75,18 @@ void App::editor_scroll_event(InputEventScroll event) {
 	this->m_editorCameraZoom2d = std::max(this->m_editorCameraZoom2d, 0.1f);
 
 	vec2 midPoint(1920.f * 0.5f, 1080.f * 0.5f);
-	double x, y;
-	Input::GetWindowMousePosition(x, y);
-	x *= (1920.f / (float)w);
-	y *= (1080.f / (float)h);
+	vec2 mousePos = Input::GetWindowMousePosition();
+
+	mousePos.x *= (1920.f / (float)windowSize.x);
+	mousePos.y *= (1080.f / (float)windowSize.y);
 
 	if (this->m_editorState != EditorState::None && GetCurrentScene()) {
 		if (Sprite2D *sprite = dynamic_cast<Sprite2D *>(GetCurrentScene()->get_node_by_id(this->m_selectedNode)); nullptr != sprite) {
-			x = (1920.f * 0.5f);
-			y = (1080.f * 0.5f);
+			mousePos.x = (1920.f * 0.5f);
+			mousePos.y = (1080.f * 0.5f);
 		}
 	}
 
-	this->m_editorCameraPos2d.x += (x - midPoint.x) * (oldZoom - this->m_editorCameraZoom2d);
-	this->m_editorCameraPos2d.y -= (y - midPoint.y) * (oldZoom - this->m_editorCameraZoom2d);
+	this->m_editorCameraPos2d.x += (mousePos.x - midPoint.x) * (oldZoom - this->m_editorCameraZoom2d);
+	this->m_editorCameraPos2d.y -= (mousePos.y - midPoint.y) * (oldZoom - this->m_editorCameraZoom2d);
 }

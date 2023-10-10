@@ -3,7 +3,7 @@
 #pragma once
 
 #include "resource/resource_type.hxx"
-#include "scene/node_2d.hxx"
+#include "scene/nodes/2d/drawable/sprite_2d.hxx"
 
 #include <string>
 

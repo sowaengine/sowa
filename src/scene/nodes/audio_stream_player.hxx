@@ -2,7 +2,7 @@
 #define SW_AUDIO_STREAM_PLAYER_HXX
 #pragma once
 
-#include "node.hxx"
+#include "scene/nodes/node.hxx"
 
 #include "resource/audio_stream/audio_stream.hxx"
 #include "resource/resource.hxx"

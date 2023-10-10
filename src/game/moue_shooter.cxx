@@ -8,8 +8,7 @@
 #include "core/time.hxx"
 #include "glm/glm.hpp"
 #include "resource/resource_manager.hxx"
-#include "scene/node_2d.hxx"
-#include "scene/sprite_2d.hxx"
+#include "scene/nodes.hxx"
 #include "servers/input_server.hxx"
 
 static RID bulletTexture;
@@ -34,7 +33,8 @@ void MouseShooter::Update(Node *node, Behaviour *) {
 		bullet->rotation() = barrelSprite->global_rotation();
 		bullet->z_index() = 1.f;
 
-		bullet->add_behaviour("Bullet Movement");
+		// bullet->add_behaviour("Bullet Movement");
+		bullet->add_behaviour("Bullet");
 		App::get().GetCurrentScene()->Nodes().push_back(bullet);
 	}
 }

@@ -5,7 +5,7 @@
 #include "glm/glm.hpp"
 #include <string>
 
-#include "node.hxx"
+#include "scene/nodes/node.hxx"
 
 class Text : public Node {
   public:

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "math/math.hxx"
-#include "node.hxx"
+#include "scene/nodes/node.hxx"
 
 #include "glm/glm.hpp"
 

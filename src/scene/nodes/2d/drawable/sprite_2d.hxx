@@ -2,7 +2,7 @@
 #define SW_SPRITE_2D_HXX
 #pragma once
 
-#include "node_2d.hxx"
+#include "scene/nodes/2d/node_2d.hxx"
 
 #include "resource/resource_type.hxx"
 #include <memory>
