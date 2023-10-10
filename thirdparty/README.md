@@ -5,6 +5,11 @@
 - Version: 2.36.1
 - License: zlib
 
+## box2d
+- Upstream: https://github.com/erincatto/box2d
+- Version: 2.4.1
+- License: MIT
+
 ## eventpp
 - Upstream: https://github.com/wqking/eventpp
 - Version: 0.1.2

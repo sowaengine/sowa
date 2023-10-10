@@ -36,6 +36,7 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/backends"
     "${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1/include"
+    
     PARENT_SCOPE
 )
 
@@ -55,6 +56,10 @@ set(SOWA_THIRDPARTY_SOURCES
 
 set(ALSOFT_INSTALL_EXAMPLES OFF)
 
+set(BOX2D_BUILD_UNIT_TESTS OFF)
+set(BOX2D_BUILD_TESTBED OFF)
+set(BOX2D_BUILD_DOCS OFF)
+
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/eventpp-0.1.2" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.13.1" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/lunasvg-2.3.8" EXCLUDE_FROM_ALL)
@@ -63,3 +68,4 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/angelscript
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/fmt-10.1.1" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/openal-soft-1.23.1" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/libsndfile-1.2.2" EXCLUDE_FROM_ALL)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1" EXCLUDE_FROM_ALL)
