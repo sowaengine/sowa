@@ -23,8 +23,9 @@ class InputServer {
 	void ProcessInput();
 	void PollEvents();
 
-	void GetMousePosition(double &x, double &y);
-	void GetWindowMousePosition(double &x, double &y);
+	vec2 GetMousePosition();
+	vec2 GetWindowMousePosition();
+	vec2 GetGameMousePosition();
 	int GetPressedChar();
 
 	ActionState GetKeyState(int key);

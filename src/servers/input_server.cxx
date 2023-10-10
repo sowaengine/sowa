@@ -84,35 +84,33 @@ void InputServer::PollEvents() {
 	}
 
 	if (RenderingServer::get().m_currentCursorMode == CursorMode::Tiled) {
-		int w, h;
-		RenderingServer::get().GetWindowSize(w, h);
+		vec2 windowSize = RenderingServer::get().GetWindowSize();
 
 		bool setCursor = false;
-		double x, y;
-		glfwGetCursorPos(RenderingServer::get().m_pWindowHandle, &x, &y);
+		vec2 mousePos = Input::GetWindowMousePosition();
 
 		const float padding = 2.f;
-		if (x < padding) {
-			x = w - padding;
+		if (mousePos.x < padding) {
+			mousePos.x = windowSize.x - padding;
 			setCursor = true;
-		} else if (x > w - padding) {
-			x = padding;
+		} else if (mousePos.x > windowSize.x - padding) {
+			mousePos.x = padding;
 			setCursor = true;
 		}
 
-		if (y < padding) {
-			y = h - padding;
+		if (mousePos.y < padding) {
+			mousePos.y = windowSize.y - padding;
 			setCursor = true;
-		} else if (y > h - padding) {
-			y = padding;
+		} else if (mousePos.y > windowSize.y - padding) {
+			mousePos.y = padding;
 			setCursor = true;
 		}
 
 		if (setCursor) {
 			s_blockMoveMoveEvent = true;
-			glfwSetCursorPos(RenderingServer::get().m_pWindowHandle, x, y);
-			m_input_mouseX = x;
-			m_input_mouseY = y;
+			glfwSetCursorPos(RenderingServer::get().m_pWindowHandle, mousePos.x, mousePos.y);
+			m_input_mouseX = mousePos.x;
+			m_input_mouseY = mousePos.y;
 		}
 	}
 
@@ -121,16 +119,24 @@ void InputServer::PollEvents() {
 	s_blockMoveMoveEvent = false;
 }
 
-void InputServer::GetMousePosition(double &x, double &y) {
-	int w, h;
-	RenderingServer::get().GetWindowSize(w, h);
-
-	x = m_input_mouseX;
-	y = h - m_input_mouseY;
+vec2 InputServer::GetMousePosition() {
+	return vec2(
+		m_input_mouseX,
+		RenderingServer::get().GetWindowSize().y - m_input_mouseY);
 }
-void InputServer::GetWindowMousePosition(double &x, double &y) {
-	x = m_input_mouseX;
-	y = m_input_mouseY;
+
+vec2 InputServer::GetWindowMousePosition() {
+	return vec2(
+		m_input_mouseX,
+		m_input_mouseY);
+}
+
+vec2 InputServer::GetGameMousePosition() {
+	vec2 windowSize = RenderingServer::get().GetWindowSize();
+
+	return vec2(
+		m_input_mouseX * (1920.f / float(windowSize.x)),
+		1080.f - m_input_mouseY * (1080.f / float(windowSize.y)));
 }
 
 int InputServer::GetPressedChar() {
@@ -182,7 +188,7 @@ bool InputServer::IsButtonUp(int button) {
 }
 
 bool InputServer::IsButtonJustPressed(int button) {
-	return GetButtonState(button) == ActionState::JUST_PRESSED;
+	return IsCursorInside() && GetButtonState(button) == ActionState::JUST_PRESSED;
 }
 
 bool InputServer::IsButtonJustReleased(int button) {

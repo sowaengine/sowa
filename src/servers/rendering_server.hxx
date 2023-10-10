@@ -32,7 +32,6 @@ class RenderingServer {
 
 	bool WindowShouldClose();
 	void SwapBuffers();
-	void GetWindowSize(int &width, int &height);
 	vec2 GetWindowSize();
 
 	void SetCursorStyle(CursorStyle style = CursorStyle::Normal);

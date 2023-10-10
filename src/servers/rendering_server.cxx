@@ -87,11 +87,6 @@ void RenderingServer::SwapBuffers() {
 	glfwSwapBuffers(m_pWindowHandle);
 }
 
-void RenderingServer::GetWindowSize(int &width, int &height) {
-	width = m_windowWidth;
-	height = m_windowHeight;
-}
-
 vec2 RenderingServer::GetWindowSize() {
 	return vec2(static_cast<float>(m_windowWidth), static_cast<float>(m_windowHeight));
 }
