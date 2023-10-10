@@ -1,8 +1,14 @@
 #include "app.hxx"
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/projection.hpp"
+#include <codecvt>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <locale>
+
+#include "behaviour/behaviour.hxx"
+#include "behaviour/behaviour_db.hxx"
+#include "behaviour/builtin/top_down_eight_dir.hxx"
 
 #include "core/command/interfaces/command_palette.hxx"
 #include "core/command/interfaces/scene_save_as.hxx"
@@ -10,45 +16,31 @@
 #include "core/time.hxx"
 #include "core/tweens.hxx"
 
-#include "servers/audio_server.hxx"
-#include "servers/file_server.hxx"
-#include "servers/gui_server.hxx"
-#include "servers/input_server.hxx"
-#include "servers/rendering_server.hxx"
-#include "servers/script_server.hxx"
-
 #include "data/toml_document.hxx"
-
-#include "ui/new_container.hxx"
-#include "ui/new_tree.hxx"
-#include "ui/ui_canvas.hxx"
-
-#include "scene/animated_sprite_2d.hxx"
-#include "scene/audio_stream_player.hxx"
-#include "scene/camera_2d.hxx"
-#include "scene/node_2d.hxx"
-#include "scene/node_db.hxx"
-#include "scene/sprite_2d.hxx"
-#include "scene/text.hxx"
+#include "game/game.hxx"
+#include "scene/nodes.hxx"
 
 #include "resource/resource.hxx"
 #include "resource/resource_manager.hxx"
 #include "resource/sprite_sheet_animation/sprite_sheet_animation.hxx"
 
-#include "behaviour/behaviour.hxx"
-#include "behaviour/behaviour_db.hxx"
+#include "servers/audio_server.hxx"
+#include "servers/file_server.hxx"
+#include "servers/gui_server.hxx"
+#include "servers/input_server.hxx"
+#include "servers/physics_server_2d.hxx"
+#include "servers/rendering_server.hxx"
+#include "servers/script_server.hxx"
 
-#include "behaviour/builtin/top_down_eight_dir.hxx"
-
-#include "game/game.hxx"
+#include "ui/new_container.hxx"
+#include "ui/new_tree.hxx"
+#include "ui/ui_canvas.hxx"
 
 #include "utils/utils.hxx"
 
-#include <codecvt>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <locale>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/projection.hpp"
 
 #ifdef SW_WEB
 #include <emscripten.h>
@@ -124,13 +116,14 @@ ErrorCode App::Init() {
 	m_layer2D.SetTarget(1, RenderLayerTargetType::Int);
 	m_layer2D.Create(1920, 1080);
 
-	int w, h;
-	RenderingServer::get().GetWindowSize(w, h);
+	vec2 windowSize = RenderingServer::get().GetWindowSize();
+
 	AudioServer::get();
+	PhysicsServer2D::get().init();
 
 	m_layerUI.SetTarget(0, RenderLayerTargetType::Vec4);
 	m_layerUI.SetTarget(1, RenderLayerTargetType::Int);
-	m_layerUI.Create(w, h);
+	m_layerUI.Create(windowSize.x, windowSize.y);
 
 #ifdef SW_WEB
 	// Update page title
@@ -306,6 +299,9 @@ ErrorCode App::Init() {
 	REGISTER_NODE_PROPERTY(Node2D, "rotation", rotation(), float);
 	REGISTER_NODE_PROPERTY(Node2D, "z_index", z_index(), float);
 
+	REGISTER_NODE_TYPE(PhysicsBody2D, Node2D);
+	REGISTER_NODE_PROPERTY(PhysicsBody2D, "type", type(), PhysicsBodyType);
+
 	REGISTER_NODE_TYPE(Sprite2D, Node2D);
 	REGISTER_NODE_PROPERTY(Sprite2D, "texture", texture(), RID);
 
@@ -389,25 +385,24 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 	if (nullptr == renderlayer) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		int w, h;
-		RenderingServer::get().GetWindowSize(w, h);
+		vec2 windowSize = RenderingServer::get().GetWindowSize();
 
-		float windowRatio = (float)w / h;
+		float windowRatio = (float)windowSize.x / windowSize.y;
 		float videoRatio = (float)1920.f / 1080.f;
 
 		if (windowRatio > videoRatio) {
-			float width = h * videoRatio;
-			float height = h;
-			float gap = w - width;
+			float width = windowSize.y * videoRatio;
+			float height = windowSize.y;
+			float gap = windowSize.x - width;
 
 			float x = gap / 2.f;
 			glViewport(x, 0.f, width, height);
 			m_viewportRect = rect(x, 0.f, width, height);
 
 		} else {
-			float width = w;
-			float height = w / videoRatio;
-			float gap = h - height;
+			float width = windowSize.x;
+			float height = windowSize.x / videoRatio;
+			float gap = windowSize.y - height;
 
 			float y = gap / 2.f;
 			glViewport(0.f, y, width, height);
@@ -429,11 +424,11 @@ void App::mainLoop() {
 	SetRenderLayer(&m_layerUI);
 	m_layerUI.Clear(0.0f, 0.0f, 0.0f, 0.0f);
 
-	int w, h;
-	RenderingServer::get().GetWindowSize(w, h);
-	glViewport(0, 0, w, h);
+	vec2 windowSize = RenderingServer::get().GetWindowSize();
 
-	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(w), 0.f, static_cast<float>(h), -128.f, 128.f));
+	glViewport(0, 0, windowSize.x, windowSize.y);
+
+	m_batchRenderer.GetShader().UniformMat4("uProj", glm::ortho(0.f, static_cast<float>(windowSize.x), 0.f, static_cast<float>(windowSize.y), -128.f, 128.f));
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 	Renderer().Reset();
 
@@ -448,11 +443,11 @@ void App::mainLoop() {
 		glm::vec3 hoveredColor(0.2f, 0.2f, 0.2f);
 
 		const float padding = 8.f;
-		const float xPos = w / 3.f;
-		const float width = w / 3.f;
+		const float xPos = windowSize.x / 3.f;
+		const float width = windowSize.x / 3.f;
 		const float textScale = 0.4f;
 
-		float cursorY = h;
+		float cursorY = windowSize.y;
 
 		if (interface->text_input) {
 			glm::vec2 textSize = m_testFont.CalcTextSize("I") * textScale;
@@ -577,31 +572,49 @@ void App::mainLoop() {
 	if (m_pCurrentScene != nullptr) {
 		m_pCurrentScene->_update_scene();
 	}
+
+	if (IsRunning()) {
+		PhysicsServer2D::get().step();
+	}
+
 	Tweens::get().Poll(Time::Delta());
 
 	if (!IsRunning()) {
 		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), 5.f, 0.6f, 0.2f, 0.2f, 100.f, 0.f);
 		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2f, 0.8f, 0.4f, 100.f, 0.f);
 
-		Sprite2D *selectedNode = dynamic_cast<Sprite2D *>(GetCurrentScene()->get_node_by_id(m_selectedNode));
-		if (nullptr != selectedNode) {
-			int w, h;
-			RenderingServer::get().GetWindowSize(w, h);
+		Node *selectedNode = GetCurrentScene()->get_node_by_id(m_selectedNode);
+		Node2D *selectedNode2D = dynamic_cast<Node2D *>(selectedNode);
+		if (nullptr != selectedNode2D) {
+			vec2 pos = selectedNode2D->global_position();
 
-			Texture *texture = ResourceManager::get().GetAs<Texture>(selectedNode->texture());
+			float length = 20.f * m_editorCameraZoom2d;
+			float thickness = m_editorCameraZoom2d * 5;
+			Renderer().PushLine(vec2(pos.x - length, pos.y),
+								vec2(pos.x + length, pos.y), thickness, 0.83f, 0.62f,
+								0.3f, 2.f, 100.f);
+			Renderer().PushLine(vec2(pos.x, pos.y - length),
+								vec2(pos.x, pos.y + length), thickness, 0.83f, 0.62f,
+								0.3f, 2.f, 100.f);
+		}
+
+		Sprite2D *selectedSprite2D = dynamic_cast<Sprite2D *>(selectedNode);
+		if (nullptr != selectedSprite2D) {
+			Texture *texture =
+				ResourceManager::get().GetAs<Texture>(selectedSprite2D->texture());
 			float width = 128.f;
 			float height = 128.f;
 			if (texture) {
 				width = texture->Width();
 				height = texture->Height();
 			}
-			glm::mat4 model = glm::scale(selectedNode->calculate_transform(), {width, height, 1.f});
+			glm::mat4 model =
+				glm::scale(selectedSprite2D->calculate_transform(), {width, height, 1.f});
 
-			glm::vec4 points[4] = {
-				{-0.5f, 0.5f, 0.f, 1.f},
-				{-0.5f, -0.5f, 0.f, 1.f},
-				{0.5f, -0.5f, 0.f, 1.f},
-				{0.5f, 0.5f, 0.f, 1.f}};
+			glm::vec4 points[4] = {{-0.5f, 0.5f, 0.f, 1.f},
+								   {-0.5f, -0.5f, 0.f, 1.f},
+								   {0.5f, -0.5f, 0.f, 1.f},
+								   {0.5f, 0.5f, 0.f, 1.f}};
 
 			for (int i = 0; i < 4; i++) {
 				points[i] = model * points[i];
@@ -624,15 +637,14 @@ void App::mainLoop() {
 			maxY += padding;
 
 			float thickness = m_editorCameraZoom2d * 5;
-			Renderer().PushLine(vec2(minX, minY), vec2(maxX, minY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
-			Renderer().PushLine(vec2(maxX, minY), vec2(maxX, maxY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
-			Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
-			Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f, 0.6f, 0.8f, 2.f, 100.f);
-
-			vec2 pos = selectedNode->global_position();
-			float length = 20.f * m_editorCameraZoom2d;
-			Renderer().PushLine(vec2(pos.x - length, pos.y), vec2(pos.x + length, pos.y), thickness, 0.83f, 0.62f, 0.3f, 2.f, 100.f);
-			Renderer().PushLine(vec2(pos.x, pos.y - length), vec2(pos.x, pos.y + length), thickness, 0.83f, 0.62f, 0.3f, 2.f, 100.f);
+			Renderer().PushLine(vec2(minX, minY), vec2(maxX, minY), thickness, 0.2f,
+								0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(maxX, minY), vec2(maxX, maxY), thickness, 0.2f,
+								0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f,
+								0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f,
+								0.6f, 0.8f, 2.f, 100.f);
 		}
 	}
 
@@ -680,24 +692,25 @@ void App::mainLoop() {
 	Renderer().End();
 
 	if (!IsRunning()) {
-		double x, y;
-		Input::GetWindowMousePosition(x, y);
-		int w, h;
-		RenderingServer::get().GetWindowSize(w, h);
+		vec2 windowSize = RenderingServer::get().GetWindowSize();
 		// vec2 cursorPos = ViewportRect().map_point(vec2(x, y), rect(0.f, 0.f, 1920.f, 1080.f));
-		vec2 cursorPos = vec2(x, y);
-		cursorPos.x *= 1920.f / (float)w;
-		cursorPos.y *= 1080.f / (float)h;
+		vec2 cursorPos = Input::GetWindowMousePosition();
+		cursorPos.x *= 1920.f / (float)windowSize.x;
+		cursorPos.y *= 1080.f / (float)windowSize.y;
 
-		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(cursorPos.x), static_cast<int>(cursorPos.y));
+		int id = m_layer2D.ReadAttachmentInt(1, static_cast<int>(cursorPos.x),
+											 static_cast<int>(cursorPos.y));
 		if (id == 0)
 			m_hoveredNode = 0;
-		if (id == 0 && Input::IsButtonJustClicked(MB_LEFT) && this->m_editorState == EditorState::None && Input::IsCursorInside())
+		if (id == 0 && Input::IsButtonJustClicked(MB_LEFT) &&
+			this->m_editorState == EditorState::None && Input::IsCursorInside())
 			m_selectedNode = 0;
 
-		if (id != 0 && GetCurrentScene() && nullptr != GetCurrentScene()->get_node_by_id(id)) {
+		if (id != 0 && GetCurrentScene() &&
+			nullptr != GetCurrentScene()->get_node_by_id(id)) {
 			m_hoveredNode = static_cast<size_t>(id);
-			if (m_editorState == EditorState::None && Input::IsButtonJustClicked(MB_LEFT) && Input::IsCursorInside()) {
+			if (m_editorState == EditorState::None &&
+				Input::IsButtonJustClicked(MB_LEFT) && Input::IsCursorInside()) {
 				if (m_selectedNode == m_hoveredNode)
 					m_selectedNode = 0;
 				else
@@ -705,7 +718,8 @@ void App::mainLoop() {
 			}
 		}
 
-		if (Input::IsButtonJustClicked(MB_LEFT) && this->m_editorState != EditorState::None) {
+		if (Input::IsButtonJustClicked(MB_LEFT) &&
+			this->m_editorState != EditorState::None) {
 			m_editorState = EditorState::None;
 			RenderingServer::get().SetCursorMode(CursorMode::Normal);
 		}
@@ -721,7 +735,7 @@ void App::mainLoop() {
 	// glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
 	// fullscreenModel.Draw();
 
-	glViewport(0, 0, w, h);
+	glViewport(0, 0, windowSize.x, windowSize.y);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_layerUI.GetTargetTextureID(0));
 	fullscreenModel.Draw();
