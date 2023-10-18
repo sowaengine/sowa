@@ -25,8 +25,9 @@ class Scene {
 	ErrorCode save(const char *path);
 	void clear();
 
-
 	Node *create(NodeType type, const std::string &name = "", size_t id = 0);
+	void queue_free(size_t id);
+
 	Resource *load_resource(const std::string &path, RID id = 0, ResourceType type = ResourceType_None);
 
 	inline const std::vector<RID> &scene_resources() { return m_resources; }
@@ -46,6 +47,8 @@ class Scene {
 
 	std::vector<Node *> m_nodes;
 	size_t m_active_camera_2d;
+
+	std::vector<size_t> m_nodes_to_free;
 
 	std::string m_path = "";
 };

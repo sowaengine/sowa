@@ -127,6 +127,22 @@ void Scene::_update_scene() {
 		if (App::get().IsRunning())
 			node->update_behaviours();
 	}
+
+	for (auto id : m_nodes_to_free) {
+		Node *node = get_node_by_id(id);
+		if (nullptr == node)
+			continue;
+
+		if (Node *parent = node->get_parent(); nullptr != parent) {
+			parent->remove_child(node->id());
+		}
+
+		NodeDB::get().destruct(node);
+
+		m_allocated_nodes.erase(id);
+	}
+
+	m_nodes_to_free.clear();
 }
 
 void Scene::_end_scene() {
@@ -340,6 +356,10 @@ Node *Scene::create(NodeType type, const std::string &name, size_t id) {
 	m_allocated_nodes[node->id()] = node;
 
 	return node;
+}
+
+void Scene::queue_free(size_t id) {
+	m_nodes_to_free.push_back(id);
 }
 
 Resource *Scene::load_resource(const std::string &path, RID id, ResourceType type) {
