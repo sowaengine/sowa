@@ -15,6 +15,7 @@ const int MODE_SPRITE2D = 0;
 const int MODE_UI_CONTAINER = 1;
 const int MODE_TEXT = 2;
 const int MODE_HOLLOW = 3;
+const int MODE_HOLLOW_CIRCLE = 4;
 
 uniform sampler2D uTextures[32];
 
@@ -52,6 +53,20 @@ void main() {
     color = vec4(1.0f, 1.0f, 1.0f, getTexture().r) * vColor;
 
   } else if(int(vDrawMode) == MODE_HOLLOW) {
+    float f1 = fmod(vTexCoords.x, 0.1f);
+    float f2 = fmod(vTexCoords.y, 0.1f);
+    if((f1 > 0.025f && f1 < 0.075f) || (f2 > 0.025f && f2 < 0.075f)) {
+      discard;
+    }
+
+    color = getTexture() * vColor;
+
+  } else if(int(vDrawMode) == MODE_HOLLOW_CIRCLE) {
+    vec2 center = vec2(0.5f, 0.5f);
+    if(length(vTexCoords - center) > 0.5f) {
+      discard;
+    }
+
     float f1 = fmod(vTexCoords.x, 0.1f);
     float f2 = fmod(vTexCoords.y, 0.1f);
     if((f1 > 0.025f && f1 < 0.075f) || (f2 > 0.025f && f2 < 0.075f)) {
