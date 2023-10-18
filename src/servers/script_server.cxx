@@ -390,14 +390,14 @@ ScriptServer::ScriptServer() {
 	s_data.engine->RegisterGlobalFunction("double delta()", asFUNCTION(Time::Delta), asCALL_CDECL);
 	s_data.engine->SetDefaultNamespace("");
 
-	struct MethodWrapper {
+	struct InputMethodWrapper {
 		static vec2 *GetGameMousePosition() {
 			return ASRef::Create<vec2>(Input::GetGameMousePosition());
 		}
 	};
 
 	s_data.engine->SetDefaultNamespace("input");
-	s_data.engine->RegisterGlobalFunction("vec2@ get_game_mouse_position()", asFUNCTION(MethodWrapper::GetGameMousePosition), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("vec2@ get_game_mouse_position()", asFUNCTION(InputMethodWrapper::GetGameMousePosition), asCALL_CDECL);
 	s_data.engine->SetDefaultNamespace("");
 
 	// Register nodes
@@ -406,7 +406,33 @@ ScriptServer::ScriptServer() {
 		AS_REGISTER_TYPE_STR(name.c_str(), asOBJ_REF | asOBJ_NOCOUNT);
 	}
 
+	struct SceneMethodWrapper {
+		static Node *Create(const std::string &nodeType, const std::string &name) {
+			return App::get().GetCurrentScene()->create(NodeDB::get().get_node_type(nodeType), name);
+		}
+
+		static Node *GetNodeInGroup(const std::string &group) {
+			return App::get().GetCurrentScene()->get_node_in_group(group);
+		}
+
+		static Node *GetNodeById(uint64_t id) {
+			return App::get().GetCurrentScene()->get_node_by_id(static_cast<size_t>(id));
+		}
+
+		static void QueueFree(Node *node) {
+			return App::get().GetCurrentScene()->queue_free(node->id());
+		}
+	};
+
+	s_data.engine->SetDefaultNamespace("scene");
+	s_data.engine->RegisterGlobalFunction("Node@ create(string, string)", asFUNCTION(SceneMethodWrapper::Create), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("Node@ get_node_in_group(string)", asFUNCTION(SceneMethodWrapper::GetNodeInGroup), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("Node@ get_node_by_id(uint64)", asFUNCTION(SceneMethodWrapper::GetNodeById), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
+
 	s_data.engine->RegisterObjectMethod("Node", "Node@ get_parent()", asMETHODPR(Node, get_parent, (), Node *), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("Node", "Node@ add_child()", asMETHODPR(Node, add_child, (Node *), void), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("Node", "void queue_free()", asFUNCTION(SceneMethodWrapper::QueueFree), asCALL_CDECL_OBJFIRST);
 	s_data.engine->RegisterObjectMethod("Node2D", "float global_rotation()", asMETHODPR(Node2D, global_rotation, (), float), asCALL_THISCALL);
 
 	for (const auto &[type, data] : db.m_db) {
