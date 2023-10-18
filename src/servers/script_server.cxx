@@ -3,11 +3,14 @@
 #include <iostream>
 
 #include "core/behaviour/behaviour_db.hxx"
+#include "core/time.hxx"
+
 #include "file_server.hxx"
+
 #include "math/math.hxx"
-#include "scene/node_2d.hxx"
+
 #include "scene/node_db.hxx"
-#include "scene/sprite_2d.hxx"
+#include "scene/nodes.hxx"
 
 #include <angelscript.h>
 #include <scriptbuilder/scriptbuilder.h>
@@ -46,35 +49,54 @@ struct ScriptServerData {
 
 static ScriptServerData s_data;
 
+static int s_alloc = 0;
+static int s_dealloc = 0;
+
 namespace ASRef {
 // ref -1: app allocated object
 static std::unordered_map<void *, int> refs;
 
 template <typename T>
 void AddRef(T *o) {
-	if (refs[(void *)o] == -1)
+	if (refs[(void *)o] == -1) {
 		return;
+	}
 
 	refs[(void *)o]++;
 }
 
 template <typename T>
 void Release(T *o) {
-	if (refs[(void *)o] == -1)
+
+	if (refs.find((void *)o) == refs.end()) {
 		return;
+	}
+
+	if (refs[(void *)o] == -1) {
+		return;
+	}
 
 	if (--refs[(void *)o] == 0) {
+		s_dealloc += sizeof(T);
+		refs.erase(refs.find((void *)o));
+
 		delete o;
+
+	} else {
+		Utils::Error("Checkout {}:{}", __FILE__, __LINE__);
 	}
 }
 
 template <typename T, typename... Args>
 T *Create(Args... args) {
-	return new T(args...);
-}
-template <typename T>
-T *Create(float v) {
-	return new T(v);
+
+	T *t = new T(args...);
+	refs[(void *)t] = 1;
+
+	s_alloc += sizeof(T);
+
+	// Utils::Log("Alloc: {}, Dealloc: {}, Usage: {}", s_alloc, s_dealloc, s_alloc - s_dealloc);
+	return t;
 }
 
 // Stores script object without allocating it. (used for app allocated objects)
@@ -183,7 +205,7 @@ static void asGetProperty(asIScriptGeneric *gen) {
 	std::string propName = std::string(func->GetName()).substr(4);
 
 	std::string typeName;
-	void *ret = nullptr;
+	// void *ret = nullptr;
 
 	int propTypeID = gen->GetReturnTypeId();
 	if (propTypeID == asTYPEID_INT32) {
@@ -198,7 +220,7 @@ static void asGetProperty(asIScriptGeneric *gen) {
 		}
 
 		typeName = propType->GetName();
-		ret = gen->GetEngine()->CreateScriptObject(propType);
+		// ret = gen->GetEngine()->CreateScriptObject(propType);
 	}
 
 	if (typeName == "int") {
@@ -214,10 +236,9 @@ static void asGetProperty(asIScriptGeneric *gen) {
 			return;
 		}
 	} else if (typeName == "string") {
-		std::any prop = NodeDB::get().get_property(node->type_hash(), propName).get(node);
-		if (std::string *v = std::any_cast<std::string>(&prop)) {
-			*reinterpret_cast<std::string *>(ret) = *v;
-			gen->SetReturnObject(ret);
+		std::any prop = NodeDB::get().get_property(node->type_hash(), propName).get_ref(node);
+		if (std::string **v = std::any_cast<std::string *>(&prop)) {
+			gen->SetReturnObject(ASRef::CreateNoAlloc(*v));
 			return;
 		}
 	} else if (typeName == "vec2") {
@@ -307,6 +328,7 @@ void asDestruct(void *memory) {
 ScriptServer::ScriptServer() {
 	vec2 v;
 	asConstruct<vec2>(&v, 0.f);
+	asDestruct<vec2>(nullptr);
 
 	s_data.engine = asCreateScriptEngine();
 
@@ -337,20 +359,55 @@ ScriptServer::ScriptServer() {
 
 	// Register types
 	s_data.engine->RegisterTypedef("RID", "int");
+
+	s_data.engine->RegisterEnum("PhysicsBodyType");
+	s_data.engine->RegisterEnumValue("PhysicsBodyType", "Static", (int)PhysicsBodyType::Static);
+	s_data.engine->RegisterEnumValue("PhysicsBodyType", "Dynamic", (int)PhysicsBodyType::Dynamic);
+	s_data.engine->RegisterEnumValue("PhysicsBodyType", "Kinematic", (int)PhysicsBodyType::Kinematic);
+
 	s_data.engine->RegisterObjectType("vec2", sizeof(vec2), asOBJ_REF);
 	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_ADDREF, "void f()", asFUNCTION(ASRef::AddRef<vec2>), asCALL_CDECL_OBJFIRST);
 	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_RELEASE, "void f()", asFUNCTION(ASRef::Release<vec2>), asCALL_CDECL_OBJFIRST);
+
 	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_FACTORY, "vec2@ f()", asFUNCTIONPR(ASRef::Create<vec2>, (), vec2 *), asCALL_CDECL);
 	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_FACTORY, "vec2@ f(float)", asFUNCTIONPR(ASRef::Create<vec2>, (float), vec2 *), asCALL_CDECL);
+	s_data.engine->RegisterObjectBehaviour("vec2", asBEHAVE_FACTORY, "vec2@ f(float, float)", asFUNCTIONPR(ASRef::Create<vec2>, (float, float), vec2 *), asCALL_CDECL);
 	s_data.engine->RegisterObjectMethod("vec2", "vec2 &opAssign(vec2 &in) const", asMETHODPR(vec2, operator=, (const vec2 &), vec2 &), asCALL_THISCALL);
 	s_data.engine->RegisterObjectProperty("vec2", "float x", asOFFSET(vec2, x));
 	s_data.engine->RegisterObjectProperty("vec2", "float y", asOFFSET(vec2, y));
+
+	s_data.engine->SetDefaultNamespace("math");
+	s_data.engine->RegisterGlobalFunction("float sin(float)", asFUNCTION(math::sin), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("float cos(float)", asFUNCTION(math::cos), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("float pi()", asFUNCTION(math::pi), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("float radians(float)", asFUNCTION(math::radians), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("float degrees(float)", asFUNCTION(math::degrees), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("float atan2(float, float)", asFUNCTION(math::atan2), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("float fmod(float, float)", asFUNCTION(math::fmod), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
+
+	s_data.engine->SetDefaultNamespace("time");
+	s_data.engine->RegisterGlobalFunction("double delta()", asFUNCTION(Time::Delta), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
+
+	struct MethodWrapper {
+		static vec2 *GetGameMousePosition() {
+			return ASRef::Create<vec2>(Input::GetGameMousePosition());
+		}
+	};
+
+	s_data.engine->SetDefaultNamespace("input");
+	s_data.engine->RegisterGlobalFunction("vec2@ get_game_mouse_position()", asFUNCTION(MethodWrapper::GetGameMousePosition), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
 
 	// Register nodes
 	for (const auto &[type, data] : db.m_db) {
 		std::string name = db.get_node_typename(type);
 		AS_REGISTER_TYPE_STR(name.c_str(), asOBJ_REF | asOBJ_NOCOUNT);
 	}
+
+	s_data.engine->RegisterObjectMethod("Node", "Node@ get_parent()", asMETHODPR(Node, get_parent, (), Node *), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("Node2D", "float global_rotation()", asMETHODPR(Node2D, global_rotation, (), float), asCALL_THISCALL);
 
 	for (const auto &[type, data] : db.m_db) {
 		std::string name = db.get_node_typename(type);
