@@ -14,6 +14,7 @@ in vec4 vClipRect;
 const int MODE_SPRITE2D = 0;
 const int MODE_UI_CONTAINER = 1;
 const int MODE_TEXT = 2;
+const int MODE_HOLLOW = 3;
 
 uniform sampler2D uTextures[32];
 
@@ -21,6 +22,10 @@ vec4 getTexture();
 
 float lerp(float from, float to, float t) {
   return from + ((to - from) * t);
+}
+
+float fmod(float x, float y) {
+  return x - y * floor(x / y);
 }
 
 void main() {
@@ -45,6 +50,13 @@ void main() {
 
   } else if(int(vDrawMode) == MODE_TEXT) {
     color = vec4(1.0f, 1.0f, 1.0f, getTexture().r) * vColor;
+
+  } else if(int(vDrawMode) == MODE_HOLLOW) {
+    if(fmod(vTexCoords.x, 0.1f) < 0.05f || fmod(vTexCoords.y, 0.1f) < 0.05f) {
+      discard;
+    }
+
+    color = getTexture() * vColor;
 
   } else {
     color = vec4(0.f, 0.f, 0.f, 1.f);
