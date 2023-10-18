@@ -196,6 +196,13 @@ ErrorCode App::Init() {
 				Start();
 		}
 
+		if (event.action == KEY_PRESSED && event.key == KEY_S && event.modifiers.control) {
+			ErrorCode err = GetCurrentScene()->save(GetCurrentScene()->Path().c_str());
+			if (err != OK) {
+				std::cout << "Failed to save scene " << err << std::endl;
+			}
+		}
+
 		command_interface_key_callback(event);
 	});
 

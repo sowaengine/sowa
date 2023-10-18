@@ -362,7 +362,6 @@ void GuiServer::Update() {
 
 	if (show_demo) {
 		ImGui::ShowDemoWindow(nullptr);
-		ImGui::End();
 	}
 
 	ImGui::End();

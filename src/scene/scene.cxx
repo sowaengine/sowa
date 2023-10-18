@@ -235,6 +235,8 @@ ErrorCode Scene::load(const char *path) {
 }
 
 ErrorCode Scene::save(const char *path) {
+	Utils::Info("Saving scene to {}", path);
+
 	NodeDB &db = NodeDB::get();
 
 	YAML::Node doc;
