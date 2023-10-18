@@ -2,24 +2,16 @@
 
 #include "servers/input_server.hxx"
 
-void Input::GetMousePosition(double &x, double &y) {
-	return InputServer::get().GetMousePosition(x, y);
-}
-void Input::GetWindowMousePosition(double &x, double &y) {
-	return InputServer::get().GetWindowMousePosition(x, y);
-}
 vec2 Input::GetMousePosition() {
-	double x, y;
-	InputServer::get().GetMousePosition(x, y);
-	vec2 v(x, y);
-	return v;
+	return InputServer::get().GetMousePosition();
 }
 vec2 Input::GetWindowMousePosition() {
-	double x, y;
-	InputServer::get().GetWindowMousePosition(x, y);
-	vec2 v(x, y);
-	return v;
+	return InputServer::get().GetWindowMousePosition();
 }
+vec2 Input::GetGameMousePosition() {
+	return InputServer::get().GetGameMousePosition();
+}
+
 int Input::GetPressedChar() {
 	return InputServer::get().GetPressedChar();
 }

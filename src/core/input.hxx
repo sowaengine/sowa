@@ -163,10 +163,9 @@ static const Key KEY_MENU = 348;
 
 class Input {
   public:
-	static void GetMousePosition(double &x, double &y);
-	static void GetWindowMousePosition(double &x, double &y);
 	static vec2 GetMousePosition();
 	static vec2 GetWindowMousePosition();
+	static vec2 GetGameMousePosition();
 	static int GetPressedChar();
 
 	static ActionState GetKeyState(int key);
