@@ -24,9 +24,9 @@ struct BatchVertex {
 	float g = 1.f;
 	float b = 1.f;
 	float a = 1.f;
-	float d_id = 0.f; // draw id
-	float t_id = 0.f; // texture id
-	float draw_mode = 0.f;
+	float d_id = 0.f;	   // draw id
+	float t_id = 0.f;	   // texture id
+	float draw_mode = 0.f; // 0.f -> sprite2d, 1.f -> ui container, 2.f -> text, 3.f -> hollow
 	float clipRect_x = 0.f;
 	float clipRect_y = 0.f;
 	float clipRect_w = 1920.f;

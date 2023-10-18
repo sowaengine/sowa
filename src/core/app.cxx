@@ -302,6 +302,10 @@ ErrorCode App::Init() {
 	REGISTER_NODE_TYPE(PhysicsBody2D, Node2D);
 	REGISTER_NODE_PROPERTY(PhysicsBody2D, "type", type(), PhysicsBodyType);
 
+	REGISTER_NODE_TYPE(RectCollider2D, Node2D);
+	REGISTER_NODE_PROPERTY(RectCollider2D, "width", width(), float);
+	REGISTER_NODE_PROPERTY(RectCollider2D, "height", height(), float);
+
 	REGISTER_NODE_TYPE(Sprite2D, Node2D);
 	REGISTER_NODE_PROPERTY(Sprite2D, "texture", texture(), RID);
 
@@ -752,12 +756,12 @@ void App::mainLoopCaller(void *self) {
 }
 
 void App::SetCurrentScene(Scene *scene) {
-	if (m_pCurrentScene != nullptr) {
+	if (m_pCurrentScene != nullptr && IsRunning()) {
 		m_pCurrentScene->_end_scene();
 	}
 
 	m_pCurrentScene = scene;
-	if (m_running)
+	if (IsRunning())
 		m_pCurrentScene->_begin_scene();
 }
 
