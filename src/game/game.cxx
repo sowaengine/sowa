@@ -69,7 +69,7 @@ void Main() {
 
 			crates->add_child(sprite);
 		}
-		scene->Nodes().push_back(crates);
+		scene->Root()->add_child(crates);
 		*/
 	} else
 		load_scene();
@@ -93,7 +93,7 @@ void load_scene() {
 	Sprite2D *centerSprite = dynamic_cast<Sprite2D *>(centerNode);
 	centerSprite->texture() = 100;
 	centerSprite->position() = {600.f, 600.f};
-	scene->Nodes().push_back(centerSprite);
+	scene->Root()->add_child(centerSprite);
 
 	{
 		Node *node = scene->create(NodeDB::get().get_node_type("Sprite2D"));
@@ -112,8 +112,7 @@ void load_scene() {
 	player->name() = "Player";
 	player->add_behaviour("Tank Movement");
 
-	scene->Nodes()
-		.push_back(player);
+	scene->Root()->add_child(player);
 
 	node = scene->create(NodeDB::get().get_node_type("Sprite2D"));
 	Sprite2D *barrel = dynamic_cast<Sprite2D *>(node);
@@ -141,7 +140,7 @@ void load_scene() {
 			sand->z_index() = -1.f;
 			sand->name() = "sand" + std::to_string(index++);
 
-			scene->Nodes().push_back(sand);
+			scene->Root()->add_child(sand);
 
 			if (y > 1080.f)
 				break;

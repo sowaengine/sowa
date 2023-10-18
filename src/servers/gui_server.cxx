@@ -233,6 +233,9 @@ void GuiServer::Update() {
 			std::function<void(Node *)> drawNode;
 
 			drawNode = [&](Node *node) {
+				if (node == nullptr)
+					return;
+
 				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 				if (node->get_children().size() == 0) {
 					flags |= ImGuiTreeNodeFlags_Leaf;
@@ -260,9 +263,7 @@ void GuiServer::Update() {
 				}
 			};
 
-			for (Node *node : scene->Nodes()) {
-				drawNode(node);
-			}
+			drawNode(scene->Root());
 
 			if (!ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 				scene_rclick_selected_node = 0;
@@ -281,7 +282,11 @@ void GuiServer::Update() {
 						Node *node = App::get().GetCurrentScene()->create(NodeDB::get().get_node_type(typeName), "New " + typeName);
 
 						if (scene_rclick_selected_node == 0) {
-							App::get().GetCurrentScene()->Nodes().push_back(node);
+							if (nullptr == App::get().GetCurrentScene()->Root()) {
+								App::get().GetCurrentScene()->Root() = (node);
+							} else {
+								App::get().GetCurrentScene()->Root()->add_child(node);
+							}
 						} else {
 							App::get().GetCurrentScene()->get_node_by_id(scene_rclick_selected_node)->add_child(node);
 						}

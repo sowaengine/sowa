@@ -35,6 +35,6 @@ void MouseShooter::Update(Node *node, Behaviour *) {
 
 		// bullet->add_behaviour("Bullet Movement");
 		bullet->add_behaviour("Bullet");
-		App::get().GetCurrentScene()->Nodes().push_back(bullet);
+		App::get().GetCurrentScene()->Root()->add_child(bullet);
 	}
 }

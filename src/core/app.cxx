@@ -50,6 +50,14 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include "mz.h"
+#include "mz_strm.h"
+#include "mz_strm_mem.h"
+#include "mz_zip.h"
+#include "mz_zip_rw.h"
+#include "unzip.h"
+#include "zip.h"
+
 static App *s_instance;
 
 App::App() {
@@ -360,9 +368,7 @@ ErrorCode App::Init() {
 				}
 			};
 
-			for (Node *node : GetCurrentScene()->Nodes()) {
-				func(node);
-			}
+			func(GetCurrentScene()->Root());
 		}
 	});
 	RegisterCommand("Save Scene", [&]() {
@@ -389,6 +395,85 @@ ErrorCode App::Init() {
 	});
 
 	GuiServer::get().Initialize();
+
+	// file_buffer f;
+	// err = FileServer::get().ReadFileBytes("res://project.zip", f);
+	// if (err != OK) {
+	// 	exit(2);
+	// }
+
+	// void *mem_stream = mz_stream_mem_create();
+	// mz_stream_mem_set_buffer(mem_stream, f.data(), f.size());
+	// mz_stream_open(mem_stream, NULL, MZ_OPEN_MODE_READ);
+	//
+	// void *zip_handle = mz_zip_create();
+	// mz_zip_open(zip_handle, mem_stream, MZ_OPEN_MODE_READ);
+
+	/*
+	void *zip_reader = mz_zip_reader_create();
+	mz_zip_reader_open_buffer(zip_reader, f.data(), f.size(), 0);
+	//
+	// mz_zip_entry_write(zip_handle)
+	mz_zip_file *file_info = NULL;
+	if (mz_zip_reader_goto_first_entry(zip_reader) == MZ_OK) {
+			do {
+					mz_zip_file *file_info = NULL;
+					if (mz_zip_reader_entry_get_info(zip_reader, &file_info) !=
+	MZ_OK) { printf("Unable to get zip entry info\n"); break;
+					}
+					printf("Zip entry %s\n", file_info->filename);
+					std::string filename = file_info->filename;
+					if (mz_zip_reader_entry_is_dir(zip_reader) == MZ_OK) {
+							printf("Entry is a directory\n");
+							continue;
+					}
+
+					if (mz_zip_reader_entry_open(zip_reader) == MZ_OK) {
+							if (mz_zip_reader_entry_get_info(zip_reader,
+	&file_info) == MZ_OK) { printf("filename: %s\n", file_info->filename);
+									printf("uncompressed: %ld\n",
+	file_info->uncompressed_size);
+							}
+
+							// char buf[1024];
+							std::vector<char> buf;
+							buf.reserve(file_info->uncompressed_size);
+
+							int32_t bytes_read = 0;
+							int32_t totalBytes = 0;
+							// int32_t err = MZ_OK;
+							do {
+									bytes_read =
+	mz_zip_reader_entry_read(zip_reader, buf.data(), buf.capacity()); if
+	(bytes_read < 0) {
+											// err = bytes_read;
+											// break;
+									}
+									if (bytes_read > 0) {
+											totalBytes += bytes_read;
+									}
+
+									printf("Bytes read from entry %d\n",
+	bytes_read); } while (bytes_read > 0);
+							// mz_zip_reader_close(zip_reader);
+
+							Utils::Info("{}", filename);
+							std::filesystem::path path =
+	Utils::Format("./zipcopy/{}", filename); Utils::Log("{}",
+	path.parent_path().string());
+							std::filesystem::create_directories(path.parent_path());
+							std::ofstream ofstream(path.string(), std::ios::out);
+							ofstream.write(buf.data(), totalBytes);
+					}
+
+			} while (mz_zip_reader_goto_next_entry(zip_reader) == MZ_OK);
+	}
+	mz_zip_reader_close(zip_reader);
+	*/
+
+	// mz_zip_close(zip_handle);
+	// mz_zip_delete(&zip_handle);
+	// mz_stream_mem_delete(&mem_stream);
 
 	return OK;
 }

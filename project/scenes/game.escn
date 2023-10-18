@@ -1,4 +1,4 @@
-active_camera_2d: 2025263758
+active_camera_2d: 78007
 resources:
   103:
     type: ImageTexture
@@ -24,252 +24,83 @@ resources:
   1234:
     type: SpriteSheetAnimation
     path: res://resources/player.anim
-nodes:
-  987812:
-    type: Sprite2D
-    name: Player
-    props:
-      texture:
-        int: 100
-      z_index:
-        float: 0
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 15
-      position:
-        vec2:
-          x: 400
-          y: 400
-    behaviours:
-      - Tank Movement
-    children:
-      7802112:
-        type: Sprite2D
-        name: Barrel
-        props:
-          texture:
-            int: 101
-          z_index:
-            float: 2
-          scale:
-            vec2:
-              x: 1
-              y: 1
-          rotation:
-            float: 190
-          position:
-            vec2:
-              x: 0
-              y: 0
-        behaviours:
-          - Tank Barrel
-          - Mouse Shooter
-        groups:
-          - Barrel
-      2025263758:
-        type: Camera2D
-        name: Camera
-        props:
-          zoom:
-            vec2:
-              x: 1
-              y: 1
-          z_index:
-            float: 0
-          scale:
-            vec2:
-              x: 1
-              y: 1
-          rotation:
-            float: 0
-          position:
-            vec2:
-              x: 0
-              y: 0
-  1123:
-    type: Sprite2D
-    name: New Node
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: 0
-          y: 0
-  14123:
-    type: Sprite2D
-    name: bg2
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: -1280
-          y: 0
-  512312:
-    type: Sprite2D
-    name: bg3
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: 1280
-          y: 0
-  71231:
-    type: Sprite2D
-    name: bg4
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: -1280
-          y: 1280
-  12313123:
-    type: Sprite2D
-    name: bg5
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: 0
-          y: 1280
-  16732132:
-    type: Sprite2D
-    name: bg6
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: 1280
-          y: 1280
-  1732412:
-    type: Sprite2D
-    name: bg7
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: -1280
-          y: -1280
-  176231:
-    type: Sprite2D
-    name: bg8
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: 0
-          y: -1280
-  72412:
-    type: Sprite2D
-    name: bg9
-    props:
-      texture:
-        int: 103
-      z_index:
-        float: -1
-      scale:
-        vec2:
-          x: 1
-          y: 1
-      rotation:
-        float: 0
-      position:
-        vec2:
-          x: 1280
-          y: -1280
-  495516:
-    type: AudioStreamPlayer
-    name: music
-    props:
-      autoplay:
-        bool: true
-      stream:
-        int: 1736439943
-  12345:
-    type: AnimatedSprite2D
-    name: animation
-    props:
-      scale:
-        vec2:
-          x: 4
-          y: 4
-      position:
-        vec2:
-          x: 200
-          y: 200
-      spritesheet:
-        int: 1234
+root:
+  id: 628138
+  type: Node2D
+  name: Root
+  props:
+    z_index:
+      float: 0
+    scale:
+      vec2:
+        x: 1
+        y: 1
+    rotation:
+      float: 0
+    position:
+      vec2:
+        x: 0
+        y: 0
+  children:
+    - id: 707657
+      type: Sprite2D
+      name: Tank
+      behaviours:
+        - Tank Movement
+      props:
+        texture:
+          int: 100
+        z_index:
+          float: 0
+        scale:
+          vec2:
+            x: 1
+            y: 1
+        rotation:
+          float: 37.0000038
+        position:
+          vec2:
+            x: 370.909119
+            y: 311.688293
+      children:
+        - id: 672007
+          type: Sprite2D
+          name: Barrel
+          behaviours:
+            - Barrel
+            - Mouse Shooter
+          props:
+            texture:
+              int: 101
+            z_index:
+              float: 2
+            scale:
+              vec2:
+                x: 1
+                y: 1
+            rotation:
+              float: 0
+            position:
+              vec2:
+                x: 0
+                y: 0
+        - id: 78007
+          type: Camera2D
+          name: Camera
+          props:
+            zoom:
+              vec2:
+                x: 1
+                y: 1
+            z_index:
+              float: 0
+            scale:
+              vec2:
+                x: 1
+                y: 1
+            rotation:
+              float: 0
+            position:
+              vec2:
+                x: 0
+                y: 0

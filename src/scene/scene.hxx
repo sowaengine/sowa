@@ -14,7 +14,7 @@
 
 class Scene {
   public:
-	inline std::vector<Node *> &Nodes() { return m_nodes; }
+	inline Node *&Root() { return m_root; }
 	virtual ~Scene() = default;
 
 	void _begin_scene();
@@ -27,6 +27,7 @@ class Scene {
 
 	Node *create(NodeType type, const std::string &name = "", size_t id = 0);
 	void queue_free(size_t id);
+	void free(size_t id);
 
 	Resource *load_resource(const std::string &path, RID id = 0, ResourceType type = ResourceType_None);
 
@@ -45,7 +46,7 @@ class Scene {
 	std::unordered_map<size_t, Node *> m_allocated_nodes;
 	std::vector<RID> m_resources;
 
-	std::vector<Node *> m_nodes;
+	Node *m_root = nullptr;
 	size_t m_active_camera_2d;
 
 	std::vector<size_t> m_nodes_to_free;

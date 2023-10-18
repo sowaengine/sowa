@@ -129,17 +129,7 @@ void Scene::_update_scene() {
 	}
 
 	for (auto id : m_nodes_to_free) {
-		Node *node = get_node_by_id(id);
-		if (nullptr == node)
-			continue;
-
-		if (Node *parent = node->get_parent(); nullptr != parent) {
-			parent->remove_child(node->id());
-		}
-
-		NodeDB::get().destruct(node);
-
-		m_allocated_nodes.erase(id);
+		this->free(id);
 	}
 
 	m_nodes_to_free.clear();
@@ -153,7 +143,7 @@ void Scene::_end_scene() {
 
 ErrorCode Scene::load(const char *path) {
 	NodeDB &db = NodeDB::get();
-	m_nodes.clear();
+	Root() = nullptr;
 
 	YAML::Node node;
 
@@ -194,33 +184,21 @@ ErrorCode Scene::load(const char *path) {
 		Utils::Info("Loaded resource ({}) id: {}", path, res->ResourceID());
 	}
 
-	YAML::Node nodes = scene["nodes"];
-	std::function<void(Node *, const std::pair<YAML::Node, YAML::Node> &)> deserializeNode;
+	YAML::Node root = scene["root"];
+	std::function<void(Node *, const YAML::Node &)> deserializeNode;
 
-	deserializeNode = [&](Node *parent, const std::pair<YAML::Node, YAML::Node> &doc) {
-		size_t id = doc.first.as<size_t>(0);
-		YAML::Node nodeData = doc.second;
+	deserializeNode = [&](Node *parent, const YAML::Node &doc) {
+		YAML::Node nodeData = doc;
+
 		std::string type = nodeData["type"].as<std::string>("Node");
 		std::string name = nodeData["name"].as<std::string>("New Node");
+		size_t id = nodeData["id"].as<size_t>(0);
 
 		Node *pNode = create(db.get_node_type(type), name, id);
 		if (parent == nullptr)
-			this->Nodes().push_back(pNode);
+			this->Root() = pNode;
 		else
 			parent->add_child(pNode);
-
-		for (const auto &prop : nodeData["props"]) {
-			std::string propName = prop.first.as<std::string>();
-			if (propName == "name")
-				continue;
-
-			std::any value = prop.second.as<std::any>();
-
-			NodeProperty propSetter = db.get_property(pNode->type_hash(), propName);
-			if (propSetter.set) {
-				propSetter.set(pNode, value);
-			}
-		}
 
 		for (const auto &behaviour : nodeData["behaviours"]) {
 			std::string name = behaviour.as<std::string>("");
@@ -237,14 +215,25 @@ ErrorCode Scene::load(const char *path) {
 			pNode->get_groups().push_back(name);
 		}
 
+		for (const auto &prop : nodeData["props"]) {
+			std::string propName = prop.first.as<std::string>();
+			if (propName == "name")
+				continue;
+
+			std::any value = prop.second.as<std::any>();
+
+			NodeProperty propSetter = db.get_property(pNode->type_hash(), propName);
+			if (propSetter.set) {
+				propSetter.set(pNode, value);
+			}
+		}
+
 		for (const auto &child : nodeData["children"]) {
 			deserializeNode(pNode, child);
 		}
 	};
 
-	for (const auto &node : nodes) {
-		deserializeNode(nullptr, node);
-	}
+	deserializeNode(nullptr, root);
 
 	m_path = path;
 	return OK;
@@ -280,24 +269,14 @@ ErrorCode Scene::save(const char *path) {
 
 	doc["resources"] = resources;
 
-	YAML::Node nodes;
+	YAML::Node root;
 
 	std::function<void(Node *, YAML::Node &)> serializeNode;
 	serializeNode = [&](Node *pNode, YAML::Node &doc) {
 		YAML::Node node;
+		node["id"] = pNode->id();
 		node["type"] = db.get_node_typename(pNode->type_hash());
 		node["name"] = pNode->name();
-
-		YAML::Node props;
-		std::vector<std::string> propNames;
-		db.get_property_names(pNode->type_hash(), propNames);
-		for (const auto &name : propNames) {
-			if (name == "name")
-				continue;
-
-			props[name] = db.get_property(pNode->type_hash(), name).get(pNode);
-		}
-		node["props"] = props;
 
 		auto &behaviourList = pNode->get_behaviour_names();
 		if (behaviourList.size() > 0) {
@@ -314,7 +293,18 @@ ErrorCode Scene::save(const char *path) {
 			node["groups"] = groups;
 		}
 
-		doc[pNode->id()] = (node);
+		YAML::Node props;
+		std::vector<std::string> propNames;
+		db.get_property_names(pNode->type_hash(), propNames);
+		for (const auto &name : propNames) {
+			if (name == "name")
+				continue;
+
+			props[name] = db.get_property(pNode->type_hash(), name).get(pNode);
+		}
+		node["props"] = props;
+
+		doc.push_back(node);
 
 		YAML::Node childrenDoc;
 		for (Node *child : pNode->get_children()) {
@@ -324,10 +314,9 @@ ErrorCode Scene::save(const char *path) {
 			node["children"] = childrenDoc;
 	};
 
-	for (Node *pNode : Nodes()) {
-		serializeNode(pNode, nodes);
-	}
-	doc["nodes"] = nodes;
+	serializeNode(Root(), root);
+	if (root.size() > 0)
+		doc["root"] = root[0];
 
 	std::string s;
 	std::stringstream ss;
@@ -344,7 +333,7 @@ ErrorCode Scene::save(const char *path) {
 }
 
 void Scene::clear() {
-	m_nodes.clear();
+	Root() = nullptr;
 	for (auto &[id, node] : m_allocated_nodes) {
 		NodeDB::get().destruct(node);
 	}
@@ -360,6 +349,28 @@ Node *Scene::create(NodeType type, const std::string &name, size_t id) {
 
 void Scene::queue_free(size_t id) {
 	m_nodes_to_free.push_back(id);
+}
+
+void Scene::free(size_t id) {
+	Node *node = get_node_by_id(id);
+	if (nullptr == node)
+		return;
+
+	if (node == Root()) {
+		Root() = nullptr;
+	}
+
+	if (Node *parent = node->get_parent(); nullptr != parent) {
+		parent->remove_child(node->id());
+	}
+
+	for (Node *child : node->get_children()) {
+		free(child->id());
+	}
+
+	NodeDB::get().destruct(node);
+
+	m_allocated_nodes.erase(id);
 }
 
 Resource *Scene::load_resource(const std::string &path, RID id, ResourceType type) {
@@ -390,7 +401,7 @@ static Node *search_node_in_group(Node *node, std::string group) {
 }
 
 Node *Scene::get_node_in_group(std::string group) {
-	for (Node *node : Nodes()) {
+	for (Node *node : Root()->get_children()) {
 		Node *find = search_node_in_group(node, group);
 		if (nullptr != find)
 			return find;
@@ -430,8 +441,6 @@ void Scene::copy(Scene *src, Scene *dst) {
 	};
 
 	dst->clear();
-	for (Node *node : src->Nodes()) {
-		Node *newNode = copyNode(node);
-		dst->Nodes().push_back(newNode);
-	}
+	Node *newRoot = copyNode(src->Root());
+	dst->Root() = newRoot;
 }
