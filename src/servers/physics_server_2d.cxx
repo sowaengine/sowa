@@ -25,19 +25,19 @@ class DebugDraw : public b2Draw {
 			b2Vec2 v1 = vertices[i - 1];
 			b2Vec2 v2 = vertices[i];
 
-			App::get().Renderer().PushLine(vec2(UNIT_TO_PX(v1.x), UNIT_TO_PX(v1.y)), vec2(UNIT_TO_PX(v2.x), UNIT_TO_PX(v2.y)), 5.f, color.r, color.g, color.b, color.a, 10.f);
+			App::get().Renderer().PushLine(vec2(UNIT_TO_PX(v1.x), UNIT_TO_PX(v1.y)), vec2(UNIT_TO_PX(v2.x), UNIT_TO_PX(v2.y)), 2.f, color.r, color.g, color.b, color.a, 10.f);
 		}
 
 		b2Vec2 v1 = vertices[vertexCount - 1];
 		b2Vec2 v2 = vertices[0];
 
-		App::get().Renderer().PushLine(vec2(UNIT_TO_PX(v1.x), UNIT_TO_PX(v1.y)), vec2(UNIT_TO_PX(v2.x), UNIT_TO_PX(v2.y)), 5.f, color.r, color.g, color.b, color.a, 10.f);
+		App::get().Renderer().PushLine(vec2(UNIT_TO_PX(v1.x), UNIT_TO_PX(v1.y)), vec2(UNIT_TO_PX(v2.x), UNIT_TO_PX(v2.y)), 2.f, color.r, color.g, color.b, color.a, 10.f);
 	}
 	void DrawCircle(const b2Vec2 &center, float radius, const b2Color &color) override {
 		Utils::Log("Draw Circle");
 	}
 	void DrawSolidCircle(const b2Vec2 &center, float radius, const b2Vec2 &axis, const b2Color &color) override {
-		Utils::Log("Draw Solid Circle");
+		// Utils::Log("Draw Solid Circle");
 	}
 	void DrawSegment(const b2Vec2 &p1, const b2Vec2 &p2, const b2Color &color) override {
 		Utils::Log("Draw Segment");
@@ -163,6 +163,21 @@ void PhysicsServer2D::destroy_body(void *body) {
 void *PhysicsServer2D::body_add_box_shape(void *body, cref<vec2> halfSize, cref<vec2> position, float rotation) {
 	b2PolygonShape shape;
 	shape.SetAsBox(PX_TO_UNIT(halfSize.x), PX_TO_UNIT(halfSize.y), b2Vec2(PX_TO_UNIT(position.x), PX_TO_UNIT(position.y)), math::radians(rotation));
+
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &shape;
+	fixtureDef.density = 1.0f;
+	fixtureDef.friction = 0.3f;
+	fixtureDef.restitution = 0.4f;
+
+	b2Fixture *fixture = reinterpret_cast<b2Body *>(body)->CreateFixture(&fixtureDef);
+	return (void *)fixture;
+}
+
+void *PhysicsServer2D::body_add_circle_shape(void *body, float radius, cref<vec2> position) {
+	b2CircleShape shape;
+	shape.m_p.Set(PX_TO_UNIT(position.x), PX_TO_UNIT(position.y));
+	shape.m_radius = PX_TO_UNIT(radius);
 
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &shape;
