@@ -52,7 +52,9 @@ void main() {
     color = vec4(1.0f, 1.0f, 1.0f, getTexture().r) * vColor;
 
   } else if(int(vDrawMode) == MODE_HOLLOW) {
-    if(fmod(vTexCoords.x, 0.1f) < 0.05f || fmod(vTexCoords.y, 0.1f) < 0.05f) {
+    float f1 = fmod(vTexCoords.x, 0.1f);
+    float f2 = fmod(vTexCoords.y, 0.1f);
+    if((f1 > 0.025f && f1 < 0.075f) || (f2 > 0.025f && f2 < 0.075f)) {
       discard;
     }
 
