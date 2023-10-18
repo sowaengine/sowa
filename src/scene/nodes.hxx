@@ -9,6 +9,7 @@
 #include "nodes/2d/drawable/sprite_2d.hxx"
 
 #include "nodes/2d/physics/base_collider_2d.hxx"
+#include "nodes/2d/physics/circle_collider_2d.hxx"
 #include "nodes/2d/physics/physics_body_2d.hxx"
 #include "nodes/2d/physics/rect_collider_2d.hxx"
 

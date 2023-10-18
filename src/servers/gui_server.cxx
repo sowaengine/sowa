@@ -226,6 +226,8 @@ void GuiServer::Update() {
 	}
 	ImGui::End();
 
+	bool scene_rclick_open_popup = false;
+
 	if (ImGui::Begin("Scene")) {
 		if (Scene *scene = App::get().GetCurrentScene(); nullptr != scene) {
 			std::function<void(Node *)> drawNode;
@@ -240,6 +242,11 @@ void GuiServer::Update() {
 				}
 
 				bool open = ImGui::TreeNodeEx(("\uf248   " + node->name()).c_str(), flags);
+				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+					scene_rclick_selected_node = node->id();
+					scene_rclick_open_popup = true;
+				}
+
 				if (!ImGui::IsItemToggledOpen() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 					App::get().SelectNode(node->id());
 				}
@@ -255,6 +262,69 @@ void GuiServer::Update() {
 
 			for (Node *node : scene->Nodes()) {
 				drawNode(node);
+			}
+
+			if (!ImGui::IsAnyItemHovered() && ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				scene_rclick_selected_node = 0;
+				scene_rclick_open_popup = true;
+			}
+
+			if (scene_rclick_open_popup) {
+				ImGui::OpenPopup("##scene_rclick");
+			}
+
+			if (ImGui::BeginPopup("##scene_rclick")) {
+				if (ImGui::BeginMenu("Add Node")) {
+					std::function<void(const NodeTypeName &)> drawNodeTypeName;
+
+					auto addNodeByTypeName = [this](const std::string &typeName) {
+						Node *node = App::get().GetCurrentScene()->create(NodeDB::get().get_node_type(typeName), "New " + typeName);
+
+						if (scene_rclick_selected_node == 0) {
+							App::get().GetCurrentScene()->Nodes().push_back(node);
+						} else {
+							App::get().GetCurrentScene()->get_node_by_id(scene_rclick_selected_node)->add_child(node);
+						}
+
+						App::get().SelectNode(node->id());
+					};
+
+					drawNodeTypeName = [&](const NodeTypeName &nodeTypeName) {
+						if (nodeTypeName.children.size() == 0) {
+							if (ImGui::Selectable(nodeTypeName.name.c_str())) {
+								addNodeByTypeName(nodeTypeName.name);
+							}
+
+						} else {
+							if (ImGui::BeginMenu(nodeTypeName.name.c_str())) {
+								if (nodeTypeName.addable_to_scene && ImGui::IsItemClicked()) {
+									addNodeByTypeName(nodeTypeName.name);
+									ImGui::CloseCurrentPopup();
+								}
+
+								for (const NodeTypeName &nt : nodeTypeName.children) {
+									drawNodeTypeName(nt);
+								}
+
+								ImGui::EndMenu();
+							}
+						}
+					};
+
+					for (const NodeTypeName &nt : App::get().NodeTypeNames()) {
+						drawNodeTypeName(nt);
+					}
+
+					ImGui::EndMenu();
+				}
+
+				if (scene_rclick_selected_node != 0) {
+					if (ImGui::Selectable("Delete Node")) {
+						App::get().GetCurrentScene()->queue_free(scene_rclick_selected_node);
+					}
+				}
+
+				ImGui::EndPopup();
 			}
 		}
 	}

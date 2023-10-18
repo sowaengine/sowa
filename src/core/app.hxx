@@ -21,6 +21,15 @@
 
 #include "eventpp/callbacklist.h"
 
+struct NodeTypeName {
+	std::string name;
+	std::vector<NodeTypeName> children;
+	bool addable_to_scene = false;
+
+	NodeTypeName(const std::string &name, bool addable_to_scene)
+		: name(name), addable_to_scene(addable_to_scene) {}
+};
+
 class App {
   public:
 	App();
@@ -32,6 +41,7 @@ class App {
 	static App &get();
 
 	inline project_settings &ProjectSettings() { return m_projectSettings; }
+	inline std::vector<NodeTypeName> &NodeTypeNames() { return m_node_type_names; }
 
 	void SetRenderLayer(RenderLayer *renderlayer);
 
@@ -113,6 +123,7 @@ class App {
 	RenderLayer m_layerUI;
 
 	project_settings m_projectSettings;
+	std::vector<NodeTypeName> m_node_type_names;
 
 	CommandInterface *m_commandInterface = nullptr;
 	std::vector<CommandOption> m_commands;

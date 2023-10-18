@@ -295,34 +295,46 @@ ErrorCode App::Init() {
 
 	REGISTER_NODE_TYPE(Node, );
 	REGISTER_NODE_PROPERTY(Node, "name", name(), std::string);
+	NodeTypeName &nt_node = NodeTypeNames().emplace_back("Node", true);
 
 	REGISTER_NODE_TYPE(AudioStreamPlayer, Node);
 	REGISTER_NODE_PROPERTY(AudioStreamPlayer, "stream", stream(), RID);
 	REGISTER_NODE_PROPERTY(AudioStreamPlayer, "autoplay", autoplay(), bool);
+	nt_node.children.emplace_back("AudioStreamPlayer", true);
 
 	REGISTER_NODE_TYPE(Node2D, Node);
 	REGISTER_NODE_PROPERTY(Node2D, "position", position(), vec2);
 	REGISTER_NODE_PROPERTY(Node2D, "scale", scale(), vec2);
 	REGISTER_NODE_PROPERTY(Node2D, "rotation", rotation(), float);
 	REGISTER_NODE_PROPERTY(Node2D, "z_index", z_index(), float);
+	NodeTypeName &nt_node2d = NodeTypeNames().emplace_back("Node2D", true);
 
 	REGISTER_NODE_TYPE(PhysicsBody2D, Node2D);
 	REGISTER_NODE_PROPERTY(PhysicsBody2D, "type", type(), PhysicsBodyType);
+	nt_node2d.children.emplace_back("PhysicsBody2D", true);
 
 	REGISTER_NODE_TYPE(RectCollider2D, Node2D);
 	REGISTER_NODE_PROPERTY(RectCollider2D, "width", width(), float);
 	REGISTER_NODE_PROPERTY(RectCollider2D, "height", height(), float);
+	nt_node2d.children.emplace_back("RectCollider2D", true);
+
+	REGISTER_NODE_TYPE(CircleCollider2D, Node2D);
+	REGISTER_NODE_PROPERTY(CircleCollider2D, "radius", radius(), float);
+	nt_node2d.children.emplace_back("CircleCollider2D", true);
 
 	REGISTER_NODE_TYPE(Sprite2D, Node2D);
 	REGISTER_NODE_PROPERTY(Sprite2D, "texture", texture(), RID);
+	nt_node2d.children.emplace_back("Sprite2D", true);
 
 	REGISTER_NODE_TYPE(AnimatedSprite2D, Node2D);
 	REGISTER_NODE_PROPERTY(AnimatedSprite2D, "spritesheet", spritesheet(), RID);
 	REGISTER_NODE_PROPERTY(AnimatedSprite2D, "speed", speed(), float);
 	REGISTER_NODE_PROPERTY(AnimatedSprite2D, "playing", playing(), bool);
+	nt_node2d.children.emplace_back("AnimatedSprite2D", true);
 
 	REGISTER_NODE_TYPE(Camera2D, Node2D);
 	REGISTER_NODE_PROPERTY(Camera2D, "zoom", zoom(), vec2);
+	nt_node2d.children.emplace_back("Camera2D", true);
 
 	BehaviourDB::get().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 

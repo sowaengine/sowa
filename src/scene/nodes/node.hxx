@@ -37,6 +37,7 @@ class Node {
 	Node *get_child(std::string name);
 	Node *get_child_index(size_t index);
 	void remove_child(std::string name);
+	void remove_child(size_t id);
 
 	//
 	inline std::vector<std::string> &get_groups() { return m_groups; }

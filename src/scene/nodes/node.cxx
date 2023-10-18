@@ -77,6 +77,17 @@ void Node::remove_child(std::string name) {
 	for (auto it = m_children.begin(); it != m_children.end(); ++it) {
 		if ((*it)->name() == name) {
 			m_children.erase(it);
+			// (*it)->m_parent = nullptr;
+			return;
+		}
+	}
+}
+
+void Node::remove_child(size_t id) {
+	for (auto it = m_children.begin(); it != m_children.end(); ++it) {
+		if ((*it)->id() == id) {
+			m_children.erase(it);
+			// (*it)->m_parent = nullptr;
 			return;
 		}
 	}

@@ -18,6 +18,8 @@ class GuiServer {
 
 	rect m_viewport_rect;
 	bool on_viewport = false;
+
+	size_t scene_rclick_selected_node = 0;
 };
 
 #endif // SW_GUI_SERVER_HXX
