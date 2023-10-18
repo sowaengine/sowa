@@ -580,6 +580,7 @@ void App::mainLoop() {
 	if (IsRunning()) {
 		PhysicsServer2D::get().step();
 	}
+	PhysicsServer2D::get().debug_draw();
 
 	Tweens::get().Poll(Time::Delta());
 

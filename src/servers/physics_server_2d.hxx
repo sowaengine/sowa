@@ -29,11 +29,13 @@ class PhysicsServer2D {
 	void set_gravity(cref<vec2> gravity);
 
 	void step();
+	void debug_draw();
 
-	void *create_body(cref<vec2> position, PhysicsBodyType bodyType);
+	void *create_body(PhysicsBodyType bodyType, cref<vec2> position, float rotation = 0.f);
 	void destroy_body(void *body);
-	void body_add_box_shape(void *body, cref<vec2> halfSize);
+	void *body_add_box_shape(void *body, cref<vec2> halfSize, cref<vec2> position, float rotation = 0.f);
 	vec2 body_get_position(void *body);
+	float body_get_rotation(void *body);
 
   private:
 	vec2 m_gravity = vec2{0.f, -9.8f};
