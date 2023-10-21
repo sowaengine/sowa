@@ -689,8 +689,18 @@ void App::mainLoop() {
 	Tweens::get().Poll(Time::Delta());
 
 	if (!IsRunning()) {
-		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), 5.f, 0.6f, 0.2f, 0.2f, 100.f, 0.f);
-		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2f, 0.8f, 0.4f, 100.f, 0.f);
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), 5.f, 0.6f, 0.2f, 0.2, 1.f, 0.f);
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2f, 0.8f, 0.4f, 1.f, 0.f);
+
+		const float halfSize = 1'000'000.f;
+		const float spacing = 100.f;
+		const int halfCount = 20;
+		for (int i = -halfCount; i < halfCount; i++) {
+			Renderer().PushLine(vec2(i * spacing, -halfSize), vec2(i * spacing, halfSize), 5, 1.f, 1.f, 1.f, .3f);
+		}
+		for (int i = -halfCount; i < halfCount; i++) {
+			Renderer().PushLine(vec2(-halfSize, i * spacing), vec2(halfSize, i * spacing), 5, 1.f, 1.f, 1.f, .3f);
+		}
 
 		Node *selectedNode = GetCurrentScene()->get_node_by_id(m_selectedNode);
 		Node2D *selectedNode2D = dynamic_cast<Node2D *>(selectedNode);
