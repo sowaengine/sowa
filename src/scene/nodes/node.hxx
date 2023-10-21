@@ -22,6 +22,7 @@ class Node {
 	inline size_t type_hash() { return m_type_hash; }
 
 	void add_behaviour(std::string name);
+	bool has_behaviour(std::string name);
 	void remove_behaviour(std::string name);
 	void reload_behaviours();
 	void start_behaviours();
@@ -41,6 +42,9 @@ class Node {
 
 	//
 	inline std::vector<std::string> &get_groups() { return m_groups; }
+	bool is_in_group(const std::string &name);
+	void remove_group(const std::string &name);
+	void add_group(const std::string &name);
 
   protected:
 	std::string m_name = "";

@@ -6,7 +6,7 @@
 #include "core/behaviour/behaviour_db.hxx"
 
 void Node::add_behaviour(std::string name) {
-	if (std::find(m_behaviour_names.begin(), m_behaviour_names.end(), name) != m_behaviour_names.end())
+	if (has_behaviour(name))
 		return;
 
 	m_behaviour_names.push_back(name);
@@ -15,7 +15,15 @@ void Node::add_behaviour(std::string name) {
 	}
 }
 
+bool Node::has_behaviour(std::string name) {
+	return std::find(m_behaviour_names.begin(), m_behaviour_names.end(), name) != m_behaviour_names.end();
+}
+
 void Node::remove_behaviour(std::string name) {
+	std::vector<std::string>::iterator position = std::find(m_behaviour_names.begin(), m_behaviour_names.end(), name);
+	if (position != m_behaviour_names.end())
+		m_behaviour_names.erase(position);
+
 	size_t id = BehaviourDB::get().GetBehaviourID(name);
 	if (id == 0)
 		return;
@@ -104,4 +112,21 @@ void Node::register_behaviour(const std::string &behaviour, bool callStart) {
 		m_behaviours[id].DataTable()["m_noStart"] = true;
 		m_behaviours[id].Start(this);
 	}
+}
+
+bool Node::is_in_group(const std::string &name) {
+	return std::find(m_groups.begin(), m_groups.end(), name) != m_groups.end();
+}
+
+void Node::remove_group(const std::string &name) {
+	std::vector<std::string>::iterator position = std::find(m_groups.begin(), m_groups.end(), name);
+	if (position != m_groups.end())
+		m_groups.erase(position);
+}
+
+void Node::add_group(const std::string &name) {
+	if (is_in_group(name))
+		return;
+
+	m_groups.push_back(name);
 }
