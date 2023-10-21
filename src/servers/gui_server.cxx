@@ -1,6 +1,7 @@
 #include "gui_server.hxx"
 #include "rendering_server.hxx"
 
+#include "core/behaviour/behaviour_db.hxx"
 #include "scene/nodes/2d/physics/physics_body_2d.hxx"
 
 #include "imgui.h"
@@ -337,89 +338,166 @@ void GuiServer::Update() {
 
 	if (ImGui::Begin("Properties")) {
 		if (ImGui::BeginChild("##Properties_", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - ImGui::GetFrameHeight()))) {
+
 			if (size_t id = App::get().GetSelectedNode(); id != 0 && nullptr != App::get().GetCurrentScene()) {
 				Node *node = App::get().GetCurrentScene()->get_node_by_id(id);
 				if (nullptr != node) {
-					ImGui::Text("%s : %s", node->name().c_str(), NodeDB::get().get_node_typename(node->type_hash()).c_str());
+					if (ImGui::CollapsingHeader("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
+						ImGui::Indent();
 
-					std::vector<std::string> propNames;
-					NodeType nodeType = node->type_hash();
+						ImGui::Text("%s : %s", node->name().c_str(), NodeDB::get().get_node_typename(node->type_hash()).c_str());
 
-					NodeDB::get().get_property_names(nodeType, propNames);
+						std::vector<std::string> propNames;
+						NodeType nodeType = node->type_hash();
 
-					for (int i = static_cast<int>(propNames.size()) - 1; i >= 0; i--) {
-						const auto &propName = propNames[i];
+						NodeDB::get().get_property_names(nodeType, propNames);
 
-						ImGui::Text("%s", propName.c_str());
+						for (int i = static_cast<int>(propNames.size()) - 1; i >= 0; i--) {
+							const auto &propName = propNames[i];
 
-						auto prop = NodeDB::get().get_property(nodeType, propName);
-						if (prop.typeName == "vec2") {
-							Property p = prop.get_ref(node);
-							if (vec2 **val = std::any_cast<vec2 *>(&p); nullptr != val) {
-								ImGui::DragFloat2(("##" + propName).c_str(), &((*val)->x));
-							}
-						} else if (prop.typeName == "bool") {
-							Property p = prop.get_ref(node);
-							if (bool **val = std::any_cast<bool *>(&p); nullptr != val) {
-								ImGui::Checkbox(("##" + propName).c_str(), *val);
-							}
-						} else if (prop.typeName == "float") {
-							Property p = prop.get_ref(node);
-							if (float **val = std::any_cast<float *>(&p); nullptr != val) {
-								if (propName != "rotation") {
-									ImGui::DragFloat(("##" + propName).c_str(), *val);
-								} else {
-									float slider = **val;
-									slider = glm::radians(slider);
+							ImGui::Text("%s", propName.c_str());
 
-									ImGui::SliderAngle(("##" + propName).c_str(), &slider);
-									**val = glm::degrees(slider);
+							auto prop = NodeDB::get().get_property(nodeType, propName);
+							if (prop.typeName == "vec2") {
+								Property p = prop.get_ref(node);
+								if (vec2 **val = std::any_cast<vec2 *>(&p); nullptr != val) {
+									ImGui::DragFloat2(("##" + propName).c_str(), &((*val)->x));
 								}
-							}
-						} else if (prop.typeName == "std::string") {
-							Property p = prop.get_ref(node);
-							if (std::string **val = std::any_cast<std::string *>(&p); nullptr != val) {
-								static char buf[512];
-								memset(buf, 0, 512);
-								memcpy(buf, (*val)->data(), std::min((*val)->size(), static_cast<size_t>(512)));
-
-								if (ImGui::InputText(("##" + propName).c_str(), buf, 512, ImGuiInputTextFlags_EnterReturnsTrue)) {
+							} else if (prop.typeName == "bool") {
+								Property p = prop.get_ref(node);
+								if (bool **val = std::any_cast<bool *>(&p); nullptr != val) {
+									ImGui::Checkbox(("##" + propName).c_str(), *val);
 								}
-								(**val) = buf;
-							}
-						} else if (prop.typeName == "RID") {
-							Property p = prop.get_ref(node);
-							if (RID **val = std::any_cast<RID *>(&p); nullptr != val) {
-								ImGui::InputInt(("##" + propName).c_str(), *val, 1, 100);
-							}
+							} else if (prop.typeName == "float") {
+								Property p = prop.get_ref(node);
+								if (float **val = std::any_cast<float *>(&p); nullptr != val) {
+									if (propName != "rotation") {
+										ImGui::DragFloat(("##" + propName).c_str(), *val);
+									} else {
+										float slider = **val;
+										slider = glm::radians(slider);
 
-						} else if (prop.typeName == "PhysicsBodyType") {
-							Property p = prop.get_ref(node);
-							if (PhysicsBodyType **val = std::any_cast<PhysicsBodyType *>(&p); nullptr != val) {
-								if (ImGui::BeginCombo(("##" + propName).c_str(), PhysicsBodyTypeToString(**val).c_str())) {
-									bool t_static = false;
-									bool t_kinematic = false;
-									bool t_dynamic = false;
-
-									ImGui::Selectable("Static", &t_static);
-									ImGui::Selectable("Kinematic", &t_kinematic);
-									ImGui::Selectable("Dynamic", &t_dynamic);
-
-									if (t_static) {
-										**val = PhysicsBodyType::Static;
-									} else if (t_kinematic) {
-										**val = PhysicsBodyType::Kinematic;
-									} else if (t_dynamic) {
-										**val = PhysicsBodyType::Dynamic;
+										ImGui::SliderAngle(("##" + propName).c_str(), &slider);
+										**val = glm::degrees(slider);
 									}
+								}
+							} else if (prop.typeName == "std::string") {
+								Property p = prop.get_ref(node);
+								if (std::string **val = std::any_cast<std::string *>(&p); nullptr != val) {
+									static char buf[512];
+									memset(buf, 0, 512);
+									memcpy(buf, (*val)->data(), std::min((*val)->size(), static_cast<size_t>(512)));
 
-									ImGui::EndCombo();
+									if (ImGui::InputText(("##" + propName).c_str(), buf, 512, ImGuiInputTextFlags_EnterReturnsTrue)) {
+									}
+									(**val) = buf;
+								}
+							} else if (prop.typeName == "RID") {
+								Property p = prop.get_ref(node);
+								if (RID **val = std::any_cast<RID *>(&p); nullptr != val) {
+									ImGui::InputInt(("##" + propName).c_str(), *val, 1, 100);
+								}
+
+							} else if (prop.typeName == "PhysicsBodyType") {
+								Property p = prop.get_ref(node);
+								if (PhysicsBodyType **val = std::any_cast<PhysicsBodyType *>(&p); nullptr != val) {
+									if (ImGui::BeginCombo(("##" + propName).c_str(), PhysicsBodyTypeToString(**val).c_str())) {
+										bool t_static = false;
+										bool t_kinematic = false;
+										bool t_dynamic = false;
+
+										ImGui::Selectable("Static", &t_static);
+										ImGui::Selectable("Kinematic", &t_kinematic);
+										ImGui::Selectable("Dynamic", &t_dynamic);
+
+										if (t_static) {
+											**val = PhysicsBodyType::Static;
+										} else if (t_kinematic) {
+											**val = PhysicsBodyType::Kinematic;
+										} else if (t_dynamic) {
+											**val = PhysicsBodyType::Dynamic;
+										}
+
+										ImGui::EndCombo();
+									}
+								}
+
+							} else {
+								ImGui::Text("Unknown");
+							}
+						}
+						ImGui::Unindent();
+						ImGui::NewLine();
+					}
+
+					if (ImGui::CollapsingHeader("Behaviours", ImGuiTreeNodeFlags_DefaultOpen)) {
+						ImGui::Indent();
+
+						for (auto &name : node->get_behaviour_names()) {
+							ImGui::PushID(Utils::Format("b-{}-remove", name.c_str()).c_str());
+							if (ImGui::Button("\uf146")) {
+								node->remove_behaviour(name);
+							}
+							ImGui::PopID();
+
+							ImGui::SameLine();
+							ImGui::Text("%s", name.c_str());
+						}
+
+						if (ImGui::Button("  Add Behaviour    \uf0fe  ")) {
+							ImGui::OpenPopup("##popup_add_behaviour");
+						}
+
+						if (ImGui::BeginPopup("##popup_add_behaviour")) {
+							for (auto &[id, behaviour] : BehaviourDB::get().GetBehaviours()) {
+								if (!node->has_behaviour(behaviour.GetBehaviourName())) {
+									if (ImGui::Selectable(behaviour.GetBehaviourName().c_str())) {
+										node->add_behaviour(behaviour.GetBehaviourName());
+									}
 								}
 							}
-
-						} else {
-							ImGui::Text("Unknown");
+							ImGui::EndPopup();
 						}
+
+						ImGui::Unindent();
+						ImGui::NewLine();
+					}
+
+					if (ImGui::CollapsingHeader("Groups", ImGuiTreeNodeFlags_DefaultOpen)) {
+						ImGui::Indent();
+
+						for (auto &group : node->get_groups()) {
+							ImGui::PushID(Utils::Format("g-{}-remove", group.c_str()).c_str());
+							if (ImGui::Button("\uf146")) {
+								node->remove_group(group);
+							}
+							ImGui::PopID();
+
+							ImGui::SameLine();
+							ImGui::Text("%s", group.c_str());
+						}
+
+						if (ImGui::Button("  Add Group    \uf0fe  ")) {
+							ImGui::OpenPopup("##popup_add_group");
+						}
+
+						if (ImGui::BeginPopup("##popup_add_group")) {
+							ImGui::Text("%s", "Group Name: ");
+							ImGui::SameLine();
+
+							static char buf[32] = {0};
+							ImGui::SetKeyboardFocusHere();
+							if (ImGui::InputText("##add_group_input", buf, 32, ImGuiInputTextFlags_EnterReturnsTrue)) {
+								ImGui::CloseCurrentPopup();
+
+								node->add_group(std::string(buf));
+								memset(buf, 0, 32);
+							}
+
+							ImGui::EndPopup();
+						}
+
+						ImGui::Unindent();
 					}
 				}
 			}
