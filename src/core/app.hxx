@@ -71,6 +71,7 @@ class App {
 	void SetCommandInterface(CommandInterface *interface);
 
 	void Log(const std::string &message);
+	inline std::deque<std::string> &GetConsoleBuffer() { return m_consoleBuffer; }
 
 	inline void SelectNode(size_t id) { m_selectedNode = id; }
 	inline size_t GetSelectedNode() { return m_selectedNode; }

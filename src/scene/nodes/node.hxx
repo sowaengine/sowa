@@ -36,6 +36,7 @@ class Node {
 
 	void add_child(Node *child);
 	Node *get_child(std::string name);
+	inline size_t get_child_count() { return m_children.size(); }
 	Node *get_child_index(size_t index);
 	void remove_child(std::string name);
 	void remove_child(size_t id);

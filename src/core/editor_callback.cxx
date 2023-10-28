@@ -1,5 +1,6 @@
 #include "app.hxx"
 #include "scene/nodes/2d/drawable/sprite_2d.hxx"
+#include "servers/gui_server.hxx"
 #include "servers/rendering_server.hxx"
 
 void App::editor_mouse_move_event(InputEventMouseMove event) {
@@ -37,15 +38,15 @@ void App::editor_mouse_move_event(InputEventMouseMove event) {
 }
 
 void App::editor_key_event(InputEventKey event) {
-	if (event.action == KEY_PRESSED && event.key == KEY_G && this->m_editorState != EditorState::None) {
+	if (event.action == KEY_PRESSED && event.key == KEY_G && this->m_editorState != EditorState::None && InputServer::get().IsCursorInside()) {
 		// todo: rollback action
 		m_editorState = EditorState::None;
-		RenderingServer::get().SetCursorMode(CursorMode::Normal);
+		// RenderingServer::get().SetCursorMode(CursorMode::Normal);
 	}
 
-	if (event.action == KEY_PRESSED && event.key == KEY_G && this->m_editorState == EditorState::None) {
+	if (event.action == KEY_PRESSED && event.key == KEY_G && this->m_editorState == EditorState::None && InputServer::get().IsCursorInside()) {
 		m_editorState = EditorState::Dragging;
-		RenderingServer::get().SetCursorMode(CursorMode::Tiled);
+		// RenderingServer::get().SetCursorMode(CursorMode::Tiled);
 		m_actionDeltaVec2 = vec2(0.f);
 		m_actionAxis = EditorActionAxis::None;
 	}

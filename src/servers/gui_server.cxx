@@ -209,6 +209,10 @@ void GuiServer::Update() {
 
 		ImGui::BeginChild("command_text_area", childArea);
 
+		for (auto &msg : App::get().GetConsoleBuffer()) {
+			ImGui::Text("%s", msg.c_str());
+		}
+
 		if (to_bottom) {
 			to_bottom = false;
 			ImGui::SetScrollHereY(1.f);
@@ -221,6 +225,8 @@ void GuiServer::Update() {
 		if (ImGui::InputText("##command_line", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
 			ImGui::SetKeyboardFocusHere(-1);
 			to_bottom = true;
+
+			Utils::Log(std::string(buf));
 
 			memset(buf, 0, 256);
 		}
@@ -238,6 +244,10 @@ void GuiServer::Update() {
 					return;
 
 				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+				if (node == scene->Root()) {
+					flags |= ImGuiTreeNodeFlags_DefaultOpen;
+				}
+
 				if (node->get_children().size() == 0) {
 					flags |= ImGuiTreeNodeFlags_Leaf;
 				}
