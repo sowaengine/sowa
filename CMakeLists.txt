@@ -10,14 +10,13 @@ endif()
 
 message("Building in ${CMAKE_BUILD_TYPE}")
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  add_compile_options (-fdiagnostics-color=always)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  add_compile_options (-fcolor-diagnostics)
-endif ()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  add_compile_options(-fdiagnostics-color=always)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  add_compile_options(-fcolor-diagnostics)
+endif()
 
-set(CMAKE_CXX_FLAGS
-    "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
@@ -50,9 +49,7 @@ set(SOWA_THIRDPARTY_INCLUDES "")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty" EXCLUDE_FROM_ALL)
 
 add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
-target_include_directories(
-  thirdparty
-  PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
+target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 add_executable(sowa ${SOWA_SOURCES})
 target_include_directories(
@@ -61,8 +58,42 @@ target_include_directories(
   PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
 target_compile_options(sowa PRIVATE "-Werror")
-target_link_libraries(sowa PRIVATE thirdparty glfw eventpp::eventpp freetype lunasvg yaml-cpp angelscript fmt OpenAL sndfile box2d)
-target_precompile_headers(sowa PRIVATE <algorithm> <any> <cmath> <codecvt> <cstdint> <cstring> <ctime> <deque> <filesystem> <fstream> <iomanip> <iostream> <locale> <memory.h> <memory> <sstream> <stdexcept> <stdio.h> <string> <vector>)
+target_link_libraries(
+  sowa
+  PRIVATE thirdparty
+          glfw
+          eventpp::eventpp
+          freetype
+          lunasvg
+          yaml-cpp
+          angelscript
+          fmt
+          OpenAL
+          sndfile
+          box2d)
+target_precompile_headers(
+  sowa
+  PRIVATE
+  <algorithm>
+  <any>
+  <cmath>
+  <codecvt>
+  <cstdint>
+  <cstring>
+  <ctime>
+  <deque>
+  <filesystem>
+  <fstream>
+  <iomanip>
+  <iostream>
+  <locale>
+  <memory.h>
+  <memory>
+  <sstream>
+  <stdexcept>
+  <stdio.h>
+  <string>
+  <vector>)
 
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(

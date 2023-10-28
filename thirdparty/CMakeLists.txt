@@ -4,13 +4,13 @@ if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
       "${CMAKE_CURRENT_SOURCE_DIR}/glfw-3.3.8/include"
       "${CMAKE_CURRENT_SOURCE_DIR}/glad/include")
 
-  set(SOWA_THIRDPARTY_SOURCES ${SOWA_THIRDPARTY_SOURCES}
-                              "${CMAKE_CURRENT_SOURCE_DIR}/glad/src/glad.c"
-
-                              # angelscript addons
-                              "${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/add_on/scriptstdstring/scriptstdstring.cpp"
-                              "${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/add_on/scriptbuilder/scriptbuilder.cpp"
-                              )
+  set(SOWA_THIRDPARTY_SOURCES
+      ${SOWA_THIRDPARTY_SOURCES}
+      "${CMAKE_CURRENT_SOURCE_DIR}/glad/src/glad.c"
+      # angelscript addons
+      "${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/add_on/scriptstdstring/scriptstdstring.cpp"
+      "${CMAKE_CURRENT_SOURCE_DIR}/angelscript_2.36.1/sdk/add_on/scriptbuilder/scriptbuilder.cpp"
+  )
 
   set(GLFW_BUILD_EXAMPLES OFF)
   set(GLFW_BUILD_TESTS OFF)
@@ -36,10 +36,7 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/backends"
     "${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1/include"
-    
-    PARENT_SCOPE
-)
-
+    PARENT_SCOPE)
 
 set(SOWA_THIRDPARTY_SOURCES
     ${SOWA_THIRDPARTY_SOURCES}
@@ -50,15 +47,21 @@ set(SOWA_THIRDPARTY_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/imgui_tables.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/imgui_widgets.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/imgui.cpp"
-
     PARENT_SCOPE)
 
+set(ALSOFT_INSTALL_EXAMPLES
+    OFF
+    CACHE BOOL "")
 
-set(ALSOFT_INSTALL_EXAMPLES OFF CACHE BOOL "")
-
-set(BOX2D_BUILD_UNIT_TESTS OFF CACHE BOOL "")
-set(BOX2D_BUILD_TESTBED OFF CACHE BOOL "")
-set(BOX2D_BUILD_DOCS OFF CACHE BOOL "")
+set(BOX2D_BUILD_UNIT_TESTS
+    OFF
+    CACHE BOOL "")
+set(BOX2D_BUILD_TESTBED
+    OFF
+    CACHE BOOL "")
+set(BOX2D_BUILD_DOCS
+    OFF
+    CACHE BOOL "")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/eventpp-0.1.2" EXCLUDE_FROM_ALL)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/freetype-2.13.1" EXCLUDE_FROM_ALL)
