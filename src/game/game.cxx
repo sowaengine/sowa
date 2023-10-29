@@ -37,6 +37,8 @@ void Main() {
 	BehaviourDB::get().RegisterBehaviour("Tank Movement", Behaviour::New(TankMovement::Start, TankMovement::Update));
 	BehaviourDB::get().RegisterBehaviour("Mouse Shooter", Behaviour::New(MouseShooter::Start, MouseShooter::Update));
 
+	return;
+
 	scene = new Scene;
 	if (true) {
 		auto _ = Utils::ScopeTimer("Load Scene");

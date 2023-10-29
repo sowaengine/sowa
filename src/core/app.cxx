@@ -58,6 +58,8 @@
 #include "unzip.h"
 #include "zip.h"
 
+#include "portable-file-dialogs.h"
+
 static App *s_instance;
 
 App::App() {
@@ -266,8 +268,6 @@ ErrorCode App::Init() {
 	};
 	ResourceManager::get().RegisterResource(".anim", spriteSheetAnimation);
 
-	Resource *res = ResourceManager::get().Load("res://assets/shotThin.png");
-
 	NodeDB &db = NodeDB::get();
 
 #define REGISTER_NODE_TYPE(type, extends)                                    \
@@ -475,6 +475,8 @@ ErrorCode App::Init() {
 	// mz_zip_delete(&zip_handle);
 	// mz_stream_mem_delete(&mem_stream);
 
+	OpenProjectDialog();
+
 	return OK;
 }
 
@@ -524,6 +526,19 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 }
 
 void App::mainLoop() {
+	if (nullptr != m_open_project_dialog && m_open_project_dialog->ready()) {
+		std::vector<std::string> res = m_open_project_dialog->result();
+		if (!res.empty()) {
+			Utils::Info("Loading project file: {}", res[0]);
+			ErrorCode err = m_projectSettings.Load(Utils::Format("abs://{}", res[0]).c_str());
+			if (err != OK) {
+				Utils::Error("Failed to open project at {}", res[0]);
+			}
+		}
+
+		InvalidateProjectDialog();
+	}
+
 	InputServer::get().ProcessInput();
 	glClearColor(0.28f, 0.28f, 0.28f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -702,68 +717,70 @@ void App::mainLoop() {
 			Renderer().PushLine(vec2(-halfSize, i * spacing), vec2(halfSize, i * spacing), 5, 1.f, 1.f, 1.f, .3f);
 		}
 
-		Node *selectedNode = GetCurrentScene()->get_node_by_id(m_selectedNode);
-		Node2D *selectedNode2D = dynamic_cast<Node2D *>(selectedNode);
-		if (nullptr != selectedNode2D) {
-			vec2 pos = selectedNode2D->global_position();
+		if (nullptr != GetCurrentScene()) {
+			Node *selectedNode = GetCurrentScene()->get_node_by_id(m_selectedNode);
+			Node2D *selectedNode2D = dynamic_cast<Node2D *>(selectedNode);
+			if (nullptr != selectedNode2D) {
+				vec2 pos = selectedNode2D->global_position();
 
-			float length = 20.f * m_editorCameraZoom2d;
-			float thickness = m_editorCameraZoom2d * 5;
-			Renderer().PushLine(vec2(pos.x - length, pos.y),
-								vec2(pos.x + length, pos.y), thickness, 0.83f, 0.62f,
-								0.3f, 2.f, 100.f);
-			Renderer().PushLine(vec2(pos.x, pos.y - length),
-								vec2(pos.x, pos.y + length), thickness, 0.83f, 0.62f,
-								0.3f, 2.f, 100.f);
-		}
-
-		Sprite2D *selectedSprite2D = dynamic_cast<Sprite2D *>(selectedNode);
-		if (nullptr != selectedSprite2D) {
-			Texture *texture =
-				ResourceManager::get().GetAs<Texture>(selectedSprite2D->texture());
-			float width = 128.f;
-			float height = 128.f;
-			if (texture) {
-				width = texture->Width();
-				height = texture->Height();
-			}
-			glm::mat4 model =
-				glm::scale(selectedSprite2D->calculate_transform(), {width, height, 1.f});
-
-			glm::vec4 points[4] = {{-0.5f, 0.5f, 0.f, 1.f},
-								   {-0.5f, -0.5f, 0.f, 1.f},
-								   {0.5f, -0.5f, 0.f, 1.f},
-								   {0.5f, 0.5f, 0.f, 1.f}};
-
-			for (int i = 0; i < 4; i++) {
-				points[i] = model * points[i];
+				float length = 20.f * m_editorCameraZoom2d;
+				float thickness = m_editorCameraZoom2d * 5;
+				Renderer().PushLine(vec2(pos.x - length, pos.y),
+									vec2(pos.x + length, pos.y), thickness, 0.83f, 0.62f,
+									0.3f, 2.f, 100.f);
+				Renderer().PushLine(vec2(pos.x, pos.y - length),
+									vec2(pos.x, pos.y + length), thickness, 0.83f, 0.62f,
+									0.3f, 2.f, 100.f);
 			}
 
-			float minX = points[0].x;
-			float minY = points[0].y;
-			float maxX = points[0].x;
-			float maxY = points[0].y;
-			for (size_t i = 0; i < 4; i++) {
-				minX = std::min(minX, points[i].x);
-				minY = std::min(minY, points[i].y);
-				maxX = std::max(maxX, points[i].x);
-				maxY = std::max(maxY, points[i].y);
-			}
-			float padding = 10.f * m_editorCameraZoom2d;
-			minX -= padding;
-			maxX += padding;
-			minY -= padding;
-			maxY += padding;
+			Sprite2D *selectedSprite2D = dynamic_cast<Sprite2D *>(selectedNode);
+			if (nullptr != selectedSprite2D) {
+				Texture *texture =
+					ResourceManager::get().GetAs<Texture>(selectedSprite2D->texture());
+				float width = 128.f;
+				float height = 128.f;
+				if (texture) {
+					width = texture->Width();
+					height = texture->Height();
+				}
+				glm::mat4 model =
+					glm::scale(selectedSprite2D->calculate_transform(), {width, height, 1.f});
 
-			float thickness = m_editorCameraZoom2d * 5;
-			Renderer().PushLine(vec2(minX, minY), vec2(maxX, minY), thickness, 0.2f,
-								0.6f, 0.8f, 2.f, 100.f);
-			Renderer().PushLine(vec2(maxX, minY), vec2(maxX, maxY), thickness, 0.2f,
-								0.6f, 0.8f, 2.f, 100.f);
-			Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f,
-								0.6f, 0.8f, 2.f, 100.f);
-			Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f,
-								0.6f, 0.8f, 2.f, 100.f);
+				glm::vec4 points[4] = {{-0.5f, 0.5f, 0.f, 1.f},
+									   {-0.5f, -0.5f, 0.f, 1.f},
+									   {0.5f, -0.5f, 0.f, 1.f},
+									   {0.5f, 0.5f, 0.f, 1.f}};
+
+				for (int i = 0; i < 4; i++) {
+					points[i] = model * points[i];
+				}
+
+				float minX = points[0].x;
+				float minY = points[0].y;
+				float maxX = points[0].x;
+				float maxY = points[0].y;
+				for (size_t i = 0; i < 4; i++) {
+					minX = std::min(minX, points[i].x);
+					minY = std::min(minY, points[i].y);
+					maxX = std::max(maxX, points[i].x);
+					maxY = std::max(maxY, points[i].y);
+				}
+				float padding = 10.f * m_editorCameraZoom2d;
+				minX -= padding;
+				maxX += padding;
+				minY -= padding;
+				maxY += padding;
+
+				float thickness = m_editorCameraZoom2d * 5;
+				Renderer().PushLine(vec2(minX, minY), vec2(maxX, minY), thickness, 0.2f,
+									0.6f, 0.8f, 2.f, 100.f);
+				Renderer().PushLine(vec2(maxX, minY), vec2(maxX, maxY), thickness, 0.2f,
+									0.6f, 0.8f, 2.f, 100.f);
+				Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f,
+									0.6f, 0.8f, 2.f, 100.f);
+				Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f,
+									0.6f, 0.8f, 2.f, 100.f);
+			}
 		}
 	}
 
@@ -881,15 +898,19 @@ void App::SetCurrentScene(Scene *scene) {
 }
 
 void App::Start() {
+	if (nullptr == GetCurrentScene()) {
+		Utils::Error("Failed to start scene: no scene is active");
+		return;
+	}
+
 	if (m_running)
 		return;
-
-	if (nullptr != m_pCurrentScene)
-		Scene::copy(m_pCurrentScene, &m_backgroundScene);
-
 	m_running = true;
 
-	GetCurrentScene()->_begin_scene();
+	if (nullptr != m_pCurrentScene) {
+		Scene::copy(m_pCurrentScene, &m_backgroundScene);
+		GetCurrentScene()->_begin_scene();
+	}
 }
 
 void App::Stop() {
@@ -938,6 +959,16 @@ void App::reload_scripts() {
 	}
 
 	ScriptServer::get().EndBuild();
+}
+
+void App::OpenProjectDialog() {
+	m_open_project_dialog = std::make_unique<pfd::open_file>(pfd::open_file("Choose files to read", pfd::path::home(),
+																			{"Sowa Engine project files", "project.sowa"},
+																			pfd::opt::none));
+}
+
+void App::InvalidateProjectDialog() {
+	m_open_project_dialog = nullptr;
 }
 
 extern "C" void Unload() {

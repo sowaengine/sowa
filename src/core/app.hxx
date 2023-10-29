@@ -20,6 +20,7 @@
 #include "scene/scene.hxx"
 
 #include "eventpp/callbacklist.h"
+#include "portable-file-dialogs.h"
 
 struct NodeTypeName {
 	std::string name;
@@ -114,6 +115,11 @@ class App {
 	void editor_key_event(InputEventKey event);
 	void editor_scroll_event(InputEventScroll event);
 	//
+
+	//
+	std::unique_ptr<pfd::open_file> m_open_project_dialog;
+	void OpenProjectDialog();
+	void InvalidateProjectDialog();
 
 	Texture m_testTexture;
 	Font m_testFont;
