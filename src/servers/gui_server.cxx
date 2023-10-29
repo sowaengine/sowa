@@ -95,7 +95,8 @@ void GuiServer::Update() {
 		ImGui::EndMainMenuBar();
 	}
 
-	if (ImGui::Begin("Viewport", nullptr, windowFlags)) {
+	bool viewport = ImGui::Begin(Utils::Format("Scene {}###Scene", App::get().GetCurrentScene() ? "| " + App::get().GetCurrentScene()->Path() : "").c_str(), nullptr, windowFlags);
+	if (viewport) {
 
 		float width = ImGui::GetContentRegionAvail().x;
 		float button_sz = 36.f;

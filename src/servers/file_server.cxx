@@ -157,6 +157,8 @@ std::filesystem::path FileServer::getFilepath(const std::string &path) {
 		}
 
 		return p;
+	} else if (scheme == "abs") {
+		return tokens[1];
 	}
 
 	return "";
