@@ -36,6 +36,7 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/backends"
     "${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/portable-file-dialogs"
     PARENT_SCOPE)
 
 set(SOWA_THIRDPARTY_SOURCES
