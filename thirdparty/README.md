@@ -61,6 +61,11 @@
 - Version: 1.23.1
 - License: LGPL
 
+## portable-file-dialogs
+- Upstream: https://github.com/samhocevar/portable-file-dialogs
+- Version: 0.1.0
+- License: WTFPL
+
 ## stb
 - Upstream: https://github.com/nothings/stb
 - Version: 2.28
