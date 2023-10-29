@@ -534,6 +534,17 @@ void App::mainLoop() {
 			if (err != OK) {
 				Utils::Error("Failed to open project at {}", res[0]);
 			}
+
+			if (m_projectSettings.config_main_scene != "") {
+				if (nullptr == GetCurrentScene()) {
+					m_pCurrentScene = new Scene;
+				}
+
+				ErrorCode err = GetCurrentScene()->load(m_projectSettings.config_main_scene.c_str());
+				if (err != OK) {
+					std::cout << "Failed to load scene" << std::endl;
+				}
+			}
 		}
 
 		InvalidateProjectDialog();

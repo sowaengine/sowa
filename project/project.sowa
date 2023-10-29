@@ -7,6 +7,7 @@ version = '1.0'
 
 [config]
 icon = 'res://icon.png'
+main_scene = 'res://scenes/game.escn'
 
 [window]
 width = 1280

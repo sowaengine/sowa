@@ -27,7 +27,8 @@ ErrorCode project_settings::Save(const char *path) {
 		.Set("author", app_author);
 
 	toml_document config;
-	config.Set("icon", config_icon);
+	config.Set("icon", config_icon)
+		.Set("main_scene", config_main_scene);
 
 	toml_document window;
 	window.Set("width", window_width)
@@ -57,6 +58,7 @@ ErrorCode project_settings::loadVersion1(toml_document &doc) {
 
 	toml_document config = doc["config"];
 	config_icon = config.Value("icon", config_icon);
+	config_main_scene = config.Value("main_scene", config_main_scene);
 
 	toml_document window = doc["window"];
 	window_width = window.Value("width", window_width);

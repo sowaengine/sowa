@@ -17,6 +17,7 @@ struct project_settings {
 	std::string app_author = "Author";
 
 	std::string config_icon = "";
+	std::string config_main_scene = "";
 
 	int window_width = 1920;
 	int window_height = 1080;
