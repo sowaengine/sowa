@@ -1,0 +1,3 @@
+extension: res.hxx
+namespace: res
+dir: src/res/shaders
