@@ -7,7 +7,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 void *CircleCollider2D::body_add_fixture(void *body) {
-	return PhysicsServer2D::get().body_add_circle_shape(body, radius(), position());
+	return PhysicsServer2D::get().body_add_circle_shape(body, id(), radius(), position());
 }
 
 void CircleCollider2D::_update() {

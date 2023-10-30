@@ -33,8 +33,8 @@ class PhysicsServer2D {
 
 	void *create_body(PhysicsBodyType bodyType, cref<vec2> position, float rotation = 0.f);
 	void destroy_body(void *body);
-	void *body_add_box_shape(void *body, cref<vec2> halfSize, cref<vec2> position, float rotation = 0.f);
-	void *body_add_circle_shape(void *body, float radius, cref<vec2> position);
+	void *body_add_box_shape(void *body, uint64_t id, cref<vec2> halfSize, cref<vec2> position, float rotation = 0.f);
+	void *body_add_circle_shape(void *body, uint64_t id, float radius, cref<vec2> position);
 	vec2 body_get_position(void *body);
 	float body_get_rotation(void *body);
 

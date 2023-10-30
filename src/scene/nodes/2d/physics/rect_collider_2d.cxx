@@ -7,7 +7,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 void *RectCollider2D::body_add_fixture(void *body) {
-	return PhysicsServer2D::get().body_add_box_shape(body, vec2(width() * 0.5f, height() * 0.5f), position(), rotation());
+	return PhysicsServer2D::get().body_add_box_shape(body, id(), vec2(width() * 0.5f, height() * 0.5f), position(), rotation());
 }
 
 void RectCollider2D::_update() {

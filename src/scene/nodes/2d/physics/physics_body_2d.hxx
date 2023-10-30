@@ -11,6 +11,9 @@ class PhysicsBody2D : public Node2D {
 	void _update() override;
 	void _exit() override;
 
+	void _contact_begin(uint64_t id_a, uint64_t id_b);
+	void _contact_end(uint64_t id_a, uint64_t id_b);
+
 	PhysicsBodyType &type() { return m_type; }
 
   private:

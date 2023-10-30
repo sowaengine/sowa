@@ -28,3 +28,17 @@ void PhysicsBody2D::_exit() {
 	PhysicsServer2D::get().destroy_body(m_body);
 	m_body = nullptr;
 }
+
+void PhysicsBody2D::_contact_begin(uint64_t id_a, uint64_t id_b) {
+	Node *node_a = App::get().GetCurrentScene()->get_node_by_id(id_a);
+	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
+
+	Utils::Log("Contact begin between {} and {}", node_a->name(), node_b->name());
+}
+
+void PhysicsBody2D::_contact_end(uint64_t id_a, uint64_t id_b) {
+	Node *node_a = App::get().GetCurrentScene()->get_node_by_id(id_a);
+	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
+
+	Utils::Log("Contact end between {} and {}", node_a->name(), node_b->name());
+}
