@@ -39,6 +39,7 @@ class BatchRenderer {
 	~BatchRenderer();
 
 	ErrorCode Init(const char *vsPath, const char *fsPath);
+	ErrorCode Init(unsigned char vsData[], size_t vsLength, unsigned char fsData[], size_t fsLength);
 
 	void Reset();
 	void PushQuad(BatchVertex vertices[4]);
@@ -52,6 +53,8 @@ class BatchRenderer {
 	inline Texture &BlankTexture() { return m_blankTexture; }
 
   private:
+	ErrorCode init();
+
 	Shader m_shader;
 	gfx::Buffer m_buffer;
 	gfx::VertexArray m_array;

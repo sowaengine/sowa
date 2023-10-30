@@ -22,12 +22,7 @@ BatchRenderer::BatchRenderer() {
 BatchRenderer::~BatchRenderer() {
 }
 
-ErrorCode BatchRenderer::Init(const char *vsPath, const char *fsPath) {
-	ErrorCode err = m_shader.Load(vsPath, fsPath);
-	if (err != OK) {
-		return err;
-	}
-
+ErrorCode BatchRenderer::init() {
 	m_array.New();
 	m_buffer.New(gfx::BufferType::VertexBuffer);
 
@@ -57,6 +52,26 @@ ErrorCode BatchRenderer::Init(const char *vsPath, const char *fsPath) {
 	}
 
 	return OK;
+}
+
+ErrorCode BatchRenderer::Init(unsigned char vsData[], size_t vsLength, unsigned char fsData[], size_t fsLength) {
+	m_shader.SetVertexSource(std::string((char *)vsData, vsLength));
+	m_shader.SetFragmentSource(std::string((char *)fsData, fsLength));
+	ErrorCode err = m_shader.Build();
+	if (err != OK) {
+		return err;
+	}
+
+	return init();
+}
+
+ErrorCode BatchRenderer::Init(const char *vsPath, const char *fsPath) {
+	ErrorCode err = m_shader.Load(vsPath, fsPath);
+	if (err != OK) {
+		return err;
+	}
+
+	return init();
 }
 
 void BatchRenderer::Reset() {

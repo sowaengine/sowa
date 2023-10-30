@@ -60,6 +60,11 @@
 
 #include "portable-file-dialogs.h"
 
+#include "res/shaders/batch2d.fs.res.hxx"
+#include "res/shaders/batch2d.vs.res.hxx"
+#include "res/shaders/fullscreen.fs.res.hxx"
+#include "res/shaders/fullscreen.vs.res.hxx"
+
 static App *s_instance;
 
 App::App() {
@@ -149,7 +154,9 @@ ErrorCode App::Init() {
 	// Initialize rendering
 	ModelBuilder::Quad2D(fullscreenModel, 2.f);
 
-	err = fullscreenShader.Load("res://shaders/fullscreen.vs", "res://shaders/fullscreen.fs");
+	fullscreenShader.SetVertexSource(std::string((char*)res::src_res_shaders_fullscreen_vs_res_hxx_data, sizeof(res::src_res_shaders_fullscreen_vs_res_hxx_data)));
+	fullscreenShader.SetFragmentSource(std::string((char*)res::src_res_shaders_fullscreen_fs_res_hxx_data, sizeof(res::src_res_shaders_fullscreen_fs_res_hxx_data)));
+	err = fullscreenShader.Build();
 	if (err != OK) {
 		std::cerr << "Failed to load fullscreen shader" << std::endl;
 	}
@@ -165,7 +172,7 @@ ErrorCode App::Init() {
 		std::cout << "Failed to load font: " << err << std::endl;
 	}
 
-	err = m_batchRenderer.Init("res://shaders/batch2d.vs", "res://shaders/batch2d.fs");
+	err = m_batchRenderer.Init(res::src_res_shaders_batch2d_vs_res_hxx_data, sizeof(res::src_res_shaders_batch2d_vs_res_hxx_data), res::src_res_shaders_batch2d_fs_res_hxx_data, sizeof(res::src_res_shaders_batch2d_fs_res_hxx_data));
 	if (err != OK) {
 		std::cout << "Failed to load renderer: " << err << std::endl;
 	}
