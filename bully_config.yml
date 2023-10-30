@@ -1,3 +1,5 @@
-extension: res.hxx
+extension: .res.hxx
 namespace: res
 dir: src/res/shaders
+always_generate: false
+recursive: true
