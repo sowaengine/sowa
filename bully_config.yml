@@ -1,4 +1,4 @@
-extension: .res.hxx
+extension: .res.h
 namespace: res
 dir: src/res/shaders
 always_generate: false
