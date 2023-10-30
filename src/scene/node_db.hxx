@@ -118,6 +118,7 @@ class NodeDB {
 			return node;
 		}
 
+		Utils::Error("Invalid node type: ", (int)type);
 		return nullptr;
 	}
 

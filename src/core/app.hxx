@@ -120,6 +120,7 @@ class App {
 	std::unique_ptr<pfd::open_file> m_open_project_dialog;
 	void OpenProjectDialog();
 	void InvalidateProjectDialog();
+	void LoadProjectFromDialog();
 
 	Texture m_testTexture;
 	Font m_testFont;

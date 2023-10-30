@@ -375,7 +375,9 @@ void Scene::free(size_t id) {
 
 Resource *Scene::load_resource(const std::string &path, RID id, ResourceType type) {
 	Resource *res = ResourceManager::get().Load(path, id, type);
-	m_resources.push_back(res->ResourceID());
+	if (nullptr != res) {
+		m_resources.push_back(res->ResourceID());
+	}
 
 	return res;
 }

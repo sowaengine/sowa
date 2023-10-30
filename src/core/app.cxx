@@ -120,10 +120,9 @@ ErrorCode App::Init() {
 	}
 #endif
 
-	ErrorCode err = m_projectSettings.Load("res://project.sowa");
-	if (err != OK) {
-		//
-	}
+	ErrorCode err;
+	OpenProjectDialog();
+	LoadProjectFromDialog();
 
 	RenderingServer::get().CreateWindow(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
 
@@ -154,8 +153,8 @@ ErrorCode App::Init() {
 	// Initialize rendering
 	ModelBuilder::Quad2D(fullscreenModel, 2.f);
 
-	fullscreenShader.SetVertexSource(std::string((char*)res::src_res_shaders_fullscreen_vs_res_hxx_data, sizeof(res::src_res_shaders_fullscreen_vs_res_hxx_data)));
-	fullscreenShader.SetFragmentSource(std::string((char*)res::src_res_shaders_fullscreen_fs_res_hxx_data, sizeof(res::src_res_shaders_fullscreen_fs_res_hxx_data)));
+	fullscreenShader.SetVertexSource(std::string((char *)res::src_res_shaders_fullscreen_vs_res_hxx_data, sizeof(res::src_res_shaders_fullscreen_vs_res_hxx_data)));
+	fullscreenShader.SetFragmentSource(std::string((char *)res::src_res_shaders_fullscreen_fs_res_hxx_data, sizeof(res::src_res_shaders_fullscreen_fs_res_hxx_data)));
 	err = fullscreenShader.Build();
 	if (err != OK) {
 		std::cerr << "Failed to load fullscreen shader" << std::endl;
@@ -482,7 +481,16 @@ ErrorCode App::Init() {
 	// mz_zip_delete(&zip_handle);
 	// mz_stream_mem_delete(&mem_stream);
 
-	OpenProjectDialog();
+	if (m_projectSettings.config_main_scene != "") {
+		if (nullptr == GetCurrentScene()) {
+			m_pCurrentScene = new Scene;
+		}
+
+		ErrorCode err = GetCurrentScene()->load(m_projectSettings.config_main_scene.c_str());
+		if (err != OK) {
+			std::cout << "Failed to load scene" << std::endl;
+		}
+	}
 
 	return OK;
 }
@@ -534,27 +542,7 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 
 void App::mainLoop() {
 	if (nullptr != m_open_project_dialog && m_open_project_dialog->ready()) {
-		std::vector<std::string> res = m_open_project_dialog->result();
-		if (!res.empty()) {
-			Utils::Info("Loading project file: {}", res[0]);
-			ErrorCode err = m_projectSettings.Load(Utils::Format("abs://{}", res[0]).c_str());
-			if (err != OK) {
-				Utils::Error("Failed to open project at {}", res[0]);
-			}
-
-			if (m_projectSettings.config_main_scene != "") {
-				if (nullptr == GetCurrentScene()) {
-					m_pCurrentScene = new Scene;
-				}
-
-				ErrorCode err = GetCurrentScene()->load(m_projectSettings.config_main_scene.c_str());
-				if (err != OK) {
-					std::cout << "Failed to load scene" << std::endl;
-				}
-			}
-		}
-
-		InvalidateProjectDialog();
+		LoadProjectFromDialog();
 	}
 
 	InputServer::get().ProcessInput();
@@ -987,6 +975,19 @@ void App::OpenProjectDialog() {
 
 void App::InvalidateProjectDialog() {
 	m_open_project_dialog = nullptr;
+}
+
+void App::LoadProjectFromDialog() {
+	std::vector<std::string> res = m_open_project_dialog->result();
+	if (!res.empty()) {
+		Utils::Info("Loading project file: {}", res[0]);
+		ErrorCode err = m_projectSettings.Load(Utils::Format("abs://{}", res[0]).c_str());
+		if (err != OK) {
+			Utils::Error("Failed to open project at {}", res[0]);
+		}
+	}
+
+	InvalidateProjectDialog();
 }
 
 extern "C" void Unload() {
