@@ -122,7 +122,6 @@ class App {
 	void InvalidateProjectDialog();
 	void LoadProjectFromDialog();
 
-	Texture m_testTexture;
 	Font m_testFont;
 
 	Model fullscreenModel;

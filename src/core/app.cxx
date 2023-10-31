@@ -160,11 +160,6 @@ ErrorCode App::Init() {
 		std::cerr << "Failed to load fullscreen shader" << std::endl;
 	}
 
-	err = m_testTexture.Load(TextureType::Texture2D, "res://image.png");
-	if (err != OK) {
-		std::cout << "Failed to load texture: " << err << std::endl;
-	}
-
 	// err = m_testFont.LoadTTF("res://Roboto-Medium.ttf");
 	err = m_testFont.LoadTTF("res://NotoSansKR-Medium.otf");
 	if (err != OK) {
