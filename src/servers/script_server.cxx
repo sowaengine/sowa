@@ -604,3 +604,39 @@ void ScriptServer::register_script_behaviour() {
 		}
 	}
 }
+
+ScriptFunctionCaller::ScriptFunctionCaller(const std::string &moduleName, const std::string &decl) {
+	m_arg_counter = 0;
+
+	ctx = s_data.engine->CreateContext();
+	asIScriptFunction *func = s_data.engine->GetModule(moduleName.c_str())->GetFunctionByDecl(decl.c_str());
+	ctx->Prepare(func);
+}
+
+ScriptFunctionCaller &ScriptFunctionCaller::arg() {
+	m_arg_counter++;
+	return *this;
+}
+
+ScriptFunctionCaller &ScriptFunctionCaller::arg_u32(uint32_t value) {
+	ctx->SetArgDWord(m_arg_counter++, value);
+	return *this;
+}
+
+ScriptFunctionCaller &ScriptFunctionCaller::arg_u64(uint64_t value) {
+	ctx->SetArgQWord(m_arg_counter++, value);
+	return *this;
+}
+
+void ScriptFunctionCaller::call() {
+	int r = ctx->Execute();
+	if (r == asEXECUTION_FINISHED) {
+		// The return value is only valid if the execution finished successfully
+		// asDWORD ret = ctx->GetReturnDWord();
+	}
+}
+
+ScriptFunctionCaller::~ScriptFunctionCaller() {
+	Utils::Log("Released context");
+	ctx->Release();
+}
