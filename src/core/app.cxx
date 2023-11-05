@@ -685,18 +685,28 @@ void App::mainLoop() {
 	Tweens::get().Poll(Time::Delta());
 
 	if (!IsRunning()) {
-		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), 5.f, 0.6f, 0.2f, 0.2, 1.f, 0.f);
-		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), 5.f, 0.2f, 0.8f, 0.4f, 1.f, 0.f);
+		rect cam = rect(m_editorCameraPos2d.x, m_editorCameraPos2d.y, 1920.f * m_editorCameraZoom2d, 1080.f * m_editorCameraZoom2d);
 
-		const float halfSize = 1'000'000.f;
-		const float spacing = 100.f;
-		const int halfCount = 20;
-		for (int i = -halfCount; i < halfCount; i++) {
-			Renderer().PushLine(vec2(i * spacing, -halfSize), vec2(i * spacing, halfSize), 5, 1.f, 1.f, 1.f, .3f);
+		vec2 begin = vec2(cam.x - (cam.w * 0.5f), cam.y - (cam.h * 0.5f));
+		vec2 end = vec2(cam.x + (cam.w * 0.5f), cam.y + (cam.h * 0.5f));
+
+		float grid_spacing = 500.f;
+		float thickness = 3.f * m_editorCameraZoom2d;
+		for (float f = begin.x - fmodf(begin.x, grid_spacing); f < end.x; f += grid_spacing) {
+			Renderer().PushLine(vec2(f, cam.y - cam.h), vec2(f, cam.y + cam.h), thickness, 1.f, 1.f, 1.f, .3f, 100.f);
 		}
-		for (int i = -halfCount; i < halfCount; i++) {
-			Renderer().PushLine(vec2(-halfSize, i * spacing), vec2(halfSize, i * spacing), 5, 1.f, 1.f, 1.f, .3f);
+		for (float f = begin.y - fmodf(begin.y, grid_spacing); f < end.y; f += grid_spacing) {
+			Renderer().PushLine(vec2(cam.x - cam.w, f), vec2(cam.x + cam.w, f), thickness, 1.f, 1.f, 1.f, .3f, 100.f);
 		}
+
+		thickness = 7.f * m_editorCameraZoom2d;
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), thickness, 0.6f, 0.2f, 0.2, 1.f, 0.f);
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), thickness, 0.2f, 0.8f, 0.4f, 1.f, 0.f);
+
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
+		Renderer().PushLine(vec2(0.f, 1080.f), vec2(1920.f, 1080.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
+		Renderer().PushLine(vec2(1920.f, 1080.f), vec2(1920.f, 0.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
+		Renderer().PushLine(vec2(1920.f, 0.f), vec2(0.f, 0.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
 
 		if (nullptr != GetCurrentScene()) {
 			Node *selectedNode = GetCurrentScene()->get_node_by_id(m_selectedNode);
