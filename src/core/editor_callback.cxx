@@ -16,7 +16,7 @@ void App::editor_mouse_move_event(InputEventMouseMove event) {
 
 	if (this->m_selectedNode != 0 && GetCurrentScene() && Input::IsButtonUp(MB_RIGHT)) {
 		if (this->m_editorState == EditorState::Dragging) {
-			Sprite2D *selected = dynamic_cast<Sprite2D *>(GetCurrentScene()->get_node_by_id(this->m_selectedNode));
+			Node2D *selected = dynamic_cast<Node2D *>(GetCurrentScene()->get_node_by_id(this->m_selectedNode));
 			if (selected) {
 				vec2 offset = vec2(deltaX * this->m_editorCameraZoom2d, -deltaY * this->m_editorCameraZoom2d);
 				if (Input::IsKeyDown(KEY_LEFT_SHIFT)) {
