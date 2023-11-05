@@ -963,7 +963,7 @@ void App::reload_scripts() {
 }
 
 void App::OpenProjectDialog() {
-	m_open_project_dialog = std::make_unique<pfd::open_file>(pfd::open_file("Choose files to read", pfd::path::home(),
+	m_open_project_dialog = std::make_unique<pfd::open_file>(pfd::open_file("Open Project File", pfd::path::home(),
 																			{"Sowa Engine project files", "project.sowa"},
 																			pfd::opt::none));
 }

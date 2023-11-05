@@ -12,6 +12,15 @@
 
 #include "file_server.hxx"
 
+#define ICON_BEGIN 0xe900
+#define ICON_NODE "\ue900"
+#define ICON_FILE "\ue901"
+#define ICON_FOLDER_OPEN "\ue902"
+#define ICON_FOLDER "\ue903"
+#define ICON_START "\ue904"
+#define ICON_STOP "\ue905"
+#define ICON_END 0xe950
+
 GuiServer &GuiServer::get() {
 	static GuiServer *server = new GuiServer;
 	return *server;
@@ -44,14 +53,24 @@ void GuiServer::Initialize() {
 
 		io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18, nullptr, ranges.Data);
 
-		file_buffer font2;
-		if (FileServer::get().ReadFileBytes("res://Font Awesome 6 Free-Regular-400.otf", font2) == OK) {
-			static ImWchar ranges[] = {0xf000, 0xf3ff, 0};
+		// file_buffer font2;
+		// if (FileServer::get().ReadFileBytes("res://Font Awesome 6 Free-Regular-400.otf", font2) == OK) {
+		// 	static ImWchar ranges[] = {0xf000, 0xf3ff, 0};
+		//
+		// 	ImFontConfig config;
+		// 	config.MergeMode = true;
+		//
+		// 	io.Fonts->AddFontFromMemoryTTF(font2.data(), font2.size(), 14, &config, ranges);
+		// }
+
+		file_buffer font3;
+		if (FileServer::get().ReadFileBytes("res://resources/icons.ttf", font3) == OK) {
+			static ImWchar ranges[] = {ICON_BEGIN, ICON_END, 0};
 
 			ImFontConfig config;
 			config.MergeMode = true;
 
-			io.Fonts->AddFontFromMemoryTTF(font2.data(), font2.size(), 14, &config, ranges);
+			io.Fonts->AddFontFromMemoryTTF(font3.data(), font3.size(), 14, &config, ranges);
 		}
 
 		io.Fonts->Build();
@@ -104,11 +123,11 @@ void GuiServer::Update() {
 		ImGui::SetWindowFontScale(1.25f);
 		ImGui::SetCursorPosX(width * 0.5f - button_sz * 0.5f);
 		if (App::get().IsRunning()) {
-			if (ImGui::Button("\uf28b", ImVec2(button_sz, button_sz))) {
+			if (ImGui::Button(ICON_STOP, ImVec2(button_sz, button_sz))) {
 				App::get().Stop();
 			}
 		} else {
-			if (ImGui::Button("\uf144", ImVec2(button_sz, button_sz))) {
+			if (ImGui::Button(ICON_START, ImVec2(button_sz, button_sz))) {
 				App::get().Start();
 			}
 		}
@@ -167,7 +186,7 @@ void GuiServer::Update() {
 			for (auto &entry : entries) {
 
 				if (entry.IsDirectory()) {
-					bool tree_open = ImGui::TreeNodeEx(("\uf07b   " + entry.Path().filename().string()).c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+					bool tree_open = ImGui::TreeNodeEx((ICON_FOLDER "   " + entry.Path().filename().string()).c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
 					if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsItemHovered()) {
 						ImGui::OpenPopup("popup_filesystem_rclick");
 					}
@@ -183,7 +202,7 @@ void GuiServer::Update() {
 
 			for (auto &entry : entries) {
 				if (entry.IsFile()) {
-					if (ImGui::TreeNodeEx(("\uf15b   " + entry.Path().filename().string()).c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf)) {
+					if (ImGui::TreeNodeEx((ICON_FILE "   " + entry.Path().filename().string()).c_str(), ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf)) {
 
 						ImGui::TreePop();
 					}
@@ -245,9 +264,9 @@ void GuiServer::Update() {
 					return;
 
 				ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-				if (node == scene->Root()) {
-					flags |= ImGuiTreeNodeFlags_DefaultOpen;
-				}
+				// if (node == scene->Root()) {
+				// }
+				flags |= ImGuiTreeNodeFlags_DefaultOpen;
 
 				if (node->get_children().size() == 0) {
 					flags |= ImGuiTreeNodeFlags_Leaf;
@@ -256,7 +275,16 @@ void GuiServer::Update() {
 					flags |= ImGuiTreeNodeFlags_Selected;
 				}
 
-				bool open = ImGui::TreeNodeEx(("\uf248   " + node->name()).c_str(), flags);
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 120.f));
+				bool open = ImGui::TreeNodeEx(("##" + node->name()).c_str(), flags);
+				ImGui::SetNextItemAllowOverlap();
+				ImGui::SameLine();
+				ImGui::TextColored(ImVec4(0.2f, 0.6f, 0.1f, 1.f), ICON_NODE);
+				ImGui::SetNextItemAllowOverlap();
+				ImGui::SameLine();
+				ImGui::Text("%s", node->name().c_str());
+				ImGui::PopStyleVar();
+
 				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 					scene_rclick_selected_node = node->id();
 					scene_rclick_open_popup = true;
@@ -572,6 +600,8 @@ void set_style(ImGuiStyle &style) {
 	style.TabRounding = 0.f;
 	style.GrabRounding = 2.3f;
 	style.FrameRounding = 2.3f;
+	style.IndentSpacing = 11.f;
+	style.ItemSpacing.x = 4.f;
 
 	style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
 	style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
