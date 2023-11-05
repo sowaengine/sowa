@@ -230,7 +230,7 @@ void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float
 		Font::Character ch = font->m_characters[*c];
 		if (ch.textureID == 0) {
 			// std::wcout << *c << ":" << (int)(*c) << std::endl;
-			font->loadChar((int)(*c));
+			font->load_char((int)(*c));
 		}
 
 		float xPos = x + ch.bearing.x * scale;

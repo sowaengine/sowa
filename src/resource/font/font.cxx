@@ -21,28 +21,17 @@ Font::~Font() {
 }
 
 ErrorCode Font::LoadTTF(const char *path) {
-	FT_Library freetype = GetFreeType();
-
 	ErrorCode err = FileServer::get().ReadFileBytes(path, m_buffer);
 	if (err != OK) {
 		return err;
 	}
 
-	if (FT_New_Memory_Face(freetype, m_buffer.data(), m_buffer.size(), 0, reinterpret_cast<FT_Face *>(&m_face))) {
-		return ERR_FAILED;
-	}
-	FT_Set_Pixel_Sizes(reinterpret_cast<FT_Face>(m_face), 0, 48);
+	return load_font();
+}
 
-	if (FT_Load_Char(reinterpret_cast<FT_Face>(m_face), 'X', FT_LOAD_RENDER)) {
-		return ERR_FAILED;
-	}
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	for (int c = 0; c < 128; c++) {
-		loadChar(c);
-	}
-
-	return OK;
+ErrorCode Font::LoadTTF(const file_buffer &buffer) {
+	m_buffer = buffer;
+	return load_font();
 }
 
 uint32_t Font::GetGlyphTextureID(int codepoint) {
@@ -69,7 +58,27 @@ glm::vec2 Font::CalcTextSize(const std::string &text) {
 	return size;
 }
 
-void Font::loadChar(int codepoint) {
+ErrorCode Font::load_font() {
+	FT_Library freetype = GetFreeType();
+
+	if (FT_New_Memory_Face(freetype, m_buffer.data(), m_buffer.size(), 0, reinterpret_cast<FT_Face *>(&m_face))) {
+		return ERR_FAILED;
+	}
+	FT_Set_Pixel_Sizes(reinterpret_cast<FT_Face>(m_face), 0, 48);
+
+	if (FT_Load_Char(reinterpret_cast<FT_Face>(m_face), 'X', FT_LOAD_RENDER)) {
+		return ERR_FAILED;
+	}
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	for (int c = 0; c < 128; c++) {
+		load_char(c);
+	}
+
+	return OK;
+}
+
+void Font::load_char(int codepoint) {
 	FT_Face face = reinterpret_cast<FT_Face>(m_face);
 	FT_UInt glyphIndex = FT_Get_Char_Index(face, codepoint);
 

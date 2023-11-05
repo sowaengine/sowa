@@ -17,13 +17,15 @@ class Font : public Resource {
 	~Font();
 
 	ErrorCode LoadTTF(const char *path);
+	ErrorCode LoadTTF(const file_buffer& buffer);
 	uint32_t GetGlyphTextureID(int codepoint);
 	glm::vec2 CalcTextSize(const std::string &text);
 
   private:
 	friend class BatchRenderer;
 
-	void loadChar(int codepoint);
+	ErrorCode load_font();
+	void load_char(int codepoint);
 
 	struct Character {
 		uint32_t textureID = 0;

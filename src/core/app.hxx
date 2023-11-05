@@ -137,6 +137,7 @@ class App {
 
 	void command_interface_char_callback(InputEventChar event);
 	void command_interface_key_callback(InputEventKey event);
+	void load_resources();
 
 	BatchRenderer m_batchRenderer;
 	NewTree m_uiTree;

@@ -60,11 +60,6 @@
 
 #include "portable-file-dialogs.h"
 
-#include "res/shaders/batch2d.fs.res.h"
-#include "res/shaders/batch2d.vs.res.h"
-#include "res/shaders/fullscreen.fs.res.h"
-#include "res/shaders/fullscreen.vs.res.h"
-
 static App *s_instance;
 
 App::App() {
@@ -98,8 +93,9 @@ EM_JS(bool, check_timer, (), {
 
 ErrorCode App::Init() {
 #ifndef SW_WEB
-	m_appPath = "./project";
+	// m_appPath = "./project";
 #else
+#error project picker should be added
 	m_appPath = "/app";
 #endif
 	FileServer::Create(this);
@@ -153,23 +149,7 @@ ErrorCode App::Init() {
 	// Initialize rendering
 	ModelBuilder::Quad2D(fullscreenModel, 2.f);
 
-	fullscreenShader.SetVertexSource(std::string((char *)res::src_res_shaders_fullscreen_vs_res_h_data, sizeof(res::src_res_shaders_fullscreen_vs_res_h_data)));
-	fullscreenShader.SetFragmentSource(std::string((char *)res::src_res_shaders_fullscreen_fs_res_h_data, sizeof(res::src_res_shaders_fullscreen_fs_res_h_data)));
-	err = fullscreenShader.Build();
-	if (err != OK) {
-		std::cerr << "Failed to load fullscreen shader" << std::endl;
-	}
-
-	// err = m_testFont.LoadTTF("res://Roboto-Medium.ttf");
-	err = m_testFont.LoadTTF("res://NotoSansKR-Medium.otf");
-	if (err != OK) {
-		std::cout << "Failed to load font: " << err << std::endl;
-	}
-
-	err = m_batchRenderer.Init(res::src_res_shaders_batch2d_vs_res_h_data, sizeof(res::src_res_shaders_batch2d_vs_res_h_data), res::src_res_shaders_batch2d_fs_res_h_data, sizeof(res::src_res_shaders_batch2d_fs_res_h_data));
-	if (err != OK) {
-		std::cout << "Failed to load renderer: " << err << std::endl;
-	}
+	load_resources();
 
 	Time::update();
 
@@ -974,11 +954,17 @@ void App::InvalidateProjectDialog() {
 
 void App::LoadProjectFromDialog() {
 	std::vector<std::string> res = m_open_project_dialog->result();
-	if (!res.empty()) {
+	if (res.empty()) {
+		Utils::Error("Invalid project file");
+		exit(1);
+	} else {
 		Utils::Info("Loading project file: {}", res[0]);
+		m_appPath = std::filesystem::path(res[0]).parent_path();
+
 		ErrorCode err = m_projectSettings.Load(Utils::Format("abs://{}", res[0]).c_str());
 		if (err != OK) {
 			Utils::Error("Failed to open project at {}", res[0]);
+			exit(1);
 		}
 	}
 

@@ -1,5 +1,5 @@
 extension: .res.h
 namespace: res
-dir: src/res/shaders
+dir: src/res
 always_generate: false
 recursive: true
