@@ -640,7 +640,11 @@ void App::mainLoop() {
 	m_layer2D.Clear(0.5f, 0.7f, 0.1f, 0.f, true);
 
 	glm::mat4 view = glm::mat4(1.f);
-	vec2 centerPoint(0.5f);
+	vec2 centerPoint(0.f);
+	if (!IsRunning()) {
+		centerPoint = vec2(0.5f);
+	}
+
 	vec2 position(0.f);
 	vec2 zoom(1.f);
 	float rotation = 0.f;
@@ -664,7 +668,7 @@ void App::mainLoop() {
 	view = glm::translate(view, {position.x, position.y, 0.f});
 	view = glm::rotate(view, glm::radians(rotation), {0.f, 0.f, 1.f});
 	view = glm::scale(view, {zoom.x, zoom.y, 1.f});
-	view = glm::translate(view, {-(1920.f * 0.5f), -(1080.f * 0.5f), 0.f});
+	view = glm::translate(view, {-(1920.f * centerPoint.x), -(1080.f * centerPoint.y), 0.f});
 
 	view = glm::inverse(view);
 
@@ -700,8 +704,9 @@ void App::mainLoop() {
 		}
 
 		thickness = 7.f * m_editorCameraZoom2d;
-		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), thickness, 0.6f, 0.2f, 0.2, 1.f, 0.f);
-		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), thickness, 0.2f, 0.8f, 0.4f, 1.f, 0.f);
+
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), thickness, 0.6f, 0.2f, 0.2, 1.f, 100.f);
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), thickness, 0.2f, 0.8f, 0.4f, 1.f, 100.f);
 
 		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
 		Renderer().PushLine(vec2(0.f, 1080.f), vec2(1920.f, 1080.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
