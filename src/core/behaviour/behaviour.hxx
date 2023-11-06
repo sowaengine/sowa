@@ -7,6 +7,9 @@
 #include <string>
 #include <unordered_map>
 
+#include "core/error.hxx"
+#include "servers/script_server.hxx"
+
 class Node;
 class Behaviour;
 
@@ -18,6 +21,7 @@ class Behaviour {
 
 	void Start(Node *);
 	void Update(Node *);
+	ErrorCode CallFunc(Node *node, const std::string &decl, ScriptFunctionCaller &caller);
 
 	inline void SetStartFunc(BehaviourFunc func) { m_startFunc = func; }
 	inline void SetUpdateFunc(BehaviourFunc func) { m_updateFunc = func; }

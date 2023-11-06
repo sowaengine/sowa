@@ -605,8 +605,40 @@ void ScriptServer::register_script_behaviour() {
 	}
 }
 
+ScriptFunctionCaller::ScriptFunctionCaller() {
+	m_arg_counter = 0;
+	ctx = nullptr;
+}
+
+ScriptFunctionCaller::ScriptFunctionCaller(const std::string &moduleName, const std::string className, const std::string &decl) {
+	m_arg_counter = 0;
+	ctx = nullptr;
+
+	asIScriptModule *module_ = s_data.engine->GetModule(moduleName.c_str());
+	if (nullptr == module_) {
+		// Utils::Error("Invalid module");
+		return;
+	}
+
+	asITypeInfo *typeinfo = module_->GetTypeInfoByDecl(className.c_str());
+	if (nullptr == typeinfo) {
+		// Utils::Error("Invalid type");
+		return;
+	}
+
+	asIScriptFunction *func = typeinfo->GetMethodByDecl(decl.c_str());
+	if (nullptr == func) {
+		// Utils::Error("Invalid function");
+		return;
+	}
+
+	ctx = s_data.engine->CreateContext();
+	ctx->Prepare(func);
+}
+
 ScriptFunctionCaller::ScriptFunctionCaller(const std::string &moduleName, const std::string &decl) {
 	m_arg_counter = 0;
+	ctx = nullptr;
 
 	ctx = s_data.engine->CreateContext();
 	asIScriptFunction *func = s_data.engine->GetModule(moduleName.c_str())->GetFunctionByDecl(decl.c_str());
@@ -614,29 +646,66 @@ ScriptFunctionCaller::ScriptFunctionCaller(const std::string &moduleName, const 
 }
 
 ScriptFunctionCaller &ScriptFunctionCaller::arg() {
+	if (nullptr == ctx) {
+		return *this;
+	}
+
 	m_arg_counter++;
 	return *this;
 }
 
+ScriptFunctionCaller &ScriptFunctionCaller::arg_this(void *o) {
+	if (nullptr == ctx) {
+		return *this;
+	}
+
+	ctx->SetObject(o);
+	return *this;
+}
+
+ScriptFunctionCaller &ScriptFunctionCaller::arg_object(void *o) {
+	if (nullptr == ctx) {
+		return *this;
+	}
+
+	ctx->SetArgObject(m_arg_counter++, o);
+	return *this;
+}
+
 ScriptFunctionCaller &ScriptFunctionCaller::arg_u32(uint32_t value) {
+	if (nullptr == ctx) {
+		return *this;
+	}
+
 	ctx->SetArgDWord(m_arg_counter++, value);
 	return *this;
 }
 
 ScriptFunctionCaller &ScriptFunctionCaller::arg_u64(uint64_t value) {
+	if (nullptr == ctx) {
+		return *this;
+	}
+
 	ctx->SetArgQWord(m_arg_counter++, value);
 	return *this;
 }
 
 void ScriptFunctionCaller::call() {
+	if (nullptr == ctx) {
+		Utils::Error("Attempted to call a script function with invalid context");
+		return;
+	}
+
 	int r = ctx->Execute();
 	if (r == asEXECUTION_FINISHED) {
 		// The return value is only valid if the execution finished successfully
 		// asDWORD ret = ctx->GetReturnDWord();
+	} else {
+		Utils::Error("script execution error: {}", r);
 	}
+
+	ctx->Release();
 }
 
 ScriptFunctionCaller::~ScriptFunctionCaller() {
-	Utils::Log("Released context");
-	ctx->Release();
 }

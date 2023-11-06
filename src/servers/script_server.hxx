@@ -10,18 +10,22 @@
 struct ScriptFunctionCaller {
   public:
 	ScriptFunctionCaller &arg(); /// Blank arg to increment arg counter
+	ScriptFunctionCaller &arg_this(void *o);
 
+	ScriptFunctionCaller &arg_object(void *o);
 	ScriptFunctionCaller &arg_u32(uint32_t value);
 	ScriptFunctionCaller &arg_u64(uint64_t value);
 
 	void call();
+
+	ScriptFunctionCaller();
 	~ScriptFunctionCaller();
 
   private:
 	friend class ScriptServer;
-	ScriptFunctionCaller() = delete;
 
 	ScriptFunctionCaller(const std::string &moduleName, const std::string &decl);
+	ScriptFunctionCaller(const std::string &moduleName, const std::string className, const std::string &decl);
 
 	int m_arg_counter;
 	asIScriptContext *ctx;
@@ -37,6 +41,10 @@ class ScriptServer {
 
 	inline ScriptFunctionCaller begin_func(const std::string &decl) {
 		return ScriptFunctionCaller("Sowa", decl);
+	}
+
+	inline ScriptFunctionCaller begin_method(const std::string &className, const std::string &decl) {
+		return ScriptFunctionCaller("Sowa", className, decl);
 	}
 
   private:
