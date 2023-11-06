@@ -7,6 +7,8 @@
 
 class PhysicsBody2D : public Node2D {
   public:
+	virtual ~PhysicsBody2D();
+
 	void _start() override;
 	void _update() override;
 	void _exit() override;
@@ -15,6 +17,12 @@ class PhysicsBody2D : public Node2D {
 	void _contact_end(uint64_t id_a, uint64_t id_b);
 
 	PhysicsBodyType &type() { return m_type; }
+
+	void _duplicate_data(Node *dst) override;
+
+  private:
+	void create_body();
+	void destroy_body();
 
   private:
 	PhysicsBodyType m_type = PhysicsBodyType::Static;

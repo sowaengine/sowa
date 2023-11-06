@@ -5,8 +5,54 @@
 #include "servers/physics_server_2d.hxx"
 #include "utils/utils.hxx"
 
+PhysicsBody2D::~PhysicsBody2D() {
+	destroy_body();
+}
+
 void PhysicsBody2D::_start() {
-	m_body = PhysicsServer2D::get().create_body(m_type, position(), rotation());
+	create_body();
+}
+
+void PhysicsBody2D::_update() {
+
+	if (App::get().IsRunning()) {
+
+		position() = PhysicsServer2D::get().body_get_position(m_body);
+		rotation() = PhysicsServer2D::get().body_get_rotation(m_body);
+	}
+}
+
+void PhysicsBody2D::_exit() {
+	destroy_body();
+}
+
+void PhysicsBody2D::_contact_begin(uint64_t id_a, uint64_t id_b) {
+	Node *node_a = App::get().GetCurrentScene()->get_node_by_id(id_a);
+	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
+
+	for (auto &[id, b] : get_behaviours()) {
+		ScriptFunctionCaller caller;
+		ErrorCode err = b.CallFunc(this, "void _contact_begin(Node@, Node@)", caller);
+		if (err == OK) {
+			caller.arg_object(node_a).arg_object(node_b).call();
+		}
+	}
+}
+
+void PhysicsBody2D::_contact_end(uint64_t id_a, uint64_t id_b) {
+	Node *node_a = App::get().GetCurrentScene()->get_node_by_id(id_a);
+	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
+
+	(void)node_a;
+	(void)node_db;
+}
+
+void PhysicsBody2D::_duplicate_data(Node *dst) {
+	dynamic_cast<PhysicsBody2D *>(dst)->create_body();
+}
+
+void PhysicsBody2D::create_body() {
+	m_body = PhysicsServer2D::get().create_body(m_type, global_position(), global_rotation());
 
 	for (Node *node : get_children()) {
 		BaseCollider2D *collider = dynamic_cast<BaseCollider2D *>(node);
@@ -16,29 +62,10 @@ void PhysicsBody2D::_start() {
 	}
 }
 
-void PhysicsBody2D::_update() {
+void PhysicsBody2D::destroy_body() {
+	if (nullptr == m_body)
+		return;
 
-	if (App::get().IsRunning()) {
-		position() = PhysicsServer2D::get().body_get_position(m_body);
-		rotation() = PhysicsServer2D::get().body_get_rotation(m_body);
-	}
-}
-
-void PhysicsBody2D::_exit() {
 	PhysicsServer2D::get().destroy_body(m_body);
 	m_body = nullptr;
-}
-
-void PhysicsBody2D::_contact_begin(uint64_t id_a, uint64_t id_b) {
-	Node *node_a = App::get().GetCurrentScene()->get_node_by_id(id_a);
-	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
-
-	Utils::Log("Contact begin between {} and {}", node_a->name(), node_b->name());
-}
-
-void PhysicsBody2D::_contact_end(uint64_t id_a, uint64_t id_b) {
-	Node *node_a = App::get().GetCurrentScene()->get_node_by_id(id_a);
-	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
-
-	Utils::Log("Contact end between {} and {}", node_a->name(), node_b->name());
 }
