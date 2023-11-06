@@ -58,7 +58,7 @@ void Node::update_behaviours() {
 
 void Node::add_child(Node *child) {
 	if (child->m_parent != nullptr) {
-		child->m_parent->remove_child(child->name());
+		child->m_parent->remove_child(child->id());
 	}
 
 	m_children.push_back(child);
@@ -81,21 +81,21 @@ Node *Node::get_child_index(size_t index) {
 	return m_children[index];
 }
 
-void Node::remove_child(std::string name) {
-	for (auto it = m_children.begin(); it != m_children.end(); ++it) {
-		if ((*it)->name() == name) {
-			m_children.erase(it);
-			// (*it)->m_parent = nullptr;
-			return;
-		}
-	}
-}
+// void Node::remove_child(std::string name) {
+// 	for (auto it = m_children.begin(); it != m_children.end(); ++it) {
+// 		if ((*it)->name() == name) {
+// 			m_children.erase(it);
+// 			// (*it)->m_parent = nullptr;
+// 			return;
+// 		}
+// 	}
+// }
 
 void Node::remove_child(size_t id) {
 	for (auto it = m_children.begin(); it != m_children.end(); ++it) {
 		if ((*it)->id() == id) {
+			(*it)->m_parent = nullptr;
 			m_children.erase(it);
-			// (*it)->m_parent = nullptr;
 			return;
 		}
 	}
@@ -129,4 +129,51 @@ void Node::add_group(const std::string &name) {
 		return;
 
 	m_groups.push_back(name);
+}
+
+Node *Node::duplicate() {
+	Node *newNode = duplicate_in_scene(m_scene);
+	_duplicate_data(newNode);
+	return newNode;
+}
+
+Node *Node::duplicate_in_scene(Scene *scene) {
+	std::function<Node *(Scene *, Node *)> copyNode;
+
+	copyNode = [&](Scene *scn, Node *node) -> Node * {
+		Node *newNode = scn->create(node->type_hash(), node->name(), node->id());
+		std::vector<std::string> props;
+		NodeDB::get().get_property_names(node->type_hash(), props);
+		for (auto &propName : props) {
+			NodeProperty prop = NodeDB::get().get_property(node->type_hash(), propName);
+			prop.set(newNode, prop.get(node));
+		}
+
+		newNode->get_behaviour_names() = node->get_behaviour_names();
+
+		for (Node *child : node->get_children()) {
+			newNode->add_child(copyNode(scn, child));
+		}
+
+		newNode->get_groups() = node->get_groups();
+
+		return newNode;
+	};
+
+	Node *node = copyNode(scene, this);
+
+	if (App::get().IsRunning()) {
+		std::function<void(Node *)> start;
+
+		start = [&](Node *n) {
+			n->start_behaviours();
+
+			for (Node *child : n->get_children()) {
+				start(child);
+			}
+		};
+
+		start(node);
+	}
+	return node;
 }

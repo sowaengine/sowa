@@ -8,6 +8,8 @@
 
 #include "core/behaviour/behaviour.hxx"
 
+class Scene;
+
 class Node {
   public:
 	inline std::string &name() { return m_name; }
@@ -38,8 +40,12 @@ class Node {
 	Node *get_child(std::string name);
 	inline size_t get_child_count() { return m_children.size(); }
 	Node *get_child_index(size_t index);
-	void remove_child(std::string name);
+	// void remove_child(std::string name);
 	void remove_child(size_t id);
+
+	Node *duplicate();
+	/// @brief Node type specific implementation of node property duplication
+	virtual void _duplicate_data(Node *dst) {}
 
 	//
 	inline std::vector<std::string> &get_groups() { return m_groups; }
@@ -53,8 +59,10 @@ class Node {
 
   private:
 	friend class NodeDB;
+	friend class Scene;
 
 	void register_behaviour(const std::string &behaviour, bool callStart = false);
+	Node *duplicate_in_scene(Scene *scene);
 
 	size_t m_type_hash = 0;
 
@@ -63,6 +71,7 @@ class Node {
 
 	Node *m_parent = nullptr;
 	std::vector<Node *> m_children;
+	Scene *m_scene = nullptr;
 
 	std::vector<std::string> m_groups;
 };
