@@ -44,7 +44,7 @@ void App::editor_key_event(InputEventKey event) {
 		// RenderingServer::get().SetCursorMode(CursorMode::Normal);
 	}
 
-	if (event.action == KEY_PRESSED && event.key == KEY_G && this->m_editorState == EditorState::None && InputServer::get().IsCursorInside()) {
+	if (event.action == KEY_PRESSED && event.key == KEY_G && m_selectedNode != 0 && this->m_editorState == EditorState::None && InputServer::get().IsCursorInside()) {
 		m_editorState = EditorState::Dragging;
 		// RenderingServer::get().SetCursorMode(CursorMode::Tiled);
 		m_actionDeltaVec2 = vec2(0.f);
