@@ -122,17 +122,16 @@ void Scene::_begin_scene() {
 }
 
 void Scene::_update_scene() {
+	for (auto id : m_nodes_to_free) {
+		this->free(id);
+	}
+	m_nodes_to_free.clear();
+
 	for (auto &[id, node] : m_allocated_nodes) {
 		node->_update();
 		if (App::get().IsRunning())
 			node->update_behaviours();
 	}
-
-	for (auto id : m_nodes_to_free) {
-		this->free(id);
-	}
-
-	m_nodes_to_free.clear();
 }
 
 void Scene::_end_scene() {
@@ -342,6 +341,11 @@ void Scene::clear() {
 
 Node *Scene::create(NodeType type, const std::string &name, size_t id) {
 	Node *node = NodeDB::get().construct(type, name, id);
+	while (m_allocated_nodes.find(node->m_id) != m_allocated_nodes.end()) {
+		node->m_id = Utils::RandRange(1, 1'000'000);
+	}
+
+	node->m_scene = this;
 	m_allocated_nodes[node->id()] = node;
 
 	return node;
@@ -363,9 +367,12 @@ void Scene::free(size_t id) {
 	if (Node *parent = node->get_parent(); nullptr != parent) {
 		parent->remove_child(node->id());
 	}
-
 	for (Node *child : node->get_children()) {
-		free(child->id());
+		child->m_parent = nullptr;
+	}
+
+	for (size_t i = 0; i < node->get_children().size(); i++) {
+		this->free(node->get_children()[i]->id());
 	}
 
 	NodeDB::get().destruct(node);
@@ -443,6 +450,6 @@ void Scene::copy(Scene *src, Scene *dst) {
 	};
 
 	dst->clear();
-	Node *newRoot = copyNode(src->Root());
+	Node *newRoot = src->Root()->duplicate_in_scene(dst);
 	dst->Root() = newRoot;
 }

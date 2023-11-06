@@ -460,11 +460,24 @@ ScriptServer::ScriptServer() {
 	s_data.engine->RegisterGlobalFunction("Node@ root()", asFUNCTION(SceneMethodWrapper::Root), asCALL_CDECL);
 	s_data.engine->SetDefaultNamespace("");
 
+	s_data.engine->RegisterEnum("Key");
+	s_data.engine->RegisterEnumValue("Key", "Space", KEY_SPACE);
+	s_data.engine->SetDefaultNamespace("input");
+	s_data.engine->RegisterGlobalFunction("bool is_key_down(int)", asFUNCTION(Input::IsKeyDown), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("bool is_key_just_pressed(int)", asFUNCTION(Input::IsKeyJustPressed), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
+
 	s_data.engine->RegisterObjectMethod("Node", "Node@ get_parent()", asMETHODPR(Node, get_parent, (), Node *), asCALL_THISCALL);
 	s_data.engine->RegisterObjectMethod("Node", "void add_child(Node@)", asMETHODPR(Node, add_child, (Node *), void), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("Node", "void add_group(string)", asMETHODPR(Node, add_group, (const std::string &), void), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("Node", "uint64 get_id()", asMETHODPR(Node, id, (), size_t), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("Node", "Node@ duplicate()", asMETHODPR(Node, duplicate, (), Node *), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("Node", "bool is_in_group(string)", asMETHODPR(Node, is_in_group, (const std::string &), bool), asCALL_THISCALL);
 	s_data.engine->RegisterObjectMethod("Node", "int64 get_child_count()", asMETHODPR(Node, get_child_count, (), size_t), asCALL_THISCALL);
 	s_data.engine->RegisterObjectMethod("Node", "void queue_free()", asFUNCTION(SceneMethodWrapper::QueueFree), asCALL_CDECL_OBJFIRST);
 	s_data.engine->RegisterObjectMethod("Node2D", "float global_rotation()", asMETHODPR(Node2D, global_rotation, (), float), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("AudioStreamPlayer", "void play()", asMETHODPR(AudioStreamPlayer, play, (), void), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("PhysicsBody2D", "void set_linear_velocity(vec2@)", asMETHODPR(PhysicsBody2D, set_linear_velocity, (vec2), void), asCALL_THISCALL);
 
 	for (const auto &[type, data] : db.m_db) {
 		std::string name = db.get_node_typename(type);
