@@ -18,6 +18,8 @@ class PhysicsBody2D : public Node2D {
 
 	PhysicsBodyType &type() { return m_type; }
 
+	void set_linear_velocity(vec2 velocity);
+
 	void _duplicate_data(Node *dst) override;
 
   private:

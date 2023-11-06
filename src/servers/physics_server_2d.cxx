@@ -197,6 +197,9 @@ void *PhysicsServer2D::create_body(PhysicsBodyType bodyType, cref<vec2> position
 }
 
 void PhysicsServer2D::destroy_body(void *body) {
+	if (nullptr == body)
+		return;
+
 	m_world->DestroyBody(reinterpret_cast<b2Body *>(body));
 }
 
@@ -224,6 +227,7 @@ void *PhysicsServer2D::body_add_circle_shape(void *body, uint64_t id, float radi
 	fixtureDef.shape = &shape;
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.3f;
+	fixtureDef.restitution = .1f;
 	fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(uint64_t(id));
 
 	b2Fixture *fixture = reinterpret_cast<b2Body *>(body)->CreateFixture(&fixtureDef);
@@ -231,11 +235,27 @@ void *PhysicsServer2D::body_add_circle_shape(void *body, uint64_t id, float radi
 }
 
 vec2 PhysicsServer2D::body_get_position(void *body) {
+	if (nullptr == body) {
+		return vec2(0.f, 0.f);
+	}
+
 	b2Vec2 pos = reinterpret_cast<b2Body *>(body)->GetPosition();
 	return vec2(UNIT_TO_PX(pos.x), UNIT_TO_PX(pos.y));
 }
 
 float PhysicsServer2D::body_get_rotation(void *body) {
+	if (nullptr == body) {
+		return 0.f;
+	}
+
 	float angle = reinterpret_cast<b2Body *>(body)->GetAngle();
 	return math::degrees(angle);
+}
+
+void PhysicsServer2D::body_set_linear_velocity(void *body, vec2 velocity) {
+	if (nullptr == body) {
+		return;
+	}
+
+	reinterpret_cast<b2Body *>(body)->SetLinearVelocity(b2Vec2(velocity.x, velocity.y));
 }

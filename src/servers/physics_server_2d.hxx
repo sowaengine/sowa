@@ -38,6 +38,8 @@ class PhysicsServer2D {
 	vec2 body_get_position(void *body);
 	float body_get_rotation(void *body);
 
+	void body_set_linear_velocity(void *body, vec2 velocity);
+
   private:
 	vec2 m_gravity = vec2{0.f, -9.8f};
 	b2World *m_world = nullptr;

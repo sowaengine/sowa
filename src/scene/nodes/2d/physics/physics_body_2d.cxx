@@ -47,6 +47,10 @@ void PhysicsBody2D::_contact_end(uint64_t id_a, uint64_t id_b) {
 	(void)node_db;
 }
 
+void PhysicsBody2D::set_linear_velocity(vec2 velocity) {
+	PhysicsServer2D::get().body_set_linear_velocity(m_body, velocity);
+}
+
 void PhysicsBody2D::_duplicate_data(Node *dst) {
 	dynamic_cast<PhysicsBody2D *>(dst)->create_body();
 }
