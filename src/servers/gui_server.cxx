@@ -277,6 +277,15 @@ void GuiServer::Update() {
 
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.f, 120.f));
 				bool open = ImGui::TreeNodeEx(("##" + node->name()).c_str(), flags);
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+					scene_rclick_selected_node = node->id();
+					scene_rclick_open_popup = true;
+				}
+				if (!ImGui::IsItemToggledOpen() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+					App::get().SelectNode(node->id());
+				}
+
 				ImGui::SetNextItemAllowOverlap();
 				ImGui::SameLine();
 				ImGui::TextColored(ImVec4(0.2f, 0.6f, 0.1f, 1.f), ICON_NODE);
@@ -285,16 +294,7 @@ void GuiServer::Update() {
 				ImGui::Text("%s", node->name().c_str());
 				ImGui::PopStyleVar();
 
-				if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-					scene_rclick_selected_node = node->id();
-					scene_rclick_open_popup = true;
-				}
-
-				if (!ImGui::IsItemToggledOpen() && ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-					App::get().SelectNode(node->id());
-				}
 				if (open) {
-
 					for (Node *child : node->get_children()) {
 						drawNode(child);
 					}
