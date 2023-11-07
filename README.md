@@ -4,7 +4,7 @@
 
 <br>
 
-<img src="https://raw.githubusercontent.com/sowaengine/sowa/main/.res/icon-full.png" alt="Sowa Engine Logo"><br><br>
+<img src="https://raw.githubusercontent.com/sowaengine/sowa/develop/.res/icon-full.png" alt="Sowa Engine Logo"><br><br>
 
 
 **Sowa Engine** is a 2D Game/Rendering Engine
