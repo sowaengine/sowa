@@ -10,6 +10,8 @@
 #include "resource/resource_manager.hxx"
 
 void Sprite2D::_update() {
+	if (!is_visible())
+		return;
 
 	Texture *texture = ResourceManager::get().GetAs<Texture>(m_texture);
 	if (nullptr == texture)

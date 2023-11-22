@@ -162,18 +162,25 @@ Node *Node::duplicate_in_scene(Scene *scene) {
 
 	Node *node = copyNode(scene, this);
 
-	if (App::get().IsRunning()) {
-		std::function<void(Node *)> start;
-
-		start = [&](Node *n) {
-			n->start_behaviours();
-
-			for (Node *child : n->get_children()) {
-				start(child);
-			}
-		};
-
-		start(node);
-	}
+	// if (App::get().IsRunning()) {
+	// 	std::function<void(Node *)> start;
+	//
+	// 	start = [&](Node *n) {
+	// 		n->start_behaviours();
+	//
+	// 		for (Node *child : n->get_children()) {
+	// 			start(child);
+	// 		}
+	// 	};
+	//
+	// 	start(node);
+	// }
 	return node;
+}
+
+bool Node::is_visible() {
+	if (nullptr != get_parent())
+		return m_visible && get_parent()->is_visible();
+
+	return m_visible;
 }

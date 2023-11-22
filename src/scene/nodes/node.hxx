@@ -13,7 +13,8 @@ class Scene;
 class Node {
   public:
 	inline std::string &name() { return m_name; }
-	size_t id() { return m_id; }
+	inline size_t id() { return m_id; }
+	inline bool &visible() { return m_visible; }
 
 	virtual ~Node() = default;
 
@@ -53,9 +54,13 @@ class Node {
 	void remove_group(const std::string &name);
 	void add_group(const std::string &name);
 
+	/// @brief checks both visible() and parent.is_visible()
+	bool is_visible();
+
   protected:
 	std::string m_name = "";
 	size_t m_id = 0;
+	bool m_visible = true;
 
   private:
 	friend class NodeDB;
