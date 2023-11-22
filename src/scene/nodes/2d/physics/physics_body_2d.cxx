@@ -44,7 +44,7 @@ void PhysicsBody2D::_contact_end(uint64_t id_a, uint64_t id_b) {
 	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
 
 	(void)node_a;
-	(void)node_db;
+	(void)node_b;
 }
 
 void PhysicsBody2D::set_linear_velocity(vec2 velocity) {

@@ -520,6 +520,14 @@ void App::mainLoop() {
 		LoadProjectFromDialog();
 	}
 
+	if (m_scene_to_load != "") {
+		GetCurrentScene()->_end_scene();
+		GetCurrentScene()->load(m_scene_to_load.c_str());
+		GetCurrentScene()->_begin_scene();
+
+		m_scene_to_load = "";
+	}
+
 	InputServer::get().ProcessInput();
 	glClearColor(0.28f, 0.28f, 0.28f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -891,6 +899,10 @@ void App::SetCurrentScene(Scene *scene) {
 	m_pCurrentScene = scene;
 	if (IsRunning())
 		m_pCurrentScene->_begin_scene();
+}
+
+void App::load_scene(const std::string &path) {
+	m_scene_to_load = path;
 }
 
 void App::Start() {

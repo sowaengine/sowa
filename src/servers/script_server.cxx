@@ -406,6 +406,10 @@ ScriptServer::ScriptServer() {
 		static void Warn(const std::string &msg) {
 			Utils::Warn(msg);
 		}
+
+		static int RandRange(int min, int max) {
+			return Utils::RandRange(min, max);
+		}
 	};
 
 	s_data.engine->SetDefaultNamespace("utils");
@@ -413,6 +417,7 @@ ScriptServer::ScriptServer() {
 	s_data.engine->RegisterGlobalFunction("void info(string)", asFUNCTION(UtilsMethodWrapper::Info), asCALL_CDECL);
 	s_data.engine->RegisterGlobalFunction("void error(string)", asFUNCTION(UtilsMethodWrapper::Error), asCALL_CDECL);
 	s_data.engine->RegisterGlobalFunction("void warn(string)", asFUNCTION(UtilsMethodWrapper::Warn), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("int rand_range(int, int)", asFUNCTION(UtilsMethodWrapper::RandRange), asCALL_CDECL);
 	s_data.engine->SetDefaultNamespace("");
 
 	struct InputMethodWrapper {
@@ -458,6 +463,16 @@ ScriptServer::ScriptServer() {
 	s_data.engine->RegisterGlobalFunction("Node@ get_node_in_group(string)", asFUNCTION(SceneMethodWrapper::GetNodeInGroup), asCALL_CDECL);
 	s_data.engine->RegisterGlobalFunction("Node@ get_node_by_id(uint64)", asFUNCTION(SceneMethodWrapper::GetNodeById), asCALL_CDECL);
 	s_data.engine->RegisterGlobalFunction("Node@ root()", asFUNCTION(SceneMethodWrapper::Root), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
+
+	struct AppMethodWrapper {
+		static void LoadScene(const std::string &path) {
+			App::get().load_scene(path);
+		}
+	};
+
+	s_data.engine->SetDefaultNamespace("app");
+	s_data.engine->RegisterGlobalFunction("void load_scene(string)", asFUNCTION(AppMethodWrapper::LoadScene), asCALL_CDECL);
 	s_data.engine->SetDefaultNamespace("");
 
 	s_data.engine->RegisterEnum("Key");

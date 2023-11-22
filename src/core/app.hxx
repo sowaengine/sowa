@@ -59,6 +59,7 @@ class App {
 
 	void SetCurrentScene(Scene *scene);
 	inline Scene *GetCurrentScene() { return m_pCurrentScene; }
+	void load_scene(const std::string &path);
 
 	Font &TestFont() { return m_testFont; }
 
@@ -159,6 +160,9 @@ class App {
 
 	friend class FileServer;
 	std::filesystem::path m_appPath = "";
+
+	// Used by App::load_scene();
+	std::string m_scene_to_load = "";
 };
 
 #endif // SW_APP_HXX

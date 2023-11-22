@@ -44,14 +44,14 @@ void GuiServer::Initialize() {
 	ImGui_ImplOpenGL3_Init("#version 130");
 
 	file_buffer font;
-	if (FileServer::get().ReadFileBytes("res://NotoSansKR-Medium.otf", font) == OK) {
+	if (FileServer::get().ReadFileBytes("res://Roboto-Medium.ttf", font) == OK) {
 		ImVector<ImWchar> ranges;
 		ImFontGlyphRangesBuilder builder;
 		builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
 		//
 		builder.BuildRanges(&ranges);
 
-		io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 18, nullptr, ranges.Data);
+		io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 16, nullptr, ranges.Data);
 
 		// file_buffer font2;
 		// if (FileServer::get().ReadFileBytes("res://Font Awesome 6 Free-Regular-400.otf", font2) == OK) {
@@ -225,7 +225,7 @@ void GuiServer::Update() {
 		static bool to_bottom = true;
 
 		ImVec2 childArea = ImGui::GetContentRegionAvail();
-		childArea.y -= ImGui::GetFrameHeight() * 2;
+		childArea.y -= ImGui::GetFrameHeight();
 
 		ImGui::BeginChild("command_text_area", childArea);
 
@@ -235,21 +235,21 @@ void GuiServer::Update() {
 
 		if (to_bottom) {
 			to_bottom = false;
-			ImGui::SetScrollHereY(1.f);
 		}
+		ImGui::SetScrollHereY(1.f);
 
 		ImGui::EndChild();
-		static char buf[256] = {0};
+		// static char buf[256] = {0};
 
-		ImGui::SetNextItemWidth(childArea.x);
-		if (ImGui::InputText("##command_line", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-			ImGui::SetKeyboardFocusHere(-1);
-			to_bottom = true;
-
-			Utils::Log(std::string(buf));
-
-			memset(buf, 0, 256);
-		}
+		// ImGui::SetNextItemWidth(childArea.x);
+		// if (ImGui::InputText("##command_line", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
+		// 	ImGui::SetKeyboardFocusHere(-1);
+		// 	to_bottom = true;
+		//
+		// 	Utils::Log(std::string(buf));
+		//
+		// 	memset(buf, 0, 256);
+		// }
 	}
 	ImGui::End();
 
