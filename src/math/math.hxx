@@ -15,6 +15,7 @@ float radians(float deg);
 float degrees(float rad);
 float atan2(float y, float x);
 float fmod(float x, float y);
+float sqrt(float v);
 
 }; // namespace math
 

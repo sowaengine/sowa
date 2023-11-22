@@ -1,17 +1,21 @@
 #include "utils.hxx"
 
+#ifndef PI
+#define PI (3.14159265358979323846)
+#endif
+
 float Utils::LerpMap(float t, Easing easing) {
 	if (easing == Easing::LINEAR) {
 		return t;
 	}
 	if (easing == Easing::SINE_EASE_IN) {
-		return 1.f - std::cos((t * M_PI) * 0.5f);
+		return 1.f - std::cos((t * PI) * 0.5f);
 	}
 	if (easing == Easing::SINE_EASE_OUT) {
-		return std::sin((t * M_PI) * 0.5f);
+		return std::sin((t * PI) * 0.5f);
 	}
 	if (easing == Easing::SINE_EASE_IN_OUT) {
-		return -(std::cos(M_PI * t) - 1.f) * 0.5f;
+		return -(std::cos(PI * t) - 1.f) * 0.5f;
 	}
 	if (easing == Easing::CUBIC_EASE_IN) {
 		return t * t * t;
@@ -42,16 +46,16 @@ float Utils::LerpMap(float t, Easing easing) {
 	}
 	if (easing == Easing::ELASTIC_IN) {
 		return t == 0.f ? 0.f : t == 1.f ? 1.f
-										 : -std::pow(2, 10 * t - 10.f) * std::sin((t * 10.f - 10.75f) * (2 * M_PI) * 0.33f);
+										 : -std::pow(2, 10 * t - 10.f) * std::sin((t * 10.f - 10.75f) * (2 * PI) * 0.33f);
 	}
 	if (easing == Easing::ELASTIC_OUT) {
 		return t == 0.f ? 0.f : t == 1 ? 1.f
-									   : std::pow(2, -10.f * t) * std::sin((t * 10.f - 0.75f) * (2 * M_PI) * 0.33f) + 1.f;
+									   : std::pow(2, -10.f * t) * std::sin((t * 10.f - 0.75f) * (2 * PI) * 0.33f) + 1.f;
 	}
 	if (easing == Easing::ELASTIC_IN_OUT) {
 		return t == 0.f ? 0.f : t == 1.f ? 1.f
-							: t < 0.5f	 ? -(std::pow(2, 20 * t - 10.f) * std::sin((20 * t - 11.125) * (2 * M_PI) / 4.5)) * 0.5f
-										 : (std::pow(2, -20 * t + 10) * std::sin((20 * t - 11.125) * (2 * M_PI) / 4.5)) * 0.5f + 1;
+							: t < 0.5f	 ? -(std::pow(2, 20 * t - 10.f) * std::sin((20 * t - 11.125) * (2 * PI) / 4.5)) * 0.5f
+										 : (std::pow(2, -20 * t + 10) * std::sin((20 * t - 11.125) * (2 * PI) / 4.5)) * 0.5f + 1;
 	}
 	if (easing == Easing::QUAD_IN) {
 		return t * t;

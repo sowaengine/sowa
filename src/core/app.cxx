@@ -13,6 +13,7 @@
 #include "core/command/interfaces/command_palette.hxx"
 #include "core/command/interfaces/scene_save_as.hxx"
 #include "core/graphics.hxx"
+#include "core/store.hxx"
 #include "core/time.hxx"
 #include "core/tweens.hxx"
 
@@ -42,6 +43,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/projection.hpp"
 
+// #define SW_TEMPLATE
+
 #ifdef SW_WEB
 #include <emscripten.h>
 #endif
@@ -50,13 +53,13 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "mz.h"
-#include "mz_strm.h"
-#include "mz_strm_mem.h"
-#include "mz_zip.h"
-#include "mz_zip_rw.h"
-#include "unzip.h"
-#include "zip.h"
+// #include "mz.h"
+// #include "mz_strm.h"
+// #include "mz_strm_mem.h"
+// #include "mz_zip.h"
+// #include "mz_zip_rw.h"
+// #include "unzip.h"
+// #include "zip.h"
 
 #include "portable-file-dialogs.h"
 
@@ -120,7 +123,7 @@ ErrorCode App::Init() {
 	OpenProjectDialog();
 	LoadProjectFromDialog();
 
-	RenderingServer::get().CreateWindow(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
+	RenderingServer::get().create_window(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
 
 	m_layer2D.SetTarget(0, RenderLayerTargetType::Vec4);
 	m_layer2D.SetTarget(1, RenderLayerTargetType::Int);
@@ -157,6 +160,7 @@ ErrorCode App::Init() {
 		this->m_layerUI.Resize(width, height);
 	});
 
+#ifndef SW_TEMPLATE
 	ScrollCallback().append([this](InputEventScroll event) {
 		if (!IsRunning()) {
 			editor_scroll_event(event);
@@ -175,9 +179,9 @@ ErrorCode App::Init() {
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_Z) {
-			Tweens::get().RegisterTween(2.f, [](float f) {
-				// App::get().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
-			});
+			// Tweens::get().RegisterTween(2.f, [](float f) {
+			//    App::get().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
+			// });
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_F5) {
@@ -185,6 +189,11 @@ ErrorCode App::Init() {
 				Stop();
 			else
 				Start();
+		}
+
+		if (event.action == KEY_PRESSED && event.key == KEY_R && !this->IsRunning() && event.modifiers.control) {
+			this->GetCurrentScene()->load(this->GetCurrentScene()->Path().c_str());
+			this->reload_scripts();
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_S && event.modifiers.control) {
@@ -200,6 +209,7 @@ ErrorCode App::Init() {
 	CharCallback().append([&](InputEventChar event) {
 		command_interface_char_callback(event);
 	});
+#endif
 
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 
@@ -214,7 +224,7 @@ ErrorCode App::Init() {
 		if (Texture *tex = res->As<Texture>(); nullptr != tex) {
 			ErrorCode err = tex->Load(TextureType::Texture2D, path.c_str());
 			if (err != OK) {
-				std::cout << "Failed to load texture: " << err << std::endl;
+				std::cout << "Failed to load texture: " << err << "(" << path << ")" << std::endl;
 			}
 		}
 	};
@@ -228,7 +238,7 @@ ErrorCode App::Init() {
 		if (AudioStream *stream = res->As<AudioStream>(); nullptr != stream) {
 			ErrorCode err = stream->Load(path.c_str());
 			if (err != OK) {
-				std::cout << "Failed to load audio stream: " << err << std::endl;
+				std::cout << "Failed to load audio stream: " << err << "(" << path << ")" << std::endl;
 			}
 		}
 	};
@@ -284,6 +294,7 @@ ErrorCode App::Init() {
 
 	REGISTER_NODE_TYPE(Node, );
 	REGISTER_NODE_PROPERTY(Node, "name", name(), std::string);
+	REGISTER_NODE_PROPERTY(Node, "visible", visible(), bool);
 	NodeTypeName &nt_node = NodeTypeNames().emplace_back("Node", true);
 
 	REGISTER_NODE_TYPE(AudioStreamPlayer, Node);
@@ -315,6 +326,14 @@ ErrorCode App::Init() {
 	REGISTER_NODE_PROPERTY(Sprite2D, "texture", texture(), RID);
 	nt_node2d.children.emplace_back("Sprite2D", true);
 
+	REGISTER_NODE_TYPE(Text2D, Node2D);
+	REGISTER_NODE_PROPERTY(Text2D, "color_red", color_red(), float);
+	REGISTER_NODE_PROPERTY(Text2D, "color_green", color_green(), float);
+	REGISTER_NODE_PROPERTY(Text2D, "color_blue", color_blue(), float);
+	REGISTER_NODE_PROPERTY(Text2D, "color_alpha", color_alpha(), float);
+	REGISTER_NODE_PROPERTY(Text2D, "text", text(), std::string);
+	nt_node2d.children.emplace_back("Text2D", true);
+
 	REGISTER_NODE_TYPE(AnimatedSprite2D, Node2D);
 	REGISTER_NODE_PROPERTY(AnimatedSprite2D, "spritesheet", spritesheet(), RID);
 	REGISTER_NODE_PROPERTY(AnimatedSprite2D, "speed", speed(), float);
@@ -328,7 +347,7 @@ ErrorCode App::Init() {
 	BehaviourDB::get().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
 	reload_scripts();
-	Main();
+	// Main();
 
 	RegisterCommand("Start/Stop Game", [&]() {
 		if (IsRunning())
@@ -375,7 +394,9 @@ ErrorCode App::Init() {
 		exit(0);
 	});
 
+#ifndef SW_TEMPLATE
 	GuiServer::get().Initialize();
+#endif
 
 	// file_buffer f;
 	// err = FileServer::get().ReadFileBytes("res://project.zip", f);
@@ -467,6 +488,10 @@ ErrorCode App::Init() {
 		}
 	}
 
+#ifdef SW_TEMPLATE
+	Start();
+#endif
+
 	return OK;
 }
 
@@ -544,12 +569,14 @@ void App::mainLoop() {
 	m_batchRenderer.GetShader().UniformMat4("uView", glm::mat4(1.f));
 	Renderer().Reset();
 
+#ifndef SW_TEMPLATE
 	GuiServer::get().Begin();
 	GuiServer::get().Update();
 	GuiServer::get().End();
+#endif
 
 	if (nullptr != m_commandInterface) {
-		CommandInterface *interface = m_commandInterface;
+		CommandInterface *cmd_interface = m_commandInterface;
 
 		glm::vec3 normalColor(0.12f, 0.12f, 0.12f);
 		glm::vec3 hoveredColor(0.2f, 0.2f, 0.2f);
@@ -561,7 +588,7 @@ void App::mainLoop() {
 
 		float cursorY = windowSize.y;
 
-		if (interface->text_input) {
+		if (cmd_interface->text_input) {
 			glm::vec2 textSize = m_testFont.CalcTextSize("I") * textScale;
 			float height = textSize.y + (padding * 2);
 			cursorY -= height;
@@ -573,16 +600,16 @@ void App::mainLoop() {
 
 			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, 0.6, 0.6, 0.6, 1.f, 0.f, 0.f);
 			Renderer().PushQuad(xPos + outlineSize, cursorY + outlineSize, 0.f, width - (outlineSize * 2), height - (outlineSize * 2), normalColor.x, normalColor.y, normalColor.z, 1.f, 0.f, 0.f);
-			if (interface->text.size() > 0) {
+			if (cmd_interface->text.size() > 0) {
 				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-				std::string str = converter.to_bytes(interface->text);
+				std::string str = converter.to_bytes(cmd_interface->text);
 
-				Renderer().DrawText(str, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale);
-			} else if (interface->text_placeholder.size() > 0) {
+				Renderer().draw_text(str, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale);
+			} else if (cmd_interface->text_placeholder.size() > 0) {
 				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-				std::string str = converter.to_bytes(interface->text_placeholder);
+				std::string str = converter.to_bytes(cmd_interface->text_placeholder);
 
-				Renderer().DrawText(str, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale, 0.f, 0.f, 1.f, 1.f, 1.f, 0.6f);
+				Renderer().draw_text(str, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale, 0.f, 0.f, 1.f, 1.f, 1.f, 0.6f);
 			}
 
 			static float f = 0.f;
@@ -599,7 +626,7 @@ void App::mainLoop() {
 		}
 
 		int index = -1;
-		for (CommandOption &opt : interface->options) {
+		for (CommandOption &opt : cmd_interface->options) {
 			index++;
 			glm::vec2 size = m_testFont.CalcTextSize("I") * textScale;
 
@@ -610,11 +637,11 @@ void App::mainLoop() {
 			float textY = cursorY + padding;
 
 			glm::vec3 color = normalColor;
-			if (index == interface->currentIndex)
+			if (index == cmd_interface->currentIndex)
 				color = hoveredColor;
 
 			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, color.x, color.y, color.z, 1.f, 0.f, 0.f);
-			Renderer().DrawText(opt.label, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale);
+			Renderer().draw_text(opt.label, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale);
 		}
 	}
 
@@ -823,7 +850,7 @@ void App::mainLoop() {
 			"Back in", "Back out", "Back in/out",
 			"Bounce in", "Bounce out", "Bounce in/out"};
 
-		Renderer().DrawText(names.at(i), &m_testFont, -100.f, -280 - (i * 60.f), 0.f, glm::mat4(1.f), 0.f, 1.f);
+		Renderer().draw_text(names.at(i), &m_testFont, -100.f, -280 - (i * 60.f), 0.f, glm::mat4(1.f), 0.f, 1.f);
 
 		Renderer().PushQuad(200.f + (values[i] * 1000.f), -300 - (i * 60.f), 0.f, 64.f, 64.f, 1.f, 1.f, 1.f, 1.f, 0.f, static_cast<float>(m_testTexture.ID()));
 	}
@@ -870,10 +897,11 @@ void App::mainLoop() {
 
 	fullscreenShader.Bind();
 
-	// on non editors
-	// glActiveTexture(GL_TEXTURE0);
-	// glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
-	// fullscreenModel.Draw();
+#ifdef SW_TEMPLATE
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_layer2D.GetTargetTextureID(0));
+	fullscreenModel.Draw();
+#endif
 
 	glViewport(0, 0, windowSize.x, windowSize.y);
 	glActiveTexture(GL_TEXTURE0);
@@ -922,8 +950,14 @@ void App::Start() {
 }
 
 void App::Stop() {
+#ifdef SW_TEMPLATE
+	return;
+#endif
+
 	if (!m_running)
 		return;
+
+	Tweens::get().clear();
 
 	if (nullptr != m_pCurrentScene) {
 		m_pCurrentScene->_end_scene();
@@ -942,11 +976,11 @@ void App::RegisterCommand(std::string command, std::function<void()> action) {
 	m_commands.push_back(opt);
 }
 
-void App::SetCommandInterface(CommandInterface *interface) {
+void App::SetCommandInterface(CommandInterface *cmd_interface) {
 	if (nullptr != m_commandInterface)
 		delete m_commandInterface;
 
-	m_commandInterface = interface;
+	m_commandInterface = cmd_interface;
 }
 
 void App::Log(const std::string &message) {

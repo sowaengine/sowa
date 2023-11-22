@@ -11,6 +11,10 @@
 
 #include "core/graphics.hxx"
 
+#ifndef PI
+#define PI (3.14159265358979323846)
+#endif
+
 #define BATCH2D_MAX_RECT (1000)
 #define BATCH2D_MAX_VERTEX (BATCH2D_MAX_RECT * 6)
 #define BATCH2D_MAX_TEXTURE 16
@@ -157,7 +161,7 @@ void BatchRenderer::PushQuad(float x, float y, float z, float w, float h, float 
 }
 
 void BatchRenderer::PushLine(const vec2 &p1, const vec2 &p2, float thickness, float r, float g, float b, float a, float z) {
-	float rot = atan2(p1.y - p2.y, p1.x - p2.x) + M_PI;
+	float rot = atan2(p1.y - p2.y, p1.x - p2.x) + PI;
 
 	glm::vec2 sub = {p2.x - p1.x, p2.y - p1.y};
 	float len = sqrt((sub.x * sub.x) + (sub.y * sub.y));
@@ -207,7 +211,7 @@ void BatchRenderer::PushLine(const vec2 &p1, const vec2 &p2, float thickness, fl
 	PushQuad(vertices);
 }
 
-void BatchRenderer::DrawText(const std::string &text, Font *font, float x, float y, float z, glm::mat4 transform, float draw_id, float scale, float maxWidth, float maxHeight, float r, float g, float b, float a, rect clipRect) {
+void BatchRenderer::draw_text(const std::string &text, Font *font, float x, float y, float z, glm::mat4 transform, float draw_id, float scale, float maxWidth, float maxHeight, float r, float g, float b, float a, rect clipRect) {
 	glm::vec2 textSize = font->CalcTextSize(text);
 
 	if (maxWidth > 0.f) {

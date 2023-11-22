@@ -2,6 +2,10 @@
 
 #include "glm/glm.hpp"
 
+#ifndef PI
+#define PI (3.14159265358979323846)
+#endif
+
 float math::sin(float f) {
 	return glm::sin(f);
 }
@@ -11,7 +15,7 @@ float math::cos(float f) {
 }
 
 float math::pi() {
-	return M_PI;
+	return PI;
 }
 
 float math::radians(float deg) {
@@ -28,4 +32,8 @@ float math::atan2(float y, float x) {
 
 float math::fmod(float x, float y) {
 	return ::fmod(x, y);
+}
+
+float math::sqrt(float v) {
+	return ::sqrt(v);
 }

@@ -23,8 +23,6 @@ void BehaviourDB::RegisterBehaviour(std::string name, Behaviour behaviour) {
 
 	m_behaviourNames[id] = name;
 	m_behaviourIDs[name] = id;
-
-	Utils::Info("Register behaviour {} with id {}", name, id);
 }
 
 Behaviour BehaviourDB::Construct(std::string name) {

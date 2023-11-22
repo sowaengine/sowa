@@ -70,7 +70,7 @@ class App {
 
 	void RegisterCommand(std::string command, std::function<void()> action);
 	inline const std::vector<CommandOption> &Commands() { return m_commands; }
-	void SetCommandInterface(CommandInterface *interface);
+	void SetCommandInterface(CommandInterface *cmd_interface);
 
 	void Log(const std::string &message);
 	inline std::deque<std::string> &GetConsoleBuffer() { return m_consoleBuffer; }

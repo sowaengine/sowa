@@ -41,7 +41,7 @@ void Gui::BeginWindow(const std::string &title, GuiWindowFlags flags) {
 	if (data.flags & GuiWindowFlag_TitleCentered) {
 		textX = x + (w * 0.5f) - (textSize.x * 0.5f);
 	}
-	App::get().Renderer().DrawText(data.title, &App::get().TestFont(), textX, textY, 1.f, glm::mat4(1.f), 0.f, 0.4f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, calculate_bounds(data));
+	App::get().Renderer().draw_text(data.title, &App::get().TestFont(), textX, textY, 1.f, glm::mat4(1.f), 0.f, 0.4f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, calculate_bounds(data));
 }
 void Gui::EndWindow() {
 	m_currentWindow = ID();
@@ -63,7 +63,7 @@ void Gui::Text(const std::string &text) {
 
 	App::get()
 		.Renderer()
-		.DrawText(text, &App::get().TestFont(), percentage_to_px_w(window.posX) + window.cursorX + m_configTextPadding, percentage_to_px_h(window.posY) + percentage_to_px_h(window.height) - window.cursorY - textSize.y + m_configTextPadding, 1.f, glm::mat4(1.f), 0.f, 0.4f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, calculate_bounds(window));
+		.draw_text(text, &App::get().TestFont(), percentage_to_px_w(window.posX) + window.cursorX + m_configTextPadding, percentage_to_px_h(window.posY) + percentage_to_px_h(window.height) - window.cursorY - textSize.y + m_configTextPadding, 1.f, glm::mat4(1.f), 0.f, 0.4f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f, calculate_bounds(window));
 
 	window.cursorX = 0.f;
 	window.cursorY += textSize.y;

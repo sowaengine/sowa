@@ -28,7 +28,7 @@ class RenderingServer {
 	RenderingServer();
 
 	static RenderingServer &get();
-	void CreateWindow(int width, int height, const std::string &title);
+	void create_window(int width, int height, const std::string &title);
 
 	bool WindowShouldClose();
 	void SwapBuffers();

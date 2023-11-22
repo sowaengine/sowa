@@ -43,7 +43,7 @@ RenderingServer &RenderingServer::get() {
 	return *server;
 }
 
-void RenderingServer::CreateWindow(int width, int height, const std::string &title) {
+void RenderingServer::create_window(int width, int height, const std::string &title) {
 	if (nullptr != m_pWindowHandle) {
 		throw std::runtime_error("Failed to create window. Window already exists");
 	}
