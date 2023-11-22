@@ -211,6 +211,9 @@ float LerpMap(float t, Easing easing = Easing::LINEAR);
 
 float Lerp(float from, float to, float t, Easing easing = Easing::LINEAR);
 
+//-------------------------  Dialogs  -------------------------//
+std::filesystem::path OpenFileDialog(const char *title, std::vector<std::string> patterns, const char *patternName, bool multiselect);
+
 } // namespace Utils
 
 #endif // SW_UTILS_HXX

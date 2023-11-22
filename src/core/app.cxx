@@ -61,8 +61,6 @@
 // #include "unzip.h"
 // #include "zip.h"
 
-#include "portable-file-dialogs.h"
-
 static App *s_instance;
 
 App::App() {
@@ -120,7 +118,6 @@ ErrorCode App::Init() {
 #endif
 
 	ErrorCode err;
-	OpenProjectDialog();
 	LoadProjectFromDialog();
 
 	RenderingServer::get().create_window(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
@@ -541,10 +538,6 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 }
 
 void App::mainLoop() {
-	if (nullptr != m_open_project_dialog && m_open_project_dialog->ready()) {
-		LoadProjectFromDialog();
-	}
-
 	if (m_scene_to_load != "") {
 		GetCurrentScene()->_end_scene();
 		GetCurrentScene()->load(m_scene_to_load.c_str());
@@ -957,6 +950,7 @@ void App::Stop() {
 	if (!m_running)
 		return;
 
+	Store<std::string, std::string>::get().clear();
 	Tweens::get().clear();
 
 	if (nullptr != m_pCurrentScene) {
@@ -1003,33 +997,18 @@ void App::reload_scripts() {
 	ScriptServer::get().EndBuild();
 }
 
-void App::OpenProjectDialog() {
-	m_open_project_dialog = std::make_unique<pfd::open_file>(pfd::open_file("Open Project File", pfd::path::home(),
-																			{"Sowa Engine project files", "project.sowa"},
-																			pfd::opt::none));
-}
-
-void App::InvalidateProjectDialog() {
-	m_open_project_dialog = nullptr;
-}
-
 void App::LoadProjectFromDialog() {
-	std::vector<std::string> res = m_open_project_dialog->result();
-	if (res.empty()) {
+	std::filesystem::path path = Utils::OpenFileDialog("Load Project File", {"project.sowa"}, "project.sowa File", false);
+	if (path.empty()) {
 		Utils::Error("Invalid project file");
 		exit(1);
-	} else {
-		Utils::Info("Loading project file: {}", res[0]);
-		m_appPath = std::filesystem::path(res[0]).parent_path();
-
-		ErrorCode err = m_projectSettings.Load(Utils::Format("abs://{}", res[0]).c_str());
-		if (err != OK) {
-			Utils::Error("Failed to open project at {}", res[0]);
-			exit(1);
-		}
 	}
-
-	InvalidateProjectDialog();
+	m_appPath = path.parent_path();
+	ErrorCode err = m_projectSettings.Load(Utils::Format("abs://{}", path.string()).c_str());
+	if (err != OK) {
+		Utils::Error("Failed to open project at {}", path.string());
+		exit(1);
+	}
 }
 
 extern "C" void Unload() {
