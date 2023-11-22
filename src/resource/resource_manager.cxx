@@ -49,6 +49,11 @@ Resource *ResourceManager::Load(const std::string &path, RID id, ResourceType ty
 	return nullptr;
 }
 
+void ResourceManager::Unload(RID id) {
+	m_resources[id] = nullptr;
+	m_resources.erase(id);
+}
+
 Resource *ResourceManager::Get(RID id) {
 	if (m_resources.find(id) == m_resources.end()) {
 		return nullptr;

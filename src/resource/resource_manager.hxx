@@ -20,6 +20,7 @@ class ResourceManager {
 
 	void RegisterResource(std::string extension, ResourceFactory factory);
 	Resource *Load(const std::string &path, RID id = 0, ResourceType type = ResourceType_None);
+	void Unload(RID id);
 
 	Resource *Get(RID id);
 
