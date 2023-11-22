@@ -4,6 +4,8 @@
 #include "core/behaviour/behaviour_db.hxx"
 #include "scene/nodes/2d/physics/physics_body_2d.hxx"
 
+#include "res/editor/imgui.ini.res.h"
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -38,6 +40,12 @@ void GuiServer::Initialize() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+	if (!FileServer::get().Exists("abs://./imgui.ini")) {
+		io.IniFilename = NULL;
+		ImGui::LoadIniSettingsFromMemory((char *)res::src_res_editor_imgui_ini_res_h_data, res::src_res_editor_imgui_ini_res_h_size);
+	}
+
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplGlfw_InitForOpenGL(RenderingServer::get().m_pWindowHandle, true);

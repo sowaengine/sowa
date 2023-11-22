@@ -113,9 +113,12 @@ std::vector<FileEntry> FileServer::ReadDir(const char *p, bool recursive) {
 	std::filesystem::path base = getFilepath("res://");
 
 	std::vector<FileEntry> files;
-	std::string path = getFilepath(p);
+	std::string path = getFilepath(p).string();
 	if (path == "")
 		return files;
+
+	if (!std::filesystem::exists(path))
+		return std::vector<FileEntry>{};
 
 	if (recursive) {
 		for (auto &entry : std::filesystem::recursive_directory_iterator(path)) {
@@ -136,6 +139,10 @@ std::vector<FileEntry> FileServer::ReadDir(const char *p, bool recursive) {
 	}
 
 	return files;
+}
+
+bool FileServer::Exists(const char *path) {
+	return std::filesystem::exists(getFilepath(path));
 }
 
 std::filesystem::path FileServer::getFilepath(const std::string &path) {

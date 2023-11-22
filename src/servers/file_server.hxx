@@ -26,6 +26,8 @@ class FileServer {
 
 	std::vector<FileEntry> ReadDir(const char *path, bool recursive = false);
 
+	bool Exists(const char *path);
+
   private:
 	std::filesystem::path getFilepath(const std::string &path);
 
