@@ -3,7 +3,10 @@
 #include <iostream>
 
 #include "core/behaviour/behaviour_db.hxx"
+#include "core/store.hxx"
 #include "core/time.hxx"
+#include "core/tweens.hxx"
+#include "resource/resource_manager.hxx"
 
 #include "file_server.hxx"
 
@@ -13,8 +16,13 @@
 #include "scene/nodes.hxx"
 
 #include <angelscript.h>
+#include <scriptarray/scriptarray.h>
 #include <scriptbuilder/scriptbuilder.h>
 #include <scriptstdstring/scriptstdstring.h>
+
+#ifdef GetObject
+#undef GetObject
+#endif
 
 #define AS_CHECK()                                                        \
 	do {                                                                  \
@@ -212,6 +220,8 @@ static void asGetProperty(asIScriptGeneric *gen) {
 		typeName = "int";
 	} else if (propTypeID == asTYPEID_FLOAT) {
 		typeName = "float";
+	} else if (propTypeID == asTYPEID_BOOL) {
+		typeName = "bool";
 	} else {
 		asITypeInfo *propType = gen->GetEngine()->GetTypeInfoById(propTypeID);
 		if (nullptr == propType) {
@@ -233,6 +243,12 @@ static void asGetProperty(asIScriptGeneric *gen) {
 		std::any prop = NodeDB::get().get_property(node->type_hash(), propName).get(node);
 		if (float *v = std::any_cast<float>(&prop)) {
 			gen->SetReturnFloat(*v);
+			return;
+		}
+	} else if (typeName == "bool") {
+		std::any prop = NodeDB::get().get_property(node->type_hash(), propName).get(node);
+		if (bool *v = std::any_cast<bool>(&prop)) {
+			gen->SetReturnByte(*v ? 1 : 0);
 			return;
 		}
 	} else if (typeName == "string") {
@@ -267,6 +283,8 @@ static void asSetProperty(asIScriptGeneric *gen) {
 		typeName = "int";
 	} else if (propTypeID == asTYPEID_FLOAT) {
 		typeName = "float";
+	} else if (propTypeID == asTYPEID_BOOL) {
+		typeName = "bool";
 	} else {
 		asITypeInfo *propType = gen->GetEngine()->GetTypeInfoById(propTypeID);
 		if (nullptr == propType) {
@@ -284,6 +302,11 @@ static void asSetProperty(asIScriptGeneric *gen) {
 
 	} else if (typeName == "float") {
 		float arg = gen->GetArgFloat(0);
+		prop.set(node, arg);
+		return;
+
+	} else if (typeName == "bool") {
+		bool arg = gen->GetArgByte(0) == 1;
 		prop.set(node, arg);
 		return;
 
@@ -337,6 +360,7 @@ ScriptServer::ScriptServer() {
 	AS_CHECK();
 
 	RegisterStdString(s_data.engine);
+	RegisterScriptArray(s_data.engine, true);
 
 	AS_REGISTER_FUNC("void print(const string &in)", asFUNCTION(print), asCALL_CDECL);
 
@@ -384,6 +408,7 @@ ScriptServer::ScriptServer() {
 	s_data.engine->RegisterGlobalFunction("float degrees(float)", asFUNCTION(math::degrees), asCALL_CDECL);
 	s_data.engine->RegisterGlobalFunction("float atan2(float, float)", asFUNCTION(math::atan2), asCALL_CDECL);
 	s_data.engine->RegisterGlobalFunction("float fmod(float, float)", asFUNCTION(math::fmod), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("float sqrt(float)", asFUNCTION(math::sqrt), asCALL_CDECL);
 	s_data.engine->SetDefaultNamespace("");
 
 	s_data.engine->SetDefaultNamespace("time");
@@ -436,6 +461,29 @@ ScriptServer::ScriptServer() {
 		AS_REGISTER_TYPE_STR(name.c_str(), asOBJ_REF | asOBJ_NOCOUNT);
 	}
 
+	// TODO: Temporary
+	struct GlobalAudioMethodWrapper {
+		static AudioStreamPlayer *get() {
+			static AudioStreamPlayer *player = new AudioStreamPlayer;
+			return ASRef::CreateNoAlloc<AudioStreamPlayer>(player);
+		}
+
+		static void LoadAudio(const std::string &path) {
+			Resource *res = ResourceManager::get().Load(path, 0, ResourceType_AudioStream);
+			if (res == nullptr) {
+				return;
+			}
+
+			get()->stop();
+			get()->stream() = res->ResourceID();
+		}
+	};
+
+	s_data.engine->SetDefaultNamespace("global_audio");
+	s_data.engine->RegisterGlobalFunction("AudioStreamPlayer@ get()", asFUNCTION(GlobalAudioMethodWrapper::get), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("void load_audio(string)", asFUNCTION(GlobalAudioMethodWrapper::LoadAudio), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
+
 	struct SceneMethodWrapper {
 		static Node *Create(const std::string &nodeType, const std::string &name) {
 			return App::get().GetCurrentScene()->create(NodeDB::get().get_node_type(nodeType), name);
@@ -469,14 +517,67 @@ ScriptServer::ScriptServer() {
 		static void LoadScene(const std::string &path) {
 			App::get().load_scene(path);
 		}
+
+		static void LoadSceneDelayed(const std::string &path, float delay) {
+			Tweens::get().RegisterTween(
+				delay, [path](float v) {}, [path]() { App::get().load_scene(path); },
+				Utils::Easing::LINEAR);
+		}
 	};
 
 	s_data.engine->SetDefaultNamespace("app");
 	s_data.engine->RegisterGlobalFunction("void load_scene(string)", asFUNCTION(AppMethodWrapper::LoadScene), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("void load_scene_delayed(string, float)", asFUNCTION(AppMethodWrapper::LoadSceneDelayed), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
+
+	struct PhysicsMethodWrapper {
+		static void SetGravity(float x, float y) {
+			PhysicsServer2D::get().set_gravity(vec2(x, y));
+		}
+	};
+
+	s_data.engine->SetDefaultNamespace("physics");
+	s_data.engine->RegisterGlobalFunction("void set_gravity(float, float)", asFUNCTION(PhysicsMethodWrapper::SetGravity), asCALL_CDECL);
+	s_data.engine->SetDefaultNamespace("");
+
+	struct StoreMethodWrapper {
+		using store_type = Store<std::string, std::string>;
+
+		static std::string GetValue(const std::string &key) {
+			return store_type::get().get_value(key);
+		}
+		static void SetValue(const std::string &key, const std::string &value) {
+			store_type::get().set_value(key, value);
+		}
+
+		static bool HasKey(const std::string &key) {
+			return store_type::get().has_key(key);
+		}
+
+		static void RemoveKey(const std::string &key) {
+			store_type::get().remove_key(key);
+		}
+
+		static void Clear() {
+			store_type::get().clear();
+		}
+	};
+
+	s_data.engine->SetDefaultNamespace("store");
+	s_data.engine->RegisterGlobalFunction("string get_value(string)", asFUNCTION(StoreMethodWrapper::GetValue), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("void set_value(string, string)", asFUNCTION(StoreMethodWrapper::SetValue), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("bool has_key(string)", asFUNCTION(StoreMethodWrapper::HasKey), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("void remove_key(string)", asFUNCTION(StoreMethodWrapper::RemoveKey), asCALL_CDECL);
+	s_data.engine->RegisterGlobalFunction("void clear()", asFUNCTION(StoreMethodWrapper::Clear), asCALL_CDECL);
 	s_data.engine->SetDefaultNamespace("");
 
 	s_data.engine->RegisterEnum("Key");
 	s_data.engine->RegisterEnumValue("Key", "Space", KEY_SPACE);
+	s_data.engine->RegisterEnumValue("Key", "W", KEY_W);
+	s_data.engine->RegisterEnumValue("Key", "A", KEY_A);
+	s_data.engine->RegisterEnumValue("Key", "S", KEY_S);
+	s_data.engine->RegisterEnumValue("Key", "D", KEY_D);
+	s_data.engine->RegisterEnumValue("Key", "R", KEY_R);
 	s_data.engine->SetDefaultNamespace("input");
 	s_data.engine->RegisterGlobalFunction("bool is_key_down(int)", asFUNCTION(Input::IsKeyDown), asCALL_CDECL);
 	s_data.engine->RegisterGlobalFunction("bool is_key_just_pressed(int)", asFUNCTION(Input::IsKeyJustPressed), asCALL_CDECL);
@@ -492,6 +593,7 @@ ScriptServer::ScriptServer() {
 	s_data.engine->RegisterObjectMethod("Node", "void queue_free()", asFUNCTION(SceneMethodWrapper::QueueFree), asCALL_CDECL_OBJFIRST);
 	s_data.engine->RegisterObjectMethod("Node2D", "float global_rotation()", asMETHODPR(Node2D, global_rotation, (), float), asCALL_THISCALL);
 	s_data.engine->RegisterObjectMethod("AudioStreamPlayer", "void play()", asMETHODPR(AudioStreamPlayer, play, (), void), asCALL_THISCALL);
+	s_data.engine->RegisterObjectMethod("AudioStreamPlayer", "bool is_playing()", asMETHODPR(AudioStreamPlayer, is_playing, (), bool), asCALL_THISCALL);
 	s_data.engine->RegisterObjectMethod("PhysicsBody2D", "void set_linear_velocity(vec2@)", asMETHODPR(PhysicsBody2D, set_linear_velocity, (vec2), void), asCALL_THISCALL);
 
 	for (const auto &[type, data] : db.m_db) {
@@ -541,7 +643,6 @@ ErrorCode ScriptServer::LoadScriptFile(std::string path) {
 }
 
 void ScriptServer::EndBuild() {
-	register_script_behaviour();
 	int r = s_data.builder.BuildModule();
 	AS_CHECK();
 
