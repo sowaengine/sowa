@@ -1,6 +1,7 @@
 #include "scene.hxx"
 
 #include "core/error/error.hxx"
+#include "core/tweens.hxx"
 #include "math/math.hxx"
 #include "resource/resource_manager.hxx"
 #include "scene/node_db.hxx"
@@ -115,6 +116,8 @@ struct convert<std::any> {
 } // namespace YAML
 
 void Scene::_begin_scene() {
+	// _awake, _start
+	// separate _start and start_behaviours
 	for (auto &[id, node] : m_allocated_nodes) {
 		node->_start();
 		node->start_behaviours();
@@ -135,6 +138,8 @@ void Scene::_update_scene() {
 }
 
 void Scene::_end_scene() {
+	Tweens::get().clear();
+
 	for (auto &[id, node] : m_allocated_nodes) {
 		node->_exit();
 	}
@@ -142,7 +147,17 @@ void Scene::_end_scene() {
 
 ErrorCode Scene::load(const char *path) {
 	NodeDB &db = NodeDB::get();
-	Root() = nullptr;
+
+	if (nullptr != Root()) {
+		this->free(Root()->id());
+		Root() = nullptr;
+	}
+	m_allocated_nodes.clear();
+
+	// for (int id : m_resources) {
+	// 	ResourceManager::get().Unload(id);
+	// }
+	// m_resources.clear();
 
 	YAML::Node node;
 
@@ -179,8 +194,6 @@ ErrorCode Scene::load(const char *path) {
 
 		if (nullptr == res)
 			continue;
-
-		Utils::Info("Loaded resource ({}) id: {}", path, res->ResourceID());
 	}
 
 	YAML::Node root = scene["root"];
@@ -428,6 +441,8 @@ Node *Scene::get_node_by_id(size_t id) {
 
 void Scene::copy(Scene *src, Scene *dst) {
 	std::function<Node *(Node *)> copyNode;
+	dst->m_path = src->m_path;
+	dst->m_resources = src->scene_resources();
 
 	copyNode = [&](Node *node) -> Node * {
 		Node *newNode = dst->create(node->type_hash(), node->name(), node->id());
