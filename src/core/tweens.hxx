@@ -11,7 +11,8 @@ class Tweens {
   public:
 	static Tweens &get();
 
-	void RegisterTween(float duration, std::function<void(float)> callback, Utils::Easing easing = Utils::Easing::SINE_EASE_IN);
+	void clear();
+	void RegisterTween(float duration, std::function<void(float)> callback, std::function<void()> finished, Utils::Easing easing = Utils::Easing::SINE_EASE_IN);
 	void Poll(float dt);
 
   private:
@@ -19,6 +20,7 @@ class Tweens {
 		float duration = 0.f;
 		float elapsed = 0.f;
 		std::function<void(float)> callback;
+		std::function<void()> finished;
 		Utils::Easing easing;
 	};
 	std::vector<Tween> m_tweens;

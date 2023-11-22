@@ -7,11 +7,16 @@ Tweens &Tweens::get() {
 	return *tweens;
 }
 
-void Tweens::RegisterTween(float duration, std::function<void(float)> callback, Utils::Easing easing) {
+void Tweens::clear() {
+	m_tweens.clear();
+}
+
+void Tweens::RegisterTween(float duration, std::function<void(float)> callback, std::function<void()> finished, Utils::Easing easing) {
 	Tween t;
 	t.duration = std::max(duration, 0.01f);
 	t.elapsed = 0.f;
 	t.callback = callback;
+	t.finished = finished;
 	t.easing = easing;
 
 	m_tweens.push_back(t);
@@ -30,6 +35,7 @@ void Tweens::Poll(float dt) {
 		tween.callback(std::min(current, 1.f));
 
 		if (t >= 1.f) {
+			tween.finished();
 			m_tweens.erase(m_tweens.begin() + i);
 			i--;
 		}
