@@ -43,7 +43,7 @@ class RenderingServer {
 	inline bool Active() { return m_serverActive; }
 
   private:
-	friend class WindowCallbackBridge;
+	friend struct WindowCallbackBridge;
 	friend class InputServer;
 	friend class GuiServer;
 	GLFWwindow *m_pWindowHandle = nullptr;

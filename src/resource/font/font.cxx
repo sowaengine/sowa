@@ -39,14 +39,11 @@ uint32_t Font::GetGlyphTextureID(int codepoint) {
 }
 
 glm::vec2 Font::CalcTextSize(const std::string &text) {
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::wstring wide_string = converter.from_bytes(text);
-
 	glm::vec2 size{0.f, 0.f};
 
 	float scale = 1.f;
-	std::wstring::const_iterator c;
-	for (c = wide_string.begin(); c != wide_string.end(); c++) {
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++) {
 		Font::Character ch = m_characters[*c];
 		size.x += (ch.advance >> 6) * scale;
 

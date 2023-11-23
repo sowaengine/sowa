@@ -3,6 +3,7 @@
 #include "data/file_buffer.hxx"
 #include "servers/file_server.hxx"
 
+#ifndef SW_WEB
 #include "AL/alext.h"
 #include "sndfile.h"
 
@@ -56,12 +57,16 @@ static sf_count_t sf_func_write(const void *data, sf_count_t count, void *userda
 	sf_func_data *func_data = reinterpret_cast<sf_func_data *>(userdata);
 	return 0;
 }
+#endif
 
 AudioStream::~AudioStream() {
+#ifndef SW_WEB
 	Delete();
+#endif
 }
 
 ErrorCode AudioStream::Load(const char *path) {
+#ifndef SW_WEB
 	Delete();
 	file_buffer data;
 	if (ErrorCode err = FileServer::get().ReadFileBytes(path, data); err != OK) {
@@ -149,14 +154,16 @@ ErrorCode AudioStream::Load(const char *path) {
 		Utils::Error("AL ERROR: {}", alGetString(err));
 		Delete();
 	}
-
+#endif
 	return OK;
 }
 
 void AudioStream::Delete() {
+#ifndef SW_WEB
 	if (m_id != 0) {
 		alDeleteBuffers(1, &m_id);
 	}
 
 	m_id = 0;
+#endif
 }

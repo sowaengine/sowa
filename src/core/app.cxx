@@ -78,13 +78,18 @@ App &App::get() {
 #ifdef SW_WEB
 EM_JS(void, sync_fs_from_db, (), {
 	Module.timer = false;
-	FS.syncfs(
-		true, function(err) {
-			if (err) {
-				console.error("An error occured while syncing fs", err);
-			}
+	setTimeout(
+		function() {
 			Module.timer = true;
-		});
+		},
+		500);
+	// FS.syncfs(
+	// 	true, function(err) {
+	// 		if (err) {
+	// 			console.error("An error occured while syncing fs", err);
+	// 		}
+	// 		Module.timer = true;
+	// 	});
 });
 
 EM_JS(bool, check_timer, (), {
@@ -93,10 +98,11 @@ EM_JS(bool, check_timer, (), {
 #endif
 
 ErrorCode App::Init() {
+
 #ifndef SW_WEB
 	// m_appPath = "./project";
 #else
-#error project picker should be added
+	// #error project picker should be added // FIXME
 	m_appPath = "/app";
 #endif
 	FileServer::Create(this);
@@ -118,7 +124,7 @@ ErrorCode App::Init() {
 #endif
 
 	ErrorCode err;
-	LoadProjectFromDialog();
+	// LoadProjectFromDialog();
 
 	RenderingServer::get().create_window(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
 
@@ -594,13 +600,11 @@ void App::mainLoop() {
 			Renderer().PushQuad(xPos, cursorY, 0.f, width, height, 0.6, 0.6, 0.6, 1.f, 0.f, 0.f);
 			Renderer().PushQuad(xPos + outlineSize, cursorY + outlineSize, 0.f, width - (outlineSize * 2), height - (outlineSize * 2), normalColor.x, normalColor.y, normalColor.z, 1.f, 0.f, 0.f);
 			if (cmd_interface->text.size() > 0) {
-				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-				std::string str = converter.to_bytes(cmd_interface->text);
+				std::string str = cmd_interface->text;
 
 				Renderer().draw_text(str, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale);
 			} else if (cmd_interface->text_placeholder.size() > 0) {
-				std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-				std::string str = converter.to_bytes(cmd_interface->text_placeholder);
+				std::string str = cmd_interface->text_placeholder;
 
 				Renderer().draw_text(str, &m_testFont, textX, textY, 0.f, glm::mat4(1.f), 0.f, textScale, 0.f, 0.f, 1.f, 1.f, 1.f, 0.6f);
 			}
@@ -612,8 +616,7 @@ void App::mainLoop() {
 			const float cursorPadding = 5.f;
 			const float cursorWidth = 2.f;
 
-			std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-			std::string str = converter.to_bytes(this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor));
+			std::string str = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor);
 			float textCursorX = m_testFont.CalcTextSize(str).x * textScale;
 			Renderer().PushQuad(xPos + textCursorX + textSize.x + 2.f, cursorY + cursorPadding, 0.f, cursorWidth, height - (cursorPadding * 2), 0.8f, 0.8f, 0.8f, opacity, 0.f, 0.f);
 		}

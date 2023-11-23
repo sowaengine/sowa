@@ -2,7 +2,7 @@
 #define SW_RECT_HXX
 #pragma once
 
-class vec2;
+struct vec2;
 
 class rect {
   public:

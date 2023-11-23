@@ -226,11 +226,8 @@ void BatchRenderer::draw_text(const std::string &text, Font *font, float x, floa
 		}
 	}
 
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	std::wstring wide_string = converter.from_bytes(text);
-
-	std::wstring::const_iterator c;
-	for (c = wide_string.begin(); c != wide_string.end(); c++) {
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++) {
 		Font::Character ch = font->m_characters[*c];
 		if (ch.textureID == 0) {
 			// std::wcout << *c << ":" << (int)(*c) << std::endl;

@@ -2,17 +2,15 @@
 #include "command/interfaces/command_palette.hxx"
 
 void App::command_interface_char_callback(InputEventChar event) {
-	// std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-	std::wstring wstr = {static_cast<wchar_t>(event.codepoint)};
-	// std::string str = converter.to_bytes(wstr);
+	std::string str(1, (char)event.codepoint); // FIXME
 
 	if (nullptr != this->m_commandInterface && this->m_commandInterface->text_input) {
 		if (this->m_commandInterface->text_cursor == this->m_commandInterface->text.size())
-			this->m_commandInterface->text += wstr;
+			this->m_commandInterface->text += str;
 		else
-			this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor) + wstr + this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
+			this->m_commandInterface->text = this->m_commandInterface->text.substr(0, this->m_commandInterface->text_cursor) + str + this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
 
-		this->m_commandInterface->text_cursor += wstr.size();
+		this->m_commandInterface->text_cursor += str.size();
 	}
 }
 
@@ -79,7 +77,7 @@ void App::command_interface_key_callback(InputEventKey event) {
 					index += 1;
 				}
 
-				std::wstring remaining = this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
+				std::string remaining = this->m_commandInterface->text.substr(this->m_commandInterface->text_cursor);
 
 				if (index == std::string::npos) {
 					// has no space
