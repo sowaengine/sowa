@@ -27,8 +27,10 @@ struct ScriptFunctionCaller {
 	ScriptFunctionCaller(const std::string &moduleName, const std::string &decl);
 	ScriptFunctionCaller(const std::string &moduleName, const std::string className, const std::string &decl);
 
+#ifndef SW_WEB
 	int m_arg_counter;
 	asIScriptContext *ctx;
+#endif
 };
 
 class ScriptServer {

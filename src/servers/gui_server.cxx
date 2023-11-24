@@ -1,3 +1,4 @@
+
 #include "gui_server.hxx"
 #include "rendering_server.hxx"
 
@@ -13,6 +14,7 @@
 #include "utils/utils.hxx"
 
 #include "file_server.hxx"
+#ifndef SW_WEB
 
 #define ICON_BEGIN 0xe900
 #define ICON_NODE "\ue900"
@@ -22,11 +24,6 @@
 #define ICON_START "\ue904"
 #define ICON_STOP "\ue905"
 #define ICON_END 0xe950
-
-GuiServer &GuiServer::get() {
-	static GuiServer *server = new GuiServer;
-	return *server;
-}
 
 static bool begin_footer(const std::string &label);
 static void end_footer();
@@ -662,3 +659,19 @@ void set_style(ImGuiStyle &style) {
 	style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }
+
+#endif
+
+GuiServer &GuiServer::get() {
+	static GuiServer *server = new GuiServer;
+	return *server;
+}
+
+#ifdef SW_WEB
+
+void GuiServer::Initialize() {}
+void GuiServer::Begin() {}
+void GuiServer::End() {}
+void GuiServer::Update() {}
+
+#endif

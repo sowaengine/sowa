@@ -15,14 +15,18 @@
 #include "scene/node_db.hxx"
 #include "scene/nodes.hxx"
 
+#ifndef SW_WEB
 #include <angelscript.h>
 #include <scriptarray/scriptarray.h>
 #include <scriptbuilder/scriptbuilder.h>
 #include <scriptstdstring/scriptstdstring.h>
+#endif
 
 #ifdef GetObject
 #undef GetObject
 #endif
+
+#ifndef SW_WEB
 
 #define AS_CHECK()                                                        \
 	do {                                                                  \
@@ -139,11 +143,6 @@ std::string get_name(Node *node) {
 }
 float get_pos_x(Node2D *node) {
 	return 200.f;
-}
-
-ScriptServer &ScriptServer::get() {
-	static ScriptServer *server = new ScriptServer;
-	return *server;
 }
 
 // Example opCast behaviour
@@ -347,8 +346,16 @@ template <typename T>
 void asDestruct(void *memory) {
 	((T *)memory)->~T();
 }
+#endif
+
+ScriptServer &ScriptServer::get() {
+	static ScriptServer *server = new ScriptServer;
+	return *server;
+}
 
 ScriptServer::ScriptServer() {
+#ifndef SW_WEB
+
 	vec2 v;
 	asConstruct<vec2>(&v, 0.f);
 	asDestruct<vec2>(nullptr);
@@ -616,19 +623,29 @@ ScriptServer::ScriptServer() {
 			AS_REGISTER_METHOD_STR(name.c_str(), ("void set_" + propName + "(" + typeName + ") property").c_str(), asFUNCTION(asSetProperty), asCALL_GENERIC);
 		}
 	}
+#endif
 }
 
 ScriptServer::~ScriptServer() {
+#ifndef SW_WEB
+
 	int r = s_data.engine->ShutDownAndRelease();
 	AS_CHECK();
+
+#endif
 }
 
 void ScriptServer::BeginBuild() {
+#ifndef SW_WEB
+
 	int r = s_data.builder.StartNewModule(s_data.engine, "Sowa");
 	AS_CHECK();
+
+#endif
 }
 
 ErrorCode ScriptServer::LoadScriptFile(std::string path) {
+#ifndef SW_WEB
 	int r;
 
 	std::string buf;
@@ -639,17 +656,21 @@ ErrorCode ScriptServer::LoadScriptFile(std::string path) {
 	r = s_data.builder.AddSectionFromMemory(path.c_str(), buf.c_str());
 	AS_CHECK();
 
+#endif
 	return OK;
 }
 
 void ScriptServer::EndBuild() {
+#ifndef SW_WEB
 	int r = s_data.builder.BuildModule();
 	AS_CHECK();
 
 	register_script_behaviour();
+#endif
 }
 
 void ScriptServer::register_script_behaviour() {
+#ifndef SW_WEB
 	asUINT c = s_data.engine->GetModule("Sowa")->GetObjectTypeCount();
 	for (asUINT i = 0; i < c; i++) {
 		asITypeInfo *t_info = s_data.engine->GetModule("Sowa")->GetObjectTypeByIndex(i);
@@ -732,14 +753,18 @@ void ScriptServer::register_script_behaviour() {
 			}
 		}
 	}
+#endif
 }
 
 ScriptFunctionCaller::ScriptFunctionCaller() {
+#ifndef SW_WEB
 	m_arg_counter = 0;
 	ctx = nullptr;
+#endif
 }
 
 ScriptFunctionCaller::ScriptFunctionCaller(const std::string &moduleName, const std::string className, const std::string &decl) {
+#ifndef SW_WEB
 	m_arg_counter = 0;
 	ctx = nullptr;
 
@@ -763,63 +788,77 @@ ScriptFunctionCaller::ScriptFunctionCaller(const std::string &moduleName, const 
 
 	ctx = s_data.engine->CreateContext();
 	ctx->Prepare(func);
+#endif
 }
 
 ScriptFunctionCaller::ScriptFunctionCaller(const std::string &moduleName, const std::string &decl) {
+#ifndef SW_WEB
 	m_arg_counter = 0;
 	ctx = nullptr;
 
 	ctx = s_data.engine->CreateContext();
 	asIScriptFunction *func = s_data.engine->GetModule(moduleName.c_str())->GetFunctionByDecl(decl.c_str());
 	ctx->Prepare(func);
+#endif
 }
 
 ScriptFunctionCaller &ScriptFunctionCaller::arg() {
+#ifndef SW_WEB
 	if (nullptr == ctx) {
 		return *this;
 	}
 
 	m_arg_counter++;
+#endif
 	return *this;
 }
 
 ScriptFunctionCaller &ScriptFunctionCaller::arg_this(void *o) {
+#ifndef SW_WEB
 	if (nullptr == ctx) {
 		return *this;
 	}
 
 	ctx->SetObject(o);
+#endif
 	return *this;
 }
 
 ScriptFunctionCaller &ScriptFunctionCaller::arg_object(void *o) {
+#ifndef SW_WEB
 	if (nullptr == ctx) {
 		return *this;
 	}
 
 	ctx->SetArgObject(m_arg_counter++, o);
+#endif
 	return *this;
 }
 
 ScriptFunctionCaller &ScriptFunctionCaller::arg_u32(uint32_t value) {
+#ifndef SW_WEB
 	if (nullptr == ctx) {
 		return *this;
 	}
 
 	ctx->SetArgDWord(m_arg_counter++, value);
+#endif
 	return *this;
 }
 
 ScriptFunctionCaller &ScriptFunctionCaller::arg_u64(uint64_t value) {
+#ifndef SW_WEB
 	if (nullptr == ctx) {
 		return *this;
 	}
 
 	ctx->SetArgQWord(m_arg_counter++, value);
+#endif
 	return *this;
 }
 
 void ScriptFunctionCaller::call() {
+#ifndef SW_WEB
 	if (nullptr == ctx) {
 		Utils::Error("Attempted to call a script function with invalid context");
 		return;
@@ -834,6 +873,7 @@ void ScriptFunctionCaller::call() {
 	}
 
 	ctx->Release();
+#endif
 }
 
 ScriptFunctionCaller::~ScriptFunctionCaller() {

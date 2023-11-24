@@ -10,8 +10,10 @@ class AudioServer {
 	~AudioServer();
 
   private:
+#ifndef SW_WEB
 	void *m_device;
 	void *m_context;
+#endif
 };
 
 #endif // SW_AUDIO_SERVER_HXX

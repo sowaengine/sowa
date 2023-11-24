@@ -78,18 +78,13 @@ App &App::get() {
 #ifdef SW_WEB
 EM_JS(void, sync_fs_from_db, (), {
 	Module.timer = false;
-	setTimeout(
-		function() {
+	FS.syncfs(
+		true, function(err) {
+			if (err) {
+				console.error("An error occured while syncing fs", err);
+			}
 			Module.timer = true;
-		},
-		500);
-	// FS.syncfs(
-	// 	true, function(err) {
-	// 		if (err) {
-	// 			console.error("An error occured while syncing fs", err);
-	// 		}
-	// 		Module.timer = true;
-	// 	});
+		});
 });
 
 EM_JS(bool, check_timer, (), {
@@ -124,7 +119,7 @@ ErrorCode App::Init() {
 #endif
 
 	ErrorCode err;
-	// LoadProjectFromDialog();
+	LoadProjectFromDialog();
 
 	RenderingServer::get().create_window(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
 
@@ -187,14 +182,14 @@ ErrorCode App::Init() {
 			// });
 		}
 
-		if (event.action == KEY_PRESSED && event.key == KEY_F5) {
+		if (event.action == KEY_PRESSED && event.modifiers.shift && event.key == KEY_R) {
 			if (IsRunning())
 				Stop();
 			else
 				Start();
 		}
 
-		if (event.action == KEY_PRESSED && event.key == KEY_R && !this->IsRunning() && event.modifiers.control) {
+		if (event.action == KEY_PRESSED && event.key == KEY_R && !this->IsRunning() && event.modifiers.alt) {
 			this->GetCurrentScene()->load(this->GetCurrentScene()->Path().c_str());
 			this->reload_scripts();
 		}

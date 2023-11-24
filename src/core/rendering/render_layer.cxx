@@ -43,6 +43,8 @@ void RenderLayer::Create(int width, int height) {
 	for (auto &[slot, target] : m_targets) {
 		if (target.type == RenderLayerTargetType::Vec4 || target.type == RenderLayerTargetType::Int) {
 			attachments.push_back(GL_COLOR_ATTACHMENT0 + slot);
+		} else {
+			attachments.push_back(GL_NONE);
 		}
 	}
 	glDrawBuffers(attachments.size(), attachments.data());
@@ -105,6 +107,7 @@ void RenderLayer::Clear(float r, float g, float b, float a, bool depth) {
 	if (depth)
 		glClear(GL_DEPTH_BUFFER_BIT);
 
+	// FIXME - Web
 	GLenum color = GL_COLOR_ATTACHMENT1;
 	glDrawBuffers(1, &color);
 	glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -114,6 +117,8 @@ void RenderLayer::Clear(float r, float g, float b, float a, bool depth) {
 	for (auto &[slot, target] : m_targets) {
 		if (target.type == RenderLayerTargetType::Vec4 || target.type == RenderLayerTargetType::Int) {
 			attachments.push_back(GL_COLOR_ATTACHMENT0 + slot);
+		} else {
+			attachments.push_back(GL_NONE);
 		}
 	}
 	glDrawBuffers(attachments.size(), attachments.data());

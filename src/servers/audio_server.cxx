@@ -11,6 +11,7 @@ AudioServer &AudioServer::get() {
 }
 
 AudioServer::AudioServer() {
+#ifndef SW_WEB
 	m_device = alcOpenDevice(NULL);
 	if (!m_device) {
 		Utils::Error("Failed to open audio device: {}", alGetError());
@@ -29,6 +30,7 @@ AudioServer::AudioServer() {
 	alListenerfv(AL_ORIENTATION, listenerOri);
 
 	Utils::Info("Audio server initialized");
+#endif
 }
 AudioServer::~AudioServer() {
 }

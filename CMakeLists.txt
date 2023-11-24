@@ -16,8 +16,18 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-fcolor-diagnostics)
 endif()
 
+
+set(LD_FLAG_STATIC "")
+if(WIN32)
+  link_libraries(
+    -static-libgcc
+    -static-libstdc++
+  )
+  set(LD_FLAG_STATIC -static)
+endif()
+
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_CXX_FLAGS_DEBUG "-O1 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -68,9 +78,16 @@ target_link_libraries(
           yaml-cpp
           angelscript
           fmt
-          OpenAL
           sndfile
           box2d)
+
+if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
+target_link_libraries(
+  sowa
+  PRIVATE
+    OpenAL
+)
+endif()
 target_precompile_headers(
   sowa
   PRIVATE
@@ -95,6 +112,10 @@ target_precompile_headers(
   <string>
   <vector>)
 
+if(WIN32)
+  target_link_options(sowa PRIVATE -mwindows)
+endif()
+
 if(${TARGET_PLATFORM} STREQUAL "Web")
   set_target_properties(
     sowa
@@ -102,7 +123,7 @@ if(${TARGET_PLATFORM} STREQUAL "Web")
       OUTPUT_NAME "index"
       SUFFIX ".html"
       LINK_FLAGS
-      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_Resize,_main,_Unload -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,UTF8ToString --shell-file ${CMAKE_SOURCE_DIR}/layout.html -lidbfs.js -sASYNCIFY"
+      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sEXPORTED_FUNCTIONS=_main,_Unload -sEXPORTED_RUNTIME_METHODS=ccall,cwrap,UTF8ToString --shell-file ${CMAKE_SOURCE_DIR}/layout.html -lidbfs.js -sASYNCIFY=1 -sASSERTIONS -sASYNCIFY_STACK_SIZE=16384"
   )
 endif()
 
