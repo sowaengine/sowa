@@ -27,11 +27,9 @@
 #ifdef SW_LINUX
 static std::filesystem::path get_config_path() {
 	const char *homeDir;
-	// bool isHome = false; // ~/ or ~/.local/share
 
 	homeDir = getenv("XDG_DATA_HOME"); // ~/.local/share
 	if (homeDir == NULL) {
-		// isHome = true;
 		homeDir = getenv("HOME");
 
 		if (homeDir == NULL) {
