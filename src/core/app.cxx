@@ -45,6 +45,8 @@
 
 // #define SW_TEMPLATE
 
+#include "editor/editor_config.hxx"
+
 #ifdef SW_WEB
 #include <emscripten.h>
 #endif
@@ -119,7 +121,15 @@ ErrorCode App::Init() {
 #endif
 
 	ErrorCode err;
-	LoadProjectFromDialog();
+
+	EditorConfig::get().Load();
+	EditorConfig::get().Save();
+
+	if (EditorConfig::get().auto_open_last_project && EditorConfig::get().last_project != "") {
+		LoadProjectFromPath(EditorConfig::get().last_project);
+	} else {
+		LoadProjectFromDialog();
+	}
 
 	RenderingServer::get().create_window(m_projectSettings.window_width, m_projectSettings.window_height, m_projectSettings.app_name);
 
@@ -995,18 +1005,26 @@ void App::reload_scripts() {
 	ScriptServer::get().EndBuild();
 }
 
-void App::LoadProjectFromDialog() {
-	std::filesystem::path path = Utils::OpenFileDialog("Load Project File", {"project.sowa"}, "project.sowa File", false);
-	if (path.empty()) {
-		Utils::Error("Invalid project file");
-		exit(1);
-	}
+void App::LoadProjectFromPath(const std::filesystem::path &path) {
 	m_appPath = path.parent_path();
 	ErrorCode err = m_projectSettings.Load(Utils::Format("abs://{}", path.string()).c_str());
 	if (err != OK) {
 		Utils::Error("Failed to open project at {}", path.string());
 		exit(1);
 	}
+
+	EditorConfig::get().last_project = path.string();
+	EditorConfig::get().Save();
+}
+
+void App::LoadProjectFromDialog() {
+	std::filesystem::path path = Utils::OpenFileDialog("Load Project File", {"project.sowa"}, "project.sowa File", false);
+	if (path.empty()) {
+		Utils::Error("Invalid project file");
+		exit(1);
+	}
+
+	LoadProjectFromPath(path);
 }
 
 extern "C" void Unload() {

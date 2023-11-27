@@ -106,6 +106,17 @@ toml_document &toml_document::Set(const char *key, float value) {
 }
 
 template <>
+bool toml_document::Value(const char *key, bool fallback) {
+	return toml_document_data::get(m_internal).table[key].value_or(fallback);
+}
+
+template <>
+toml_document &toml_document::Set(const char *key, bool value) {
+	toml_document_data::get(m_internal).table.insert_or_assign(key, value);
+	return *this;
+}
+
+template <>
 glm::vec2 toml_document::Value(const char *key, glm::vec2 fallback) {
 	toml_document doc;
 	toml::table *t = toml_document_data::get(m_internal).table[key].as_table();

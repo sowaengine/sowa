@@ -118,6 +118,7 @@ class App {
 	//
 
 	//
+	void LoadProjectFromPath(const std::filesystem::path &path);
 	void LoadProjectFromDialog();
 
 	Font m_testFont;
