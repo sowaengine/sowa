@@ -2,6 +2,7 @@
 
 #include "core/app.hxx"
 #include "scene/nodes/2d/physics/physics_body_2d.hxx"
+#include "scene/nodes/node.hxx"
 #include "utils/utils.hxx"
 
 #include "box2d/box2d.h"
@@ -53,15 +54,15 @@ class DebugDraw : public b2Draw {
 
 class ContactListener : public b2ContactListener {
 	void BeginContact(b2Contact *contact) override {
-		uint64_t id_a = reinterpret_cast<uint64_t>(contact->GetFixtureA()->GetUserData().pointer);
-		uint64_t id_b = reinterpret_cast<uint64_t>(contact->GetFixtureB()->GetUserData().pointer);
+		uint64_t id_a = ((Node *)(contact->GetFixtureA()->GetUserData().pointer))->id();
+		uint64_t id_b = ((Node *)(contact->GetFixtureB()->GetUserData().pointer))->id();
 
 		report_contact(id_a, id_a, id_b, true);
 		report_contact(id_b, id_a, id_b, true);
 	}
 	void EndContact(b2Contact *contact) override {
-		uint64_t id_a = reinterpret_cast<uint64_t>(contact->GetFixtureA()->GetUserData().pointer);
-		uint64_t id_b = reinterpret_cast<uint64_t>(contact->GetFixtureB()->GetUserData().pointer);
+		uint64_t id_a = ((Node *)(contact->GetFixtureA()->GetUserData().pointer))->id();
+		uint64_t id_b = ((Node *)(contact->GetFixtureB()->GetUserData().pointer))->id();
 
 		report_contact(id_a, id_a, id_b, false);
 		report_contact(id_b, id_a, id_b, false);
@@ -203,7 +204,7 @@ void PhysicsServer2D::destroy_body(void *body) {
 	m_world->DestroyBody(reinterpret_cast<b2Body *>(body));
 }
 
-void *PhysicsServer2D::body_add_box_shape(void *body, uint64_t id, cref<vec2> halfSize, cref<vec2> position, float rotation) {
+void *PhysicsServer2D::body_add_box_shape(Node *node, void *body, uint64_t id, cref<vec2> halfSize, cref<vec2> position, float rotation) {
 	b2PolygonShape shape;
 	shape.SetAsBox(PX_TO_UNIT(halfSize.x), PX_TO_UNIT(halfSize.y), b2Vec2(PX_TO_UNIT(position.x), PX_TO_UNIT(position.y)), math::radians(rotation));
 
@@ -212,13 +213,13 @@ void *PhysicsServer2D::body_add_box_shape(void *body, uint64_t id, cref<vec2> ha
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.3f;
 	fixtureDef.restitution = 0.4f;
-	fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(uint64_t(id));
+	fixtureDef.userData.pointer = (uintptr_t)node;
 
 	b2Fixture *fixture = reinterpret_cast<b2Body *>(body)->CreateFixture(&fixtureDef);
 	return (void *)fixture;
 }
 
-void *PhysicsServer2D::body_add_circle_shape(void *body, uint64_t id, float radius, cref<vec2> position) {
+void *PhysicsServer2D::body_add_circle_shape(Node *node, void *body, uint64_t id, float radius, cref<vec2> position) {
 	b2CircleShape shape;
 	shape.m_p.Set(PX_TO_UNIT(position.x), PX_TO_UNIT(position.y));
 	shape.m_radius = PX_TO_UNIT(radius);
@@ -228,7 +229,7 @@ void *PhysicsServer2D::body_add_circle_shape(void *body, uint64_t id, float radi
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.3f;
 	fixtureDef.restitution = .1f;
-	fixtureDef.userData.pointer = reinterpret_cast<uintptr_t>(uint64_t(id));
+	fixtureDef.userData.pointer = (uintptr_t)node;
 
 	b2Fixture *fixture = reinterpret_cast<b2Body *>(body)->CreateFixture(&fixtureDef);
 	return (void *)fixture;
