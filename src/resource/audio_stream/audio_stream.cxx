@@ -3,6 +3,8 @@
 #include "data/file_buffer.hxx"
 #include "servers/file_server.hxx"
 
+#include "utils/utils.hxx"
+
 #ifndef SW_WEB
 #include "AL/alext.h"
 #include "sndfile.h"
@@ -68,10 +70,10 @@ AudioStream::~AudioStream() {
 ErrorCode AudioStream::Load(const char *path) {
 #ifndef SW_WEB
 	Delete();
-	file_buffer data;
-	if (ErrorCode err = FileServer::get().ReadFileBytes(path, data); err != OK) {
-		return err;
-	}
+
+	Result<file_buffer *> data = FileServer::get().load_file(path);
+	if (!data.ok())
+		return data.error();
 
 	ALenum err, format;
 	ALuint buffer;
@@ -82,8 +84,9 @@ ErrorCode AudioStream::Load(const char *path) {
 	ALsizei num_bytes;
 
 	std::vector<unsigned char> bytes;
-	bytes.resize(data.size());
-	memcpy(bytes.data(), data.data(), data.size());
+	bytes.resize(data.get()->size());
+
+	memcpy(bytes.data(), data.get()->data(), data.get()->size());
 
 	SF_VIRTUAL_IO io;
 	io.get_filelen = sf_func_get_file_len;

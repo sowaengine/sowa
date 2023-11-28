@@ -17,7 +17,7 @@ class Font : public Resource {
 	~Font();
 
 	ErrorCode LoadTTF(const char *path);
-	ErrorCode LoadTTF(const file_buffer& buffer);
+	ErrorCode LoadTTF(const file_buffer &buffer);
 	uint32_t GetGlyphTextureID(int codepoint);
 	glm::vec2 CalcTextSize(const std::string &text);
 

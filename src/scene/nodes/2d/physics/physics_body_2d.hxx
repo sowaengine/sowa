@@ -16,7 +16,7 @@ class PhysicsBody2D : public Node2D {
 	void _contact_begin(uint64_t id_a, uint64_t id_b);
 	void _contact_end(uint64_t id_a, uint64_t id_b);
 
-	PhysicsBodyType &type() { return m_type; }
+	PhysicsBodyType &body_type() { return m_body_type; }
 
 	void set_linear_velocity(vec2 velocity);
 
@@ -27,7 +27,7 @@ class PhysicsBody2D : public Node2D {
 	void destroy_body();
 
   private:
-	PhysicsBodyType m_type = PhysicsBodyType::Static;
+	PhysicsBodyType m_body_type = PhysicsBodyType::Static;
 
 	void *m_body = nullptr;
 };

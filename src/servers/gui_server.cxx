@@ -2,6 +2,7 @@
 #include "gui_server.hxx"
 #include "rendering_server.hxx"
 
+#include "core/app.hxx"
 #include "core/behaviour/behaviour_db.hxx"
 #include "scene/nodes/2d/physics/physics_body_2d.hxx"
 
@@ -38,7 +39,7 @@ void GuiServer::Initialize() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-	if (!FileServer::get().Exists("abs://./imgui.ini")) {
+	if (!FileServer::get().exists("/imgui.ini")) {
 		io.IniFilename = NULL;
 		ImGui::LoadIniSettingsFromMemory((char *)res::src_res_editor_imgui_ini_res_h_data, res::src_res_editor_imgui_ini_res_h_size);
 	}
@@ -48,34 +49,24 @@ void GuiServer::Initialize() {
 	ImGui_ImplGlfw_InitForOpenGL(RenderingServer::get().m_pWindowHandle, true);
 	ImGui_ImplOpenGL3_Init("#version 130");
 
-	file_buffer font;
-	if (FileServer::get().ReadFileBytes("res://Roboto-Medium.ttf", font) == OK) {
+	Result<file_buffer *> res = FileServer::get().load_file("/Roboto-Medium.ttf");
+	if (res.ok()) {
 		ImVector<ImWchar> ranges;
 		ImFontGlyphRangesBuilder builder;
 		builder.AddRanges(io.Fonts->GetGlyphRangesDefault());
 		//
 		builder.BuildRanges(&ranges);
 
-		io.Fonts->AddFontFromMemoryTTF(font.data(), font.size(), 16, nullptr, ranges.Data);
+		io.Fonts->AddFontFromMemoryTTF(res.get()->data(), res.get()->size(), 16, nullptr, ranges.Data);
 
-		// file_buffer font2;
-		// if (FileServer::get().ReadFileBytes("res://Font Awesome 6 Free-Regular-400.otf", font2) == OK) {
-		// 	static ImWchar ranges[] = {0xf000, 0xf3ff, 0};
-		//
-		// 	ImFontConfig config;
-		// 	config.MergeMode = true;
-		//
-		// 	io.Fonts->AddFontFromMemoryTTF(font2.data(), font2.size(), 14, &config, ranges);
-		// }
-
-		file_buffer font3;
-		if (FileServer::get().ReadFileBytes("res://resources/icons.ttf", font3) == OK) {
+		Result<file_buffer *> res2 = FileServer::get().load_file("/resources/icons.ttf");
+		if (res2.ok()) {
 			static ImWchar ranges[] = {ICON_BEGIN, ICON_END, 0};
 
 			ImFontConfig config;
 			config.MergeMode = true;
 
-			io.Fonts->AddFontFromMemoryTTF(font3.data(), font3.size(), 14, &config, ranges);
+			io.Fonts->AddFontFromMemoryTTF(res2.get()->data(), res2.get()->size(), 14, &config, ranges);
 		}
 
 		io.Fonts->Build();
@@ -197,7 +188,7 @@ void GuiServer::Update() {
 					}
 					if (tree_open) {
 
-						auto childEntries = FileServer::get().ReadDir(entry.Path().string().c_str());
+						auto childEntries = FileServer::get().read_dir(entry.Path().string().c_str());
 						func(childEntries);
 
 						ImGui::TreePop();
@@ -215,7 +206,7 @@ void GuiServer::Update() {
 			}
 		};
 
-		auto entries = FileServer::get().ReadDir("res://", false);
+		auto entries = FileServer::get().read_dir("/", false);
 		func(entries);
 
 		if (ImGui::BeginPopup("popup_filesystem_rclick")) {

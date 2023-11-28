@@ -29,6 +29,7 @@
 #include "servers/file_server.hxx"
 #include "servers/gui_server.hxx"
 #include "servers/input_server.hxx"
+#include "servers/lua_server.hxx"
 #include "servers/physics_server_2d.hxx"
 #include "servers/rendering_server.hxx"
 #include "servers/script_server.hxx"
@@ -102,7 +103,6 @@ ErrorCode App::Init() {
 	// #error project picker should be added // FIXME
 	m_appPath = "/app";
 #endif
-	FileServer::Create(this);
 
 	// Create working dir
 #ifdef SW_WEB
@@ -318,7 +318,7 @@ ErrorCode App::Init() {
 	NodeTypeName &nt_node2d = NodeTypeNames().emplace_back("Node2D", true);
 
 	REGISTER_NODE_TYPE(PhysicsBody2D, Node2D);
-	REGISTER_NODE_PROPERTY(PhysicsBody2D, "type", type(), PhysicsBodyType);
+	REGISTER_NODE_PROPERTY(PhysicsBody2D, "body_type", body_type(), PhysicsBodyType);
 	nt_node2d.children.emplace_back("PhysicsBody2D", true);
 
 	REGISTER_NODE_TYPE(RectCollider2D, Node2D);
@@ -354,6 +354,7 @@ ErrorCode App::Init() {
 
 	BehaviourDB::get().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
+	LuaServer::get().Init();
 	reload_scripts();
 	// Main();
 
@@ -741,8 +742,8 @@ void App::mainLoop() {
 
 		thickness = 7.f * m_editorCameraZoom2d;
 
-		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), thickness, 0.6f, 0.2f, 0.2, 1.f, 100.f);
-		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), thickness, 0.2f, 0.8f, 0.4f, 1.f, 100.f);
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f * 1000), thickness, 0.6f, 0.2f, 0.2, 1.f, 101.f);
+		Renderer().PushLine(vec2(0.f, 0.f), vec2(1920.f * 1000, 0.f), thickness, 0.2f, 0.8f, 0.4f, 1.f, 101.f);
 
 		Renderer().PushLine(vec2(0.f, 0.f), vec2(0.f, 1080.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
 		Renderer().PushLine(vec2(0.f, 1080.f), vec2(1920.f, 1080.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
@@ -994,6 +995,7 @@ void App::Log(const std::string &message) {
 
 void App::reload_scripts() {
 	//
+	/*
 	ScriptServer::get().BeginBuild();
 
 	auto files = FileServer::get().ReadDir("res://scripts/", true);
@@ -1003,11 +1005,12 @@ void App::reload_scripts() {
 	}
 
 	ScriptServer::get().EndBuild();
+	*/
 }
 
 void App::LoadProjectFromPath(const std::filesystem::path &path) {
 	m_appPath = path.parent_path();
-	ErrorCode err = m_projectSettings.Load(Utils::Format("abs://{}", path.string()).c_str());
+	ErrorCode err = m_projectSettings.Load(path.c_str());
 	if (err != OK) {
 		Utils::Error("Failed to open project at {}", path.string());
 		exit(1);

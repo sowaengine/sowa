@@ -56,7 +56,7 @@ void PhysicsBody2D::_duplicate_data(Node *dst) {
 }
 
 void PhysicsBody2D::create_body() {
-	m_body = PhysicsServer2D::get().create_body(m_type, global_position(), global_rotation());
+	m_body = PhysicsServer2D::get().create_body(body_type(), global_position(), global_rotation());
 
 	for (Node *node : get_children()) {
 		BaseCollider2D *collider = dynamic_cast<BaseCollider2D *>(node);

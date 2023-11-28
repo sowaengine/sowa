@@ -1,90 +1,29 @@
 #include "file_server.hxx"
 
-#include "utils/utils.hxx"
-
 #include <fstream>
-#include <iostream>
-#include <sstream>
 
-static FileServer s_instance;
-
-FileServer::FileServer() {
-}
-
-void FileServer::Create(App *app) {
-	s_instance.m_pApp = app;
-}
+#include "core/app.hxx"
 
 FileServer &FileServer::get() {
-	return s_instance;
+	static FileServer *server = new FileServer;
+	return *server;
 }
 
-ErrorCode FileServer::ReadFileString(const char *p, std::stringstream &stream) {
-	std::filesystem::path path = getFilepath(p);
-	if (path == "") {
+Result<file_buffer *> FileServer::load_file(const char *p, ReadWriteFlagBits flags) {
+	std::filesystem::path path = get_filepath(p, flags);
+	if (path == "")
 		return ERR_FILE_NOT_FOUND;
-	}
-
-	std::ifstream ifstream(path);
-	if (!ifstream.is_open()) {
-		return ERR_FILE_NOT_FOUND;
-	}
-
-	stream << ifstream.rdbuf();
-	return OK;
-}
-
-ErrorCode FileServer::ReadFileString(const char *p, std::string &buffer) {
-	buffer = "";
-
-	std::stringstream s;
-	ErrorCode err = ReadFileString(p, s);
-	buffer = s.str();
-	return OK;
-}
-
-ErrorCode FileServer::WriteFileString(const char *p, const std::string &buffer) {
-	std::filesystem::path path = getFilepath(p);
-	if (path == "") {
-		return ERR_FILE_NOT_FOUND;
-	}
-
-	std::ofstream ofstream(path);
-	if (!ofstream.is_open()) {
-		return ERR_FILE_NOT_FOUND;
-	}
-	ofstream << buffer << std::endl;
-
-	return OK;
-}
-
-ErrorCode FileServer::WriteFileBytes(const char *p, file_buffer &buffer) {
-	std::filesystem::path path = getFilepath(p);
-	if (path == "") {
-		return ERR_FILE_NOT_FOUND;
-	}
-
-	std::ofstream ofstream(path);
-	if (!ofstream.is_open()) {
-		return ERR_FILE_NOT_FOUND;
-	}
-	ofstream.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
-
-	return OK;
-}
-
-ErrorCode FileServer::ReadFileBytes(const char *p, file_buffer &buffer) {
-
-	std::filesystem::path path = getFilepath(p);
-	if (path == "") {
-		return ERR_FILE_NOT_FOUND;
-	}
 
 	try {
-		std::ifstream ifstream(path, std::ifstream::binary);
-		if (!ifstream.is_open()) {
-			return ERR_FILE_NOT_FOUND;
+		std::ifstream::openmode om = std::ifstream::in;
+
+		if (flags & ReadWriteFlags_AsText) {
+			om |= std::ifstream::binary;
 		}
+
+		std::ifstream ifstream(path, om);
+		if (!ifstream.is_open())
+			return ERR_FILE_NOT_FOUND;
 
 		ifstream.unsetf(std::ios::skipws);
 
@@ -93,27 +32,43 @@ ErrorCode FileServer::ReadFileBytes(const char *p, file_buffer &buffer) {
 		fileSize = ifstream.tellg();
 		ifstream.seekg(0, std::ios::beg);
 
-		if (fileSize < 0) {
+		if (fileSize < 0)
 			return ERR_FILE_NOT_FOUND;
-		}
 
-		buffer.m_buffer.clear();
-		buffer.m_buffer.resize(fileSize);
-		ifstream.read((char *)buffer.m_buffer.data(), fileSize);
+		file_buffer &buf = m_buffers[path.string()];
+		buf.m_buffer.clear();
+		buf.m_buffer.resize(fileSize);
+		ifstream.read((char *)buf.m_buffer.data(), fileSize);
 
 		ifstream.close();
+		return &buf;
+
 	} catch (const std::exception &ex) {
 		return ERR_FAILED;
 	}
 
+	return ERR_FAILED;
+}
+
+ErrorCode FileServer::save_file(const void *data, int size, const char *p, ReadWriteFlagBits flags) {
+	std::filesystem::path path = get_filepath(p, flags);
+	if (path == "")
+		return ERR_FILE_NOT_FOUND;
+
+	std::ofstream ofstream(path);
+	if (!ofstream.is_open())
+		return ERR_FILE_NOT_FOUND;
+
+	ofstream.write(reinterpret_cast<const char *>(data), size);
+
 	return OK;
 }
 
-std::vector<FileEntry> FileServer::ReadDir(const char *p, bool recursive) {
-	std::filesystem::path base = getFilepath("res://");
+std::vector<FileEntry> FileServer::read_dir(const char *p, bool recursive) {
+	std::filesystem::path base = get_filepath("");
 
 	std::vector<FileEntry> files;
-	std::string path = getFilepath(p).string();
+	std::string path = get_filepath(p).string();
 	if (path == "")
 		return files;
 
@@ -124,7 +79,7 @@ std::vector<FileEntry> FileServer::ReadDir(const char *p, bool recursive) {
 		for (auto &entry : std::filesystem::recursive_directory_iterator(path)) {
 			FileEntry file;
 			file.m_isDirectory = entry.is_directory();
-			file.m_path = std::filesystem::path("res://") / (std::filesystem::relative(entry.path(), base));
+			file.m_path = entry.path();
 
 			files.push_back(file);
 		}
@@ -132,7 +87,7 @@ std::vector<FileEntry> FileServer::ReadDir(const char *p, bool recursive) {
 		for (auto &entry : std::filesystem::directory_iterator(path)) {
 			FileEntry file;
 			file.m_isDirectory = entry.is_directory();
-			file.m_path = std::filesystem::path("res://") / (std::filesystem::relative(entry.path(), base));
+			file.m_path = entry.path();
 
 			files.push_back(file);
 		}
@@ -141,32 +96,24 @@ std::vector<FileEntry> FileServer::ReadDir(const char *p, bool recursive) {
 	return files;
 }
 
-bool FileServer::Exists(const char *path) {
-	return std::filesystem::exists(getFilepath(path));
+bool FileServer::exists(const char *path) {
+	return std::filesystem::exists(get_filepath(path));
 }
 
-std::filesystem::path FileServer::getFilepath(const std::string &path) {
-	// scheme://path/to/file
-	auto tokens = Utils::Split(path, "://");
-	if (tokens.size() == 1) {
-		tokens.push_back("");
-	}
-	if (tokens.size() < 2) {
-		return "";
-	}
-
-	const std::string &scheme = tokens[0];
-	if (scheme == "res") {
-		std::filesystem::path p = m_pApp->m_appPath / std::filesystem::path(tokens[1]);
-		std::string r = std::filesystem::relative(p, m_pApp->m_appPath).string();
-		if (r.length() >= 3 && (r[0] == '.' && r[1] == '.' && (r[2] == '/' || r[2] == '\\'))) {
-			return "";
-		}
-
+std::filesystem::path FileServer::get_filepath(const std::string &p, ReadWriteFlagBits flags) {
+	if (flags & ReadWriteFlags_FullPath)
 		return p;
-	} else if (scheme == "abs") {
-		return tokens[1];
-	}
 
-	return "";
+	// path: /images/image.png
+	std::string_view path = p;
+	if (p.size() > 0 && p[0] == '/')
+		path = std::string_view(p.c_str() + 1, p.size() - 1);
+
+	return App::get().m_appPath / path;
+}
+
+FileServer::FileServer() {
+}
+
+FileServer::~FileServer() {
 }

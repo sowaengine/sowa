@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "core/app.hxx"
 #include "core/behaviour/behaviour_db.hxx"
 #include "core/store.hxx"
 #include "core/time.hxx"
@@ -646,6 +647,7 @@ void ScriptServer::BeginBuild() {
 
 ErrorCode ScriptServer::LoadScriptFile(std::string path) {
 #ifndef SW_WEB
+	/*
 	int r;
 
 	std::string buf;
@@ -655,6 +657,7 @@ ErrorCode ScriptServer::LoadScriptFile(std::string path) {
 
 	r = s_data.builder.AddSectionFromMemory(path.c_str(), buf.c_str());
 	AS_CHECK();
+	*/
 
 #endif
 	return OK;

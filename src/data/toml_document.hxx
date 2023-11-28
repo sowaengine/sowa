@@ -5,6 +5,7 @@
 #include <string>
 
 #include "core/error/error.hxx"
+#include "servers/file_server.hxx"
 
 struct toml_document {
   public:
@@ -13,7 +14,7 @@ struct toml_document {
 	toml_document(const char *path);
 	~toml_document();
 
-	ErrorCode LoadFile(const char *path);
+	ErrorCode LoadFile(const char *path, ReadWriteFlagBits flags = 0);
 	ErrorCode Serialize(std::string &str);
 
 	template <typename T>

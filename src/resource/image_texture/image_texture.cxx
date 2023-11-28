@@ -24,17 +24,16 @@ void Texture::Unbind() {
 ErrorCode Texture::Load(texture_type_t type, const char *path) {
 	Delete();
 	// m_filepath = path;
-	file_buffer buffer;
-	ErrorCode err = FileServer::get().ReadFileBytes(path, buffer);
-	if (err != OK) {
-		return err;
+	Result<file_buffer *> data = FileServer::get().load_file(path);
+	if (!data.ok()) {
+		return data.error();
 	}
 
 	if (type == TextureType::Texture2D) {
-		return loadTexture2D(buffer);
+		return loadTexture2D(*data.get());
 	}
 	if (type == TextureType::Vector2D) {
-		return loadVector2D(buffer);
+		return loadVector2D(*data.get());
 	}
 	return ERR_FAILED;
 }

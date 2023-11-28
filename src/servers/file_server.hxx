@@ -1,37 +1,38 @@
-#ifndef SW_FILE_SERVER_HXX
-#define SW_FILE_SERVER_HXX
-#pragma once
+#ifndef SW_NEW_FILE_SERVER_HXX
+#define SW_NEW_FILE_SERVER_HXX
 
-#include <sstream>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
-#include "core/app.hxx"
+#include "core/error.hxx"
 #include "data/file/file_entry.hxx"
 #include "data/file_buffer.hxx"
 
-class FileServer {
-  public:
-	FileServer();
-
-	static void Create(App *app);
-	static FileServer &get();
-
-	ErrorCode ReadFileString(const char *path, std::stringstream &stream);
-	ErrorCode ReadFileString(const char *path, std::string &buffer);
-	ErrorCode WriteFileString(const char *path, const std::string &buffer);
-
-	ErrorCode WriteFileBytes(const char *path, file_buffer &buffer);
-	ErrorCode ReadFileBytes(const char *path, file_buffer &buffer);
-
-	std::vector<FileEntry> ReadDir(const char *path, bool recursive = false);
-
-	bool Exists(const char *path);
-
-  private:
-	std::filesystem::path getFilepath(const std::string &path);
-
-	App *m_pApp = nullptr;
+enum ReadWriteFlags : uint32_t {
+	ReadWriteFlags_None = 0,
+	ReadWriteFlags_AsText = 1 << 0,
+	ReadWriteFlags_FullPath = 1 << 1,
 };
 
-#endif // SW_FILE_SERVER_HXX
+using ReadWriteFlagBits = uint32_t;
+
+class FileServer {
+  public:
+	static FileServer &get();
+
+	Result<file_buffer *> load_file(const char *path, ReadWriteFlagBits flags = 0);
+	ErrorCode save_file(const void *data, int size, const char *path, ReadWriteFlagBits flags = 0);
+
+	std::vector<FileEntry> read_dir(const char *path, bool recursive = false);
+	bool exists(const char *path);
+
+	std::filesystem::path get_filepath(const std::string &path, ReadWriteFlagBits flags = 0);
+
+  private:
+	FileServer();
+	~FileServer();
+
+	std::unordered_map<std::string, file_buffer> m_buffers;
+};
+
+#endif // SW_NEW_FILE_SERVER_HXX

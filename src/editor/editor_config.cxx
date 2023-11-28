@@ -52,7 +52,7 @@ static std::filesystem::path get_config_path() {
 		std::filesystem::create_directories(configPath);
 	}
 
-	return std::filesystem::path("abs://").concat(configPath.string()) / "config.toml";
+	return configPath / "config.toml";
 }
 #else
 #error "Unknown platform to get editor config path"
@@ -67,7 +67,7 @@ ErrorCode EditorConfig::Load() {
 	std::filesystem::path configPath = get_config_path();
 	Utils::Info("Config path: {}", configPath.string());
 
-	ErrorCode err = m_doc.LoadFile(configPath.c_str());
+	ErrorCode err = m_doc.LoadFile(configPath.c_str(), ReadWriteFlags_FullPath);
 	if (err != OK) {
 		return err;
 	}
@@ -95,7 +95,7 @@ ErrorCode EditorConfig::Save() {
 	std::string s;
 	doc.Serialize(s);
 
-	ErrorCode err = FileServer::get().WriteFileString(configPath.c_str(), s);
+	ErrorCode err = FileServer::get().save_file(s.data(), s.size(), configPath.c_str(), ReadWriteFlags_FullPath);
 	if (err != OK) {
 		return err;
 	}

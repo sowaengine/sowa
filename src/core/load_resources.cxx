@@ -21,7 +21,7 @@ void App::load_resources() {
 		Utils::Error("Failed to load renderer: {}", (int)err);
 	}
 
-	err = m_testFont.LoadTTF("res://Roboto-Medium.ttf");
+	err = m_testFont.LoadTTF("/Roboto-Medium.ttf");
 	if (err != OK) {
 		Utils::Error("Failed to load font: {}", (int)err);
 	}

@@ -2,6 +2,7 @@
 
 #include "servers/file_server.hxx"
 
+#include "utils/utils.hxx"
 #include "yaml-cpp/yaml.h"
 
 SpriteSheetAnimation::~SpriteSheetAnimation() {
@@ -9,9 +10,11 @@ SpriteSheetAnimation::~SpriteSheetAnimation() {
 
 ErrorCode SpriteSheetAnimation::Load(const char *path) {
 	std::string data;
-	if (ErrorCode err = FileServer::get().ReadFileString(path, data); err != OK) {
-		return err;
+	Result<file_buffer *> res = FileServer::get().load_file(path);
+	if (!res.ok()) {
+		return res.error();
 	}
+	data = std::string((char *)res.get()->data(), res.get()->size());
 
 	YAML::Node yaml = YAML::Load(data.c_str());
 	if (yaml["type"].as<std::string>("") != "Animation")

@@ -1,5 +1,6 @@
 #include "toml_document.hxx"
 
+#include "glm/glm.hpp"
 #include <toml.hpp>
 
 #include <iostream>
@@ -32,13 +33,14 @@ toml_document::~toml_document() {
 	delete reinterpret_cast<toml_document_data *>(m_internal);
 }
 
-ErrorCode toml_document::LoadFile(const char *path) {
+ErrorCode toml_document::LoadFile(const char *path, ReadWriteFlagBits flags) {
 	try {
 		std::string buf;
-		ErrorCode err = FileServer::get().ReadFileString(path, buf);
-		if (err != OK) {
-			return err;
+		Result<file_buffer *> res = FileServer::get().load_file(path, flags);
+		if (!res.ok()) {
+			return res.error();
 		}
+		buf = std::string((char *)res.get()->data(), res.get()->size());
 
 		toml_document_data::get(m_internal).table = toml::parse(buf);
 	} catch (const std::exception &ex) {

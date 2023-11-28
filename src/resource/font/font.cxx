@@ -5,6 +5,8 @@
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
+#include "core/rendering/gl.hxx"
+
 #include "servers/file_server.hxx"
 
 static FT_Library GetFreeType() {
@@ -21,10 +23,11 @@ Font::~Font() {
 }
 
 ErrorCode Font::LoadTTF(const char *path) {
-	ErrorCode err = FileServer::get().ReadFileBytes(path, m_buffer);
-	if (err != OK) {
-		return err;
+	Result<file_buffer *> res = FileServer::get().load_file(path);
+	if (!res.ok()) {
+		return res.error();
 	}
+	m_buffer = *res.get();
 
 	return load_font();
 }
