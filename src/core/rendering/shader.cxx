@@ -41,20 +41,22 @@ Shader::~Shader() {
 ErrorCode Shader::Load(const char *vertexPath, const char *fragmentPath) {
 	ErrorCode err;
 	std::string buf;
-	err = FileServer::get().ReadFileString(vertexPath, buf);
-	if (err != OK) {
+	Result<file_buffer *> res = FileServer::get().load_file(vertexPath, ReadWriteFlags_AsText);
+	if (!res.ok()) {
 		SetVertexSource("");
 		SetFragmentSource("");
-		return err;
+		return res.error();
 	}
+	buf = std::string((char *)res.get()->data(), res.get()->size());
 	SetVertexSource(buf);
 
-	err = FileServer::get().ReadFileString(fragmentPath, buf);
-	if (err != OK) {
+	res = FileServer::get().load_file(fragmentPath, ReadWriteFlags_AsText);
+	if (!res.ok()) {
 		SetVertexSource("");
 		SetFragmentSource("");
-		return err;
+		return res.error();
 	}
+	buf = std::string((char *)res.get()->data(), res.get()->size());
 	SetFragmentSource(buf);
 
 	return Build();
