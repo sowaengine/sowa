@@ -45,6 +45,11 @@
 - Version: 1.2.2
 - License: LGPL-2.1
 
+## Lua
+- Upstream: https://github.com/lua/lua
+- Version: 5.4.6
+- License: MIT
+
 ## Dear ImGui
 - Upstream: https://github.com/ocornut/imgui
 - Branch: docking
@@ -66,11 +71,21 @@
 - Version: 0.1.0
 - License: WTFPL
 
+## sol
+- Upstream: https://github.com/ThePhD/sol2
+- Version: 3.3.0
+- License: MIT
+
 ## stb
 - Upstream: https://github.com/nothings/stb
 - Version: 2.28
 - License: MIT
 - Included Files: stb_image.h
+
+## tinyfiledialogs
+- Upstream: https://sourceforge.net/projects/tinyfiledialogs/
+- Version: 3.15.1
+- License: zlib
 
 ## toml++
 - Upstream: https://github.com/marzer/tomlplusplus
