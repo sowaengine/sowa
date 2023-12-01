@@ -14,10 +14,9 @@
 #include "data/input_event/input_event.hxx"
 #include "gui/gui.hxx"
 #include "resource/font/font.hxx"
+#include "scene/scene.hxx"
 #include "servers/rendering_server.hxx"
 #include "ui/new_tree.hxx"
-
-#include "scene/scene.hxx"
 
 #include "eventpp/callbacklist.h"
 #include "portable-file-dialogs.h"
@@ -57,8 +56,6 @@ class App {
 
 	inline eventpp::CallbackList<void(int, int)> &WindowResizeCallback() { return m_windowResizeCallback; }
 
-	void SetCurrentScene(Scene *scene);
-	inline Scene *GetCurrentScene() { return m_pCurrentScene; }
 	void load_scene(const std::string &path);
 
 	Font &TestFont() { return m_testFont; }
@@ -85,10 +82,9 @@ class App {
 	void reload_scripts();
 
   private:
-	Scene *m_pCurrentScene = nullptr;
-	Scene m_backgroundScene;
-
 	// Editor
+	Scene m_editor_scene;
+	Scene *m_game_scene = nullptr; // stores scene pointer that SceneTree allocates on start
 	enum class EditorState {
 		None = 0,
 		Dragging,

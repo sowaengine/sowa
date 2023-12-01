@@ -4,6 +4,7 @@
 
 #include "core/app.hxx"
 #include "core/behaviour/behaviour_db.hxx"
+#include "scene/scene.hxx"
 
 void Node::add_behaviour(std::string name) {
 	if (has_behaviour(name))

@@ -5,6 +5,7 @@
 #include "core/app.hxx"
 #include "core/behaviour/behaviour_db.hxx"
 #include "scene/nodes/2d/physics/physics_body_2d.hxx"
+#include "scene/scene_tree.hxx"
 
 #include "res/editor/imgui.ini.res.h"
 
@@ -110,7 +111,7 @@ void GuiServer::Update() {
 		ImGui::EndMainMenuBar();
 	}
 
-	bool viewport = ImGui::Begin(Utils::Format("Scene {}###Scene", App::get().GetCurrentScene() ? "| " + App::get().GetCurrentScene()->Path() : "").c_str(), nullptr, windowFlags);
+	bool viewport = ImGui::Begin(Utils::Format("Scene {}###Scene", SceneTree::get().get_scene() ? "| " + SceneTree::get().get_scene()->Path() : "").c_str(), nullptr, windowFlags);
 	if (viewport) {
 
 		float width = ImGui::GetContentRegionAvail().x;
@@ -252,7 +253,7 @@ void GuiServer::Update() {
 	bool scene_rclick_open_popup = false;
 
 	if (ImGui::Begin("Scene")) {
-		if (Scene *scene = App::get().GetCurrentScene(); nullptr != scene) {
+		if (Scene *scene = SceneTree::get().get_scene(); nullptr != scene) {
 			std::function<void(Node *)> drawNode;
 
 			drawNode = [&](Node *node) {
@@ -315,16 +316,16 @@ void GuiServer::Update() {
 					std::function<void(const NodeTypeName &)> drawNodeTypeName;
 
 					auto addNodeByTypeName = [this](const std::string &typeName) {
-						Node *node = App::get().GetCurrentScene()->create(NodeDB::get().get_node_type(typeName), "New " + typeName);
+						Node *node = SceneTree::get().get_scene()->create(NodeDB::get().get_node_type(typeName), "New " + typeName);
 
 						if (scene_rclick_selected_node == 0) {
-							if (nullptr == App::get().GetCurrentScene()->Root()) {
-								App::get().GetCurrentScene()->Root() = (node);
+							if (nullptr == SceneTree::get().get_scene()->Root()) {
+								SceneTree::get().get_scene()->Root() = (node);
 							} else {
-								App::get().GetCurrentScene()->Root()->add_child(node);
+								SceneTree::get().get_scene()->Root()->add_child(node);
 							}
 						} else {
-							App::get().GetCurrentScene()->get_node_by_id(scene_rclick_selected_node)->add_child(node);
+							SceneTree::get().get_scene()->get_node_by_id(scene_rclick_selected_node)->add_child(node);
 						}
 
 						App::get().SelectNode(node->id());
@@ -361,7 +362,7 @@ void GuiServer::Update() {
 
 				if (scene_rclick_selected_node != 0) {
 					if (ImGui::Selectable("Delete Node")) {
-						App::get().GetCurrentScene()->queue_free(scene_rclick_selected_node);
+						SceneTree::get().get_scene()->queue_free(scene_rclick_selected_node);
 					}
 				}
 
@@ -374,8 +375,8 @@ void GuiServer::Update() {
 	if (ImGui::Begin("Properties")) {
 		if (ImGui::BeginChild("##Properties_", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - ImGui::GetFrameHeight()))) {
 
-			if (size_t id = App::get().GetSelectedNode(); id != 0 && nullptr != App::get().GetCurrentScene()) {
-				Node *node = App::get().GetCurrentScene()->get_node_by_id(id);
+			if (size_t id = App::get().GetSelectedNode(); id != 0 && nullptr != SceneTree::get().get_scene()) {
+				Node *node = SceneTree::get().get_scene()->get_node_by_id(id);
 				if (nullptr != node) {
 					if (ImGui::CollapsingHeader("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
 						ImGui::Indent();

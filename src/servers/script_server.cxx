@@ -15,6 +15,8 @@
 
 #include "scene/node_db.hxx"
 #include "scene/nodes.hxx"
+#include "scene/scene.hxx"
+#include "scene/scene_tree.hxx"
 
 #ifndef SW_WEB
 #include <angelscript.h>
@@ -137,7 +139,7 @@ void print(std::string &msg) {
 Node *get() {
 	int a = 1;
 
-	return App::get().GetCurrentScene()->get_node_in_group("Barrel");
+	return SceneTree::get().get_scene()->get_node_in_group("Barrel");
 }
 std::string get_name(Node *node) {
 	return node->name();
@@ -494,23 +496,23 @@ ScriptServer::ScriptServer() {
 
 	struct SceneMethodWrapper {
 		static Node *Create(const std::string &nodeType, const std::string &name) {
-			return App::get().GetCurrentScene()->create(NodeDB::get().get_node_type(nodeType), name);
+			return SceneTree::get().get_scene()->create(NodeDB::get().get_node_type(nodeType), name);
 		}
 
 		static Node *GetNodeInGroup(const std::string &group) {
-			return App::get().GetCurrentScene()->get_node_in_group(group);
+			return SceneTree::get().get_scene()->get_node_in_group(group);
 		}
 
 		static Node *GetNodeById(uint64_t id) {
-			return App::get().GetCurrentScene()->get_node_by_id(static_cast<size_t>(id));
+			return SceneTree::get().get_scene()->get_node_by_id(static_cast<size_t>(id));
 		}
 
 		static Node *Root() {
-			return App::get().GetCurrentScene()->Root();
+			return SceneTree::get().get_scene()->Root();
 		}
 
 		static void QueueFree(Node *node) {
-			return App::get().GetCurrentScene()->queue_free(node->id());
+			return SceneTree::get().get_scene()->queue_free(node->id());
 		}
 	};
 

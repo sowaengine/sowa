@@ -78,7 +78,7 @@ void Main() {
 
 	App::get().MouseInputCallback().append(OnInput);
 
-	App::get().SetCurrentScene(scene);
+	// App::get().SetCurrentScene(scene);
 }
 
 void OnInput(InputEventMouseButton event) {

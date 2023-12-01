@@ -2,6 +2,7 @@
 
 #include "core/app.hxx"
 #include "scene/nodes/2d/physics/base_collider_2d.hxx"
+#include "scene/scene_tree.hxx"
 #include "servers/physics_server_2d.hxx"
 #include "utils/utils.hxx"
 
@@ -27,8 +28,8 @@ void PhysicsBody2D::_exit() {
 }
 
 void PhysicsBody2D::_contact_begin(uint64_t id_a, uint64_t id_b) {
-	Node *node_a = App::get().GetCurrentScene()->get_node_by_id(id_a);
-	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
+	Node *node_a = SceneTree::get().get_scene()->get_node_by_id(id_a);
+	Node *node_b = SceneTree::get().get_scene()->get_node_by_id(id_b);
 
 	for (auto &[id, b] : get_behaviours()) {
 		ScriptFunctionCaller caller;
@@ -40,8 +41,8 @@ void PhysicsBody2D::_contact_begin(uint64_t id_a, uint64_t id_b) {
 }
 
 void PhysicsBody2D::_contact_end(uint64_t id_a, uint64_t id_b) {
-	Node *node_a = App::get().GetCurrentScene()->get_node_by_id(id_a);
-	Node *node_b = App::get().GetCurrentScene()->get_node_by_id(id_b);
+	Node *node_a = SceneTree::get().get_scene()->get_node_by_id(id_a);
+	Node *node_b = SceneTree::get().get_scene()->get_node_by_id(id_b);
 
 	(void)node_a;
 	(void)node_b;

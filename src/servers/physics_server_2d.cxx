@@ -3,6 +3,8 @@
 #include "core/app.hxx"
 #include "scene/nodes/2d/physics/physics_body_2d.hxx"
 #include "scene/nodes/node.hxx"
+#include "scene/scene.hxx"
+#include "scene/scene_tree.hxx"
 #include "utils/utils.hxx"
 
 #include "box2d/box2d.h"
@@ -69,7 +71,7 @@ class ContactListener : public b2ContactListener {
 	}
 
 	void report_contact(uint64_t id, uint64_t id_a, uint64_t id_b, bool begin) {
-		Scene *scene = App::get().GetCurrentScene();
+		Scene *scene = SceneTree::get().get_scene();
 		if (nullptr == scene)
 			return;
 

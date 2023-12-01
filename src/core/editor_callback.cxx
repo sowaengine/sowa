@@ -1,5 +1,6 @@
 #include "app.hxx"
 #include "scene/nodes/2d/drawable/sprite_2d.hxx"
+#include "scene/scene_tree.hxx"
 #include "servers/gui_server.hxx"
 #include "servers/rendering_server.hxx"
 
@@ -14,9 +15,9 @@ void App::editor_mouse_move_event(InputEventMouseMove event) {
 		this->m_editorCameraPos2d.y += deltaY * this->m_editorCameraZoom2d;
 	}
 
-	if (this->m_selectedNode != 0 && GetCurrentScene() && Input::IsButtonUp(MB_RIGHT)) {
+	if (this->m_selectedNode != 0 && Input::IsButtonUp(MB_RIGHT)) {
 		if (this->m_editorState == EditorState::Dragging) {
-			Node2D *selected = dynamic_cast<Node2D *>(GetCurrentScene()->get_node_by_id(this->m_selectedNode));
+			Node2D *selected = dynamic_cast<Node2D *>(SceneTree::get().get_scene()->get_node_by_id(this->m_selectedNode));
 			if (selected) {
 				vec2 offset = vec2(deltaX * this->m_editorCameraZoom2d, -deltaY * this->m_editorCameraZoom2d);
 				if (Input::IsKeyDown(KEY_LEFT_SHIFT)) {
@@ -81,8 +82,8 @@ void App::editor_scroll_event(InputEventScroll event) {
 	mousePos.x *= (1920.f / (float)windowSize.x);
 	mousePos.y *= (1080.f / (float)windowSize.y);
 
-	if (this->m_editorState != EditorState::None && GetCurrentScene()) {
-		if (Sprite2D *sprite = dynamic_cast<Sprite2D *>(GetCurrentScene()->get_node_by_id(this->m_selectedNode)); nullptr != sprite) {
+	if (this->m_editorState != EditorState::None) {
+		if (Sprite2D *sprite = dynamic_cast<Sprite2D *>(SceneTree::get().get_scene()->get_node_by_id(this->m_selectedNode)); nullptr != sprite) {
 			mousePos.x = (1920.f * 0.5f);
 			mousePos.y = (1080.f * 0.5f);
 		}

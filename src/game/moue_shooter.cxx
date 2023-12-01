@@ -9,6 +9,7 @@
 #include "glm/glm.hpp"
 #include "resource/resource_manager.hxx"
 #include "scene/nodes.hxx"
+#include "scene/scene_tree.hxx"
 #include "servers/input_server.hxx"
 
 static RID bulletTexture;
@@ -26,7 +27,7 @@ void MouseShooter::Update(Node *node, Behaviour *) {
 			return;
 		}
 
-		Node *bulletNode = App::get().GetCurrentScene()->create(NodeDB::get().get_node_type("Sprite2D"), "Bullet");
+		Node *bulletNode = SceneTree::get().get_scene()->create(NodeDB::get().get_node_type("Sprite2D"), "Bullet");
 		Sprite2D *bullet = dynamic_cast<Sprite2D *>(bulletNode);
 		bullet->texture() = bulletTexture;
 		bullet->position() = barrelSprite->global_position();
@@ -35,6 +36,6 @@ void MouseShooter::Update(Node *node, Behaviour *) {
 
 		// bullet->add_behaviour("Bullet Movement");
 		bullet->add_behaviour("Bullet");
-		App::get().GetCurrentScene()->Root()->add_child(bullet);
+		SceneTree::get().get_scene()->Root()->add_child(bullet);
 	}
 }

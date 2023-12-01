@@ -17,6 +17,8 @@
 #include "core/time.hxx"
 #include "core/tweens.hxx"
 
+#include "scene/scene_tree.hxx"
+
 #include "data/toml_document.hxx"
 #include "game/game.hxx"
 #include "scene/nodes.hxx"
@@ -188,7 +190,7 @@ ErrorCode App::Init() {
 
 		if (event.action == KEY_PRESSED && event.key == KEY_Z) {
 			// Tweens::get().RegisterTween(2.f, [](float f) {
-			//    App::get().GetCurrentScene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
+			//    App::get().SceneTree::get().get_scene()->get_active_camera2d()->Zoom() = 1.f - (f * 0.5f);
 			// });
 		}
 
@@ -200,12 +202,12 @@ ErrorCode App::Init() {
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_R && !this->IsRunning() && event.modifiers.alt) {
-			this->GetCurrentScene()->load(this->GetCurrentScene()->Path().c_str());
+			SceneTree::get().get_scene()->load(SceneTree::get().get_scene()->Path().c_str());
 			this->reload_scripts();
 		}
 
 		if (event.action == KEY_PRESSED && event.key == KEY_S && event.modifiers.control) {
-			ErrorCode err = GetCurrentScene()->save(GetCurrentScene()->Path().c_str());
+			ErrorCode err = SceneTree::get().get_scene()->save(SceneTree::get().get_scene()->Path().c_str());
 			if (err != OK) {
 				std::cout << "Failed to save scene " << err << std::endl;
 			}
@@ -367,7 +369,7 @@ ErrorCode App::Init() {
 	RegisterCommand("Rebuild Scripts", [&]() {
 		reload_scripts();
 
-		if (IsRunning() && nullptr != GetCurrentScene()) {
+		if (IsRunning()) {
 			std::function<void(Node *)> func;
 			func = [&func](Node *node) {
 				node->reload_behaviours();
@@ -377,27 +379,22 @@ ErrorCode App::Init() {
 				}
 			};
 
-			func(GetCurrentScene()->Root());
+			func(SceneTree::get().get_scene()->Root());
 		}
 	});
 	RegisterCommand("Save Scene", [&]() {
-		if (nullptr == GetCurrentScene())
-			return;
-		if (GetCurrentScene()->Path() == "") {
+		if (SceneTree::get().get_scene()->Path() == "") {
 			SetCommandInterface(new SceneSaveAsInterface(""));
 			return;
 		}
 
-		ErrorCode err = GetCurrentScene()->save(GetCurrentScene()->Path().c_str());
+		ErrorCode err = SceneTree::get().get_scene()->save(SceneTree::get().get_scene()->Path().c_str());
 		if (err != OK) {
 			std::cout << "Failed to save scene " << err << std::endl;
 		}
 	});
 	RegisterCommand("Save Scene As", [&]() {
-		if (nullptr == GetCurrentScene())
-			return;
-
-		SetCommandInterface(new SceneSaveAsInterface(GetCurrentScene()->Path()));
+		SetCommandInterface(new SceneSaveAsInterface(SceneTree::get().get_scene()->Path()));
 	});
 	RegisterCommand("Exit", [&]() {
 		exit(0);
@@ -407,91 +404,8 @@ ErrorCode App::Init() {
 	GuiServer::get().Initialize();
 #endif
 
-	// file_buffer f;
-	// err = FileServer::get().ReadFileBytes("res://project.zip", f);
-	// if (err != OK) {
-	// 	exit(2);
-	// }
-
-	// void *mem_stream = mz_stream_mem_create();
-	// mz_stream_mem_set_buffer(mem_stream, f.data(), f.size());
-	// mz_stream_open(mem_stream, NULL, MZ_OPEN_MODE_READ);
-	//
-	// void *zip_handle = mz_zip_create();
-	// mz_zip_open(zip_handle, mem_stream, MZ_OPEN_MODE_READ);
-
-	/*
-	void *zip_reader = mz_zip_reader_create();
-	mz_zip_reader_open_buffer(zip_reader, f.data(), f.size(), 0);
-	//
-	// mz_zip_entry_write(zip_handle)
-	mz_zip_file *file_info = NULL;
-	if (mz_zip_reader_goto_first_entry(zip_reader) == MZ_OK) {
-			do {
-					mz_zip_file *file_info = NULL;
-					if (mz_zip_reader_entry_get_info(zip_reader, &file_info) !=
-	MZ_OK) { printf("Unable to get zip entry info\n"); break;
-					}
-					printf("Zip entry %s\n", file_info->filename);
-					std::string filename = file_info->filename;
-					if (mz_zip_reader_entry_is_dir(zip_reader) == MZ_OK) {
-							printf("Entry is a directory\n");
-							continue;
-					}
-
-					if (mz_zip_reader_entry_open(zip_reader) == MZ_OK) {
-							if (mz_zip_reader_entry_get_info(zip_reader,
-	&file_info) == MZ_OK) { printf("filename: %s\n", file_info->filename);
-									printf("uncompressed: %ld\n",
-	file_info->uncompressed_size);
-							}
-
-							// char buf[1024];
-							std::vector<char> buf;
-							buf.reserve(file_info->uncompressed_size);
-
-							int32_t bytes_read = 0;
-							int32_t totalBytes = 0;
-							// int32_t err = MZ_OK;
-							do {
-									bytes_read =
-	mz_zip_reader_entry_read(zip_reader, buf.data(), buf.capacity()); if
-	(bytes_read < 0) {
-											// err = bytes_read;
-											// break;
-									}
-									if (bytes_read > 0) {
-											totalBytes += bytes_read;
-									}
-
-									printf("Bytes read from entry %d\n",
-	bytes_read); } while (bytes_read > 0);
-							// mz_zip_reader_close(zip_reader);
-
-							Utils::Info("{}", filename);
-							std::filesystem::path path =
-	Utils::Format("./zipcopy/{}", filename); Utils::Log("{}",
-	path.parent_path().string());
-							std::filesystem::create_directories(path.parent_path());
-							std::ofstream ofstream(path.string(), std::ios::out);
-							ofstream.write(buf.data(), totalBytes);
-					}
-
-			} while (mz_zip_reader_goto_next_entry(zip_reader) == MZ_OK);
-	}
-	mz_zip_reader_close(zip_reader);
-	*/
-
-	// mz_zip_close(zip_handle);
-	// mz_zip_delete(&zip_handle);
-	// mz_stream_mem_delete(&mem_stream);
-
 	if (m_projectSettings.config_main_scene != "") {
-		if (nullptr == GetCurrentScene()) {
-			m_pCurrentScene = new Scene;
-		}
-
-		ErrorCode err = GetCurrentScene()->load(m_projectSettings.config_main_scene.c_str());
+		ErrorCode err = SceneTree::get().get_scene()->load(m_projectSettings.config_main_scene.c_str());
 		if (err != OK) {
 			std::cout << "Failed to load scene" << std::endl;
 		}
@@ -499,6 +413,12 @@ ErrorCode App::Init() {
 
 #ifdef SW_TEMPLATE
 	Start();
+#endif
+
+	m_game_scene = SceneTree::get().m_scene;
+#ifndef SW_TEMPLATE
+	Scene::copy(m_game_scene, &m_editor_scene);
+	SceneTree::get().m_scene = &m_editor_scene;
 #endif
 
 	return OK;
@@ -551,9 +471,9 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 
 void App::mainLoop() {
 	if (m_scene_to_load != "") {
-		GetCurrentScene()->_end_scene();
-		GetCurrentScene()->load(m_scene_to_load.c_str());
-		GetCurrentScene()->_begin_scene();
+		SceneTree::get().get_scene()->_end_scene();
+		SceneTree::get().get_scene()->load(m_scene_to_load.c_str());
+		SceneTree::get().get_scene()->_begin_scene();
 
 		m_scene_to_load = "";
 	}
@@ -686,16 +606,14 @@ void App::mainLoop() {
 	vec2 zoom(1.f);
 	float rotation = 0.f;
 	if (IsRunning()) {
-		if (GetCurrentScene()) {
-			Camera2D *cam = dynamic_cast<Camera2D *>(GetCurrentScene()->get_active_camera2d());
-			if (cam) {
-				centerPoint = cam->center_point();
+		Camera2D *cam = dynamic_cast<Camera2D *>(SceneTree::get().get_scene()->get_active_camera2d());
+		if (cam) {
+			centerPoint = cam->center_point();
 
-				position = cam->global_position();
-				zoom = cam->zoom();
-				if (cam->rotatable()) {
-					rotation = glm::radians(cam->global_rotation());
-				}
+			position = cam->global_position();
+			zoom = cam->zoom();
+			if (cam->rotatable()) {
+				rotation = glm::radians(cam->global_rotation());
 			}
 		}
 	} else {
@@ -714,9 +632,8 @@ void App::mainLoop() {
 	Renderer().Reset();
 	glEnable(GL_DEPTH_TEST);
 
-	if (m_pCurrentScene != nullptr) {
-		m_pCurrentScene->_update_scene();
-	}
+	SceneTree::get()._update_globals();
+	SceneTree::get().get_scene()->_update_scene();
 
 	if (IsRunning()) {
 		PhysicsServer2D::get().step();
@@ -750,70 +667,68 @@ void App::mainLoop() {
 		Renderer().PushLine(vec2(1920.f, 1080.f), vec2(1920.f, 0.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
 		Renderer().PushLine(vec2(1920.f, 0.f), vec2(0.f, 0.f), thickness, 0.1f, 0.3f, 0.6, 1.f, 100.f);
 
-		if (nullptr != GetCurrentScene()) {
-			Node *selectedNode = GetCurrentScene()->get_node_by_id(m_selectedNode);
-			Node2D *selectedNode2D = dynamic_cast<Node2D *>(selectedNode);
-			if (nullptr != selectedNode2D) {
-				vec2 pos = selectedNode2D->global_position();
+		Node *selectedNode = SceneTree::get().get_scene()->get_node_by_id(m_selectedNode);
+		Node2D *selectedNode2D = dynamic_cast<Node2D *>(selectedNode);
+		if (nullptr != selectedNode2D) {
+			vec2 pos = selectedNode2D->global_position();
 
-				float length = 20.f * m_editorCameraZoom2d;
-				float thickness = m_editorCameraZoom2d * 5;
-				Renderer().PushLine(vec2(pos.x - length, pos.y),
-									vec2(pos.x + length, pos.y), thickness, 0.83f, 0.62f,
-									0.3f, 2.f, 100.f);
-				Renderer().PushLine(vec2(pos.x, pos.y - length),
-									vec2(pos.x, pos.y + length), thickness, 0.83f, 0.62f,
-									0.3f, 2.f, 100.f);
+			float length = 20.f * m_editorCameraZoom2d;
+			float thickness = m_editorCameraZoom2d * 5;
+			Renderer().PushLine(vec2(pos.x - length, pos.y),
+								vec2(pos.x + length, pos.y), thickness, 0.83f, 0.62f,
+								0.3f, 2.f, 100.f);
+			Renderer().PushLine(vec2(pos.x, pos.y - length),
+								vec2(pos.x, pos.y + length), thickness, 0.83f, 0.62f,
+								0.3f, 2.f, 100.f);
+		}
+
+		Sprite2D *selectedSprite2D = dynamic_cast<Sprite2D *>(selectedNode);
+		if (nullptr != selectedSprite2D) {
+			Texture *texture =
+				ResourceManager::get().GetAs<Texture>(selectedSprite2D->texture());
+			float width = 128.f;
+			float height = 128.f;
+			if (texture) {
+				width = texture->Width();
+				height = texture->Height();
+			}
+			glm::mat4 model =
+				glm::scale(selectedSprite2D->calculate_transform(), {width, height, 1.f});
+
+			glm::vec4 points[4] = {{-0.5f, 0.5f, 0.f, 1.f},
+								   {-0.5f, -0.5f, 0.f, 1.f},
+								   {0.5f, -0.5f, 0.f, 1.f},
+								   {0.5f, 0.5f, 0.f, 1.f}};
+
+			for (int i = 0; i < 4; i++) {
+				points[i] = model * points[i];
 			}
 
-			Sprite2D *selectedSprite2D = dynamic_cast<Sprite2D *>(selectedNode);
-			if (nullptr != selectedSprite2D) {
-				Texture *texture =
-					ResourceManager::get().GetAs<Texture>(selectedSprite2D->texture());
-				float width = 128.f;
-				float height = 128.f;
-				if (texture) {
-					width = texture->Width();
-					height = texture->Height();
-				}
-				glm::mat4 model =
-					glm::scale(selectedSprite2D->calculate_transform(), {width, height, 1.f});
-
-				glm::vec4 points[4] = {{-0.5f, 0.5f, 0.f, 1.f},
-									   {-0.5f, -0.5f, 0.f, 1.f},
-									   {0.5f, -0.5f, 0.f, 1.f},
-									   {0.5f, 0.5f, 0.f, 1.f}};
-
-				for (int i = 0; i < 4; i++) {
-					points[i] = model * points[i];
-				}
-
-				float minX = points[0].x;
-				float minY = points[0].y;
-				float maxX = points[0].x;
-				float maxY = points[0].y;
-				for (size_t i = 0; i < 4; i++) {
-					minX = std::min(minX, points[i].x);
-					minY = std::min(minY, points[i].y);
-					maxX = std::max(maxX, points[i].x);
-					maxY = std::max(maxY, points[i].y);
-				}
-				float padding = 10.f * m_editorCameraZoom2d;
-				minX -= padding;
-				maxX += padding;
-				minY -= padding;
-				maxY += padding;
-
-				float thickness = m_editorCameraZoom2d * 5;
-				Renderer().PushLine(vec2(minX, minY), vec2(maxX, minY), thickness, 0.2f,
-									0.6f, 0.8f, 2.f, 100.f);
-				Renderer().PushLine(vec2(maxX, minY), vec2(maxX, maxY), thickness, 0.2f,
-									0.6f, 0.8f, 2.f, 100.f);
-				Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f,
-									0.6f, 0.8f, 2.f, 100.f);
-				Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f,
-									0.6f, 0.8f, 2.f, 100.f);
+			float minX = points[0].x;
+			float minY = points[0].y;
+			float maxX = points[0].x;
+			float maxY = points[0].y;
+			for (size_t i = 0; i < 4; i++) {
+				minX = std::min(minX, points[i].x);
+				minY = std::min(minY, points[i].y);
+				maxX = std::max(maxX, points[i].x);
+				maxY = std::max(maxY, points[i].y);
 			}
+			float padding = 10.f * m_editorCameraZoom2d;
+			minX -= padding;
+			maxX += padding;
+			minY -= padding;
+			maxY += padding;
+
+			float thickness = m_editorCameraZoom2d * 5;
+			Renderer().PushLine(vec2(minX, minY), vec2(maxX, minY), thickness, 0.2f,
+								0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(maxX, minY), vec2(maxX, maxY), thickness, 0.2f,
+								0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(maxX, maxY), vec2(minX, maxY), thickness, 0.2f,
+								0.6f, 0.8f, 2.f, 100.f);
+			Renderer().PushLine(vec2(minX, maxY), vec2(minX, minY), thickness, 0.2f,
+								0.6f, 0.8f, 2.f, 100.f);
 		}
 	}
 
@@ -875,8 +790,7 @@ void App::mainLoop() {
 			this->m_editorState == EditorState::None && Input::IsCursorInside())
 			m_selectedNode = 0;
 
-		if (id != 0 && GetCurrentScene() &&
-			nullptr != GetCurrentScene()->get_node_by_id(id)) {
+		if (id != 0 && nullptr != SceneTree::get().get_scene()->get_node_by_id(id)) {
 			m_hoveredNode = static_cast<size_t>(id);
 			if (m_editorState == EditorState::None &&
 				Input::IsButtonJustClicked(MB_LEFT) && Input::IsCursorInside()) {
@@ -921,34 +835,36 @@ void App::mainLoopCaller(void *self) {
 	static_cast<App *>(self)->mainLoop();
 }
 
+/*
 void App::SetCurrentScene(Scene *scene) {
-	if (m_pCurrentScene != nullptr && IsRunning()) {
-		m_pCurrentScene->_end_scene();
+	if (IsRunning()) {
+		SceneTree::get().get_scene()->_end_scene();
 	}
 
-	m_pCurrentScene = scene;
+	SceneTree::get().m_scene = scene;
 	if (IsRunning())
-		m_pCurrentScene->_begin_scene();
+		SceneTree::get().get_scene()->_begin_scene();
 }
+*/
 
 void App::load_scene(const std::string &path) {
 	m_scene_to_load = path;
 }
 
 void App::Start() {
-	if (nullptr == GetCurrentScene()) {
-		Utils::Error("Failed to start scene: no scene is active");
-		return;
-	}
+	// if (nullptr == GetCurrentScene()) {
+	// 	Utils::Error("Failed to start scene: no scene is active");
+	// 	return;
+	// }
 
 	if (m_running)
 		return;
 	m_running = true;
 
-	if (nullptr != m_pCurrentScene) {
-		Scene::copy(m_pCurrentScene, &m_backgroundScene);
-		GetCurrentScene()->_begin_scene();
-	}
+	SceneTree::get().m_scene = m_game_scene;
+	Scene::copy(&m_editor_scene, SceneTree::get().m_scene);
+	SceneTree::get()._begin_globals();
+	SceneTree::get().get_scene()->_begin_scene();
 }
 
 void App::Stop() {
@@ -962,11 +878,9 @@ void App::Stop() {
 	Store<std::string, std::string>::get().clear();
 	Tweens::get().clear();
 
-	if (nullptr != m_pCurrentScene) {
-		m_pCurrentScene->_end_scene();
-
-		Scene::copy(&m_backgroundScene, m_pCurrentScene);
-	}
+	SceneTree::get().get_scene()->_end_scene();
+	SceneTree::get()._end_globals();
+	SceneTree::get().m_scene = &m_editor_scene;
 
 	m_running = false;
 }

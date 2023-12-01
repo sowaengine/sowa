@@ -1,6 +1,7 @@
 #include "app.hxx"
 
 #include "core/error.hxx"
+#include "utils/utils.hxx"
 
 #include "res/shaders/batch2d.fs.res.h"
 #include "res/shaders/batch2d.vs.res.h"

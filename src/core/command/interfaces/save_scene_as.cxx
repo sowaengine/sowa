@@ -5,6 +5,7 @@
 
 #include "core/app.hxx"
 #include "core/error.hxx"
+#include "scene/scene_tree.hxx"
 
 SceneSaveAsInterface::SceneSaveAsInterface(std::string path) {
 	if (path == "") {
@@ -21,7 +22,7 @@ SceneSaveAsInterface::SceneSaveAsInterface(std::string path) {
 	}
 
 	action = [this]() {
-		ErrorCode err = App::get().GetCurrentScene()->save(text.c_str());
+		ErrorCode err = SceneTree::get().get_scene()->save(text.c_str());
 		if (err != OK) {
 			std::cout << "Failed to save scene " << err << std::endl;
 		}
