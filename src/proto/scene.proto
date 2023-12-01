@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package pb;
+
+message Vec2 {
+  float x = 1;
+  float y = 2;
+}
+
+message Resource {
+  uint64 id = 1;
+  uint64 type = 2; // ResourceType_ImageTexture ...
+  string path = 3;
+}
+
+message Node {
+  uint64 id = 1;
+  uint64 parent_id = 2;
+  string type = 3;
+  string name = 4;
+  repeated string behaviour = 5;
+  repeated string group = 6;
+
+  // properties
+  optional bool visible = 100;
+  optional int32 stream = 101;
+  optional bool autoplay = 102;
+  optional Vec2 position = 103;
+  optional Vec2 scale = 104;
+  optional float rotation = 105;
+  optional float z_index = 106;
+  optional string body_type = 107;
+  optional float width = 108;
+  optional float height = 109;
+  optional float radius = 110;
+  optional int32 texture = 111;
+  optional float color_red = 112;
+  optional float color_green = 113;
+  optional float color_blue = 114;
+  optional float color_alpha = 115;
+  optional int32 spritesheet = 116;
+  optional float speed = 117;
+  optional bool playing = 118;
+  optional Vec2 zoom = 119;
+}
+
+message Scene {
+  uint64 active_camera_2d = 1;
+  repeated Resource resource = 2;
+  uint64 root_id = 3;
+  repeated Node node = 4;
+}

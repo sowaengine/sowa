@@ -1,5 +1,6 @@
 #include "scene.hxx"
 
+#include "core/app.hxx"
 #include "core/error/error.hxx"
 #include "core/tweens.hxx"
 #include "math/math.hxx"
@@ -12,108 +13,8 @@
 #include <any>
 #include <iostream>
 
-#include "yaml-cpp/yaml.h"
-
-namespace YAML {
-template <>
-struct convert<PhysicsBodyType> {
-	static Node encode(const PhysicsBodyType &o) {
-		Node node = Node(PhysicsBodyTypeToString(o));
-		return node;
-	}
-
-	static bool decode(const Node &node, PhysicsBodyType &o) {
-		if (!node.IsScalar()) {
-			return false;
-		}
-
-		o = StringToPhysicsBodyType(node.as<std::string>(""));
-		return true;
-	}
-};
-} // namespace YAML
-
-namespace YAML {
-template <>
-struct convert<vec2> {
-	static Node encode(const vec2 &rhs) {
-		Node node;
-		node["x"] = (rhs.x);
-		node["y"] = (rhs.y);
-		return node;
-	}
-
-	static bool decode(const Node &node, vec2 &rhs) {
-		if (!node.IsMap() || node.size() != 2) {
-			return false;
-		}
-
-		rhs.x = node["x"].as<double>();
-		rhs.y = node["y"].as<double>();
-		return true;
-	}
-};
-} // namespace YAML
-
-namespace YAML {
-template <>
-struct convert<std::any> {
-	static Node encode(const std::any &rhs) {
-		Node node;
-
-		if (const std::string *p = std::any_cast<std::string>(&rhs)) {
-			node["str"] = *p;
-		} else if (const vec2 *p = std::any_cast<vec2>(&rhs)) {
-			node["vec2"] = *p;
-		} else if (const int *p = std::any_cast<int>(&rhs)) {
-			node["int"] = *p;
-		} else if (const float *p = std::any_cast<float>(&rhs)) {
-			node["float"] = *p;
-		} else if (const bool *p = std::any_cast<bool>(&rhs)) {
-			node["bool"] = *p;
-		} else if (const PhysicsBodyType *p = std::any_cast<PhysicsBodyType>(&rhs)) {
-			node["PhysicsBodyType"] = *p;
-		} else {
-			assert(false && "unknown type on std::any encode");
-		}
-
-		return node;
-	}
-
-	static bool decode(const Node &node, std::any &rhs) {
-		if (!node.IsMap()) {
-			return false;
-		}
-
-		std::string type = "";
-		for (const auto &pair : node) {
-			type = pair.first.as<std::string>();
-		}
-
-		if (type == "") {
-			return false;
-		}
-
-		if (type == "str") {
-			rhs = node["str"].as<std::string>("");
-		} else if (type == "vec2") {
-			rhs = node["vec2"].as<vec2>(vec2{0.f, 0.f});
-		} else if (type == "int") {
-			rhs = node["int"].as<int>(0);
-		} else if (type == "float") {
-			rhs = node["float"].as<float>(0.f);
-		} else if (type == "bool") {
-			rhs = node["bool"].as<bool>(false);
-		} else if (type == "PhysicsBodyType") {
-			rhs = node["PhysicsBodyType"].as<PhysicsBodyType>(PhysicsBodyType::Static);
-		} else {
-			assert(false && "unknown type on std::any encode");
-		}
-
-		return true;
-	}
-};
-} // namespace YAML
+#include "google/protobuf/text_format.h"
+#include "proto/scene.pb.h"
 
 void Scene::_begin_scene() {
 	// _awake, _start
@@ -159,186 +60,233 @@ ErrorCode Scene::load(const char *path) {
 	// }
 	// m_resources.clear();
 
-	YAML::Node node;
-
-	std::string buffer;
-	ErrorCode err = FileServer::get().ReadFileString(path, buffer);
-	if (err != OK) {
-		return err;
+	pb::Scene scn;
+	Result<file_buffer *> buf = FileServer::get().load_file(path, ReadWriteFlags_AsText);
+	if (!buf.ok()) {
+		return buf.error();
 	}
 
-	YAML::Node scene = YAML::Load(buffer);
+	std::string v((char *)buf.get()->data(), buf.get()->size());
+	google::protobuf::TextFormat::ParseFromString(v, &scn);
 
-	m_active_camera_2d = scene["active_camera_2d"].as<size_t>(0);
+	m_active_camera_2d = scn.active_camera_2d();
+	for (int i = 0; i < scn.resource_size(); i++) {
+		pb::Resource *r = scn.mutable_resource(i);
 
-	YAML::Node resources = scene["resources"];
-	for (const auto &resource : resources) {
-		std::string type = resource.second["type"].as<std::string>("");
-		std::string path = resource.second["path"].as<std::string>("");
-		if (type == "" || path == "") {
+		uint64_t type = r->type();
+		std::string path = r->path();
+		if (path == "")
 			continue;
-		}
-		RID id = resource.first.as<RID>(0);
+
+		RID id = r->id();
 
 		Resource *res = nullptr;
-		if (type == "ImageTexture") {
-			res = load_resource(path, id, ResourceType_ImageTexture);
-		} else if (type == "AudioStream") {
-			res = load_resource(path, id, ResourceType_AudioStream);
-		} else if (type == "SpriteSheetAnimation") {
-			res = load_resource(path, id, ResourceType_SpriteSheetAnimation);
-		} else {
-			res = load_resource(path, id, ResourceType_None);
-			assert(nullptr != res && "unknown resource type");
-		}
+		res = load_resource(path, id, type);
 
-		if (nullptr == res)
+		if (nullptr == res) {
+			Utils::Error("Failed to load resource {}", path);
 			continue;
+		}
 	}
 
-	YAML::Node root = scene["root"];
-	std::function<void(Node *, const YAML::Node &)> deserializeNode;
+	// parentIds[nodeId] = node.parentID
+	std::unordered_map<uint64_t, uint64_t> parentIds;
+	for (int i = 0; i < scn.node_size(); i++) {
+		pb::Node *n = scn.mutable_node(i);
 
-	deserializeNode = [&](Node *parent, const YAML::Node &doc) {
-		YAML::Node nodeData = doc;
+		uint64_t id = n->id();
+		uint64_t parentId = n->parent_id();
+		std::string type = n->type();
+		std::string name = n->name();
 
-		std::string type = nodeData["type"].as<std::string>("Node");
-		std::string name = nodeData["name"].as<std::string>("New Node");
-		size_t id = nodeData["id"].as<size_t>(0);
+		Node *node = create(db.get_node_type(type), name, id);
+		parentIds[id] = parentId;
 
-		Node *pNode = create(db.get_node_type(type), name, id);
-		if (parent == nullptr)
-			this->Root() = pNode;
-		else
-			parent->add_child(pNode);
-
-		for (const auto &behaviour : nodeData["behaviours"]) {
-			std::string name = behaviour.as<std::string>("");
-			if (name == "")
-				continue;
-
-			pNode->add_behaviour(name);
+		for (int j = 0; j < n->behaviour_size(); j++) {
+			node->add_behaviour(n->behaviour(j));
 		}
-
-		for (const auto &group : nodeData["groups"]) {
-			std::string name = group.as<std::string>("");
-			if (name == "")
-				continue;
-			pNode->get_groups().push_back(name);
+		for (int j = 0; j < n->group_size(); j++) {
+			node->add_group(n->group(j));
 		}
+		std::vector<std::string> propNames;
+		db.get_property_names(node->type_hash(), propNames);
+		for (std::string &propName : propNames) {
+			const google::protobuf::FieldDescriptor *field = n->GetDescriptor()->FindFieldByName(propName);
 
-		for (const auto &prop : nodeData["props"]) {
-			std::string propName = prop.first.as<std::string>();
-			if (propName == "name")
+			if (nullptr == field)
 				continue;
 
-			std::any value = prop.second.as<std::any>();
+			NodeProperty prop = db.get_property(node->type_hash(), propName);
 
-			NodeProperty propSetter = db.get_property(pNode->type_hash(), propName);
-			if (propSetter.set) {
-				propSetter.set(pNode, value);
+			switch (field->type()) {
+			case google::protobuf::FieldDescriptor::TYPE_BOOL:
+				prop.set(node, n->GetReflection()->GetBool(*n, field));
+				break;
+			case google::protobuf::FieldDescriptor::TYPE_INT32:
+				prop.set(node, n->GetReflection()->GetInt32(*n, field));
+				break;
+			case google::protobuf::FieldDescriptor::TYPE_FLOAT:
+				prop.set(node, n->GetReflection()->GetFloat(*n, field));
+				break;
+			case google::protobuf::FieldDescriptor::TYPE_STRING: {
+
+				std::string v = n->GetReflection()->GetString(*n, field);
+				if (field->name() == "body_type")
+					prop.set(node, StringToPhysicsBodyType(v));
+				else
+					prop.set(node, v);
+
+			} break;
+			case google::protobuf::FieldDescriptor::TYPE_MESSAGE: {
+
+				std::string msgName = field->message_type()->name();
+				if (msgName == "Vec2") {
+					const google::protobuf::Message &v = n->GetReflection()->GetMessage(*n, field);
+
+					auto des = v.GetDescriptor();
+					auto refl = v.GetReflection();
+
+					auto fieldX = des->FindFieldByName("x");
+					auto fieldY = des->FindFieldByName("y");
+					float x = refl->GetFloat(v, fieldX);
+					float y = refl->GetFloat(v, fieldY);
+
+					prop.set(node, vec2(x, y));
+				} else {
+					Utils::Error("Unknown message type: {}", field->message_type()->name());
+				}
+
+			} break;
+
+			default:
+				Utils::Error("Unknown field type name: {}", field->type_name());
+				break;
 			}
 		}
+	}
 
-		for (const auto &child : nodeData["children"]) {
-			deserializeNode(pNode, child);
+	Root() = get_node_by_id(scn.root_id());
+	for (auto &[id, parentID] : parentIds) {
+		Node *parent = get_node_by_id(parentID);
+		Node *child = get_node_by_id(id);
+
+		if (parent && child) {
+			parent->add_child(child);
 		}
-	};
-
-	deserializeNode(nullptr, root);
+	}
 
 	m_path = path;
 	return OK;
 }
 
 ErrorCode Scene::save(const char *path) {
-	Utils::Info("Saving scene to {}", path);
-
 	NodeDB &db = NodeDB::get();
 
-	YAML::Node doc;
+	pb::Scene scn;
+	scn.set_active_camera_2d(m_active_camera_2d);
 
-	doc["active_camera_2d"] = m_active_camera_2d;
-
-	YAML::Node resources;
 	for (const RID &id : scene_resources()) {
 		Resource *resource = ResourceManager::get().Get(id);
-		YAML::Node res;
 
-		if (resource->Type() == ResourceType_ImageTexture) {
-			res["type"] = "ImageTexture";
-		} else if (resource->Type() == ResourceType_AudioStream) {
-			res["type"] = "AudioStream";
-		} else if (resource->Type() == ResourceType_SpriteSheetAnimation) {
-			res["type"] = "SpriteSheetAnimation";
-		} else {
-			assert(false && "unknown resource type");
-		}
-		res["path"] = resource->Filepath();
-
-		resources[id] = res;
+		pb::Resource *res = scn.add_resource();
+		res->set_id(id);
+		res->set_type(resource->Type());
+		res->set_path(resource->Filepath());
 	}
 
-	doc["resources"] = resources;
+	scn.set_root_id(Root()->id());
 
-	YAML::Node root;
+	std::function<void(Node *, pb::Node *)> push;
+	push = [&](Node *src, pb::Node *dst) {
+		dst->set_id(src->id());
+		dst->set_parent_id(src->get_parent() != nullptr ? src->get_parent()->id() : 0);
+		dst->set_type(db.get_node_typename(src->type_hash()));
+		dst->set_name(src->name());
 
-	std::function<void(Node *, YAML::Node &)> serializeNode;
-	serializeNode = [&](Node *pNode, YAML::Node &doc) {
-		YAML::Node node;
-		node["id"] = pNode->id();
-		node["type"] = db.get_node_typename(pNode->type_hash());
-		node["name"] = pNode->name();
-
-		auto &behaviourList = pNode->get_behaviour_names();
-		if (behaviourList.size() > 0) {
-			YAML::Node behaviours;
-
-			node["behaviours"] = behaviourList;
-		}
-
-		auto groupList = pNode->get_groups();
-		if (groupList.size() > 0) {
-			YAML::Node groups;
-			groups = groupList;
-
-			node["groups"] = groups;
-		}
-
-		YAML::Node props;
-		std::vector<std::string> propNames;
-		db.get_property_names(pNode->type_hash(), propNames);
-		for (const auto &name : propNames) {
-			if (name == "name")
+		std::vector<std::string> props;
+		db.get_property_names(src->type_hash(), props);
+		for (const std::string &propName : props) {
+			if (propName == "name")
 				continue;
 
-			props[name] = db.get_property(pNode->type_hash(), name).get(pNode);
-		}
-		node["props"] = props;
+			NodeProperty prop = db.get_property(src->type_hash(), propName);
 
-		doc.push_back(node);
+			const google::protobuf::Descriptor *descriptor = dst->GetDescriptor();
+			const google::protobuf::FieldDescriptor *field = descriptor->FindFieldByName(propName);
 
-		YAML::Node childrenDoc;
-		for (Node *child : pNode->get_children()) {
-			serializeNode(child, childrenDoc);
+			if (nullptr == field) {
+				Utils::Error("Failed to find field {}", field->name());
+				break;
+			}
+
+			switch (field->type()) {
+			case google::protobuf::FieldDescriptor::TYPE_BOOL:
+				dst->GetReflection()->SetBool(dst, field, std::any_cast<bool>(prop.get(src)));
+				break;
+			case google::protobuf::FieldDescriptor::TYPE_INT32:
+				dst->GetReflection()->SetInt32(dst, field, std::any_cast<int>(prop.get(src)));
+				break;
+			case google::protobuf::FieldDescriptor::TYPE_FLOAT:
+				dst->GetReflection()->SetFloat(dst, field, std::any_cast<float>(prop.get(src)));
+				break;
+			case google::protobuf::FieldDescriptor::TYPE_STRING: {
+				std::string v = "";
+				if (field->name() == "body_type") {
+					v = PhysicsBodyTypeToString(std::any_cast<PhysicsBodyType>(prop.get(src)));
+				} else {
+					v = std::any_cast<std::string>(prop.get(src));
+				}
+				dst->GetReflection()->SetString(dst, field, v);
+			} break;
+			case google::protobuf::FieldDescriptor::TYPE_MESSAGE: {
+				std::string msgName = field->message_type()->name();
+
+				if (msgName == "Vec2") {
+					pb::Vec2 *msg = new pb::Vec2;
+					vec2 v = std::any_cast<vec2>(prop.get(src));
+					msg->set_x(v.x);
+					msg->set_y(v.y);
+
+					dst->GetReflection()->SetAllocatedMessage(dst, msg, field);
+				} else {
+					Utils::Error("Unknown message type: {}", field->message_type()->name());
+				}
+			} break;
+
+			default:
+				Utils::Error("Unknown field type name: {}", field->type_name());
+				break;
+			}
 		}
-		if (childrenDoc.size() > 0)
-			node["children"] = childrenDoc;
+
+		for (auto &behaviour : src->get_behaviour_names()) {
+			dst->add_behaviour(behaviour);
+		}
+
+		for (auto &group : src->get_groups()) {
+			dst->add_group(group);
+		}
+
+		for (Node *child : src->get_children()) {
+			pb::Node *c = scn.add_node();
+			push(child, c);
+		}
 	};
 
-	serializeNode(Root(), root);
-	if (root.size() > 0)
-		doc["root"] = root[0];
+	pb::Node *n = scn.add_node();
+	push(Root(), n);
 
-	std::string s;
-	std::stringstream ss;
-	ss << doc;
-	s = ss.str();
+	Utils::Info("Saving scene to {}", path);
 
-	ErrorCode err = FileServer::get().WriteFileString(path, s);
-	if (err != OK) {
-		return err;
+	std::string str;
+	if (!google::protobuf::TextFormat::PrintToString(scn, &str)) {
+		Utils::Error("Failed to generate scene file");
+		return ERR_FAILED;
 	}
+
+	ErrorCode err = FileServer::get().save_file(str.data(), str.size(), path, ReadWriteFlags_AsText);
+	if (err != OK)
+		return err;
 
 	m_path = path;
 	return OK;

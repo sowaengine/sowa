@@ -6,7 +6,6 @@
 
 #include "core/error/error.hxx"
 #include "data/size.hxx"
-#include "toml_document.hxx"
 
 struct project_settings {
 	ErrorCode Load(const char *path);
@@ -23,9 +22,6 @@ struct project_settings {
 	int window_height = 1080;
 
   private:
-	toml_document m_doc;
-
-	ErrorCode loadVersion1(toml_document &doc);
 };
 
 #endif // SW_DATA_PROJECT_SETTINGS_HXX

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package pb;
+
+message App {
+  string author = 1;
+  string name = 2;
+  string version = 3;
+}
+
+message Config {
+  string icon = 1;
+  string main_scene = 2;
+}
+
+message Window {
+  int32 width = 1;
+  int32 height = 2;
+}
+
+message ProjectSettings {
+  App app = 1;
+  Config config = 2;
+  Window window = 3;
+}

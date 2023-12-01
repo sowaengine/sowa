@@ -52,6 +52,7 @@ else()
 endif()
 
 file(GLOB_RECURSE SOWA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx")
+file(GLOB_RECURSE SOWA_PROTO_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/proto/*.cc")
 set(SOWA_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/src/")
 
 set(SOWA_THIRDPARTY_SOURCES "")
@@ -61,7 +62,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty" EXCLUDE_FROM_ALL)
 add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
 target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
 
-add_executable(sowa ${SOWA_SOURCES})
+add_executable(sowa ${SOWA_SOURCES} ${SOWA_PROTO_SOURCES})
 target_include_directories(
   sowa
   PUBLIC ${SOWA_INCLUDES}
@@ -79,7 +80,8 @@ target_link_libraries(
           angelscript
           fmt
           sndfile
-          box2d)
+          box2d
+          protobuf)
 
 if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
 target_link_libraries(
