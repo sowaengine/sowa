@@ -79,7 +79,7 @@ std::vector<FileEntry> FileServer::read_dir(const char *p, bool recursive) {
 		for (auto &entry : std::filesystem::recursive_directory_iterator(path)) {
 			FileEntry file;
 			file.m_isDirectory = entry.is_directory();
-			file.m_path = entry.path();
+			file.m_path = std::filesystem::relative(entry.path(), base);
 
 			files.push_back(file);
 		}
@@ -87,7 +87,7 @@ std::vector<FileEntry> FileServer::read_dir(const char *p, bool recursive) {
 		for (auto &entry : std::filesystem::directory_iterator(path)) {
 			FileEntry file;
 			file.m_isDirectory = entry.is_directory();
-			file.m_path = entry.path();
+			file.m_path = std::filesystem::relative(entry.path(), base);
 
 			files.push_back(file);
 		}
