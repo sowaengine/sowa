@@ -5,9 +5,6 @@
 
 #include "core/app.hxx"
 
-Camera2D::Camera2D() {
-}
-
 void Camera2D::_update() {
 	if (!App::get().IsRunning()) {
 		rect bounds = get_bounds();
