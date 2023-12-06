@@ -5,6 +5,6 @@
 #include "core/app.hxx"
 
 void Utils::WriteStdout(const std::string &line) {
-	std::cout << line << std::endl;
+	std::cout << line;
 	App::get().Log(line);
 }

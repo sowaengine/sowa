@@ -50,35 +50,35 @@ void WriteStdout(const std::string &);
 template <typename... Args>
 void Print(const std::string levelText, const std::string &format, Args... args) {
 	std::string time = GetTime("%Y-%m-%d %H:%M:%S");
-	WriteStdout(Format("[{}] [{}] ", levelText, time) + Format(format, args...));
+	WriteStdout(Format("[{}] [{}] {}\n", levelText, time, Format(format, args...)));
 }
 
 template <typename... Args>
 void Error(const std::string &format, Args... args) {
 	std::cout << RED;
 	Print("ERR", format, args...);
-	std::cout << RESET;
+	std::cout << RESET << std::flush;
 }
 
 template <typename... Args>
 void Warn(const std::string &format, Args... args) {
 	std::cout << YELLOW;
 	Print("WARN", format, args...);
-	std::cout << RESET;
+	std::cout << RESET << std::flush;
 }
 
 template <typename... Args>
 void Info(const std::string &format, Args... args) {
 	std::cout << CYAN;
 	Print("INFO", format, args...);
-	std::cout << RESET;
+	std::cout << RESET << std::flush;
 }
 
 template <typename... Args>
 void Log(const std::string &format, Args... args) {
 	std::cout << GREEN;
 	Print("LOG", format, args...);
-	std::cout << RESET;
+	std::cout << RESET << std::flush;
 }
 
 //-------------------------   Random  -------------------------//
