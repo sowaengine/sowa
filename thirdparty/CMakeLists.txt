@@ -36,6 +36,7 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs"
     "${CMAKE_CURRENT_SOURCE_DIR}/lua-5.4.6"
     "${CMAKE_CURRENT_SOURCE_DIR}/sol"
+    "${CMAKE_CURRENT_SOURCE_DIR}/backward-cpp-1.6"
     )
 
 if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
