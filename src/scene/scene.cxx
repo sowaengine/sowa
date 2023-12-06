@@ -420,4 +420,8 @@ void Scene::copy(Scene *src, Scene *dst) {
 	dst->clear();
 	Node *newRoot = src->Root()->duplicate_in_scene(dst);
 	dst->Root() = newRoot;
+
+	if (Camera2D *cam = src->get_active_camera2d(); nullptr != cam) {
+		dst->set_active_camera2d(cam->id());
+	}
 }
