@@ -75,6 +75,13 @@ class App {
 	inline void SelectNode(size_t id) { m_selectedNode = id; }
 	inline size_t GetSelectedNode() { return m_selectedNode; }
 
+	// Register a routine that runs each {frame_interval} frame
+	void register_routine(int frame_interval, std::function<void()> func);
+
+	// Same as register_routine, but routines registered as tool will be executed
+	// even when the game is not running (used in building editor tools)
+	void register_tool_routine(int frame_interval, std::function<void()> func);
+
   private:
 	void mainLoop();
 	static void mainLoopCaller(void *self);
@@ -107,6 +114,18 @@ class App {
 
 	std::deque<std::string> m_consoleBuffer;
 	size_t m_consoleBufferSize = 10;
+
+	struct RoutineCounter {
+		int interval = 0;
+		int current_interval = 0;
+		std::function<void()> func;
+	};
+	std::vector<RoutineCounter> m_routines;
+	void process_routines();
+
+	// tool routines have their own data so they can be removed on non editor builds
+	std::vector<RoutineCounter> m_tool_routines;
+	void process_tool_routines();
 
 	void editor_mouse_move_event(InputEventMouseMove event);
 	void editor_key_event(InputEventKey event);

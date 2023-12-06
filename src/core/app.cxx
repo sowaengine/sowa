@@ -808,6 +808,10 @@ void App::mainLoop() {
 		}
 	}
 
+	process_tool_routines();
+	if (IsRunning())
+		process_routines();
+
 	glDisable(GL_DEPTH_TEST);
 	SetRenderLayer(nullptr);
 
@@ -942,6 +946,52 @@ void App::LoadProjectFromDialog() {
 	}
 
 	LoadProjectFromPath(path);
+}
+
+void App::register_routine(int frame_interval, std::function<void()> func) {
+	RoutineCounter counter;
+	counter.current_interval = 0;
+	counter.interval = frame_interval;
+	counter.func = func;
+
+	m_routines.push_back(counter);
+}
+
+void App::register_tool_routine(int frame_interval, std::function<void()> func) {
+	RoutineCounter counter;
+	counter.current_interval = 0;
+	counter.interval = frame_interval;
+	counter.func = func;
+
+	m_tool_routines.push_back(counter);
+}
+
+void App::process_routines() {
+	for (RoutineCounter &routine : m_routines) {
+		routine.current_interval++;
+
+		if (routine.current_interval >= routine.interval) {
+			routine.current_interval = 0;
+
+			if (routine.func) {
+				routine.func();
+			}
+		}
+	}
+}
+
+void App::process_tool_routines() {
+	for (RoutineCounter &routine : m_tool_routines) {
+		routine.current_interval++;
+
+		if (routine.current_interval >= routine.interval) {
+			routine.current_interval = 0;
+
+			if (routine.func) {
+				routine.func();
+			}
+		}
+	}
 }
 
 extern "C" void Unload() {
