@@ -185,7 +185,7 @@ ErrorCode Scene::save(const char *path) {
 	pb::Scene scn;
 	scn.set_active_camera_2d(m_active_camera_2d);
 
-	for (const RID &id : scene_resources()) {
+	for (const auto &[id, count] : scene_resources().get_references()) {
 		Resource *resource = ResourceManager::get().Get(id);
 
 		pb::Resource *res = scn.add_resource();
@@ -344,7 +344,7 @@ void Scene::free(size_t id) {
 Resource *Scene::load_resource(const std::string &path, RID id, ResourceType type) {
 	Resource *res = ResourceManager::get().Load(path, id, type);
 	if (nullptr != res) {
-		m_resources.push_back(res->ResourceID());
+		m_resources.increment(res->ResourceID());
 	}
 
 	return res;
@@ -390,7 +390,12 @@ Node *Scene::get_node_by_id(size_t id) {
 void Scene::copy(Scene *src, Scene *dst) {
 	std::function<Node *(Node *)> copyNode;
 	dst->m_path = src->m_path;
-	dst->m_resources = src->scene_resources();
+
+	dst->m_resources.reset();
+	for (const auto &[id, count] : src->m_resources.get_references()) {
+		for (int i = 0; i < count; i++)
+			dst->m_resources.increment(id);
+	}
 
 	copyNode = [&](Node *node) -> Node * {
 		Node *newNode = dst->create(node->type_hash(), node->name(), node->id());

@@ -24,6 +24,7 @@
 #include "scene/nodes.hxx"
 
 #include "resource/resource.hxx"
+#include "resource/resource_locker.hxx"
 #include "resource/resource_manager.hxx"
 #include "resource/sprite_sheet_animation/sprite_sheet_animation.hxx"
 
@@ -410,6 +411,10 @@ ErrorCode App::Init() {
 			std::cout << "Failed to load scene" << std::endl;
 		}
 	}
+
+	register_tool_routine(300, []() {
+		GlobalResourceLocker::get().collect();
+	});
 
 #ifdef SW_TEMPLATE
 	Start();

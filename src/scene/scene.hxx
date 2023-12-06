@@ -9,6 +9,7 @@
 #include "node_db.hxx"
 #include "nodes/node.hxx"
 #include "resource/resource.hxx"
+#include "resource/resource_locker.hxx"
 #include "resource/resource_type.hxx"
 #include "scene/nodes/2d/camera_2d.hxx"
 
@@ -31,7 +32,7 @@ class Scene {
 
 	Resource *load_resource(const std::string &path, RID id = 0, ResourceType type = ResourceType_None);
 
-	inline const std::vector<RID> &scene_resources() { return m_resources; }
+	inline const ResourceLocker &scene_resources() { return m_resources; }
 
 	inline void set_active_camera2d(size_t id) { m_active_camera_2d = id; }
 	Camera2D *get_active_camera2d();
@@ -44,7 +45,7 @@ class Scene {
 
   private:
 	std::unordered_map<size_t, Node *> m_allocated_nodes;
-	std::vector<RID> m_resources;
+	ResourceLocker m_resources;
 
 	Node *m_root = nullptr;
 	size_t m_active_camera_2d;
