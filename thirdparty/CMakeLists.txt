@@ -32,7 +32,6 @@ set(SOWA_THIRDPARTY_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking"
     "${CMAKE_CURRENT_SOURCE_DIR}/imgui-1.89.9-docking/backends"
     "${CMAKE_CURRENT_SOURCE_DIR}/box2d-2.4.1/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/portable-file-dialogs"
     "${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs"
     "${CMAKE_CURRENT_SOURCE_DIR}/lua-5.4.6"
     "${CMAKE_CURRENT_SOURCE_DIR}/sol"

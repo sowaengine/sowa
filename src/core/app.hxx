@@ -19,7 +19,6 @@
 #include "ui/new_tree.hxx"
 
 #include "eventpp/callbacklist.h"
-#include "portable-file-dialogs.h"
 
 struct NodeTypeName {
 	std::string name;
