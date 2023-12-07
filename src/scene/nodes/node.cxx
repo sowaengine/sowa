@@ -108,7 +108,7 @@ void Node::register_behaviour(const std::string &behaviour, bool callStart) {
 	if (id == 0)
 		return;
 
-	m_behaviours[id] = BehaviourDB::get().Construct(behaviour);
+	m_behaviours[id] = BehaviourDB::get().Construct(behaviour, type_hash());
 	if (callStart) {
 		m_behaviours[id].DataTable()["m_noStart"] = true;
 		m_behaviours[id].Start(this);

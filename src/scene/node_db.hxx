@@ -77,6 +77,24 @@ class NodeDB {
 		return prop;
 	}
 
+	// does_inherit(Sprite2D, Node) == true
+	// does_inherit(Node, Sprite2D) == false
+	bool does_inherit(NodeType type, NodeType inherits) {
+		if (m_db.find(type) == m_db.end())
+			return false;
+
+		if (m_db.find(inherits) == m_db.end())
+			return false;
+
+		if (type == inherits)
+			return true;
+
+		if (m_db[type].extends != 0)
+			return does_inherit(m_db[type].extends, inherits);
+
+		return false;
+	}
+
 	NodeType get_node_type(std::string nodeType) {
 		if (nodeType == "") {
 			return 0;

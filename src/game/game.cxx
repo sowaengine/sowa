@@ -34,8 +34,8 @@ float lerpAngle(float from, float to, float t) {
 void OnInput(InputEventMouseButton event);
 
 void Main() {
-	BehaviourDB::get().RegisterBehaviour("Tank Movement", Behaviour::New(TankMovement::Start, TankMovement::Update));
-	BehaviourDB::get().RegisterBehaviour("Mouse Shooter", Behaviour::New(MouseShooter::Start, MouseShooter::Update));
+	// BehaviourDB::get().RegisterBehaviour("Tank Movement", Behaviour::New(TankMovement::Start, TankMovement::Update));
+	// BehaviourDB::get().RegisterBehaviour("Mouse Shooter", Behaviour::New(MouseShooter::Start, MouseShooter::Update));
 
 	return;
 

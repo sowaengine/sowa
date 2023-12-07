@@ -355,7 +355,7 @@ ErrorCode App::Init() {
 	REGISTER_NODE_PROPERTY(Camera2D, "zoom", zoom(), vec2);
 	nt_node2d.children.emplace_back("Camera2D", true);
 
-	BehaviourDB::get().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
+	BehaviourDB::get().RegisterBehaviour("8 Dir Movement", Behaviour::New("Node2D", TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
 	LuaServer::get().Init();
 	LuaServer::get().Load();

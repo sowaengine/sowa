@@ -17,7 +17,7 @@ using BehaviourFunc = std::function<void(Node *, Behaviour *)>;
 
 class Behaviour {
   public:
-	static Behaviour New(BehaviourFunc startFunc, BehaviourFunc updateFunc);
+	static Behaviour New(std::string extends, BehaviourFunc startFunc, BehaviourFunc updateFunc);
 
 	void Start(Node *);
 	void Update(Node *);
@@ -40,6 +40,7 @@ class Behaviour {
 	std::unordered_map<std::string, std::any> m_dataTable;
 
 	size_t m_behaviourID = 0;
+	std::string extends = "Node";
 };
 
 #endif // SW_BEHAVIOUR_HXX

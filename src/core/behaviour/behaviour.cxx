@@ -6,8 +6,9 @@
 
 #include "angelscript.h"
 
-Behaviour Behaviour::New(BehaviourFunc startFunc, BehaviourFunc updateFunc) {
+Behaviour Behaviour::New(std::string extends, BehaviourFunc startFunc, BehaviourFunc updateFunc) {
 	Behaviour behaviour;
+	behaviour.extends = extends;
 	behaviour.m_startFunc = startFunc;
 	behaviour.m_updateFunc = updateFunc;
 

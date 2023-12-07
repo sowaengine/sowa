@@ -13,12 +13,12 @@ class BehaviourDB {
 	static BehaviourDB &get();
 
 	void RegisterBehaviour(std::string name, Behaviour behaviour);
-	Behaviour Construct(std::string name);
+	Behaviour Construct(std::string name, size_t node_type);
 
 	size_t GetBehaviourID(std::string name);
 	std::string GetBehaviourName(size_t id);
 
-	inline std::unordered_map<size_t, Behaviour>& GetBehaviours() { return m_behaviours; }
+	inline std::unordered_map<size_t, Behaviour> &GetBehaviours() { return m_behaviours; }
 
   private:
 	std::unordered_map<size_t, Behaviour> m_behaviours;
