@@ -92,12 +92,14 @@ void LuaServer::Load() {
 		auto behaviour = behaviour_res.get<sol::table>();
 
 		std::string name = behaviour["name"].get_or<std::string>(file.Path().filename().replace_extension(""));
+		std::string extends = behaviour["extends"].get_or<std::string>("Node");
 
 		//
 		internal(p_internal).behaviour_templates[name] = behaviour;
 		Utils::Info("Loaded behaviour with name {}", name);
 
 		Behaviour b;
+		b.SetExtends(extends);
 		b.SetStartFunc([this, name](Node *node, Behaviour *self) {
 			uint32_t behaviour_id = this->NewBehaviour(name);
 			self->DataTable()["m_behaviour_id"] = behaviour_id;

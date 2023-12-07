@@ -25,6 +25,7 @@ class Behaviour {
 
 	inline void SetStartFunc(BehaviourFunc func) { m_startFunc = func; }
 	inline void SetUpdateFunc(BehaviourFunc func) { m_updateFunc = func; }
+	inline void SetExtends(std::string extends) { this->extends = extends; }
 
 	inline std::unordered_map<std::string, std::any> &DataTable() { return m_dataTable; }
 
