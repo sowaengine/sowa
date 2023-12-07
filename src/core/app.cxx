@@ -358,6 +358,7 @@ ErrorCode App::Init() {
 	BehaviourDB::get().RegisterBehaviour("8 Dir Movement", Behaviour::New(TopDownEightDirMovement::Start, TopDownEightDirMovement::Update));
 
 	LuaServer::get().Init();
+	LuaServer::get().Load();
 	reload_scripts();
 	// Main();
 
