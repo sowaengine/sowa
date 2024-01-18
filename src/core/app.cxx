@@ -47,7 +47,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/projection.hpp"
 
-// #define SW_TEMPLATE
+#define SW_TEMPLATE
 
 #include "editor/editor_config.hxx"
 
@@ -231,6 +231,9 @@ ErrorCode App::Init() {
 	imageTexture.typeName = "ImageTexture";
 	imageTexture.type = ResourceType_ImageTexture;
 	imageTexture.loadFunc = [](Resource *res, std::string path) {
+		if (Texture *tex = res->As<Texture>(); nullptr != tex) {
+			tex->Delete();
+		}
 		res->Data() = Texture();
 		if (Texture *tex = res->As<Texture>(); nullptr != tex) {
 			ErrorCode err = tex->Load(TextureType::Texture2D, path.c_str());
@@ -417,11 +420,14 @@ ErrorCode App::Init() {
 		GlobalResourceLocker::get().collect();
 	});
 
+	m_game_scene = SceneTree::get().m_scene;
+
 #ifdef SW_TEMPLATE
+	Scene::copy(m_game_scene, &m_editor_scene);
+	SceneTree::get().m_scene = &m_editor_scene;
 	Start();
 #endif
 
-	m_game_scene = SceneTree::get().m_scene;
 #ifndef SW_TEMPLATE
 	Scene::copy(m_game_scene, &m_editor_scene);
 	SceneTree::get().m_scene = &m_editor_scene;
@@ -477,9 +483,13 @@ void App::SetRenderLayer(RenderLayer *renderlayer) {
 
 void App::mainLoop() {
 	if (m_scene_to_load != "") {
-		SceneTree::get().get_scene()->_end_scene();
+		if (IsRunning())
+			SceneTree::get().get_scene()->_end_scene();
+
 		SceneTree::get().get_scene()->load(m_scene_to_load.c_str());
-		SceneTree::get().get_scene()->_begin_scene();
+
+		if (IsRunning())
+			SceneTree::get().get_scene()->_begin_scene();
 
 		m_scene_to_load = "";
 	}
