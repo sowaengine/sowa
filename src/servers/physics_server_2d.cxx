@@ -255,6 +255,15 @@ float PhysicsServer2D::body_get_rotation(void *body) {
 	return math::degrees(angle);
 }
 
+void PhysicsServer2D::body_set_transform(void *body, const vec2 &pos, float rotation) {
+	if (nullptr == body)
+		return;
+
+	reinterpret_cast<b2Body *>(body)->SetTransform(
+		b2Vec2(PX_TO_UNIT(pos.x), PX_TO_UNIT(pos.y)),
+		math::radians(rotation));
+}
+
 void PhysicsServer2D::body_set_linear_velocity(void *body, vec2 velocity) {
 	if (nullptr == body) {
 		return;
