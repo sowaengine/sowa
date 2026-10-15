@@ -1,5 +1,0 @@
-extension: .res.inc
-# namespace: res
-dir: src/res
-always_generate: false
-recursive: true

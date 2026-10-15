@@ -1,3 +1,0 @@
-#include "sowa.hpp"
-const char *s_gitHash = "@GIT_COMMIT_HASH@";
-const char *s_gitBranch = "@GIT_BRANCH@";
