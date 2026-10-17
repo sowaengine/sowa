@@ -1,0 +1,33 @@
+version: 1
+Application:
+  Name: Example
+  Author: Sowa Engine
+  Version: 1.0.0
+  Icon: res://icon.png
+  MainScene: res://scenes/demo.scene
+  Scripts:
+    - res://scripts/main.lua
+    - res://scripts/editor_commands.lua
+  Autoloads:
+    []
+Rendering:
+  Window:
+    Width: 1280
+    Height: 720
+  Viewport:
+    Width: 1920
+    Height: 1080
+    ScaleMode: KeepAspect
+Input:
+  Actions:
+    move_left:
+      - A
+    move_right:
+      - D
+    move_down:
+      - S
+    move_up:
+      - W
+GlobalStore:
+  MyKey: Is This
+  Test: Test Value

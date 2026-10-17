@@ -1,0 +1,80 @@
+{
+  "name": "vscode-sowa",
+  "displayName": "Sowa Engine",
+  "description": "Debug Lua scripts in a running Sowa editor or game.",
+  "version": "0.1.0",
+  "publisher": "lexographics",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Debuggers"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onDebugResolve:sowa",
+    "onDebugDynamicConfigurations:sowa"
+  ],
+  "contributes": {
+    "breakpoints": [
+      {
+        "language": "lua"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "sowa",
+        "label": "Sowa",
+        "languages": [
+          "lua"
+        ],
+        "configurationAttributes": {
+          "attach": {
+            "properties": {
+              "port": {
+                "type": "integer",
+                "description": "Debug port of the running editor or game (--debug-port).",
+                "default": 6510,
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "localRoot": {
+                "type": "string",
+                "description": "The project directory (the one holding project.sowa) as VS Code sees it. Only needed when it differs from the path the engine was started with."
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "sowa",
+            "request": "attach",
+            "name": "Attach to Sowa",
+            "port": 6510
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Sowa: Attach",
+            "description": "Attach to a running Sowa editor or game.",
+            "body": {
+              "type": "sowa",
+              "request": "attach",
+              "name": "Attach to Sowa",
+              "port": 6510
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "package": "vsce package --allow-missing-repository --skip-license --out sowa.vsix"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.9.2"
+  }
+}

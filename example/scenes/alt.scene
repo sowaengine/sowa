@@ -1,0 +1,50 @@
+version: 1
+resources:
+  - id: 1
+    type: ImageTexture
+    data:
+      path: "res://icon.png"
+  - id: 2
+    type: PackedScene
+    data:
+      path: "res://scenes/object.scene"
+root:
+  name: Alt
+  components:
+    SceneRoot:
+      sourcePath: "res://scenes/alt.scene"
+      activeCamera: "Alt/Camera"
+    Game: {}
+  children:
+    - name: Object1
+      instance: 2
+      components:
+        Transform2D:
+          position: [440, 740]
+        Sprite:
+          modulate: [1, 0.54902, 0.352941, 1]
+        Velocity2D:
+          velocity: [120, -160]
+        Spin2D:
+          degreesPerSecond: 40
+        RenderOrder:
+          zIndex: 0
+        MouseFollower: {}
+    - name: Object2
+      instance: 2
+      components:
+        Transform2D:
+          position: [440, 340]
+        Sprite:
+          modulate: [0.352941, 1, 0.823529, 1]
+        Velocity2D:
+          velocity: [-120, 160]
+        Spin2D:
+          degreesPerSecond: -55
+        RenderOrder:
+          zIndex: 10
+    - name: Camera
+      components:
+        Transform2D:
+          position: [960, 540]
+        Camera2D: {}

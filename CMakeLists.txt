@@ -1,90 +1,68 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.25)
+
 project(
-  Sowa
-  VERSION 1.0
+  SowaEngine
+  VERSION 0.1.0
   LANGUAGES CXX C)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
 
-message("Building in ${CMAKE_BUILD_TYPE}")
-message("Platform: ${CMAKE_SYSTEM_NAME}")
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set(TARGET_PLATFORM "Linux")
-  add_definitions(-DSW_LINUX)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-  set(TARGET_PLATFORM "Web")
-  add_definitions(-DSW_WEB)
-else()
-  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif()
-
-
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-variable -Wno-unused-parameter")
-set(CMAKE_CXX_FLAGS_DEBUG "-O1 -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-file(GLOB_RECURSE SOWA_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-set(SOWA_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(SOWA_THIRDPARTY_SOURCES "")
-set(SOWA_THIRDPARTY_INCLUDES "")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/thirdparty" EXCLUDE_FROM_ALL)
+# So clangd (and other tooling) can resolve include paths/defines. See .clangd.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_library(thirdparty ${SOWA_THIRDPARTY_SOURCES})
-target_include_directories(thirdparty PRIVATE ${SOWA_THIRDPARTY_INCLUDES})
-
-if(${TARGET_PLATFORM} STREQUAL "Web")
-  add_compile_options("-s" "USE_FREETYPE=1")
-endif()
-
-add_executable(sowa ${SOWA_SOURCES} "${CMAKE_BINARY_DIR}/git_hash.cpp")
-target_include_directories(
-  sowa
-  PUBLIC ${SOWA_INCLUDES}
-)
-  
-target_include_directories(
-  sowa
-  SYSTEM
-  PUBLIC ${SOWA_THIRDPARTY_INCLUDES}
-)
-
-# target_compile_options(sowa PRIVATE "-Werror")
-target_link_libraries( sowa PUBLIC thirdparty PRIVATE freetype yaml-cpp fmt sndfile )
-if(NOT ${TARGET_PLATFORM} STREQUAL "Web")
-  target_link_libraries( sowa PRIVATE glfw OpenAL )
-endif()
-if(EDITOR)
-  message("Building editor")
-  target_compile_definitions(sowa PRIVATE SW_EDITOR)
+if(EMSCRIPTEN)
+  set(SOWA_PLATFORM "Web")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  set(SOWA_PLATFORM "Windows")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set(SOWA_PLATFORM "Linux")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(SOWA_PLATFORM "macOS")
 else()
-  message("Building application")
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+message(STATUS "SowaEngine target platform: ${SOWA_PLATFORM}")
+
+if(APPLE AND NOT EMSCRIPTEN)
+  enable_language(OBJC OBJCXX)
 endif()
 
-if(${TARGET_PLATFORM} STREQUAL "Web")
-  set_target_properties(sowa
-    PROPERTIES
-      OUTPUT_NAME "index"
-      SUFFIX ".html"
-      LINK_FLAGS
-      # " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
-      " --bind -sUSE_GLFW=3 -sWASM=1 -sFULL_ES3=1 -sASSERTIONS -sALLOW_MEMORY_GROWTH -sEXPORTED_FUNCTIONS=_main,_onVisibilityChange,_onWindowResize --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/res/@res --shell-file ${CMAKE_SOURCE_DIR}/layout.html"
-      # "-sEXPORTED_FUNCTIONS=_main -sEXPORTED_RUNTIME_METHODS=ccall,cwrap -lidbfs.js -sASYNCIFY=1 -sASSERTIONS -sASYNCIFY_STACK_SIZE=16384"
-      )
+# Editor build, or an export template that only runs a packaged game (like
+# Godot's templates). Web only ships as an export template.
+option(SOWA_ENABLE_EDITOR "Build the editor instead of an export template" ON)
+if(EMSCRIPTEN AND SOWA_ENABLE_EDITOR)
+  message(FATAL_ERROR "The editor cannot be built for Web; use -DSOWA_ENABLE_EDITOR=OFF")
+endif()
+# SOWA_PROFILE_* macros compile to nothing when profiling is disabled.
+# Enabled by default for editor builds; opt in for export templates.
+option(SOWA_ENABLE_PROFILER "Include the frame profiler" ${SOWA_ENABLE_EDITOR})
+# Loopback DAP server for VS Code. Enabled by default for editor builds and disabled
+# for Web. The Lua debugger itself is built independently of the adapter.
+option(SOWA_ENABLE_DEBUGGER "Include the Lua debug adapter (VS Code)" ${SOWA_ENABLE_EDITOR})
+if(EMSCRIPTEN)
+  set(SOWA_ENABLE_DEBUGGER OFF CACHE BOOL "" FORCE)
+endif()
+# The suite covers editor code, so it only exists in editor builds.
+option(SOWA_BUILD_TESTS "Build the sowa_tests unit test suite (see tests/)" ON)
+
+include(cmake/Dependencies.cmake)
+include(cmake/Sources.cmake)
+
+if(NOT EMSCRIPTEN)
+  add_subdirectory(thirdparty/glad)
 endif()
 
-add_custom_command(
-  OUTPUT "git_hash.cpp"
-  PRE_BUILD
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMAND ${CMAKE_COMMAND}
-    -D IN_FILE="${CMAKE_CURRENT_SOURCE_DIR}/src/git_hash.cpp.in"
-    -D OUT_FILE="${CMAKE_BINARY_DIR}/git_hash.cpp"
-    -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ConfigureFile.cmake"
-)
+add_subdirectory(src)
+
+if(SOWA_BUILD_TESTS AND SOWA_ENABLE_EDITOR)
+  enable_testing()
+  add_subdirectory(tests)
+endif()

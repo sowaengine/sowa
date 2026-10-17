@@ -1,0 +1,413 @@
+version: 1
+resources:
+  - id: 1
+    type: ImageTexture
+    data:
+      path: res://icon.png
+      flipVertically: true
+      retainPixels: false
+      filter: Linear
+  - id: 2
+    type: PackedScene
+    data:
+      path: res://scenes/object.scene
+  - id: 10543953070827358192
+    type: SpriteSheetAnimation
+    data:
+      animations:
+        - name: MyAnim
+          texture: 13329756321257049503
+          columns: 23
+          rows: 4
+          paddingX: 0
+          paddingY: 0
+          spacingX: 0
+          spacingY: 0
+          framesPerSecond: 6
+          loop: true
+          frames:
+            - 46
+            - 47
+            - 48
+            - 49
+            - 50
+            - 51
+            - 52
+            - 53
+            - 54
+            - 55
+            - 56
+            - 57
+            - 58
+            - 59
+            - 60
+            - 61
+            - 62
+            - 63
+  - id: 13329756321257049503
+    type: ImageTexture
+    data:
+      path: res://textures/characters.png
+      flipVertically: true
+      retainPixels: false
+      filter: Nearest
+root:
+  name: Demo
+  components:
+    Game:
+      {}
+    SceneRoot:
+      sourcePath: res://scenes/demo.scene
+      activeCamera: Demo/Camera
+  children:
+    - name: Object1
+      components:
+        AudioSource:
+          clip: 3
+          gain: 0.300000012
+          pitch: 1
+          loop: true
+          autoplay: false
+          pan: 0
+          spatial: true
+          maxDistance: 2000
+        MouseFollower:
+          speed: 900
+        Pulse:
+          amplitude: 0.150000006
+          speed: 4
+        RenderOrder:
+          zIndex: 0
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        SceneRoot:
+          sourcePath: ""
+          activeCamera: ""
+        Spin2D:
+          degreesPerSecond: 45
+        Sprite:
+          texture: 1
+          modulate: [1, 0.666666985, 0.666666985, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [620, 540]
+          rotation: 0
+          scale: [1, 1]
+        Velocity2D:
+          velocity: [180, 120]
+      instance: 2
+    - name: Object2
+      components:
+        AudioSource:
+          clip: 3
+          gain: 0.300000012
+          pitch: 1
+          loop: true
+          autoplay: false
+          pan: 0
+          spatial: true
+          maxDistance: 2000
+        Pulse:
+          amplitude: 0.0799999982
+          speed: 4
+        RenderOrder:
+          zIndex: 10
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        SceneRoot:
+          sourcePath: ""
+          activeCamera: ""
+        Spin2D:
+          degreesPerSecond: -30
+        Sprite:
+          texture: 1
+          modulate: [0.666666985, 1, 0.745097995, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [960, 760]
+          rotation: 0
+          scale: [1, 1]
+        Velocity2D:
+          velocity: [-150, 170]
+      instance: 2
+    - name: Object3
+      components:
+        AudioSource:
+          clip: 3
+          gain: 0.300000012
+          pitch: 1
+          loop: true
+          autoplay: false
+          pan: 0
+          spatial: true
+          maxDistance: 2000
+        Pulse:
+          amplitude: 0.0799999982
+          speed: 4
+        RenderOrder:
+          zIndex: 20
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        SceneRoot:
+          sourcePath: ""
+          activeCamera: ""
+        Spin2D:
+          degreesPerSecond: 60
+        Sprite:
+          texture: 1
+          modulate: [0.666666985, 0.823529005, 1, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [1260, 420]
+          rotation: 0
+          scale: [1, 1]
+        Velocity2D:
+          velocity: [130, -200]
+      instance: 2
+    - name: Object4
+      components:
+        AudioSource:
+          clip: 3
+          gain: 0.300000012
+          pitch: 1
+          loop: true
+          autoplay: false
+          pan: 0
+          spatial: true
+          maxDistance: 2000
+        Pulse:
+          amplitude: 0.0799999982
+          speed: 4
+        RenderOrder:
+          zIndex: 30
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        SceneRoot:
+          sourcePath: ""
+          activeCamera: ""
+        Spin2D:
+          degreesPerSecond: -75
+        Sprite:
+          texture: 1
+          modulate: [1, 0.92156899, 0.627451003, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [440, 280]
+          rotation: 0
+          scale: [1, 1]
+        Velocity2D:
+          velocity: [-210, -110]
+      instance: 2
+    - name: Object5
+      components:
+        AudioSource:
+          clip: 3
+          gain: 0.300000012
+          pitch: 1
+          loop: true
+          autoplay: false
+          pan: 0
+          spatial: true
+          maxDistance: 2000
+        Pulse:
+          amplitude: 0.0799999982
+          speed: 4
+        RenderOrder:
+          zIndex: 40
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        SceneRoot:
+          sourcePath: ""
+          activeCamera: ""
+        Spin2D:
+          degreesPerSecond: 20
+        Sprite:
+          texture: 1
+          modulate: [0.941175997, 0.705882013, 1, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [1520, 840]
+          rotation: 0
+          scale: [1, 1]
+        Velocity2D:
+          velocity: [160, -175]
+      instance: 2
+    - name: Camera
+      components:
+        Camera2D:
+          offset: [0, 0]
+          rotatable: false
+          anchor: [0.5, 0.5]
+        Transform2D:
+          position: [960, 540]
+          rotation: 0
+          scale: [1, 1]
+    - name: Floor
+      components:
+        Collider2D:
+          type: Box
+          size: [1920, 80]
+          radius: 50
+          offset: [0, 0]
+          rotation: 0
+          isTrigger: false
+          density: 1
+          friction: 0.600000024
+          restitution: 0
+        RenderOrder:
+          zIndex: -20
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        RigidBody2D:
+          type: Static
+          gravityScale: 1
+          linearDamping: 0
+          angularDamping: 0
+          fixedRotation: false
+        Sprite:
+          texture: 1
+          modulate: [0.319999993, 0.340000004, 0.419999987, 1]
+          size: [1920, 80]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [960, 40]
+          rotation: 0
+          scale: [1, 1]
+    - name: Crate1
+      components:
+        Collider2D:
+          type: Box
+          size: [150, 150]
+          radius: 50
+          offset: [0, 0]
+          rotation: 0
+          isTrigger: false
+          density: 1
+          friction: 0.600000024
+          restitution: 0.349999994
+        Crate:
+          {}
+        RenderOrder:
+          zIndex: 50
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        RigidBody2D:
+          type: Dynamic
+          gravityScale: 1
+          linearDamping: 0
+          angularDamping: 0
+          fixedRotation: false
+        Sprite:
+          texture: 1
+          modulate: [1, 0.720000029, 0.379999995, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [720, 860]
+          rotation: 14
+          scale: [1, 1]
+    - name: Crate2
+      components:
+        Collider2D:
+          type: Circle
+          size: [100, 100]
+          radius: 75
+          offset: [0, 0]
+          rotation: 0
+          isTrigger: false
+          density: 1
+          friction: 0.600000024
+          restitution: 0.449999988
+        Crate:
+          {}
+        RenderOrder:
+          zIndex: 51
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        RigidBody2D:
+          type: Dynamic
+          gravityScale: 1
+          linearDamping: 0
+          angularDamping: 0
+          fixedRotation: false
+        Sprite:
+          texture: 1
+          modulate: [0.449999988, 0.819999993, 1, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [960, 980]
+          rotation: -8
+          scale: [1, 1]
+    - name: Crate3
+      components:
+        Collider2D:
+          type: Box
+          size: [150, 150]
+          radius: 50
+          offset: [0, 0]
+          rotation: 0
+          isTrigger: false
+          density: 1
+          friction: 0.600000024
+          restitution: 0.25
+        Crate:
+          {}
+        RenderOrder:
+          zIndex: 52
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        RigidBody2D:
+          type: Dynamic
+          gravityScale: 1
+          linearDamping: 0
+          angularDamping: 0
+          fixedRotation: false
+        Sprite:
+          texture: 1
+          modulate: [0.850000024, 0.550000012, 1, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [1220, 780]
+          rotation: 22
+          scale: [1, 1]
+    - name: Player
+      components:
+        CharacterController: {speed: 600}
+        AnimatedSprite:
+          animations: 10543953070827358192
+          currentAnimation: MyAnim
+          autoplay: true
+          speed: 1
+          modulate: [1, 1, 1, 1]
+          size: [0, 0]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [109, 579]
+          rotation: 0
+          scale: [10, 10]

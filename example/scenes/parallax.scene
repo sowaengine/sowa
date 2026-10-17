@@ -1,0 +1,121 @@
+version: 1
+resources:
+  - id: 990101
+    type: ImageTexture
+    data:
+      path: res://textures/tile_342.png
+      filter: Nearest
+  - id: 990102
+    type: ImageTexture
+    data:
+      path: res://textures/tile_334.png
+      filter: Nearest
+  - id: 990103
+    type: ImageTexture
+    data:
+      path: res://textures/characters.png
+      filter: Nearest
+      flipVertically: true
+  - id: 990105
+    type: SpriteSheetAnimation
+    data:
+      animations:
+        - name: player
+          texture: 990103
+          columns: 23
+          rows: 4
+          frames: [0]
+          framesPerSecond: 1
+          loop: true
+root:
+  name: ParallaxDemo
+  components:
+    SceneRoot:
+      sourcePath: res://scenes/parallax.scene
+      activeCamera: ParallaxDemo/Player/Camera
+  children:
+    - name: FarBackground
+      components:
+        Transform2D: {}
+        RenderOrder: {zIndex: -20}
+        Sprite:
+          texture: 990101
+          size: [256, 256]
+          modulate: [0.18, 0.3, 0.5, 1]
+        Parallax2D:
+          tileX: true
+          tileY: true
+          xSpeed: 0.25
+          ySpeed: 0.25
+    - name: BoundedLayer
+      components:
+        Transform2D: {}
+        RenderOrder: {zIndex: -10}
+        Sprite:
+          texture: 990101
+          size: [192, 192]
+          modulate: [0.3, 1, 0.75, 0.7]
+        Parallax2D:
+          tileX: true
+          tileY: true
+          xSpeed: 0.65
+          ySpeed: 0.8
+          limitX: true
+          limitY: true
+          limitMin: [-800, -450]
+          limitMax: [800, 450]
+    - name: LeftLimit
+      components:
+        Transform2D: {position: [-800, 0]}
+        Sprite: {texture: 990102, size: [4, 900], modulate: [1, 0.75, 0.25, 1]}
+    - name: RightLimit
+      components:
+        Transform2D: {position: [800, 0]}
+        Sprite: {texture: 990102, size: [4, 900], modulate: [1, 0.75, 0.25, 1]}
+    - name: BottomLimit
+      components:
+        Transform2D: {position: [0, -450]}
+        Sprite: {texture: 990102, size: [1600, 4], modulate: [1, 0.75, 0.25, 1]}
+    - name: TopLimit
+      components:
+        Transform2D: {position: [0, 450]}
+        Sprite: {texture: 990102, size: [1600, 4], modulate: [1, 0.75, 0.25, 1]}
+    - name: OriginLabel
+      components:
+        Transform2D: {position: [0, -110]}
+        Text2D:
+          text: "WORLD ORIGIN (0, 0)"
+          fontSize: 26
+          horizontalAlignment: Center
+          modulate: [1, 0.85, 0.55, 1]
+    - name: LimitLabel
+      components:
+        Transform2D: {position: [0, 415]}
+        Text2D:
+          text: "TILING STOPS AT THIS BORDER"
+          fontSize: 24
+          horizontalAlignment: Center
+          modulate: [1, 0.85, 0.55, 1]
+    - name: Player
+      components:
+        Transform2D: {}
+        TopDownPlayer: {speed: 400}
+        RenderOrder: {zIndex: 10}
+        AnimatedSprite:
+          animations: 990105
+          currentAnimation: player
+          size: [100, 100]
+      children:
+        - name: Camera
+          components:
+            Transform2D: {}
+            Camera2D: {}
+          children:
+            - name: Instructions
+              components:
+                Transform2D: {position: [-880, 495]}
+                RenderOrder: {zIndex: 100}
+                Text2D:
+                  fontSize: 26
+                  verticalAlignment: Top
+                  text: "PARALLAX TEST   |   WASD / arrows: move   |   Q / E: zoom   |   R: reset\nBlue: 0.25 speed   |   Green: X 0.65, Y 0.8   |   Border: fixed world limits"

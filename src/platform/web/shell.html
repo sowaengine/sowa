@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Sowa Engine</title>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+  /* GLFW sizes the canvas from the browser window; it just needs no layout of its own. */
+  canvas { display: block; outline: none; }
+  #loading {
+    position: fixed; inset: 0; display: flex; flex-direction: column; gap: 10px;
+    align-items: center; justify-content: center; background: #000;
+    color: #ccc; font: 14px system-ui, sans-serif;
+  }
+  #loading.hidden { display: none; }
+  #bar { width: min(320px, 70vw); height: 6px; border-radius: 3px; background: #222; overflow: hidden; }
+  #fill { width: 0; height: 100%; background: #6aa9ff; transition: width 0.1s linear; }
+  #loading.indeterminate #fill { width: 30%; animation: slide 1s ease-in-out infinite alternate; }
+  #loading.error #fill { background: #e05555; width: 100%; }
+  @keyframes slide { from { margin-left: 0; } to { margin-left: 70%; } }
+</style>
+</head>
+<body>
+<canvas id="canvas" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+<div id="loading">
+  <div id="label">Loading…</div>
+  <div id="bar"><div id="fill"></div></div>
+</div>
+<script>
+  // Minimal development shell. The engine loads game.zip next to this page.
+  var loading = document.getElementById('loading');
+  var label = document.getElementById('label');
+  var fill = document.getElementById('fill');
+
+  function showProgress(text, fraction) {
+    label.textContent = text;
+    loading.classList.toggle('indeterminate', fraction === null);
+    if (fraction !== null) {
+      fill.style.width = Math.round(Math.min(fraction, 1) * 100) + '%';
+    }
+  }
+
+  function showError(text) {
+    loading.classList.remove('hidden', 'indeterminate');
+    loading.classList.add('error');
+    label.textContent = text;
+  }
+
+  // The engine (sowa.wasm) and the game (game.zip) both download through
+  // fetch, so wrapping it reports progress for both.
+  var downloads = { 'sowa.wasm': 'Downloading engine', 'game.zip': 'Downloading game' };
+  var originalFetch = window.fetch;
+  window.fetch = async function (input, init) {
+    var url = typeof input === 'string' ? input : input.url;
+    var name = Object.keys(downloads).find(function (file) { return url.split('?')[0].endsWith(file); });
+    var response = await originalFetch(input, init);
+    if (!name) {
+      return response;
+    }
+    if (!response.ok) {
+      showError('Failed to download ' + name + ' (HTTP ' + response.status + ')');
+      return response;
+    }
+    // Compressed responses report the compressed length, so the bar may
+    // finish early; it is clamped rather than overshooting.
+    var total = Number(response.headers.get('Content-Length')) || 0;
+    var received = 0;
+    var reader = response.body.getReader();
+    var stream = new ReadableStream({
+      async pull(controller) {
+        var chunk = await reader.read();
+        if (chunk.done) {
+          controller.close();
+          showProgress(name === 'game.zip' ? 'Starting…' : 'Loading…', null);
+          return;
+        }
+        received += chunk.value.byteLength;
+        showProgress(downloads[name] + '… ' + (received / 1048576).toFixed(1) + ' MB',
+          total ? received / total : null);
+        controller.enqueue(chunk.value);
+      },
+    });
+    return new Response(stream, { status: response.status, statusText: response.statusText, headers: response.headers });
+  };
+
+  var Module = {
+    canvas: document.getElementById('canvas'),
+    // Called by the engine once the game is running (or failed to start).
+    onGameStart: function (ok) {
+      if (ok) {
+        loading.classList.add('hidden');
+      } else {
+        showError('The game failed to start. See the browser console for details.');
+      }
+    },
+    onAbort: function () { showError('The engine stopped unexpectedly. See the browser console for details.'); },
+  };
+  window.addEventListener('click', function () { Module.canvas.focus(); });
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>

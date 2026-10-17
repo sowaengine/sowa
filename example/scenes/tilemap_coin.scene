@@ -1,0 +1,23 @@
+version: 1
+resources:
+  - id: 71001
+    type: ImageTexture
+    data: {path: "res://textures/spritesheet_tiles.png", filter: Nearest}
+root:
+  name: Coin
+  components:
+    SceneRoot: {}
+    Transform2D: {}
+  children:
+    - name: Visual
+      components:
+        Transform2D:
+          position: [-20, -20]
+        Tilemap:
+          cellSize: [40, 40]
+          tiles:
+            - {id: 1, name: Coin, resource: 71001, x: 1702, y: 296, width: 64, height: 64}
+          layers:
+            - id: 0
+              name: Visual
+              cells: [{x: 0, y: 0, tile: 1}]

@@ -1,0 +1,240 @@
+version: 1
+resources:
+  - id: 71001
+    type: ImageTexture
+    data: {path: "res://textures/spritesheet_tiles.png", filter: Nearest}
+  - id: 71002
+    type: ImageTexture
+    data: {path: "res://textures/tile_334.png", filter: Nearest}
+  - id: 71003
+    type: PackedScene
+    data: {path: "res://scenes/tilemap_coin.scene"}
+root:
+  name: TilemapExample
+  components:
+    SceneRoot:
+      activeCamera: TilemapExample/Camera
+  children:
+    - name: Map
+      components:
+        Transform2D:
+          position: [-576, -320]
+        Tilemap:
+          cellSize: [64, 64]
+          sheets:
+            - id: 1
+              resource: 71001
+              tileSize: [64, 64]
+              margin: 0
+              spacing: 10
+              tiles:
+                - {x: 0, y: 0, tile: 1}
+                - {x: 20, y: 6, tile: 2}
+          tiles:
+            - {id: 1, name: Grass, resource: 71001, x: 0, y: 0, width: 64, height: 64}
+            - {id: 2, name: Bush, resource: 71001, x: 1480, y: 444, width: 64, height: 64}
+            - {id: 3, name: "Individual tile 334", resource: 71002}
+            - {id: 4, name: Coin, resource: 71003, scene: true}
+          layers:
+            - id: 0
+              name: Grass
+              cells:
+                - {x: 0, y: 0, tile: 1}
+                - {x: 0, y: 1, tile: 1}
+                - {x: 0, y: 2, tile: 1}
+                - {x: 0, y: 3, tile: 1}
+                - {x: 0, y: 4, tile: 1}
+                - {x: 0, y: 5, tile: 1}
+                - {x: 0, y: 6, tile: 1}
+                - {x: 0, y: 7, tile: 1}
+                - {x: 0, y: 8, tile: 1}
+                - {x: 0, y: 9, tile: 1}
+                - {x: 1, y: 0, tile: 1}
+                - {x: 1, y: 1, tile: 1}
+                - {x: 1, y: 2, tile: 1}
+                - {x: 1, y: 3, tile: 1}
+                - {x: 1, y: 4, tile: 1}
+                - {x: 1, y: 5, tile: 1}
+                - {x: 1, y: 6, tile: 1}
+                - {x: 1, y: 7, tile: 1}
+                - {x: 1, y: 8, tile: 1}
+                - {x: 1, y: 9, tile: 1}
+                - {x: 2, y: 0, tile: 1}
+                - {x: 2, y: 1, tile: 1}
+                - {x: 2, y: 2, tile: 1}
+                - {x: 2, y: 3, tile: 1}
+                - {x: 2, y: 4, tile: 1}
+                - {x: 2, y: 5, tile: 1}
+                - {x: 2, y: 6, tile: 1}
+                - {x: 2, y: 7, tile: 1}
+                - {x: 2, y: 8, tile: 1}
+                - {x: 2, y: 9, tile: 1}
+                - {x: 3, y: 0, tile: 1}
+                - {x: 3, y: 1, tile: 1}
+                - {x: 3, y: 2, tile: 1}
+                - {x: 3, y: 3, tile: 1}
+                - {x: 3, y: 4, tile: 1}
+                - {x: 3, y: 5, tile: 1}
+                - {x: 3, y: 6, tile: 1}
+                - {x: 3, y: 7, tile: 1}
+                - {x: 3, y: 8, tile: 1}
+                - {x: 3, y: 9, tile: 1}
+                - {x: 4, y: 0, tile: 1}
+                - {x: 4, y: 1, tile: 1}
+                - {x: 4, y: 2, tile: 1}
+                - {x: 4, y: 3, tile: 1}
+                - {x: 4, y: 4, tile: 1}
+                - {x: 4, y: 5, tile: 1}
+                - {x: 4, y: 6, tile: 1}
+                - {x: 4, y: 7, tile: 1}
+                - {x: 4, y: 8, tile: 1}
+                - {x: 4, y: 9, tile: 1}
+                - {x: 5, y: 0, tile: 1}
+                - {x: 5, y: 1, tile: 1}
+                - {x: 5, y: 2, tile: 1}
+                - {x: 5, y: 3, tile: 1}
+                - {x: 5, y: 4, tile: 1}
+                - {x: 5, y: 5, tile: 1}
+                - {x: 5, y: 6, tile: 1}
+                - {x: 5, y: 7, tile: 1}
+                - {x: 5, y: 8, tile: 1}
+                - {x: 5, y: 9, tile: 1}
+                - {x: 6, y: 0, tile: 1}
+                - {x: 6, y: 1, tile: 1}
+                - {x: 6, y: 2, tile: 1}
+                - {x: 6, y: 3, tile: 1}
+                - {x: 6, y: 4, tile: 1}
+                - {x: 6, y: 5, tile: 1}
+                - {x: 6, y: 6, tile: 1}
+                - {x: 6, y: 7, tile: 1}
+                - {x: 6, y: 8, tile: 1}
+                - {x: 6, y: 9, tile: 1}
+                - {x: 7, y: 0, tile: 1}
+                - {x: 7, y: 1, tile: 1}
+                - {x: 7, y: 2, tile: 1}
+                - {x: 7, y: 3, tile: 1}
+                - {x: 7, y: 4, tile: 1}
+                - {x: 7, y: 5, tile: 1}
+                - {x: 7, y: 6, tile: 1}
+                - {x: 7, y: 7, tile: 1}
+                - {x: 7, y: 8, tile: 1}
+                - {x: 7, y: 9, tile: 1}
+                - {x: 8, y: 0, tile: 1}
+                - {x: 8, y: 1, tile: 1}
+                - {x: 8, y: 2, tile: 1}
+                - {x: 8, y: 3, tile: 1}
+                - {x: 8, y: 4, tile: 1}
+                - {x: 8, y: 5, tile: 1}
+                - {x: 8, y: 6, tile: 1}
+                - {x: 8, y: 7, tile: 1}
+                - {x: 8, y: 8, tile: 1}
+                - {x: 8, y: 9, tile: 1}
+                - {x: 9, y: 0, tile: 1}
+                - {x: 9, y: 1, tile: 1}
+                - {x: 9, y: 2, tile: 1}
+                - {x: 9, y: 3, tile: 1}
+                - {x: 9, y: 4, tile: 1}
+                - {x: 9, y: 5, tile: 1}
+                - {x: 9, y: 6, tile: 1}
+                - {x: 9, y: 7, tile: 1}
+                - {x: 9, y: 8, tile: 1}
+                - {x: 9, y: 9, tile: 1}
+                - {x: 10, y: 0, tile: 1}
+                - {x: 10, y: 1, tile: 1}
+                - {x: 10, y: 2, tile: 1}
+                - {x: 10, y: 3, tile: 1}
+                - {x: 10, y: 4, tile: 1}
+                - {x: 10, y: 5, tile: 1}
+                - {x: 10, y: 6, tile: 1}
+                - {x: 10, y: 7, tile: 1}
+                - {x: 10, y: 8, tile: 1}
+                - {x: 10, y: 9, tile: 1}
+                - {x: 11, y: 0, tile: 1}
+                - {x: 11, y: 1, tile: 1}
+                - {x: 11, y: 2, tile: 1}
+                - {x: 11, y: 3, tile: 1}
+                - {x: 11, y: 4, tile: 1}
+                - {x: 11, y: 5, tile: 1}
+                - {x: 11, y: 6, tile: 1}
+                - {x: 11, y: 7, tile: 1}
+                - {x: 11, y: 8, tile: 1}
+                - {x: 11, y: 9, tile: 1}
+                - {x: 12, y: 0, tile: 1}
+                - {x: 12, y: 1, tile: 1}
+                - {x: 12, y: 2, tile: 1}
+                - {x: 12, y: 3, tile: 1}
+                - {x: 12, y: 4, tile: 1}
+                - {x: 12, y: 5, tile: 1}
+                - {x: 12, y: 6, tile: 1}
+                - {x: 12, y: 7, tile: 1}
+                - {x: 12, y: 8, tile: 1}
+                - {x: 12, y: 9, tile: 1}
+                - {x: 13, y: 0, tile: 1}
+                - {x: 13, y: 1, tile: 1}
+                - {x: 13, y: 2, tile: 1}
+                - {x: 13, y: 3, tile: 1}
+                - {x: 13, y: 4, tile: 1}
+                - {x: 13, y: 5, tile: 1}
+                - {x: 13, y: 6, tile: 1}
+                - {x: 13, y: 7, tile: 1}
+                - {x: 13, y: 8, tile: 1}
+                - {x: 13, y: 9, tile: 1}
+                - {x: 14, y: 0, tile: 1}
+                - {x: 14, y: 1, tile: 1}
+                - {x: 14, y: 2, tile: 1}
+                - {x: 14, y: 3, tile: 1}
+                - {x: 14, y: 4, tile: 1}
+                - {x: 14, y: 5, tile: 1}
+                - {x: 14, y: 6, tile: 1}
+                - {x: 14, y: 7, tile: 1}
+                - {x: 14, y: 8, tile: 1}
+                - {x: 14, y: 9, tile: 1}
+                - {x: 15, y: 0, tile: 1}
+                - {x: 15, y: 1, tile: 1}
+                - {x: 15, y: 2, tile: 1}
+                - {x: 15, y: 3, tile: 1}
+                - {x: 15, y: 4, tile: 1}
+                - {x: 15, y: 5, tile: 1}
+                - {x: 15, y: 6, tile: 1}
+                - {x: 15, y: 7, tile: 1}
+                - {x: 15, y: 8, tile: 1}
+                - {x: 15, y: 9, tile: 1}
+                - {x: 16, y: 0, tile: 1}
+                - {x: 16, y: 1, tile: 1}
+                - {x: 16, y: 2, tile: 1}
+                - {x: 16, y: 3, tile: 1}
+                - {x: 16, y: 4, tile: 1}
+                - {x: 16, y: 5, tile: 1}
+                - {x: 16, y: 6, tile: 1}
+                - {x: 16, y: 7, tile: 1}
+                - {x: 16, y: 8, tile: 1}
+                - {x: 16, y: 9, tile: 1}
+                - {x: 17, y: 0, tile: 1}
+                - {x: 17, y: 1, tile: 1}
+                - {x: 17, y: 2, tile: 1}
+                - {x: 17, y: 3, tile: 1}
+                - {x: 17, y: 4, tile: 1}
+                - {x: 17, y: 5, tile: 1}
+                - {x: 17, y: 6, tile: 1}
+                - {x: 17, y: 7, tile: 1}
+                - {x: 17, y: 8, tile: 1}
+                - {x: 17, y: 9, tile: 1}
+            - id: 1
+              name: Decorations
+              cells:
+                - {x: 2, y: 2, tile: 2}
+                - {x: 4, y: 7, tile: 2}
+                - {x: 13, y: 6, tile: 2}
+                - {x: 14, y: 2, tile: 2}
+                - {x: 8, y: 4, tile: 3}
+                - {x: 9, y: 4, tile: 3}
+            - id: 2
+              name: Prefabs
+              cells:
+                - {x: 5, y: 3, tile: 4}
+                - {x: 9, y: 7, tile: 4}
+                - {x: 12, y: 4, tile: 4}
+    - name: Camera
+      components:
+        Transform2D: {}
+        Camera2D: {}

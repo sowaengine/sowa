@@ -1,0 +1,142 @@
+version: 1
+resources: []
+root:
+  name: ParticleShowcase
+  components:
+    SceneRoot:
+      sourcePath: res://scenes/particles.scene
+      activeCamera: ParticleShowcase/Camera
+  children:
+    - name: Camera
+      components:
+        Transform2D: {position: [960, 540]}
+        Camera2D: {anchor: [0.5, 0.5]}
+    - name: Smoke
+      components:
+        Transform2D: {position: [350, 430], scale: [2, 2]}
+        Particles2D:
+          is_emitting: true
+          emissionRate: 24
+          lifetime: 3
+          preprocess: 2
+          emissionShape: Circle
+          emissionRadius: 10
+          initialVelocity: [15, 30]
+          initialSize: [16, 24]
+          sizeStart: 0.4
+          sizeMiddle: 1.5
+          sizeEnd: 2.5
+          colorStart: [0.3, 0.3, 0.32, 0]
+          colorMiddle: [0.5, 0.5, 0.52, 0.5]
+          colorEnd: [0.65, 0.65, 0.67, 0]
+          colorMidpoint: 0.2
+          turbulenceStrength: 15
+          damping: 0.2
+          angularVelocity: [-30, 30]
+    - name: Flame
+      components:
+        Transform2D: {position: [670, 430], scale: [2, 2]}
+        Particles2D:
+          is_emitting: true
+          emissionRate: 100
+          lifetime: 0.8
+          preprocess: 1
+          emissionShape: Circle
+          emissionRadius: 10
+          initialVelocity: [35, 70]
+          initialSize: [14, 24]
+          gravity: [0, 35]
+          turbulenceStrength: 20
+          sizeStart: 0.8
+          sizeMiddle: 0.6
+          sizeEnd: 0
+          colorStart: [1, 0.95, 0.5, 0.9]
+          colorMiddle: [1, 0.28, 0.025, 0.8]
+          colorEnd: [0.6, 0.04, 0.01, 0]
+          blendMode: Additive
+    - name: Water
+      components:
+        Transform2D: {position: [1040, 430]}
+        Particles2D:
+          is_emitting: true
+          amount: 512
+          emissionRate: 120
+          lifetime: 2
+          preprocess: 2
+          emissionShape: Circle
+          emissionRadius: 3
+          initialVelocity: [130, 190]
+          spread: 12
+          gravity: [0, -220]
+          initialSize: [3, 6]
+          sizeEnd: 0.5
+          colorStart: [0.5, 0.8, 1, 0.9]
+          colorMiddle: [0.15, 0.5, 1, 0.8]
+          colorEnd: [0.1, 0.4, 1, 0]
+          drawShape: Circle
+          alignToVelocity: true
+          velocityStretch: 0.005
+          collisionEnabled: true
+          collisionY: 300
+          collisionBounce: 0.35
+    - name: Sparks
+      components:
+        Transform2D: {position: [1400, 430]}
+        Particles2D:
+          is_emitting: true
+          emissionRate: 40
+          lifetime: 1.2
+          lifetimeRandomness: 0.5
+          emissionShape: Circle
+          emissionRadius: 10
+          initialVelocity: [80, 180]
+          spread: 45
+          gravity: [0, -120]
+          initialSize: [2, 4]
+          alignToVelocity: true
+          velocityStretch: 0.02
+          colorStart: [1, 1, 0.7, 1]
+          colorMiddle: [1, 0.4, 0.03, 1]
+          colorEnd: [1, 0.05, 0, 0]
+          blendMode: Additive
+    - name: Explosion
+      components:
+        Transform2D: {position: [1720, 620]}
+        Particles2D:
+          is_emitting: true
+          emissionRate: 0
+          burstCount: 160
+          oneShot: true
+          duration: 0.1
+          lifetime: 1
+          lifetimeRandomness: 0.6
+          spread: 180
+          initialVelocity: [50, 240]
+          initialSize: [8, 18]
+          damping: 2
+          colorStart: [1, 1, 0.6, 1]
+          colorMiddle: [1, 0.25, 0.02, 0.8]
+          colorEnd: [0.25, 0.04, 0.01, 0]
+          blendMode: Additive
+    - name: Snow
+      components:
+        Transform2D: {position: [960, 940]}
+        RenderOrder: {zIndex: -1}
+        Particles2D:
+          is_emitting: true
+          amount: 1024
+          emissionRate: 30
+          lifetime: 8
+          preprocess: 4
+          emissionShape: Line
+          emissionSize: [1700, 0]
+          direction: [0, -1]
+          initialVelocity: [20, 40]
+          spread: 10
+          initialSize: [2, 5]
+          sizeEnd: 1
+          turbulenceStrength: 8
+          colorStart: [1, 1, 1, 0]
+          colorMiddle: [1, 1, 1, 0.9]
+          colorEnd: [1, 1, 1, 0]
+          colorMidpoint: 0.1

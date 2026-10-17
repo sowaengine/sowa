@@ -1,0 +1,54 @@
+version: 1
+resources: []
+root:
+  name: TextDemo
+  components:
+    SceneRoot:
+      sourcePath: res://scenes/text.scene
+      activeCamera: TextDemo/Camera
+  children:
+    - name: Camera
+      components:
+        Transform2D:
+          position: [960, 540]
+        Camera2D: {}
+    - name: Title
+      components:
+        Transform2D:
+          position: [960, 870]
+        Text2D:
+          text: Text2D
+          fontSize: 72
+          horizontalAlignment: Center
+          verticalAlignment: Top
+          modulate: [0.35, 0.8, 1, 1]
+    - name: Centered
+      components:
+        Transform2D:
+          position: [960, 700]
+        Text2D:
+          text: "World-space text\nShared font atlas, tint and render ordering"
+          fontSize: 48
+          horizontalAlignment: Center
+          verticalAlignment: Center
+          lineSpacing: 1.4
+    - name: Wrapped
+      components:
+        Transform2D:
+          position: [450, 510]
+        Text2D:
+          text: "This paragraph wraps at word boundaries. Resize the Wrap Width field in the inspector to change its layout."
+          fontSize: 36
+          wrapWidth: 470
+          verticalAlignment: Top
+    - name: Rotated
+      components:
+        Transform2D:
+          position: [1260, 390]
+          rotation: 15
+        Text2D:
+          text: "Rotate and scale\nwith Transform2D"
+          fontSize: 48
+          horizontalAlignment: Center
+          verticalAlignment: Center
+          modulate: [1, 0.72, 0.35, 1]

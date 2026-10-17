@@ -1,0 +1,264 @@
+version: 1
+resources:
+  - id: 980302
+    type: ImageTexture
+    data:
+      path: res://textures/physics_white.png
+      filter: Linear
+  - id: 980303
+    type: ImageTexture
+    data:
+      path: res://textures/physics_circle.png
+      filter: Linear
+root:
+  name: PhysicsQueries
+  components:
+    PhysicsQueriesDemo: {}
+    SceneRoot:
+      sourcePath: res://scenes/physics_queries.scene
+      activeCamera: PhysicsQueries/Camera
+  children:
+    - name: Camera
+      components:
+        Transform2D:
+          position: [960, 540]
+        Camera2D: {}
+    - name: Background
+      components:
+        Transform2D:
+          position: [960, 540]
+          rotation: 0
+        Sprite:
+          texture: 980302
+          size: [1920, 1080]
+          modulate: [0.035, 0.05, 0.085, 1]
+        RenderOrder:
+          zIndex: -10
+    - name: Title
+      components:
+        Transform2D:
+          position: [100, 990]
+        Text2D:
+          text: "Physics queries / Raycast2D"
+          fontSize: 52
+          modulate: [0.3, 0.85, 1, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Left
+    - name: Controls
+      components:
+        Transform2D:
+          position: [100, 900]
+        Text2D:
+          text: "Arrows: move probe   Q / E: rotate   1: all layers   2: layer 2   3: layer 3\nS: sensors   X: exclude Box   Space: auto update on/off   F: force update   R: reset"
+          fontSize: 30
+          modulate: [0.9, 0.93, 1, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Left
+    - name: Explanation
+      components:
+        Transform2D:
+          position: [100, 790]
+        Text2D:
+          text: "Orange and green markers show direct and cached hit points (offset vertically for visibility).\nThe component updates after each physics tick; F refreshes it immediately, even when auto is off."
+          fontSize: 26
+          modulate: [0.62, 0.7, 0.8, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Left
+    - name: RayLine
+      components:
+        Transform2D:
+          position: [975, 600]
+          rotation: 0
+        Sprite:
+          texture: 980302
+          size: [1550, 3]
+          modulate: [0.35, 0.65, 0.75, 0.85]
+        RenderOrder:
+          zIndex: 1
+    - name: Probe
+      components:
+        Transform2D:
+          position: [200, 600]
+          rotation: 0
+        Sprite:
+          texture: 980303
+          size: [40, 40]
+          modulate: [0.3, 0.85, 1, 1]
+        RenderOrder:
+          zIndex: 2
+        RigidBody2D:
+          type: Static
+        Collider2D:
+          type: Circle
+          radius: 20
+        Raycast2D:
+          targetPosition: [1550, 0]
+          excludeOwner: true
+    - name: Sensor
+      components:
+        Transform2D:
+          position: [450, 600]
+          rotation: 0
+        Sprite:
+          texture: 980302
+          size: [80, 180]
+          modulate: [0.8, 0.4, 0.9, 0.65]
+        RenderOrder:
+          zIndex: 0
+        RigidBody2D:
+          type: Static
+        Collider2D:
+          type: Box
+          size: [80, 180]
+          radius: 50
+          collisionLayer: 1
+          isTrigger: true
+    - name: SensorLabel
+      components:
+        Transform2D:
+          position: [450, 430]
+        Text2D:
+          text: "Sensor\nLayer 1 / sensor"
+          fontSize: 28
+          modulate: [0.8, 0.4, 0.9, 0.65]
+          verticalAlignment: Top
+          horizontalAlignment: Center
+    - name: Box
+      components:
+        Transform2D:
+          position: [780, 600]
+          rotation: 0
+        Sprite:
+          texture: 980302
+          size: [130, 180]
+          modulate: [0.3, 0.65, 1, 1]
+        RenderOrder:
+          zIndex: 0
+        RigidBody2D:
+          type: Static
+        Collider2D:
+          type: Box
+          size: [130, 180]
+          radius: 50
+          collisionLayer: 1
+          isTrigger: false
+    - name: BoxLabel
+      components:
+        Transform2D:
+          position: [780, 430]
+        Text2D:
+          text: "Box\nLayer 1"
+          fontSize: 28
+          modulate: [0.3, 0.65, 1, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Center
+    - name: Circle
+      components:
+        Transform2D:
+          position: [1120, 600]
+          rotation: 0
+        Sprite:
+          texture: 980303
+          size: [180, 180]
+          modulate: [1, 0.68, 0.28, 1]
+        RenderOrder:
+          zIndex: 0
+        RigidBody2D:
+          type: Static
+        Collider2D:
+          type: Circle
+          size: [180, 180]
+          radius: 90
+          collisionLayer: 2
+          isTrigger: false
+    - name: CircleLabel
+      components:
+        Transform2D:
+          position: [1120, 430]
+        Text2D:
+          text: "Circle\nLayer 2"
+          fontSize: 28
+          modulate: [1, 0.68, 0.28, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Center
+    - name: RotatedBox
+      components:
+        Transform2D:
+          position: [1460, 600]
+          rotation: 25
+        Sprite:
+          texture: 980302
+          size: [130, 180]
+          modulate: [0.35, 0.85, 0.55, 1]
+        RenderOrder:
+          zIndex: 0
+        RigidBody2D:
+          type: Static
+        Collider2D:
+          type: Box
+          size: [130, 180]
+          radius: 50
+          collisionLayer: 4
+          isTrigger: false
+    - name: RotatedBoxLabel
+      components:
+        Transform2D:
+          position: [1460, 430]
+        Text2D:
+          text: "RotatedBox\nLayer 3"
+          fontSize: 28
+          modulate: [0.35, 0.85, 0.55, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Center
+    - name: ProbeLabel
+      components:
+        Transform2D:
+          position: [200, 430]
+        Text2D:
+          text: "Probe\nOwner excluded"
+          fontSize: 26
+          modulate: [0.3, 0.85, 1, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Center
+    - name: DirectHit
+      components:
+        Transform2D:
+          position: [715, 614]
+          rotation: 0
+        Sprite:
+          texture: 980303
+          size: [18, 18]
+          modulate: [1, 0.5, 0.15, 1]
+        RenderOrder:
+          zIndex: 3
+    - name: CachedHit
+      components:
+        Transform2D:
+          position: [715, 586]
+          rotation: 0
+        Sprite:
+          texture: 980303
+          size: [18, 18]
+          modulate: [0.25, 1, 0.5, 1]
+        RenderOrder:
+          zIndex: 3
+    - name: Status
+      components:
+        Transform2D:
+          position: [100, 300]
+        Text2D:
+          text: "Press F6 / Play Current to run the raycast lab."
+          fontSize: 30
+          modulate: [0.9, 0.93, 1, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Left
+    - name: SnapshotNote
+      components:
+        Transform2D:
+          position: [100, 105]
+        Text2D:
+          text: "Direct queries read the latest solver snapshot. The first frame may show a miss.\nDisable auto, press F to cache a hit, move the probe, then press F again to refresh."
+          fontSize: 24
+          modulate: [0.62, 0.7, 0.8, 1]
+          verticalAlignment: Top
+          horizontalAlignment: Left

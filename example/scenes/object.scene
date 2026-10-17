@@ -1,0 +1,68 @@
+version: 1
+resources:
+  - id: 1
+    type: ImageTexture
+    data:
+      path: res://icon.png
+      flipVertically: true
+      retainPixels: false
+      filter: Linear
+  - id: 3
+    type: AudioClip
+    data:
+      path: res://file_example_WAV_1MG.wav
+root:
+  name: Object
+  components:
+    AudioSource:
+      clip: 3
+      gain: 0.300000012
+      pitch: 1
+      loop: true
+      autoplay: false
+      pan: 0
+      spatial: true
+      maxDistance: 2000
+    Pulse:
+      amplitude: 0.0799999982
+      speed: 4
+    RenderOrder:
+      zIndex: 0
+      zIndexMode: Relative
+      layer: 0
+      layerMode: Inherit
+    SceneRoot:
+      sourcePath: res://scenes/object.scene
+      activeCamera: ""
+    Spin2D:
+      degreesPerSecond: 0
+    Sprite:
+      texture: 1
+      modulate: [1, 1, 1, 1]
+      size: [150, 150]
+      offset: [0, 0]
+      centered: true
+    Transform2D:
+      position: [0, 0]
+      rotation: 0
+      scale: [1, 1]
+    Velocity2D:
+      velocity: [0, 0]
+  children:
+    - name: Satellite
+      components:
+        RenderOrder:
+          zIndex: -1
+          zIndexMode: Relative
+          layer: 0
+          layerMode: Inherit
+        Sprite:
+          texture: 1
+          modulate: [1, 1, 1, 1]
+          size: [150, 150]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [149.77771, 4.15625]
+          rotation: 0
+          scale: [0.5, 0.5]

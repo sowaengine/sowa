@@ -1,0 +1,10 @@
+#include "core/build_info.hpp"
+
+namespace sowa::BuildInfo {
+
+const char *Version() { return "@SOWA_VERSION@"; }
+const char *GitHash() { return "@GIT_COMMIT_HASH@"; }
+const char *GitBranch() { return "@GIT_BRANCH@"; }
+bool IsDirty() { return @GIT_IS_DIRTY@; }
+
+} // namespace sowa::BuildInfo

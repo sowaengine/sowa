@@ -1,0 +1,174 @@
+# Source groups shared by the application and test targets.
+
+set(SOWA_RUNTIME_SOURCES
+  core/arg_parser.cpp
+  core/executable_path.cpp
+  core/log.cpp
+  core/profiler.cpp
+  core/profiler_report.cpp
+  core/string.cpp
+  core/input.cpp
+  core/input_binding.cpp
+  core/project_settings.cpp
+  core/filesystem/file_system.cpp
+  core/filesystem/file_watcher.cpp
+  core/filesystem/folder_file_server.cpp
+  core/filesystem/zip_file_server.cpp
+  core/filesystem/zip_builder.cpp
+  core/serialize/archive.cpp
+  ecs/entity.cpp
+  ecs/entity_pick_map.cpp
+  ecs/component_serializer.cpp
+  particles/particles2d.cpp
+  particles/particle_presets.cpp
+  particles/particle_drawing.cpp
+  ecs/world.cpp
+  scene/scene.cpp
+  scene/scene_serializer.cpp
+  scene/scene_snapshot.cpp
+  scene/scene_manager.cpp
+  scene/packed_scene.cpp
+  script/lua_debugger.cpp
+  script/script_suspension.cpp
+  script/script_watchdog.cpp
+  script/script_server.cpp
+  script/lua_editor.cpp
+  script/lua_bindings.cpp
+  script/lua_tilemap.cpp
+  script/lua_physics.cpp
+  ecs/field_registry.cpp
+  ecs/components/tilemap.cpp
+  scene/tilemap_scenes.cpp
+  ecs/components/transform2d.cpp
+  ecs/components/render_order.cpp
+  ecs/components/camera2d.cpp
+  ecs/components/parallax2d.cpp
+  core/reflection/field_serializer.cpp
+  resource/resource.cpp
+  resource/image_texture.cpp
+  resource/font.cpp
+  resource/audio_clip.cpp
+  animation/animated_sprite.cpp
+  animation/animation.cpp
+  animation/animation_property.cpp
+  animation/animation_player.cpp
+  resource/sprite_sheet_animation.cpp
+  resource/resource_registry.cpp
+  math/rect.cpp
+  math/matrix.cpp
+  audio/audio_device.cpp
+  audio/audio_mixer.cpp
+  audio/miniaudio/miniaudio_device.cpp
+  physics/physics_world.cpp
+  physics/physics_queries.cpp
+  core/commands.cpp
+  core/command_inputs.cpp
+  render/shader.cpp
+  render/viewport_scale.cpp
+  render/renderer2d.cpp
+  render/text_draw.cpp
+  render/text_layout.cpp
+  ui/components.cpp
+  ui/theme.cpp
+  ui/layout.cpp
+  ui/geometry.cpp
+  ui/input.cpp
+  ui/interaction.cpp
+  ui/text_input.cpp
+  ui/rendering.cpp
+  ui/painting.cpp
+  ui/drawing.cpp
+  script/lua_ui.cpp
+  render/image_patches.cpp
+  render/sprite_renderer2d.cpp
+  render/parallax2d.cpp
+  render/fullscreen_present.cpp
+)
+
+set(SOWA_APPLICATION_SOURCES
+  main.cpp
+  core/application.cpp
+  core/window.cpp
+  render/graphics_device.cpp
+  render/gl/gl_graphics_device.cpp
+  render/gl/gl_shader.cpp
+  render/gl/gl_buffer.cpp
+  render/gl/gl_pipeline.cpp
+  render/gl/gl_texture.cpp
+  render/gl/gl_render_target.cpp
+)
+
+set(SOWA_TOOL_SOURCES
+  build/glob.cpp
+  build/build_params.cpp
+  build/export_targets.cpp
+  build/file_rules.cpp
+  build/build_script.cpp
+  build/build_runner.cpp
+  build/icns.cpp
+  editor/animation_preview.cpp
+  editor/animation_timeline.cpp
+  editor/sprite_sheet_panel.cpp
+  editor/style.cpp
+  editor/fonts.cpp
+  editor/viewport.cpp
+  editor/camera.cpp
+  editor/gizmos.cpp
+  editor/nine_patch_tools.cpp
+  editor/hierarchy.cpp
+  editor/inspector.cpp
+  editor/resource_inspector.cpp
+  editor/asset_picker.cpp
+  editor/tilemap_tools.cpp
+  editor/tilemap_palette.cpp
+  editor/filesystem_browser.cpp
+  editor/console.cpp
+  editor/project_manager.cpp
+  editor/project_data.cpp
+  editor/project_settings.cpp
+  editor/binding_capture.cpp
+  editor/play_controls.cpp
+  editor/profiler_panel.cpp
+  editor/command_palette.cpp
+  editor/command_history.cpp
+  editor/scene_commands.cpp
+  editor/scene_documents.cpp
+  editor/widgets.cpp
+  editor/project_settings_panel.cpp
+  editor/project_export_panel.cpp
+)
+
+set(SOWA_EDITOR_SOURCES
+  editor/editor.cpp
+  editor/menu_bar.cpp
+  editor/viewport_panel.cpp
+  editor/hierarchy_panel.cpp
+  editor/inspector_panel.cpp
+  editor/filesystem_panel.cpp
+  editor/editor_commands.cpp
+  editor/tilemap_editor.cpp
+  editor/tilemap_brush.cpp
+  editor/animation_editor.cpp
+  editor/sprite_sheet_editor.cpp
+  editor/transform_gizmo.cpp
+  editor/ui_gizmo.cpp
+  editor/nine_patch_editor.cpp
+  editor/nine_patch_gizmo.cpp
+  editor/viewport_grid.cpp
+  editor/project_manager_window.cpp
+)
+
+set(SOWA_DEBUGGER_SOURCES
+  script/dap_framing.cpp
+  script/dap_session.cpp
+  script/dap_server.cpp
+)
+
+foreach(group SOWA_RUNTIME_SOURCES SOWA_APPLICATION_SOURCES SOWA_TOOL_SOURCES
+    SOWA_EDITOR_SOURCES SOWA_DEBUGGER_SOURCES)
+  list(TRANSFORM ${group} PREPEND "${PROJECT_SOURCE_DIR}/src/")
+endforeach()
+list(APPEND SOWA_RUNTIME_SOURCES
+  "${PROJECT_SOURCE_DIR}/thirdparty/stb/stb_vorbis.c"
+  "${PROJECT_BINARY_DIR}/src/generated/core/build_info.cpp"
+)

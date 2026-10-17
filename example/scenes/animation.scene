@@ -1,0 +1,154 @@
+version: 1
+resources:
+  - id: 970101
+    type: ImageTexture
+    data:
+      path: res://icon.png
+      flipVertically: true
+      retainPixels: false
+      filter: Linear
+  - id: 970102
+    type: AnimationLibrary
+    data:
+      clips:
+        - name: Travel
+          duration: 4
+          loop: true
+          tracks:
+            - path: .
+              component: Transform2D
+              property: position
+              type: Vector2
+              keys:
+                - time: 0
+                  interpolation: Smooth
+                  value: [500, 540]
+                - time: 1.0000000149011612
+                  interpolation: Smooth
+                  value: [960, 740]
+                - time: 2
+                  interpolation: Smooth
+                  value: [1420, 540]
+                - time: 3
+                  interpolation: Smooth
+                  value: [960, 340]
+                - time: 4
+                  interpolation: Linear
+                  value: [500, 540]
+            - path: .
+              component: Transform2D
+              property: rotation
+              type: F32
+              keys:
+                - time: 0
+                  interpolation: Linear
+                  value: 0
+                - time: 4
+                  interpolation: Linear
+                  value: 360
+            - path: .
+              component: Sprite
+              property: modulate
+              type: Color
+              keys:
+                - time: 0
+                  interpolation: Linear
+                  value: [0.25, 0.699999988, 1, 1]
+                - time: 1
+                  interpolation: Linear
+                  value: [1, 0.400000006, 0.649999976, 1]
+                - time: 2
+                  interpolation: Linear
+                  value: [1, 0.850000024, 0.300000012, 1]
+                - time: 4
+                  interpolation: Linear
+                  value: [0.25, 0.699999988, 1, 1]
+            - path: ../Camera
+              component: Transform2D
+              property: rotation
+              type: F32
+              keys:
+                - time: 0
+                  interpolation: Linear
+                  value: 0
+                - time: 2.9000000432133675
+                  interpolation: Linear
+                  value: 90
+            - path: ../Camera
+              component: Transform2D
+              property: position
+              type: Vector2
+              keys:
+                - time: 0
+                  interpolation: Linear
+                  value: [960, 540]
+                - time: 1.9000000283122063
+                  interpolation: Linear
+                  value: [0, 0]
+                - time: 2.9000000432133675
+                  interpolation: Linear
+                  value: [960, 540]
+          calls:
+            []
+        - name: Pulse
+          duration: 2
+          loop: true
+          tracks:
+            - path: .
+              component: Transform2D
+              property: position
+              type: Vector2
+              keys:
+                - time: 0
+                  interpolation: Linear
+                  value: [960, 540]
+            - path: .
+              component: Transform2D
+              property: scale
+              type: Vector2
+              keys:
+                - time: 0
+                  interpolation: Smooth
+                  value: [1, 1]
+                - time: 1
+                  interpolation: Smooth
+                  value: [1.60000002, 1.60000002]
+                - time: 2
+                  interpolation: Linear
+                  value: [1, 1]
+          calls:
+            []
+root:
+  name: AnimationExample
+  components:
+    SceneRoot:
+      sourcePath: res://scenes/animation.scene
+      activeCamera: AnimationExample/Camera
+  children:
+    - name: AnimatedIcon
+      components:
+        AnimationPlayer:
+          library: 970102
+          currentAnimation: Travel
+          autoplay: true
+          speed: 1
+        Sprite:
+          texture: 970101
+          modulate: [1, 1, 1, 1]
+          size: [180, 180]
+          offset: [0, 0]
+          centered: true
+        Transform2D:
+          position: [500, 540]
+          rotation: 0
+          scale: [1, 1]
+    - name: Camera
+      components:
+        Camera2D:
+          offset: [0, 0]
+          rotatable: true
+          anchor: [0.5, 0.5]
+        Transform2D:
+          position: [960, 540]
+          rotation: 0
+          scale: [1, 1]

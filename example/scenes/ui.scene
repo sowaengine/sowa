@@ -1,0 +1,1007 @@
+version: 1
+resources:
+  -
+    id: 990102
+    type: "UITheme"
+    data:
+      fontSize: 21
+      padding:
+        - 12
+        - 8
+      background:
+        - 0.13
+        - 0.17
+        - 0.23
+        - 1
+      hovered:
+        - 0.2
+        - 0.26
+        - 0.35
+        - 1
+      pressed:
+        - 0.09
+        - 0.12
+        - 0.17
+        - 1
+      text:
+        - 0.91
+        - 0.95
+        - 1
+        - 1
+      accent:
+        - 0.3
+        - 0.7
+        - 0.96
+        - 1
+      border:
+        - 0.24
+        - 0.3
+        - 0.39
+        - 1
+      rules:
+        -
+          role: "Panel"
+          variant: "Canvas"
+          background:
+            - 0.065
+            - 0.085
+            - 0.12
+            - 1
+          borderWidth: 0
+        -
+          role: "Panel"
+          variant: "Surface"
+          background:
+            - 0.095
+            - 0.12
+            - 0.17
+            - 1
+          border:
+            - 0.17
+            - 0.22
+            - 0.3
+            - 1
+        -
+          role: "Button"
+          variant: "Primary"
+          background:
+            - 0.13
+            - 0.43
+            - 0.68
+            - 1
+          hovered:
+            - 0.2
+            - 0.55
+            - 0.8
+            - 1
+  -
+    id: 990103
+    type: "UITheme"
+    data:
+      fontSize: 21
+      padding:
+        - 12
+        - 8
+      background:
+        - 0.89
+        - 0.92
+        - 0.97
+        - 1
+      hovered:
+        - 0.8
+        - 0.87
+        - 0.96
+        - 1
+      pressed:
+        - 0.72
+        - 0.8
+        - 0.9
+        - 1
+      text:
+        - 0.12
+        - 0.19
+        - 0.28
+        - 1
+      accent:
+        - 0.1
+        - 0.43
+        - 0.77
+        - 1
+      border:
+        - 0.7
+        - 0.77
+        - 0.85
+        - 1
+      rules:
+        -
+          role: "Panel"
+          variant: "Canvas"
+          background:
+            - 0.94
+            - 0.96
+            - 0.98
+            - 1
+          borderWidth: 0
+        -
+          role: "Panel"
+          variant: "Surface"
+          background:
+            - 1
+            - 1
+            - 1
+            - 1
+          border:
+            - 0.78
+            - 0.83
+            - 0.88
+            - 1
+        -
+          role: "Button"
+          variant: "Primary"
+          background:
+            - 0.2
+            - 0.49
+            - 0.78
+            - 1
+          hovered:
+            - 0.3
+            - 0.6
+            - 0.86
+            - 1
+          text:
+            - 1
+            - 1
+            - 1
+            - 1
+root:
+  name: "UIDemo"
+  components:
+    SceneRoot:
+      sourcePath: "res://scenes/ui.scene"
+      activeCamera: "UIDemo/Camera"
+    UIDemoController: {}
+  children:
+    - name: Camera
+      components:
+        Transform2D:
+          position: [640, 360]
+        Camera2D: {}
+    -
+      name: "Canvas"
+      components:
+        UICanvas:
+          theme: 990102
+          referenceSize:
+            - 1280
+            - 720
+        Transform2D:
+          position: [0, 720]
+        UIRect:
+          size: [1280, 720]
+        UIPanel: {}
+        UIStyle:
+          variant: "Canvas"
+      children:
+        -
+          name: "Title"
+          components:
+            UIRect:
+              position:
+                - 40
+                - 30
+              size:
+                - 720
+                - 44
+            UILabel:
+              text: "Build your game interface"
+              fontSize: 34
+        -
+          name: "Subtitle"
+          components:
+            UIRect:
+              position:
+                - 40
+                - 78
+              size:
+                - 850
+                - 30
+            UILabel:
+              text: "Composable controls. Shared themes. Keyboard and mouse."
+              fontSize: 19
+              modulate:
+                - 0.7
+                - 0.8
+                - 0.95
+                - 1
+        -
+          name: "Theme"
+          components:
+            UIRect:
+              position:
+                - -40
+                - 35
+              size:
+                - 165
+                - 40
+              anchorMin:
+                - 1
+                - 0
+              anchorMax:
+                - 1
+                - 0
+              pivot:
+                - 1
+                - 0
+            UIControl: {}
+            UIButton:
+              text: "Switch theme"
+        -
+          name: "Content"
+          components:
+            UIRect:
+              position:
+                - 40
+                - 136
+              size:
+                - -80
+                - -180
+              anchorMax:
+                - 1
+                - 1
+            UILayout:
+              mode: "Horizontal"
+              padding:
+                - 0
+                - 0
+              spacing:
+                - 24
+                - 0
+          children:
+            -
+              name: "Settings"
+              components:
+                UIRect:
+                  position:
+                    - 0
+                    - 0
+                  size:
+                    - 416
+                    - 490
+                  grow: 1
+                UIPanel: {}
+                UIStyle:
+                  variant: "Surface"
+                UILayout:
+                  padding:
+                    - 22
+                    - 20
+                  spacing:
+                    - 10
+                    - 10
+              children:
+                -
+                  name: "Heading"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 34
+                    UILabel:
+                      text: "Player settings"
+                      fontSize: 26
+                -
+                  name: "NameLabel"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 26
+                    UILabel:
+                      text: "Display name"
+                      fontSize: 18
+                -
+                  name: "Name"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 42
+                    UIControl: {}
+                    UITextInput:
+                      placeholder: "Your name"
+                -
+                  name: "VolumeLabel"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 26
+                    UILabel:
+                      text: "Audio volume"
+                      fontSize: 18
+                -
+                  name: "Volume"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 28
+                    UIControl: {}
+                    UISlider:
+                      value: 0.65
+                      step: 0.05
+                -
+                  name: "Music"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 40
+                    UIControl: {}
+                    UIToggle:
+                      text: "Background music"
+                      checked: true
+                -
+                  name: "Quality"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 42
+                    UIControl: {}
+                    UIDropdown:
+                      items: "Low\nMedium\nHigh\nUltra"
+                      selected: 2
+                -
+                  name: "Progress"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 28
+                    UIControl: {}
+                    UIProgressBar:
+                      value: 0.65
+                -
+                  name: "Actions"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 46
+                    UILayout:
+                      mode: "Horizontal"
+                      padding:
+                        - 0
+                        - 0
+                      spacing:
+                        - 10
+                        - 0
+                  children:
+                    -
+                      name: "Save"
+                      components:
+                        UIRect:
+                          position:
+                            - 0
+                            - 0
+                          size:
+                            - 150
+                            - 46
+                          grow: 1
+                        UIControl: {}
+                        UIButton:
+                          text: "Save changes"
+                        UIStyle:
+                          variant: "Primary"
+                        UITooltip:
+                          text: "Save your settings and see the status update."
+                    -
+                      name: "OpenModal"
+                      components:
+                        UIRect:
+                          position:
+                            - 0
+                            - 0
+                          size:
+                            - 110
+                            - 46
+                        UIControl: {}
+                        UIButton:
+                          text: "Details"
+                -
+                  name: "Status"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 36
+                    UILabel:
+                      text: "Try the controls. Tab moves focus."
+                      fontSize: 17
+            -
+              name: "Library"
+              components:
+                UIRect:
+                  position:
+                    - 0
+                    - 0
+                  size:
+                    - 430
+                    - 490
+                  grow: 1
+                UIPanel: {}
+                UIStyle:
+                  variant: "Surface"
+                UILayout:
+                  padding:
+                    - 16
+                    - 20
+                  spacing:
+                    - 10
+                    - 10
+              children:
+                -
+                  name: "Heading"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 34
+                    UILabel:
+                      text: "Your collection"
+                      fontSize: 26
+                -
+                  name: "Tabs"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 410
+                        - 400
+                    UITabs:
+                      titles: "Inventory\nNotes"
+                      headerHeight: 42
+                    UIControl: {}
+                  children:
+                    -
+                      name: "InventoryPage"
+                      components:
+                        UIRect:
+                          position:
+                            - 0
+                            - 0
+                          size:
+                            - 0
+                            - 0
+                          anchorMax:
+                            - 1
+                            - 1
+                        UILayout:
+                          padding:
+                            - 14
+                            - 12
+                          spacing:
+                            - 10
+                            - 10
+                      children:
+                        -
+                          name: "Inventory"
+                          components:
+                            UIRect:
+                              position:
+                                - 0
+                                - 0
+                              size:
+                                - 340
+                                - 325
+                            UIScrollView: {}
+                            UIControl: {}
+                            UILayout:
+                              padding:
+                                - 8
+                                - 8
+                              spacing:
+                                - 6
+                                - 6
+                          children:
+                            -
+                              name: "Item0"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "01   Inventory item"
+                            -
+                              name: "Item1"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "02   Inventory item"
+                            -
+                              name: "Item2"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "03   Inventory item"
+                            -
+                              name: "Item3"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "04   Inventory item"
+                            -
+                              name: "Item4"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "05   Inventory item"
+                            -
+                              name: "Item5"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "06   Inventory item"
+                            -
+                              name: "Item6"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "07   Inventory item"
+                            -
+                              name: "Item7"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "08   Inventory item"
+                            -
+                              name: "Item8"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "09   Inventory item"
+                            -
+                              name: "Item9"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "10   Inventory item"
+                            -
+                              name: "Item10"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "11   Inventory item"
+                            -
+                              name: "Item11"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "12   Inventory item"
+                            -
+                              name: "Item12"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "13   Inventory item"
+                            -
+                              name: "Item13"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "14   Inventory item"
+                            -
+                              name: "Item14"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "15   Inventory item"
+                            -
+                              name: "Item15"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "16   Inventory item"
+                            -
+                              name: "Item16"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "17   Inventory item"
+                            -
+                              name: "Item17"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "18   Inventory item"
+                            -
+                              name: "Item18"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "19   Inventory item"
+                            -
+                              name: "Item19"
+                              components:
+                                UIRect:
+                                  position:
+                                    - 0
+                                    - 0
+                                  size:
+                                    - 160
+                                    - 40
+                                UIControl: {}
+                                UIButton:
+                                  text: "20   Inventory item"
+                    -
+                      name: "NotesPage"
+                      components:
+                        UIRect:
+                          position:
+                            - 0
+                            - 0
+                          size:
+                            - 0
+                            - 0
+                          anchorMax:
+                            - 1
+                            - 1
+                        UILayout:
+                          padding:
+                            - 14
+                            - 12
+                          spacing:
+                            - 10
+                            - 10
+                      children:
+                        -
+                          name: "Help"
+                          components:
+                            UIRect:
+                              position:
+                                - 0
+                                - 0
+                              size:
+                                - 160
+                                - 50
+                            UILabel:
+                              text: "Multiline input with selection and clipboard"
+                              fontSize: 18
+                        -
+                          name: "Notes"
+                          components:
+                            UIRect:
+                              position:
+                                - 0
+                                - 0
+                              size:
+                                - 160
+                                - 270
+                            UIControl: {}
+                            UITextInput:
+                              multiline: true
+                              placeholder: "Write a note..."
+            -
+              name: "Choices"
+              components:
+                UIRect:
+                  position:
+                    - 0
+                    - 0
+                  size:
+                    - 230
+                    - 490
+                  grow: 1
+                UIPanel: {}
+                UIStyle:
+                  variant: "Surface"
+                UILayout:
+                  padding:
+                    - 16
+                    - 20
+                  spacing:
+                    - 12
+                    - 12
+              children:
+                -
+                  name: "Heading"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 34
+                    UILabel:
+                      text: "Quick select"
+                      fontSize: 24
+                -
+                  name: "List"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 330
+                    UIControl: {}
+                    UIList:
+                      items: "Sword\nShield\nPotion\nMap\nCompass\nTorch\nRope\nKey\nBook\nCrystal"
+                      selected: 2
+                -
+                  name: "Hint"
+                  components:
+                    UIRect:
+                      position:
+                        - 0
+                        - 0
+                      size:
+                        - 160
+                        - 60
+                    UILabel:
+                      text: "Arrow keys change selection."
+                      fontSize: 17
+        -
+          name: "Modal"
+          components:
+            UIRect:
+              position:
+                - 0
+                - 0
+              size:
+                - 440
+                - 250
+              anchorMin:
+                - 0.5
+                - 0.5
+              anchorMax:
+                - 0.5
+                - 0.5
+              pivot:
+                - 0.5
+                - 0.5
+            UIPopup:
+              modal: true
+              open: false
+            UIPanel: {}
+            UIStyle:
+              variant: "Surface"
+            UILayout:
+              padding:
+                - 28
+                - 24
+              spacing:
+                - 16
+                - 16
+          children:
+            -
+              name: "Title"
+              components:
+                UIRect:
+                  position:
+                    - 0
+                    - 0
+                  size:
+                    - 160
+                    - 36
+                UILabel:
+                  text: "A reusable modal"
+                  fontSize: 28
+            -
+              name: "Description"
+              components:
+                UIRect:
+                  position:
+                    - 0
+                    - 0
+                  size:
+                    - 384
+                    - 88
+                UILabel:
+                  text: "Focus stays inside this dialog. Close it with the button, Escape, or a click outside."
+                  wrap: true
+                  fontSize: 20
+            -
+              name: "Close"
+              components:
+                UIRect:
+                  position:
+                    - 0
+                    - 0
+                  size:
+                    - 160
+                    - 42
+                UIControl: {}
+                UIButton:
+                  text: "Got it"
+        -
+          name: "Footer"
+          components:
+            UIRect:
+              position:
+                - 40
+                - -22
+              size:
+                - 800
+                - 24
+              anchorMin:
+                - 0
+                - 1
+              anchorMax:
+                - 0
+                - 1
+              pivot:
+                - 0
+                - 1
+            UILabel:
+              text: "TAB  Navigate     ENTER  Activate     ESC  Close     CTRL/CMD+C/V  Clipboard"
+              fontSize: 16

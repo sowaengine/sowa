@@ -1,0 +1,6 @@
+version: 1
+Targets:
+  - Name: my-mac
+    Platform: macos
+  - Name: my-web
+    Platform: web

@@ -1,0 +1,39 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "editor",
+      "displayName": "Editor (native)",
+      "binaryDir": "${sourceDir}/build/editor",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "SOWA_ENABLE_EDITOR": "ON"
+      }
+    },
+    {
+      "name": "template",
+      "displayName": "Export template (native)",
+      "binaryDir": "${sourceDir}/build/template",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SOWA_ENABLE_EDITOR": "OFF"
+      }
+    },
+    {
+      "name": "web",
+      "displayName": "Export template (Web, needs EMSDK)",
+      "binaryDir": "${sourceDir}/build/web",
+      "toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "SOWA_ENABLE_EDITOR": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "editor", "configurePreset": "editor" },
+    { "name": "template", "configurePreset": "template" },
+    { "name": "web", "configurePreset": "web" }
+  ]
+}
