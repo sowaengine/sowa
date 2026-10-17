@@ -138,6 +138,9 @@ class LuaDebugger {
 		return _stop.active;
 	}
 
+	// Records debugger Abort even if Lua catches its error.
+	u64 AbortGeneration() const { return _abortGeneration; }
+
 	// Inspection, valid only while stopped. Frame ids come from StackTrace;
 	// 0 is the innermost frame.
 	std::vector<LuaStackFrame> StackTrace();
@@ -246,6 +249,7 @@ class LuaDebugger {
 
 	std::map<std::string, std::vector<BreakpointState>, std::less<>> _breakpoints;
 	bool _breakOnError = false;
+	u64 _abortGeneration = 0;
 	bool _pauseWatch = false;
 	std::atomic<bool> _pauseRequested{false};
 

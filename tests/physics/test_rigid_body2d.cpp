@@ -134,7 +134,7 @@ TEST_CASE("Progress Syncs RigidBody2D entities") {
 	CHECK(b2Body_IsValid(physics.BodyId(entity)));
 }
 
-TEST_CASE("ApplyForce is reapplied on every physics tick in a hitch") {
+TEST_CASE("ApplyForce applies only to the next physics tick even in a hitch") {
 	PhysicsWorldConfig config;
 	config.gravity = Vector2(0.f, 0.f);
 	config.maxStepsPerFrame = 8;
@@ -154,7 +154,7 @@ TEST_CASE("ApplyForce is reapplied on every physics tick in a hitch") {
 	const f32 velOne = setup(config.fixedDelta);
 	const f32 velTwo = setup(config.fixedDelta * 2.f);
 	REQUIRE(velOne > 0.f);
-	CHECK(velTwo == doctest::Approx(2.f * velOne).epsilon(0.2));
+	CHECK(velTwo == doctest::Approx(velOne).epsilon(0.001));
 }
 
 TEST_CASE("ApplyImpulse runs once even when a hitch takes two ticks") {

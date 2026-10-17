@@ -2004,3 +2004,35 @@ TEST_CASE("tostring of a scene names it") {
 		assert(tostring(level) == "Scene(<invalid>)", tostring(level))
 	)lua"));
 }
+
+TEST_CASE("Script reload adds replaces and removes fixed hooks without restarting live instances") {
+	const auto root = makeTempDir();
+	const auto source = [](int amount) {
+		return std::string("local M = world:component('ReloadFixed', {ticks = 0})\n") +
+			"starts = starts or 0\nfunction M:_start() starts = starts + 1 end\n" +
+			(amount == 0 ? std::string{} : "function M:_physics_update(dt) self.ticks = self.ticks + " +
+			std::to_string(amount) + " end\n");
+	};
+	writeFile(root / "main.lua", source(0));
+	FileSystem fs;
+	fs.MountFolder("res", root);
+	World world;
+	PhysicsWorld physics;
+	physics.Init(world);
+	ScriptServer scripts(world);
+	REQUIRE(scripts.LoadModules(fs, {"res://main.lua"}));
+	Entity entity = world.CreateEntity();
+	REQUIRE(scripts.AttachScript(entity, "res://main.lua"));
+	scripts.SetEntity("reloaded", entity);
+	world.Progress(physics.Config().fixedDelta);
+	CHECK(scripts.DoString("assert(starts == 1 and reloaded:get('ReloadFixed').ticks == 0)"));
+	int total = 0;
+	for (int amount : {1, 5, 0}) {
+		writeFile(root / "main.lua", source(amount));
+		REQUIRE(scripts.ReloadModules(fs));
+		world.Progress(physics.Config().fixedDelta * 2.f);
+		total += amount * 2;
+		CHECK(scripts.DoString("assert(starts == 1 and reloaded:get('ReloadFixed').ticks == " +
+			std::to_string(total) + ")"));
+	}
+}

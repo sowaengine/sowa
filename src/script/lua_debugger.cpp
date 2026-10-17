@@ -650,6 +650,7 @@ LuaResumeAction LuaDebugger::stop(lua_State *L, LuaStopReason reason, i32 firstL
 	default:
 		break;
 	}
+	if (action == LuaResumeAction::Abort) { ++_abortGeneration; }
 	_stepThread = L;
 	_stepDepth = depth;
 	refreshHooks(L);

@@ -90,6 +90,15 @@ void ProjectSettings::Serialize(Archive &archive) {
 	viewportNode.Field("Height", rendering.viewport.height);
 	viewportNode.EnumField("ScaleMode", rendering.viewport.scaleMode, ViewportScaleModeConstants());
 
+	Archive physicsNode = archive.Child("Physics");
+	i32 ticksPerSecond = physics.ticksPerSecond;
+	physicsNode.Field("TicksPerSecond", ticksPerSecond);
+	if (ticksPerSecond > 0) {
+		physics.ticksPerSecond = ticksPerSecond;
+	} else {
+		physicsNode.AddError("TicksPerSecond", "must be greater than zero");
+	}
+
 	const std::vector<std::string> rootKeys = archive.Keys();
 	serializeInput(archive, rootKeys);
 

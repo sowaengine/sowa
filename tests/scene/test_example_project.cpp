@@ -745,3 +745,32 @@ TEST_CASE("Example Player moves with the project's WASD move actions") {
 	CHECK(player.Get<Transform2D>()->position.x == doctest::Approx(stopped.x));
 	CHECK(player.Get<Transform2D>()->position.y == doctest::Approx(stopped.y));
 }
+
+TEST_CASE("Fixed gameplay demo buffers a frame input edge through zero ticks and consumes it once") {
+	ExampleFixture f;
+	f.open("res://scenes/fixed_gameplay.scene");
+	f.play();
+	Scene scene = f.scenes.Current();
+	Entity root = scene.Root();
+	Entity ship = f.child(scene, "Ship");
+	const f32 tick = f.physics.Config().fixedDelta;
+	f.input.HandleKey(Key::Space, KeyAction::Press);
+	f.tick(tick * 0.25f);
+	CHECK(f.fieldF32(root, "FixedGameplayDemo", "ticks") == 0.f);
+	CHECK(f.fieldF32(root, "FixedGameplayDemo", "kicks") == 0.f);
+	CHECK(f.physics.GetLinearVelocity(ship).y == 0.f);
+	// The edge expires before a tick is due; the script retains the command.
+	f.input.HandleKey(Key::Space, KeyAction::Release);
+	f.tick(tick * 2.75f);
+	CHECK(f.fieldF32(root, "FixedGameplayDemo", "ticks") == 3.f);
+	CHECK(f.fieldF32(root, "FixedGameplayDemo", "kicks") == 1.f);
+	CHECK(f.physics.GetLinearVelocity(ship).y > 100.f);
+	const f32 previous = f.physics.GetLinearVelocity(ship).y;
+	f.tick(tick);
+	CHECK(f.fieldF32(root, "FixedGameplayDemo", "kicks") == 1.f);
+	CHECK(f.physics.GetLinearVelocity(ship).y < previous); // Damping, no repeated impulse.
+	f.input.HandleKey(Key::D, KeyAction::Press);
+	f.tick(tick * 2.f);
+	CHECK(f.physics.GetLinearVelocity(ship).x > 0.f);
+	CHECK(f.child(scene, "Status").Get<Text2D>()->text.find("Physics ticks: 6") != std::string::npos);
+}

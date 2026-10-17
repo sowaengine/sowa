@@ -13,6 +13,7 @@ require("res://scripts/lifetime.lua")
 require("res://scripts/ui_demo.lua")
 require("res://scripts/parallax_demo.lua")
 require("res://scripts/physics_queries_demo.lua")
+require("res://scripts/fixed_gameplay_demo.lua")
 require("res://scripts/character_controller.lua")
 
 local Game = world:component("Game", {})

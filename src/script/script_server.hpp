@@ -142,7 +142,9 @@ class ScriptServer {
 	void destroyLuaSystem(const std::string &name);
 	void rememberLuaSystem(const std::string &name, System system);
 	void bindStartSystem(const std::string &typeName, ComponentType type);
+	bool startInstance(const std::string &typeName, ComponentType type, Entity entity);
 	void bindUpdateSystem(const std::string &typeName, ComponentType type);
+	void bindFixedUpdateSystem(const std::string &typeName, ComponentType type);
 	void bindExitObserver(const std::string &typeName, ComponentType type);
 	sol::table extrasTable(Entity entity, ComponentType type, bool create);
 	void clearExtras(Entity entity, ComponentType type);

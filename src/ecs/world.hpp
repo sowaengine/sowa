@@ -15,6 +15,7 @@
 #include "ecs/component_type.hpp"
 #include "ecs/ecs_types.hpp"
 #include "ecs/entity.hpp"
+#include "ecs/fixed_system_builder.hpp"
 #include "ecs/group.hpp"
 #include "ecs/query.hpp"
 #include "ecs/system.hpp"
@@ -81,6 +82,23 @@ class World {
 		return SystemBuilder<Components...>(_world, name, &_playOnlySystems,
 			&_playOnlySystemsEnabled);
 	}
+
+	// Fixed callbacks receive seconds explicitly; DeltaTime remains frame time.
+	template <typename... Components>
+	FixedSystemBuilder<Components...> CreateFixedSystem(const std::string &name) {
+		return FixedSystemBuilder<Components...>(_world, name, _fixedSystems, _fixedTick);
+	}
+
+	System RegisterUntypedFixedSystem(const std::string &name,
+		const std::vector<ComponentType> &with, const std::vector<ComponentType> &without,
+		std::function<void(Entity, f32)> callback);
+
+	// Structural edits commit after the tick; returns false on pause or cancellation.
+	bool RunFixedTick(f32 delta, const std::function<void()> &prepare,
+		const std::function<void()> &simulate);
+	void RefreshTransforms();
+	void CancelFixedTicks() { _fixedTick.cancelled = true; }
+	bool FixedTicksCancelled() const { return _fixedTick.cancelled; }
 
 	// Enables play-only systems. Always systems and engine transform/order passes remain
 	// active. Enabled by default.
@@ -238,6 +256,9 @@ class World {
 	flecs::world _world;
 	std::unordered_map<std::string, ComponentType> _componentsByName;
 	std::vector<System> _playOnlySystems;
+	std::vector<System> _fixedSystems;
+	System _transformSystem;
+	FixedTickState _fixedTick;
 	bool _playOnlySystemsEnabled = true;
 	std::vector<Entity> _destroyQueue;
 	std::unique_ptr<ImmediateMutate> _immediate;

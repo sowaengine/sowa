@@ -137,7 +137,9 @@ bool Application::Init(i32 width, i32 height, std::string_view title) {
 	BindUI(_scripts, _ui);
 
 	_audioMixer.Init(_world, _resources);
-	_physics.Init(_world);
+	PhysicsWorldConfig physicsConfig;
+	physicsConfig.fixedDelta = 1.f / _projectSettings.physics.ticksPerSecond;
+	_physics.Init(_world, physicsConfig);
 	// Audio output is optional; a missing device leaves the game silent.
 	_audioDevice = CreateAudioDevice(AudioAPI::MiniAudio);
 	if (_audioDevice == nullptr) {
@@ -443,6 +445,11 @@ bool Application::saveAndApplyProjectSettings(ProjectSettings settings, std::str
 	_input.SetActions(_projectSettings.input.actions);
 	_scripts.UpdateSettings(_projectSettings);
 	_scenes.SetAutoloadPaths(_projectSettings.application.autoloads);
+	if (_projectSettings.physics.ticksPerSecond != previous.physics.ticksPerSecond) {
+		PhysicsWorldConfig config = _physics.Config();
+		config.fixedDelta = 1.f / _projectSettings.physics.ticksPerSecond;
+		_physics.Init(_world, config);
+	}
 
 	if (replacementTarget.IsValid()) {
 		const RenderTargetHandle oldTarget = _gameTarget;

@@ -1,5 +1,8 @@
 #include "physics/physics_world.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 #include "core/log.hpp"
 #include "core/profiler.hpp"
 #include "ecs/components/transform2d.hpp"
@@ -265,7 +268,7 @@ void PhysicsWorld::bindWorld(World &world) {
 
 void PhysicsWorld::registerStepSystem(World &world) {
 	flecs::system system =
-		world.Flecs().system("PhysicsStep").kind(flecs::OnValidate).run([this](flecs::iter &) {
+		world.Flecs().system("PhysicsStep").kind(flecs::OnValidate).immediate().run([this](flecs::iter &) {
 			Sync();
 			Step(_ecsWorld->DeltaTime());
 		});
@@ -433,9 +436,11 @@ void PhysicsWorld::applyQueuedForces(BodyRecord &record) {
 	const f32 ppm2 = ppm * ppm;
 	if (record.forcePx.x != 0.f || record.forcePx.y != 0.f) {
 		b2Body_ApplyForceToCenter(record.id, toMeters(record.forcePx), true);
+		record.forcePx = {};
 	}
 	if (record.torquePx != 0.f) {
 		b2Body_ApplyTorque(record.id, record.torquePx / ppm2, true);
+		record.torquePx = 0.f;
 	}
 	if (record.impulsePx.x != 0.f || record.impulsePx.y != 0.f) {
 		b2Body_ApplyLinearImpulseToCenter(record.id, toMeters(record.impulsePx), true);
@@ -457,7 +462,7 @@ void PhysicsWorld::Sync() {
 	}
 }
 
-void PhysicsWorld::syncBodies() {
+void PhysicsWorld::syncBodies(bool existingOnly) {
 	std::unordered_set<Entity> live;
 	_bodiesQuery.Each([&](Entity entity, RigidBody2D &body) {
 		if (!entity.Has<Transform2D>()) {
@@ -468,6 +473,10 @@ void PhysicsWorld::syncBodies() {
 		}
 		_missingTransformWarned.erase(entity);
 		live.insert(entity);
+		const auto existing = _bodies.find(entity);
+		if (existingOnly && (existing == _bodies.end() || !b2Body_IsValid(existing->second.id))) {
+			return;
+		}
 		BodyRecord &record = _bodies[entity];
 		if (!b2Body_IsValid(record.id)) {
 			createBody(entity, body, record);
@@ -499,16 +508,25 @@ Entity PhysicsWorld::findBodyEntity(Entity collider) const {
 
 PhysicsWorld::ShapeLocal PhysicsWorld::computeShapeLocal(Entity collider, Entity owner,
 	const Collider2D &colliderData) const {
-	Vector2 bodyPos;
+	glm::mat4 bodyMatrix = ComputeWorldMatrix(owner);
 	f32 bodyRot = 0.f;
-	Matrix::DecomposeTransform2D(ComputeWorldMatrix(owner), &bodyPos, &bodyRot, nullptr);
+	Matrix::DecomposeTransform2D(bodyMatrix, nullptr, &bodyRot, nullptr);
+	// Remove world translation to avoid cancellation error in child geometry.
+	bodyMatrix[3] = glm::vec4(0.f, 0.f, 0.f, 1.f);
+	glm::mat4 relative(1.f);
+	for (Entity current = collider; current.IsAlive() && current != owner;
+		 current = current.GetParent()) {
+		if (const auto *transform = current.Get<Transform2D>()) {
+			relative = transform->LocalMatrix() * relative;
+		}
+	}
 
 	Vector2 colPos;
 	f32 colRot = 0.f;
 	Vector2 colScale(1.f, 1.f);
-	Matrix::DecomposeTransform2D(ComputeWorldMatrix(collider), &colPos, &colRot, &colScale);
+	Matrix::DecomposeTransform2D(bodyMatrix * relative, &colPos, &colRot, &colScale);
 
-	const Vector2 originLocal = RotatePx(colPos - bodyPos, -bodyRot);
+	const Vector2 originLocal = RotatePx(colPos, -bodyRot);
 	const f32 relRot = colRot - bodyRot;
 	const Vector2 center = originLocal + RotatePx(colliderData.offset, relRot);
 	return ShapeLocal{
@@ -544,13 +562,16 @@ bool PhysicsWorld::geometryChanged(const Collider2D &collider, const ShapeRecord
 	if (record.pushedRotation != collider.rotation) {
 		return true;
 	}
-	if (record.pushedCenterPx != local.centerPx) {
+	// Ignore decomposition roundoff; authored fields above compare exactly.
+	if (std::abs(record.pushedCenterPx.x - local.centerPx.x) > 1e-4f ||
+		std::abs(record.pushedCenterPx.y - local.centerPx.y) > 1e-4f) {
 		return true;
 	}
-	if (record.pushedLocalRotation != local.rotationDeg) {
+	if (std::abs(std::remainder(record.pushedLocalRotation - local.rotationDeg, 360.f)) > 1e-4f) {
 		return true;
 	}
-	if (record.pushedScale != local.scale) {
+	if (std::abs(record.pushedScale.x - local.scale.x) > 1e-5f ||
+		std::abs(record.pushedScale.y - local.scale.y) > 1e-5f) {
 		return true;
 	}
 	return false;
@@ -672,10 +693,13 @@ void PhysicsWorld::pushShapeMaterial(const Collider2D &collider, ShapeRecord &re
 	}
 }
 
-void PhysicsWorld::syncShapes() {
+void PhysicsWorld::syncShapes(bool existingOnly) {
 	std::unordered_set<Entity> live;
 	_collidersQuery.Each([&](Entity entity, Collider2D &collider) {
 		live.insert(entity);
+		if (existingOnly && !_shapes.contains(entity)) {
+			return;
+		}
 		const Entity owner = findBodyEntity(entity);
 		if (!owner.IsAlive()) {
 			if (_missingBodyWarned.insert(entity).second) {
@@ -786,7 +810,23 @@ void PhysicsWorld::pushPoses() {
 }
 
 void PhysicsWorld::writePoses() {
-	for (auto &[entity, record] : _bodies) {
+	// Write parents first so child local poses use the new parent pose.
+	std::vector<std::pair<size_t, Entity>> order;
+	order.reserve(_bodies.size());
+	for (const auto &[entity, record] : _bodies) {
+		(void)record;
+		size_t depth = 0;
+		for (Entity ancestor = entity.GetParent(); ancestor.IsAlive(); ancestor = ancestor.GetParent()) {
+			++depth;
+		}
+		order.emplace_back(depth, entity);
+	}
+	std::sort(order.begin(), order.end(), [](const auto &a, const auto &b) {
+		return a.first < b.first;
+	});
+	for (const auto &[depth, entity] : order) {
+		(void)depth;
+		BodyRecord &record = _bodies.at(entity);
 		Entity live = entity;
 		if (!b2Body_IsValid(record.id) || !live.IsAlive()) {
 			continue;
@@ -812,42 +852,69 @@ void PhysicsWorld::Step(f32 frameDelta) {
 		return;
 	}
 
+	// Step(0) can still prepare query poses while paused.
+	if (frameDelta > 0.f && _ecsWorld &&
+		(!_ecsWorld->PlayOnlySystemsEnabled() || _ecsWorld->FixedTicksCancelled())) {
+		return;
+	}
+
 	_frameEvents.clear();
 	pushPoses();
 	if (frameDelta <= 0.f) {
 		return;
 	}
 
-	_accumulator += frameDelta;
-	const f32 cap = _config.fixedDelta * static_cast<f32>(_config.maxStepsPerFrame);
-	_accumulator = Math::Clamp(_accumulator, 0.f, cap);
+	// Cap incoming time without losing the previous fractional remainder.
+	const f64 tickDelta = _config.fixedDelta;
+	const f64 cap = tickDelta * _config.maxStepsPerFrame;
+	_accumulator += std::min(static_cast<f64>(frameDelta), cap);
+	const f64 tolerance = tickDelta * 1e-6;
 
 	i32 ticks = 0;
-	while (_accumulator >= _config.fixedDelta) {
+	while (ticks < _config.maxStepsPerFrame && _accumulator + tolerance >= tickDelta) {
 		SOWA_PROFILE_SCOPE("Physics tick");
-		for (auto &[entity, record] : _bodies) {
-			(void)entity;
-			applyQueuedForces(record);
+		auto prepare = [this] {
+			Sync();
+			pushPoses();
+			if (_ecsWorld) {
+				_ecsWorld->RefreshTransforms();
+			}
+		};
+		auto simulate = [this] {
+			// New bodies and shapes join next tick.
+			if (_bodiesQuery.IsValid()) {
+				syncBodies(true);
+			}
+			if (_collidersQuery.IsValid()) {
+				syncShapes(true);
+			}
+			pushPoses();
+			for (auto &[entity, record] : _bodies) {
+				(void)entity;
+				applyQueuedForces(record);
+			}
+			b2World_Step(_worldId, _config.fixedDelta, _config.subStepCount);
+			writePoses();
+			if (_ecsWorld) {
+				_ecsWorld->RefreshTransforms();
+			}
+			sampleRaycasts();
+			drainEvents();
+			_gone.clear();
+		};
+		if (_ecsWorld) {
+			if (!_ecsWorld->RunFixedTick(_config.fixedDelta, prepare, simulate)) {
+				break;
+			}
+		} else {
+			simulate();
 		}
-		b2World_Step(_worldId, _config.fixedDelta, _config.subStepCount);
-		sampleRaycasts();
-		drainEvents();
-		_accumulator -= _config.fixedDelta;
+		_accumulator = std::max(0.0, _accumulator - tickDelta);
 		++ticks;
 	}
 	SOWA_PROFILE_COUNTER("Physics ticks", ticks);
 	SOWA_PROFILE_COUNTER("Physics bodies", _bodies.size());
 	SOWA_PROFILE_COUNTER("Physics contacts", b2World_GetCounters(_worldId).contactCount);
-
-	if (ticks > 0) {
-		for (auto &[entity, record] : _bodies) {
-			(void)entity;
-			record.forcePx = {};
-			record.torquePx = 0.f;
-		}
-		writePoses();
-	}
-	_gone.clear();
 }
 
 void PhysicsWorld::drainEvents() {

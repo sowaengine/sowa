@@ -47,6 +47,8 @@ Rendering:
     Width: 1920
     Height: 1080
     ScaleMode: KeepWidth
+Physics:
+  TicksPerSecond: 30
 GlobalStore:
   lives: "3"
   player_name: Sowa
@@ -69,6 +71,7 @@ GlobalStore:
 	CHECK(settings.rendering.viewport.width == 1920);
 	CHECK(settings.rendering.viewport.height == 1080);
 	CHECK(settings.rendering.viewport.scaleMode == ViewportScaleMode::KeepWidth);
+	CHECK(settings.physics.ticksPerSecond == 30);
 	CHECK(settings.globalStore.Get("lives") == "3");
 	CHECK(settings.globalStore.Get("player_name") == "Sowa");
 
@@ -101,6 +104,7 @@ Application:
 	CHECK(settings.rendering.viewport.height == 720);
 	CHECK(settings.rendering.viewport.scaleMode ==
 		  ViewportScaleMode::KeepAspect);
+	CHECK(settings.physics.ticksPerSecond == 60);
 	CHECK(settings.globalStore.Get("default_key") == "kept");
 
 	std::filesystem::remove_all(root);
@@ -136,6 +140,7 @@ TEST_CASE("ProjectSettings round-trips through Save and Load") {
 	written.rendering.viewport.width = 640;
 	written.rendering.viewport.height = 360;
 	written.rendering.viewport.scaleMode = ViewportScaleMode::NoResize;
+	written.physics.ticksPerSecond = 120;
 	written.globalStore.Set("lives", "3");
 	written.globalStore.Set("player_name", "Sowa");
 
@@ -157,6 +162,7 @@ TEST_CASE("ProjectSettings round-trips through Save and Load") {
 	CHECK(read.rendering.viewport.width == 640);
 	CHECK(read.rendering.viewport.height == 360);
 	CHECK(read.rendering.viewport.scaleMode == ViewportScaleMode::NoResize);
+	CHECK(read.physics.ticksPerSecond == 120);
 	CHECK(read.globalStore.Get("lives") == "3");
 	CHECK(read.globalStore.Get("player_name") == "Sowa");
 
@@ -268,5 +274,20 @@ TEST_CASE("ProjectSettings input section: absent keeps actions, empty clears the
 	REQUIRE(settings.Load(fs));
 	CHECK(settings.input.actions.empty());
 
+	std::filesystem::remove_all(root);
+}
+
+TEST_CASE("ProjectSettings keeps the previous physics rate for invalid values") {
+	const auto root = makeTempDir();
+	FileSystem fs;
+	fs.MountFolder("res", root);
+	for (const std::string value : {"0", "-30", "fast", "1.5"}) {
+		CAPTURE(value);
+		writeFile(root / "project.sowa", "Physics:\n  TicksPerSecond: " + value + "\n");
+		ProjectSettings settings;
+		settings.physics.ticksPerSecond = 30;
+		REQUIRE(settings.Load(fs));
+		CHECK(settings.physics.ticksPerSecond == 30);
+	}
 	std::filesystem::remove_all(root);
 }

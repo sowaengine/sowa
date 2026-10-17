@@ -37,7 +37,8 @@ struct BuildFixture {
 		fs::remove_all(root);
 		write(project / "project.sowa",
 			"Application:\n  Name: My Game\n  Version: 1.2.0\n"
-			"Rendering:\n  Window:\n    Width: 1280\n    Height: 720\n");
+			"Rendering:\n  Window:\n    Width: 1280\n    Height: 720\n"
+			"Physics:\n  TicksPerSecond: 120\n");
 		write(project / "scenes" / "main.scene", "scene");
 		write(project / "scenes" / "world2" / "boss.scene", "boss");
 		write(project / "secret" / "key.txt", "key");
@@ -118,6 +119,7 @@ build.on("configure", function(ctx)
     if ctx.platform == Platform.Web then
         res:include(".env.web", { as = ".env" })
         ctx.project.rendering.window.width = 960
+        ctx.project.physics.ticks_per_second = 30
     end
     if ctx.params.demo then
         res:exclude("scenes/world2/**")
@@ -211,6 +213,7 @@ TEST_CASE("building targets stages files, applies overrides and lays out each pl
 	const std::string linuxProject = archived(linuxZip, "project.sowa");
 	CHECK(linuxProject.find("channel: release") != std::string::npos);
 	CHECK(linuxProject.find("Width: 1280") != std::string::npos);
+	CHECK(linuxProject.find("TicksPerSecond: 120") != std::string::npos);
 
 	const fs::path demo = fixture.project / "export" / "demo";
 	CHECK(read(demo / "My Game Demo.exe") == "windows engine");
@@ -226,6 +229,9 @@ TEST_CASE("building targets stages files, applies overrides and lays out each pl
 	CHECK(read(site / "index.html").find("<title>My Game</title>") != std::string::npos);
 	CHECK(archived(site / "game.zip", ".env") == "ENV=web");
 	CHECK(archived(site / "game.zip", "project.sowa").find("Width: 960") != std::string::npos);
+
+	CHECK(archived(site / "game.zip", "project.sowa").find("TicksPerSecond: 30") !=
+		  std::string::npos);
 
 	// One timestamp per run.
 	CHECK(archived(linuxZip, "stamp.txt") == archived(site / "game.zip", "stamp.txt"));
@@ -363,6 +369,11 @@ TEST_CASE("build.lua mistakes report the script location") {
 	CHECK(failure("ctx.project.rendering.window.width = 'wide'") ==
 		  "Target 'linux': build.lua:3: ctx.project.rendering.window.width must be an "
 		  "integer, got string");
+	CHECK(failure("ctx.project.physics.ticks_per_second = 'fast'") ==
+		  "Target 'linux': build.lua:3: ctx.project.physics.ticks_per_second must be an "
+		  "integer, got string");
+	CHECK(failure("ctx.project.physics.ticks_per_second = 0").find(
+			  "ctx.project.physics.ticks_per_second must be between 1 and") != std::string::npos);
 	CHECK(failure("ctx.project.global_store.lives = 3") ==
 		  "Target 'linux': build.lua:3: ctx.project.global_store.lives must be a string, got "
 		  "integer");

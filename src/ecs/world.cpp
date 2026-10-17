@@ -19,6 +19,7 @@
 #include "core/log.hpp"
 #include "core/profiler.hpp"
 #include "core/reflection/field_ref.hpp"
+#include "core/scope_exit.hpp"
 #include "ecs/components/camera2d.hpp"
 #include "ecs/components/render_order.hpp"
 #include "ecs/components/scene_root.hpp"
@@ -167,7 +168,7 @@ void World::registerBuiltins() {
 	// Compute world transforms parent-first using the nearest ancestor with Transform2D.
 	// Roots compose against identity. PostUpdate runs after gameplay and physics write-back
 	// so rendering sees current poses.
-	_world.system<Transform2D, const Transform2D *>("CalculateTransforms")
+	flecs::system transforms = _world.system<Transform2D, const Transform2D *>("CalculateTransforms")
 		.term_at(1)
 		.parent()
 		.cascade()
@@ -177,6 +178,7 @@ void World::registerBuiltins() {
 			transform.worldMatrix = Matrix::CalculateTransform2D(transform.position,
 				transform.rotation, transform.scale, Vector2(0.f, 0.f), base);
 		});
+	_transformSystem = System(transforms);
 
 	// No system of its own: a camera contributes a matrix on demand rather than
 	// deriving per-entity state, so there is nothing for a pass to compute.
@@ -226,6 +228,7 @@ void World::registerBuiltins() {
 World::~World() = default;
 
 void World::Progress(f32 deltaTime) {
+	_fixedTick.cancelled = false;
 	// flecs treats progress(0) as "measure wall-clock since last frame".
 	// Callers pass an explicit dt; 0 must mean no time so tests and first
 	// frames do not jump. A minimum finite value keeps flecs off that branch.
@@ -637,15 +640,121 @@ System World::RegisterUntypedSystem(const std::string &name, const std::vector<C
 	return handle;
 }
 
+System World::RegisterUntypedFixedSystem(const std::string &name,
+	const std::vector<ComponentType> &with, const std::vector<ComponentType> &without,
+	std::function<void(Entity, f32)> callback) {
+	auto builder = _world.system(name.c_str());
+	builder.kind(0);
+	for (ComponentType type : with) {
+		if (type.IsValid()) {
+			builder.with(type.Raw());
+		}
+	}
+	for (ComponentType type : without) {
+		if (type.IsValid()) {
+			builder.without(type.Raw());
+		}
+	}
+	flecs::system system;
+	if (with.empty()) {
+		system = builder.run([this, callback](flecs::iter &it) {
+			_fixedTick.RunGlobal(it, callback);
+		});
+	} else {
+		system = builder.run([this, callback](flecs::iter &it) {
+			const auto system = it.system().id();
+			const f32 delta = it.delta_time();
+			const ecs_query_t *query = ecs_system_get(_world.c_ptr(), system)->query;
+			// Release the iterator before callbacks can move matching tables.
+			if (!(query->flags & EcsQueryMatchNothing)) {
+				it.fini();
+			}
+			const auto found = _fixedTick.matches.find(system);
+			if (found == _fixedTick.matches.end()) {
+				return;
+			}
+			// Iterate IDs so Lua table changes cannot repeat an instance.
+			const auto entities = found->second;
+			for (flecs::entity_t id : entities) {
+				if (_fixedTick.cancelled) {
+					break;
+				}
+				if (!ecs_is_alive(_world.c_ptr(), id)) {
+					continue;
+				}
+				ecs_iter_t match{};
+				if (!ecs_query_has(query, id, &match)) {
+					continue;
+				}
+				ecs_iter_fini(&match);
+				callback(Entity(flecs::entity(_world.c_ptr(), id)), delta);
+			}
+		});
+	}
+	System handle(system);
+	_fixedSystems.push_back(handle);
+	return handle;
+}
+
+bool World::RunFixedTick(f32 delta, const std::function<void()> &prepare,
+	const std::function<void()> &simulate) {
+	if (!_playOnlySystemsEnabled || _fixedTick.cancelled) {
+		return false;
+	}
+	// Isolate this tick's edits from the frame pipeline's deferred commands.
+	ecs_suspend_readonly_state_t state{};
+	flecs_suspend_readonly(_world.c_ptr(), &state);
+	const auto restore = MakeScopeExit([&] { flecs_resume_readonly(_world.c_ptr(), &state); });
+	prepare();
+	// Lua add() bypasses deferral, so capture membership before callbacks.
+	std::erase_if(_fixedSystems, [](const System &system) { return !system.IsValid(); });
+	std::vector<System> systems;
+	for (const System &system : _fixedSystems) {
+		if (system.IsEnabled()) {
+			systems.push_back(system);
+		}
+	}
+	_fixedTick.matches.clear();
+	for (const System &system : systems) {
+		auto &matches = _fixedTick.matches[system.Raw().id()];
+		ecs_iter_t it = ecs_query_iter(_world.c_ptr(), ecs_system_get(_world.c_ptr(), system.Raw().id())->query);
+		while (ecs_query_next(&it)) {
+			for (int i = 0; i < it.count; ++i) {
+				matches.insert(it.entities[i]);
+			}
+		}
+	}
+	_world.defer_begin();
+	const auto merge = MakeScopeExit([&] { _world.defer_end(); });
+	for (const System &system : systems) {
+		if (_fixedTick.cancelled) {
+			break;
+		}
+		if (system.IsEnabled()) {
+			ecs_run(_world.c_ptr(), system.Raw().id(), delta, nullptr);
+		}
+	}
+	if (_fixedTick.cancelled) {
+		return false;
+	}
+	simulate();
+	return true;
+}
+
+void World::RefreshTransforms() {
+	ecs_run(_world.c_ptr(), _transformSystem.Raw().id(), 0.f, nullptr);
+}
+
 void World::DestroyTrackedSystem(System system) {
 	if (!system.IsValid()) {
 		return;
 	}
 	const flecs::entity raw = system.Raw();
-	_playOnlySystems.erase(
-		std::remove_if(_playOnlySystems.begin(), _playOnlySystems.end(),
-			[&](const System &tracked) { return !tracked.IsValid() || tracked.Raw() == raw; }),
-		_playOnlySystems.end());
+	const auto removed = [raw](const System &tracked) {
+		return !tracked.IsValid() || tracked.Raw() == raw;
+	};
+	std::erase_if(_fixedSystems, removed);
+	std::erase_if(_playOnlySystems, removed);
 	system.Destroy();
 }
 

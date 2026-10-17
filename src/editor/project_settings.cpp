@@ -49,6 +49,7 @@ bool EditableProjectSettingsEqual(const ProjectSettings &a, const ProjectSetting
 		   a.rendering.viewport.width == b.rendering.viewport.width &&
 		   a.rendering.viewport.height == b.rendering.viewport.height &&
 		   a.rendering.viewport.scaleMode == b.rendering.viewport.scaleMode &&
+		   a.physics.ticksPerSecond == b.physics.ticksPerSecond &&
 		   a.input.actions == b.input.actions &&
 		   a.globalStore.GetStore() == b.globalStore.GetStore();
 }
@@ -59,6 +60,9 @@ std::string ValidateEditableProjectSettings(const ProjectSettings &settings) {
 	}
 	if (settings.rendering.viewport.width <= 0 || settings.rendering.viewport.height <= 0) {
 		return "Viewport width and height must be greater than zero.";
+	}
+	if (settings.physics.ticksPerSecond <= 0) {
+		return "Physics ticks per second must be greater than zero.";
 	}
 	if (std::string problem = validatePaths(settings.application.scripts, "Scripts");
 		!problem.empty()) {

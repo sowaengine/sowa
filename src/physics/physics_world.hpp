@@ -89,8 +89,9 @@ class PhysicsWorld {
 	// Bodies need Transform2D; colliders need a body on self or an ancestor.
 	void Sync();
 
-	// Accumulates fixed steps and preserves the remainder. Forces apply each tick;
-	// impulses apply once. Writes dynamic/kinematic poses to local Transform2D.
+	// Accumulates fixed steps and preserves the remainder. Forces apply for one tick;
+	// impulses apply once. Writes dynamic/kinematic poses parent-first to local Transform2D.
+	// With an ECS world, positive delta is ignored while paused/stopped or cancelled.
 	// Non-positive delta still syncs static/kinematic poses. No-op before initialization.
 	void Step(f32 frameDelta);
 
@@ -114,8 +115,8 @@ class PhysicsWorld {
 	// created one. Keyed on the Collider2D entity, not the body.
 	b2ShapeId ShapeId(Entity entity) const;
 
-	// Pixel-space force, reapplied at the start of every physics tick in
-	// the current Step, then dropped. No-op without RigidBody2D+Transform2D.
+	// Pixel-space force, summed until consumed at the start of
+	// the next actual tick, then dropped. No-op without RigidBody2D+Transform2D.
 	void ApplyForce(Entity entity, Vector2 forcePx);
 	// Pixel-space torque (force * lever in pixels). Same lifetime as force.
 	void ApplyTorque(Entity entity, f32 torquePx);
@@ -134,8 +135,8 @@ class PhysicsWorld {
 		return _events;
 	}
 
-	// Events drained from every b2World_Step in the last Step() call.
-	// Cleared at the start of Step. Empty if no tick ran.
+	// Events drained from every b2World_Step in the last accepted Step() call.
+	// Cleared at the start of Step; paused/cancelled no-ops retain the snapshot.
 	const std::vector<Collision2D> &FrameEvents() const {
 		return _frameEvents;
 	}
@@ -229,8 +230,8 @@ class PhysicsWorld {
 	void createWorld(const PhysicsWorldConfig &config);
 	void bindWorld(World &world);
 	void registerStepSystem(World &world);
-	void syncBodies();
-	void syncShapes();
+	void syncBodies(bool existingOnly = false);
+	void syncShapes(bool existingOnly = false);
 	bool ensureRecord(Entity entity, BodyRecord *&record);
 	void createBody(Entity entity, const RigidBody2D &body, BodyRecord &record);
 	void pushProperties(const RigidBody2D &body, BodyRecord &record);
@@ -283,7 +284,7 @@ class PhysicsWorld {
 	EventCallbackList _events;
 	std::vector<Collision2D> _frameEvents;
 	bool _debugDrawEnabled = false;
-	f32 _accumulator = 0.f;
+	f64 _accumulator = 0.0;
 };
 
 } // namespace sowa

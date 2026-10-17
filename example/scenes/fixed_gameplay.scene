@@ -1,0 +1,70 @@
+version: 1
+resources:
+  - id: 980401
+    type: ImageTexture
+    data:
+      path: res://textures/physics_white.png
+      filter: Linear
+root:
+  name: FixedGameplay
+  components:
+    FixedGameplayDemo: {}
+    SceneRoot:
+      sourcePath: res://scenes/fixed_gameplay.scene
+      activeCamera: FixedGameplay/Camera
+  children:
+    - name: Camera
+      components:
+        Transform2D:
+          position: [960, 540]
+        Camera2D: {}
+    - name: Background
+      components:
+        Transform2D:
+          position: [960, 540]
+        Sprite:
+          texture: 980401
+          size: [1920, 1080]
+          modulate: [0.035, 0.05, 0.085, 1]
+        RenderOrder:
+          zIndex: -10
+    - name: Title
+      components:
+        Transform2D:
+          position: [100, 980]
+        Text2D:
+          text: "Fixed-step gameplay"
+          fontSize: 52
+          modulate: [0.3, 0.85, 1, 1]
+    - name: Controls
+      components:
+        Transform2D:
+          position: [100, 880]
+        Text2D:
+          text: "WASD: continuous thrust    Space: one buffered upward impulse\nF7: pause/resume    F9: one tick while paused    F8: Stop (discard runtime changes)"
+          fontSize: 30
+          modulate: [0.9, 0.93, 1, 1]
+    - name: Status
+      components:
+        Transform2D:
+          position: [100, 740]
+        Text2D:
+          text: "Play Current (F6) to start."
+          fontSize: 30
+          modulate: [0.62, 0.7, 0.8, 1]
+    - name: Ship
+      components:
+        Transform2D:
+          position: [960, 400]
+        Sprite:
+          texture: 980401
+          size: [100, 100]
+          modulate: [0.3, 0.85, 1, 1]
+        RigidBody2D:
+          type: Dynamic
+          gravityScale: 0
+          linearDamping: 1
+          fixedRotation: true
+        Collider2D:
+          size: [100, 100]
+          density: 1

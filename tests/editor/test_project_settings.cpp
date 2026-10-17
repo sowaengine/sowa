@@ -76,3 +76,17 @@ TEST_CASE("shared bindings and unique action names") {
 	CHECK(editor::UniqueActionName(actions, "fire") == "fire");
 	CHECK(editor::UniqueActionName(actions, "new_action") == "new_action_3");
 }
+
+TEST_CASE("editable project settings compare and validate the physics rate") {
+	ProjectSettings a;
+	ProjectSettings b;
+	b.physics.ticksPerSecond = 30;
+	CHECK_FALSE(editor::EditableProjectSettingsEqual(a, b));
+	a.physics.ticksPerSecond = 30;
+	CHECK(editor::EditableProjectSettingsEqual(a, b));
+	CHECK(editor::ValidateEditableProjectSettings(b).empty());
+	b.physics.ticksPerSecond = 0;
+	CHECK(editor::ValidateEditableProjectSettings(b).find("Physics") != std::string::npos);
+	b.physics.ticksPerSecond = -60;
+	CHECK(editor::ValidateEditableProjectSettings(b).find("Physics") != std::string::npos);
+}

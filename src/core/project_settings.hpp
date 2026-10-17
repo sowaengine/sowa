@@ -50,6 +50,10 @@ class ProjectSettings : public Serializable {
 	} rendering;
 
 	struct {
+		i32 ticksPerSecond = 60;
+	} physics;
+
+	struct {
 		// Named input actions, in authored order. Loaded into Input at
 		// startup and whenever saved settings are applied.
 		std::vector<InputAction> actions;

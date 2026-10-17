@@ -1026,11 +1026,16 @@ void ScriptServer::SyncLifecycles() {
 		const bool hasStart = proto["_start"].get_type() == sol::type::function;
 		const bool hasUpdate = proto["_update"].get_type() == sol::type::function;
 		const bool hasExit = proto["_exit"].get_type() == sol::type::function;
-		if (hasStart || hasExit) {
+		const bool hasFixed = proto["_physics_update"].get_type() == sol::type::function;
+		if (hasStart || hasExit || hasFixed) {
 			bindStartSystem(typeName, type);
 		}
 		if (hasUpdate) {
 			bindUpdateSystem(typeName, type);
+		}
+		destroyLuaSystem("Lua." + typeName + "._physics_update");
+		if (hasFixed) {
+			bindFixedUpdateSystem(typeName, type);
 		}
 		bindExitObserver(typeName, type);
 	}
@@ -1039,15 +1044,11 @@ void ScriptServer::SyncLifecycles() {
 void ScriptServer::bindStartSystem(const std::string &typeName, ComponentType type) {
 	const std::string name = "Lua." + typeName + "._start";
 	destroyLuaSystem(name);
-	flecs::system sys = _world.Flecs()
-							.system(name.c_str())
-							.with(type.Raw())
-							.without<ScriptLive>(type.Raw())
-							.each([this, typeName, type](flecs::entity e) {
-								Entity entity(e);
-								callHook(typeName, "_start", entity, type, nullptr);
-								e.add<ScriptLive>(type.Raw());
-							});
+	auto builder = _world.Flecs().system(name.c_str())
+		.with(type.Raw()).without<ScriptLive>(type.Raw());
+	flecs::system sys = builder.each([this, typeName, type](flecs::entity e) {
+		startInstance(typeName, type, Entity(e));
+	});
 	System handle(sys);
 	_world.TrackPlayOnly(handle);
 	rememberLuaSystem(name, handle);
@@ -1062,6 +1063,41 @@ void ScriptServer::bindUpdateSystem(const std::string &typeName, ComponentType t
 			callHook(typeName, "_update", entity, type, &dt);
 		});
 	rememberLuaSystem(name, system);
+}
+
+void ScriptServer::bindFixedUpdateSystem(const std::string &typeName, ComponentType type) {
+	const std::string name = "Lua." + typeName + "._physics_update";
+	System system = _world.RegisterUntypedFixedSystem(name, {type}, {},
+		[this, typeName, type](Entity entity, f32 dt) {
+			if (!startInstance(typeName, type, entity)) {
+				return;
+			}
+			callHook(typeName, "_physics_update", entity, type, &dt);
+		});
+	rememberLuaSystem(name, system);
+}
+
+bool ScriptServer::startInstance(const std::string &typeName, ComponentType type, Entity entity) {
+	if (_world.FixedTicksCancelled() || !entity.IsAlive() || !entity.Has(type) ||
+		!entity.Raw().enabled()) {
+		return false;
+	}
+	if (entity.Raw().has<ScriptLive>(type.Raw())) {
+		return true;
+	}
+	// Commit before _start so removal observers can clear the live marker.
+	const bool deferred = _world.IsDeferred();
+	if (deferred) { _world.SuspendDefer(); }
+	entity.Raw().add<ScriptLive>(type.Raw());
+	if (deferred) { _world.ResumeDefer(); }
+	callHook(typeName, "_start", entity, type, nullptr);
+	if (_world.FixedTicksCancelled()) {
+		if (entity.IsAlive()) {
+			entity.Raw().remove<ScriptLive>(type.Raw());
+		}
+		return false;
+	}
+	return entity.IsAlive() && entity.Has(type);
 }
 
 void ScriptServer::bindExitObserver(const std::string &typeName, ComponentType type) {
@@ -1101,8 +1137,13 @@ bool ScriptServer::callHook(const std::string &typeName, const char *hook, Entit
 		return true;
 	}
 	sol::protected_function fn = object;
+	const u64 abortGeneration = Debugger().AbortGeneration();
 	sol::protected_function_result result =
 		dt != nullptr ? fn(ComponentView{entity, type}, *dt) : fn(ComponentView{entity, type});
+	if (Debugger().AbortGeneration() != abortGeneration) {
+		_world.CancelFixedTicks();
+		return false;
+	}
 	if (result.valid()) {
 		return true;
 	}
@@ -1133,6 +1174,9 @@ void ScriptServer::dispatchCollision(const Collision2D &event) {
 
 	Entity targets[] = {event.colliderA, event.colliderB, event.bodyA, event.bodyB};
 	for (i32 i = 0; i < 4; ++i) {
+		if (_world.FixedTicksCancelled()) {
+			return;
+		}
 		const Entity self = targets[i];
 		if (!self.IsAlive()) {
 			continue;
@@ -1156,6 +1200,9 @@ void ScriptServer::dispatchCollision(const Collision2D &event) {
 			if (!type.IsValid() || !self.Has(type)) {
 				continue;
 			}
+			if (_world.FixedTicksCancelled()) {
+				return;
+			}
 			callCollisionHook(typeName, hook, self, type, other);
 		}
 	}
@@ -1175,7 +1222,12 @@ void ScriptServer::callCollisionHook(const std::string &typeName, const char *ho
 	const ProfileScopeGuard profileScope(Profiler::Main(), hookProfileName(typeName, hook));
 #endif
 	sol::protected_function fn = object;
+	const u64 abortGeneration = Debugger().AbortGeneration();
 	sol::protected_function_result result = fn(ComponentView{entity, type}, other);
+	if (Debugger().AbortGeneration() != abortGeneration) {
+		_world.CancelFixedTicks();
+		return;
+	}
 	if (result.valid()) {
 		return;
 	}

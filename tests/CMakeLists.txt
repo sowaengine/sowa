@@ -92,6 +92,7 @@ add_executable(sowa_tests
   audio/test_audio_mixer.cpp
 
   physics/test_physics_world.cpp
+  physics/test_fixed_gameplay.cpp
   physics/test_rigid_body2d.cpp
   physics/test_collider2d.cpp
   physics/test_transform_sync.cpp

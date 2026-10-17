@@ -180,3 +180,109 @@ TEST_CASE("Pause from inside a frame lets that frame finish and freezes the next
 	CHECK(Runs(play) == 2);
 	CHECK(BoxY(play) == paused);
 }
+
+TEST_CASE("Paused Step runs exactly one fixed callback with a fractional remainder and cap one") {
+	Fixture f;
+	PhysicsWorldConfig config;
+	config.maxStepsPerFrame = 1;
+	f.physics.Init(f.world, config);
+	Scene play = f.play();
+	const f32 tick = f.physics.Config().fixedDelta;
+	int fixed = 0;
+	int frames = 0;
+	f.world.CreateFixedSystem<Ticker>("FixedPausedCounter").Each(
+		[&](Entity, f32 dt, Ticker &) { CHECK(dt == tick); ++fixed; });
+	f.world.CreateSystem<Ticker>("FramePausedCounter").Each(
+		[&](Entity, Ticker &) { ++frames; });
+	REQUIRE(f.scripts.DoString(R"(
+		local M = world:component('PausedFixedLua', { frames = 0, fixed = 0 })
+		function M:_update(dt) self.frames = self.frames + 1 end
+		function M:_physics_update(dt) self.fixed = self.fixed + 1 end
+	)"));
+	Entity box = play.Root().Find("Box");
+	box.Add(f.world.FindComponent("PausedFixedLua"));
+	f.scripts.SetEntity("pausedBox", box);
+	f.frame(tick * 0.4f);
+	const f32 remainder = f.physics.Accumulator();
+	REQUIRE(remainder > 0.f);
+	f.scenes.Pause();
+	const f32 y = BoxY(play);
+	f.frame(10.f);
+	CHECK(fixed == 0);
+	CHECK(frames == 1);
+	CHECK(BoxY(play) == y);
+	for (int n = 1; n <= 3; ++n) {
+		f.scenes.Step();
+		f.frame(10.f);
+		CHECK(f.scenes.IsPaused());
+		CHECK(fixed == n);
+		CHECK(frames == n + 1);
+		CHECK(f.physics.Accumulator() == doctest::Approx(remainder));
+		f.frame(10.f);
+		CHECK(fixed == n);
+	}
+	CHECK(f.scripts.DoString("local m = pausedBox:get('PausedFixedLua'); assert(m.frames == 4 and m.fixed == 3)"));
+	f.scenes.Resume();
+	f.frame(tick * 0.6f);
+	CHECK(fixed == 4);
+	CHECK(f.physics.Accumulator() == doctest::Approx(0.f).epsilon(0.00001));
+}
+
+TEST_CASE("Pause inside fixed gameplay finishes the selected catch-up frame and Stop resets tick state") {
+	Fixture f;
+	f.scenes.SetPlaySessionCallbacks([&] { f.physics.ResetSimulation(); },
+		[&] { f.physics.ResetSimulation(); });
+	Scene play = f.play();
+	int runs = 0;
+	f.world.CreateFixedSystem<Ticker>("PauseFromFixed").Each([&](Entity, f32, Ticker &) {
+		++runs;
+		if (runs == 1) { f.scenes.Pause(); }
+	});
+	const f32 tick = f.physics.Config().fixedDelta;
+	f.frame(tick * 2.5f);
+	CHECK(runs == 2);
+	CHECK(f.scenes.IsPaused());
+	f.frame(tick * 3.f);
+	CHECK(runs == 2);
+	Entity box = play.Root().Find("Box");
+	f.physics.ApplyForce(box, {10000.f, 0.f});
+	f.scenes.Stop();
+	f.frame(tick);
+	CHECK_FALSE(f.scenes.IsPlaying());
+	CHECK(f.physics.Accumulator() == 0.f);
+	CHECK(f.physics.FrameEvents().empty());
+	CHECK_FALSE(b2Body_IsValid(f.physics.BodyId(box)));
+	play = f.play();
+	f.frame(tick);
+	CHECK(runs == 3);
+	CHECK(f.physics.GetLinearVelocity(play.Root().Find("Box")).x == 0.f);
+}
+
+TEST_CASE("Paused single stepping is exact at different fixed rates and near-full remainders") {
+	for (f32 tick : {1.f / 30.f, 1.f / 120.f}) {
+		for (f32 fraction : {0.1f, 0.999f}) {
+			Fixture f;
+			PhysicsWorldConfig config;
+			config.fixedDelta = tick;
+			config.maxStepsPerFrame = 1;
+			f.physics.Init(f.world, config);
+			f.play();
+			int callbacks = 0;
+			f.world.CreateFixedSystem<Ticker>("DifferentRateStep").Each(
+				[&](Entity, f32 dt, Ticker &) { CHECK(dt == tick); ++callbacks; });
+			f.frame(tick * fraction);
+			const f32 remainder = f.physics.Accumulator();
+			REQUIRE(callbacks == 0);
+			f.scenes.Pause();
+			for (int n = 1; n <= 30; ++n) {
+				f.scenes.Step();
+				f.frame(10.f);
+				CHECK(callbacks == n);
+				CHECK(f.scenes.IsPaused());
+				CHECK(f.physics.Accumulator() == doctest::Approx(remainder));
+				f.frame(10.f);
+				CHECK(callbacks == n);
+			}
+		}
+	}
+}

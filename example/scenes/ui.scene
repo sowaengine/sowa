@@ -206,7 +206,7 @@ root:
                 - 850
                 - 30
             UILabel:
-              text: "Composable controls. Shared themes. Keyboard and mouse."
+              text: ""
               fontSize: 19
               modulate:
                 - 0.7
@@ -447,7 +447,7 @@ root:
                         - 160
                         - 36
                     UILabel:
-                      text: "Try the controls. Tab moves focus."
+                      text: ""
                       fontSize: 17
             -
               name: "Library"
@@ -908,7 +908,7 @@ root:
                         - 160
                         - 60
                     UILabel:
-                      text: "Arrow keys change selection."
+                      text: ""
                       fontSize: 17
         -
           name: "Modal"
@@ -1003,5 +1003,5 @@ root:
                 - 0
                 - 1
             UILabel:
-              text: "TAB  Navigate     ENTER  Activate     ESC  Close     CTRL/CMD+C/V  Clipboard"
+              text: ""
               fontSize: 16

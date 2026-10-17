@@ -402,6 +402,20 @@ void ProjectSettingsPanel::Draw(ProjectSettings &project, FileSystem &files, boo
 			ImGui::EndTabItem();
 		}
 
+		if (ImGui::BeginTabItem("Physics")) {
+			ImGui::BeginChild("##project_physics_content");
+			ImGui::BeginDisabled(playing || pending);
+			if (BeginInspectorTable("##project_physics", 140.f)) {
+				InspectorFieldRow("project_ticks_per_second", "Ticks per second");
+				ImGui::InputInt("##", &_draft.physics.ticksPerSecond);
+				ImGui::PopID();
+				ImGui::EndTable();
+			}
+			ImGui::EndDisabled();
+			ImGui::EndChild();
+			ImGui::EndTabItem();
+		}
+
 		if (ImGui::BeginTabItem(ICON_FA_KEYBOARD " Input")) {
 			inputTabActive = true;
 			ImGui::BeginChild("##project_input_content");

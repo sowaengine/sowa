@@ -100,6 +100,7 @@ function internal.project(data, scale_modes, scale_mode_list, state)
 			window = { width = "integer", height = "integer" },
 			viewport = { width = "integer", height = "integer", scale_mode = "scale_mode" },
 		},
+		physics = { ticks_per_second = "integer" },
 		global_store = "map",
 	}
 
@@ -792,6 +793,7 @@ sol::table BuildScript::Impl::makeProject(const ProjectSettings &project) {
 			"viewport",
 			lua.create_table_with("width", project.rendering.viewport.width, "height",
 				project.rendering.viewport.height, "scale_mode", scaleMode)),
+		"physics", lua.create_table_with("ticks_per_second", project.physics.ticksPerSecond),
 		"global_store", lua.create_table());
 	sol::table store = projectData["global_store"];
 	for (const auto &[key, value] : project.globalStore.GetStore()) {
@@ -809,6 +811,7 @@ sol::table BuildScript::Impl::makeProject(const ProjectSettings &project) {
 bool BuildScript::Impl::readProject(ProjectSettings &project, std::string &error) {
 	sol::table application = projectData["application"];
 	sol::table rendering = projectData["rendering"];
+	sol::table physics = projectData["physics"];
 	sol::table window = rendering["window"];
 	sol::table viewport = rendering["viewport"];
 
@@ -851,7 +854,9 @@ bool BuildScript::Impl::readProject(ProjectSettings &project, std::string &error
 		!readInt(viewport, "width", "ctx.project.rendering.viewport.width",
 			project.rendering.viewport.width) ||
 		!readInt(viewport, "height", "ctx.project.rendering.viewport.height",
-			project.rendering.viewport.height)) {
+			project.rendering.viewport.height) ||
+		!readInt(physics, "ticks_per_second", "ctx.project.physics.ticks_per_second",
+			project.physics.ticksPerSecond)) {
 		return false;
 	}
 	const std::string scaleMode = viewport.get<std::string>("scale_mode");
