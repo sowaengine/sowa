@@ -290,6 +290,31 @@ Entity Entity::Duplicate(Entity parent) const {
 	return copy;
 }
 
+std::unordered_map<Entity, Entity> Entity::DuplicateRoots(const std::vector<Entity> &roots) {
+	EntityMap mapping;
+	if (roots.empty()) {
+		return mapping;
+	}
+	for (Entity root : roots) {
+		if (!root.IsAlive() || root.Raw().world().is_deferred() ||
+			root.Raw().world().c_ptr() != roots.front().Raw().world().c_ptr()) {
+			return {};
+		}
+		for (Entity other : roots) {
+			if (root != other && root.IsDescendantOf(other)) {
+				return {};
+			}
+		}
+	}
+	for (Entity root : roots) {
+		if (!mapping.contains(root)) {
+			CloneSubtree(root, root.GetParent(), mapping);
+		}
+	}
+	RemapEntityRefs(mapping);
+	return mapping;
+}
+
 Entity Entity::Find(std::string_view path) const {
 	if (!IsAlive() || path.empty()) {
 		return Entity();

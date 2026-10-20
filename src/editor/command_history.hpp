@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -83,4 +84,35 @@ class CommandHistory {
 	std::size_t _maxEntries = kDefaultMaxEntries;
 };
 
+// Children must leave their own state unchanged on failure. Successfully applied
+// siblings are rolled back; failed history movement never advances the cursor.
+class CommandBatch final : public EditCommand {
+  public:
+	explicit CommandBatch(std::string name) : _name(std::move(name)) {
+	}
+
+	~CommandBatch() override {
+		Discard();
+	}
+
+	void Add(std::unique_ptr<EditCommand> command) {
+		_commands.push_back(std::move(command));
+	}
+
+	bool Empty() const {
+		return _commands.empty();
+	}
+
+	std::string_view Name() const override {
+		return _name;
+	}
+
+	bool Undo() override;
+	bool Redo() override;
+	void Discard() override;
+
+  private:
+	std::string _name;
+	std::vector<std::unique_ptr<EditCommand>> _commands;
+};
 } // namespace sowa::editor

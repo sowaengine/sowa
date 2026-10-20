@@ -8,6 +8,9 @@
 namespace sowa {
 
 void Editor::drawSpriteSheetEditor(ResourceRegistry &resources, bool playing) {
+	if (multiSelected()) {
+		return;
+	}
 	if (!_showSpriteSheetEditor) {
 		return;
 	}
@@ -17,14 +20,14 @@ void Editor::drawSpriteSheetEditor(ResourceRegistry &resources, bool playing) {
 		return;
 	}
 
-	auto *sprite = _selected.Get<AnimatedSprite>();
+	auto *sprite = Selected().Get<AnimatedSprite>();
 	if (!sprite) {
 		ImGui::TextDisabled("Select an AnimatedSprite to edit its animations.");
 		ImGui::End();
 		return;
 	}
 
-	const bool editable = editor::CanEdit(_selected, playing);
+	const bool editable = editor::CanEdit(Selected(), playing);
 	ImGui::BeginDisabled(!editable);
 	auto library = resources.Get<SpriteSheetAnimation>(sprite->animations);
 	if (!library) {
@@ -38,17 +41,17 @@ void Editor::drawSpriteSheetEditor(ResourceRegistry &resources, bool playing) {
 			if (library) {
 				const auto empty = editor::SaveResource(*library);
 				library->Set("Animation", {});
-				sprite = _selected.Get<AnimatedSprite>();
+				sprite = Selected().Get<AnimatedSprite>();
 				sprite->animations = id;
 				sprite->currentAnimation = "Animation";
-				editor::RecordAnimatedSpriteEdit(_sceneSaveStates, _editingScene, _selected,
+				editor::RecordAnimatedSpriteEdit(_sceneSaveStates, _editingScene, Selected(),
 					resources, id, before, *sprite, empty, editor::SaveResource(*library), true);
 			}
 		}
 	}
 
 	if (library) {
-		const auto before = *_selected.Get<AnimatedSprite>();
+		const auto before = *Selected().Get<AnimatedSprite>();
 		const auto beforeData = editor::SaveResource(*library);
 		auto animation = before.currentAnimation;
 		ResourceID createdTexture;
@@ -64,14 +67,14 @@ void Editor::drawSpriteSheetEditor(ResourceRegistry &resources, bool playing) {
 			return selection.changed;
 		};
 
-		_spriteSheetPanel.Select(_selected, library->Id());
+		_spriteSheetPanel.Select(Selected(), library->Id());
 		if (_spriteSheetPanel.Draw(*library, animation, resources, pickTexture)) {
 			// Creating scene resources can move component storage.
-			sprite = _selected.Get<AnimatedSprite>();
+			sprite = Selected().Get<AnimatedSprite>();
 			sprite->currentAnimation = animation;
 			sprite->frame = 0;
 			sprite->playback = {};
-			editor::RecordAnimatedSpriteEdit(_sceneSaveStates, _editingScene, _selected, resources,
+			editor::RecordAnimatedSpriteEdit(_sceneSaveStates, _editingScene, Selected(), resources,
 				library->Id(), before, *sprite, beforeData, editor::SaveResource(*library), false,
 				createdTexture);
 		}

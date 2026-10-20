@@ -162,6 +162,11 @@ u32 GLGraphicsDevice::ReadRenderTargetUInt(RenderTargetHandle handle, u32 attach
 	return _renderTargets.ReadUInt(handle, attachment, x, y);
 }
 
+std::vector<u32> GLGraphicsDevice::ReadRenderTargetUIntRect(RenderTargetHandle handle,
+	u32 attachment, i32 x, i32 y, i32 width, i32 height) {
+	return _renderTargets.ReadUIntRect(handle, attachment, x, y, width, height);
+}
+
 void GLGraphicsDevice::SetViewport(i32 x, i32 y, i32 width, i32 height) {
 	glViewport(x, y, width, height);
 }

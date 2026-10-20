@@ -257,7 +257,7 @@ TEST_CASE("Scale gizmo follows rotated local axes and changes one scale componen
 	CHECK(geometry->xDirection.y == doctest::Approx(-1.f));
 	auto drag = f.begin(Mode::Scale, Handle::X, {250.f, 108.f});
 	const auto scaled = editor::UpdateGizmoDrag(drag, {250.f, 36.f});
-	CHECK(scaled.scale.x == doctest::Approx(4.f));
+	CHECK(scaled.scale.x == doctest::Approx(2.f * std::exp(1.f)));
 	CHECK(scaled.scale.y == doctest::Approx(3.f));
 	CHECK(scaled.rotation == doctest::Approx(90.f));
 	CHECK(scaled.position == Vector2(0.f));
@@ -273,6 +273,28 @@ TEST_CASE("Scale gizmo can restore zero scale and uniformly scale mirrored entit
 	const auto scaled = editor::UpdateGizmoDrag(drag, {286.f, 144.f});
 	CHECK(scaled.scale.x == doctest::Approx(-2.f * std::exp(1.f)));
 	CHECK(scaled.scale.y == doctest::Approx(3.f * std::exp(1.f)));
+}
+
+TEST_CASE("Axis scale drags stay monotonic and preserve reflections on both axes") {
+	TransformGizmoFixture f;
+	for (Handle handle : {Handle::X, Handle::Y}) {
+		f.entity.Get<Transform2D>()->scale = {-2, -3};
+		const Vector2 start = handle == Handle::X ? Vector2(322, 180) : Vector2(250, 108);
+		const Vector2 direction = handle == Handle::X ? Vector2(1, 0) : Vector2(0, -1);
+		auto drag = f.begin(Mode::Scale, handle, start);
+		const auto larger = editor::UpdateGizmoDrag(drag, start + direction * 72);
+		const auto smaller = editor::UpdateGizmoDrag(drag, start - direction * 144);
+		const f32 before = handle == Handle::X ? -2 : -3;
+		CHECK((handle == Handle::X ? larger.scale.x : larger.scale.y) ==
+			doctest::Approx(before * std::exp(1.f)));
+		CHECK((handle == Handle::X ? smaller.scale.x : smaller.scale.y) ==
+			doctest::Approx(before * std::exp(-2.f)));
+		CHECK(larger.scale.x < 0);
+		CHECK(larger.scale.y < 0);
+		CHECK(smaller.scale.x < 0);
+		CHECK(smaller.scale.y < 0);
+	}
+	CHECK(editor::GizmoScaleFactor(0) == 1);
 }
 
 TEST_CASE("Transform gizmo rejects missing transforms and singular parents") {

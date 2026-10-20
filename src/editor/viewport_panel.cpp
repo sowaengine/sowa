@@ -11,6 +11,7 @@
 #include "resource/resource_registry.hpp"
 #include "scene/scene_manager.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 
@@ -79,6 +80,8 @@ void Editor::drawViewport(u64 gameTextureId, Vector2 gameSize, bool playing, Wor
 	ImGui::Begin(ICON_FA_CUBE "  Viewport");
 	ImGui::PopStyleVar();
 	drawSceneTabs(scenes, resources, playing);
+	handleSelectionShortcuts(resources,
+		editor::CanCreateChild(Selected()) ? Selected() : scenes.EditorCurrent().Root());
 	if (_gizmoDrag && _gizmoScene.Root() != scenes.EditorCurrent().Root()) {
 		finishTransformGizmo();
 	}
@@ -132,6 +135,8 @@ void Editor::drawViewport(u64 gameTextureId, Vector2 gameSize, bool playing, Wor
 			}
 
 			if (playing || cameraPreview) {
+				_marquee.reset();
+				_boxRequest.reset();
 				finishUIGizmo();
 				_cameraDragging = false;
 			} else {
@@ -153,8 +158,8 @@ void Editor::drawViewport(u64 gameTextureId, Vector2 gameSize, bool playing, Wor
 						active ? 2.f : 1.25f);
 				});
 				const bool tilePainting = current.IsValid() &&
-										  editor::IsInSceneTree(_selected, current.Root()) &&
-										  drawTilemapBrush(editorViewProjection, image);
+					editor::IsInSceneTree(Selected(), current.Root()) &&
+					drawTilemapBrush(editorViewProjection, image);
 				world.Each<Raycast2D>([&](Entity ray, Raycast2D &) {
 					if (current.IsValid() && editor::IsInSceneTree(ray, current.Root())) {
 						if (const auto line = editor::RaycastGizmoLine(ray)) {
@@ -164,37 +169,60 @@ void Editor::drawViewport(u64 gameTextureId, Vector2 gameSize, bool playing, Wor
 					}
 				});
 				bool gizmoInput = current.IsValid() &&
-								  editor::IsInSceneTree(_selected, current.Root()) &&
-								  drawRaycastGizmo(editorViewProjection, image);
+					editor::IsInSceneTree(Selected(), current.Root()) &&
+					drawRaycastGizmo(editorViewProjection, image);
 				gizmoInput = drawUIGizmo(image, gameSize, hoveredEntity) || gizmoInput;
-				if (!_selected.Has<UIRect>()) {
+				if (!Selected().Has<UIRect>()) {
 					gizmoInput = drawNinePatchGizmo(editorViewProjection, image) || gizmoInput;
 				}
 				if (tilePainting) {
 					finishTransformGizmo();
 				}
-				if (!_ninePatchBefore && !_selected.Has<UIRect>() &&
+				if (!_ninePatchBefore && (multiSelected() || !Selected().Has<UIRect>()) &&
 					_gizmoMode != editor::GizmoMode::None && !tilePainting && !gizmoInput &&
-					current.IsValid() && editor::IsInSceneTree(_selected, current.Root())) {
+					current.IsValid() && editor::IsInSceneTree(Selected(), current.Root())) {
 					gizmoInput = drawTransformGizmo(editorViewProjection, image) || gizmoInput;
-					if (!editor::CanEdit(_selected, false)) {
-						if (const auto position = editor::SelectionWorldPosition(_selected)) {
+					if (!editor::CanEdit(Selected(), false)) {
+						if (const auto position = editor::SelectionWorldPosition(Selected())) {
 							drawSelectionMarker(*draw, editorViewProjection, image, *position);
 						}
 					}
 				}
 				draw->PopClipRect();
 
-				if (!tilePainting && !gizmoInput && ImGui::IsItemHovered() &&
-					ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-					_selected =
-						current.IsValid() && editor::IsInSceneTree(hoveredEntity, current.Root())
-							? hoveredEntity
-							: Entity{};
+				if (!tilePainting && !gizmoInput && !_gizmoDrag) {
+					drawBoxSelection(image, gameSize, hoveredEntity, current, resources);
+				}
+				for (Entity member : selection().Members()) {
+					if (const auto *rect = member.Get<UIRect>()) {
+						std::array<ImVec2, 4> points;
+						for (std::size_t i = 0; i < 4; ++i) {
+							points[i] =
+								ImVec2(image.x + rect->viewportCorners[i].x * image.w / gameSize.x,
+									image.y + rect->viewportCorners[i].y * image.h / gameSize.y);
+						}
+						draw->PushClipRect(min, max, true);
+						draw->AddPolyline(points.data(), 4,
+							member == Selected() ? IM_COL32(255, 220, 110, 255)
+												 : IM_COL32(110, 190, 255, 255),
+							ImDrawFlags_Closed, 2.f);
+						draw->PopClipRect();
+					}
+					if (const auto position = editor::SelectionWorldPosition(member)) {
+						const Vector2 point =
+							editor::WorldToViewportImage(editorViewProjection, *position, image);
+						draw->PushClipRect(min, max, true);
+						draw->AddCircle(ImVec2(point.x, point.y), member == Selected() ? 9.f : 6.f,
+							member == Selected() ? IM_COL32(255, 220, 110, 255)
+												 : IM_COL32(110, 190, 255, 255),
+							20, 2.f);
+						draw->PopClipRect();
+					}
 				}
 
-				if (!_gizmoDrag && !_raycastDrag && !_uiDragBefore && !_ninePatchBefore &&
-					ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+				if (!_marquee && !_gizmoDrag && !_raycastDrag && !_uiDragBefore &&
+					!_ninePatchBefore && ImGui::IsItemHovered() &&
+					ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 					_cameraDragging = true;
 				}
 				if (!ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
@@ -205,8 +233,8 @@ void Editor::drawViewport(u64 gameTextureId, Vector2 gameSize, bool playing, Wor
 					_camera.position += editor::PanDelta(Vector2(d.x, d.y), _camera.zoom, gameSize,
 						Vector2(_gameImageRect.w, _gameImageRect.h));
 				}
-				if (!_gizmoDrag && !_raycastDrag && !_uiDragBefore && !_ninePatchBefore &&
-					ImGui::IsItemHovered()) {
+				if (!_marquee && !_gizmoDrag && !_raycastDrag && !_uiDragBefore &&
+					!_ninePatchBefore && ImGui::IsItemHovered()) {
 					const f32 wheel = ImGui::GetIO().MouseWheel;
 					if (wheel != 0.f) {
 						const f32 oldZoom = _camera.zoom;
@@ -228,7 +256,10 @@ void Editor::drawViewport(u64 gameTextureId, Vector2 gameSize, bool playing, Wor
 }
 
 bool Editor::drawRaycastGizmo(const glm::mat4 &viewProjection, const Rect &image) {
-	const auto line = editor::RaycastGizmoLine(_selected);
+	if (multiSelected()) {
+		return false;
+	}
+	const auto line = editor::RaycastGizmoLine(Selected());
 	if (!line) {
 		return false;
 	}
@@ -241,14 +272,14 @@ bool Editor::drawRaycastGizmo(const glm::mat4 &viewProjection, const Rect &image
 						 point.x <= image.x + image.w && point.y >= image.y &&
 						 point.y <= image.y + image.h;
 	if (!_raycastDrag && !_gizmoDrag && hovered && ImGui::IsWindowHovered() &&
-		ImGui::IsMouseClicked(ImGuiMouseButton_Left) && editor::CanEdit(_selected, false)) {
-		_raycastDrag = RaycastDrag{_editingScene, _selected,
-			_selected.Get<Raycast2D>()->targetPosition, viewProjection, image};
+		ImGui::IsMouseClicked(ImGuiMouseButton_Left) && editor::CanEdit(Selected(), false)) {
+		_raycastDrag = RaycastDrag{_editingScene, Selected(),
+			Selected().Get<Raycast2D>()->targetPosition, viewProjection, image};
 	}
 	if (_raycastDrag) {
 		if (const auto target =
-				editor::RaycastTargetFromViewport(_selected, viewProjection, image, point)) {
-			_selected.Get<Raycast2D>()->targetPosition = *target;
+				editor::RaycastTargetFromViewport(Selected(), viewProjection, image, point)) {
+			Selected().Get<Raycast2D>()->targetPosition = *target;
 		}
 		return true;
 	}
@@ -281,4 +312,90 @@ void Editor::finishRaycastGizmo(bool cancel) {
 	}
 }
 
+bool Editor::drawBoxSelection(const Rect &image, Vector2 gameSize, Entity hovered, Scene scene,
+	ResourceRegistry &resources) {
+	const auto &io = ImGui::GetIO();
+	const Vector2 mouse(io.MousePos.x, io.MousePos.y);
+	if (_marquee &&
+		(_marquee->root != scene.Root() ||
+			(_marquee->image.x != image.x || _marquee->image.y != image.y ||
+				_marquee->image.w != image.w || _marquee->image.h != image.h) ||
+			ImGui::IsKeyPressed(ImGuiKey_Escape))) {
+		// The marquee has not changed membership yet; preserve any newly active tab.
+		_marquee.reset();
+		return true;
+	}
+	if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+		commitPendingSceneEdits(resources);
+		auto mode = editor::SelectionMode::Replace;
+		if (io.KeyCtrl || io.KeySuper) {
+			mode = editor::SelectionMode::Toggle;
+		} else if (io.KeyShift) {
+			mode = editor::SelectionMode::Add;
+		}
+		if (editor::IsInSceneTree(hovered, scene.Root())) {
+			selection().Click(hovered, mode);
+		} else if (scene.IsValid()) {
+			_marquee = Marquee{mouse, image, selection(), scene.Root(), mode};
+		}
+	}
+	if (!_marquee) {
+		return false;
+	}
+	auto &drag = *_marquee;
+	drag.dragging = drag.dragging || mouse.DistanceTo(drag.start) >= 4.f;
+	if (drag.dragging) {
+		const auto clamp = [&](Vector2 p) {
+			return ImVec2(std::clamp(p.x, image.x, image.x + image.w),
+				std::clamp(p.y, image.y, image.y + image.h));
+		};
+		const auto a = clamp(drag.start), b = clamp(mouse);
+		auto *draw = ImGui::GetWindowDrawList();
+		const ImVec2 lo(std::min(a.x, b.x), std::min(a.y, b.y)),
+			hi(std::max(a.x, b.x), std::max(a.y, b.y));
+		draw->AddRectFilled(lo, hi, IM_COL32(80, 150, 255, 35));
+		draw->AddRect(lo, hi, IM_COL32(110, 190, 255, 255));
+	}
+	if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+		if (drag.dragging) {
+			const auto normalized = [&](Vector2 p) {
+				return Vector2((p.x - image.x) / image.w, (p.y - image.y) / image.h);
+			};
+			_boxRequest = BoxSelectionRequest{scene.Root(), normalized(drag.start),
+				normalized(mouse), gameSize, _pickTargetRevision, drag.mode, drag.before};
+		} else if (drag.mode == editor::SelectionMode::Replace) {
+			selection().Clear();
+		}
+		_marquee.reset();
+	}
+	return true;
+}
+
+void Editor::CompleteBoxSelection(const BoxSelectionRequest &request,
+	const std::vector<Entity> &hits) {
+	if (_selectionPlaying || !_selectionContext || _selectionContext->root != request.root ||
+		!request.root.IsAlive() || selection() != request.before) {
+		return;
+	}
+	std::vector<Entity> ordered;
+	const auto visit = [&](const auto &self, Entity entity) -> void {
+		if (std::find(hits.begin(), hits.end(), entity) != hits.end()) {
+			ordered.push_back(entity);
+		}
+		for (Entity child : entity.GetChildren()) {
+			self(self, child);
+		}
+	};
+	visit(visit, request.root);
+	selection() = request.before;
+	if (request.mode == editor::SelectionMode::Replace) {
+		selection().Clear();
+	}
+	for (Entity entity : ordered) {
+		selection().Click(entity,
+			request.mode == editor::SelectionMode::Toggle ? editor::SelectionMode::Toggle
+														  : editor::SelectionMode::Add);
+	}
+	selection().Prune(request.root);
+}
 } // namespace sowa

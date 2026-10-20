@@ -89,6 +89,7 @@ bool Editor::Init(Window &window, FileSystem &fs) {
 }
 
 void Editor::Shutdown() {
+	_selectionContext.reset();
 	_sceneSaveStates.clear();
 	if (!_initialized) {
 		return;
@@ -142,8 +143,23 @@ void Editor::Draw(u64 gameTextureId, Vector2 gameSize, bool playing, World &worl
 		return;
 	}
 	_editingWorld = &world;
+	if (_bulkPending &&
+		(playing || _bulkPending->selection != selection() ||
+			_bulkPending->scene.Root() != scenes.EditorCurrent().Root() ||
+			ImGui::IsKeyPressed(ImGuiKey_Escape))) {
+		finishBulkInspector(playing || ImGui::IsKeyPressed(ImGuiKey_Escape));
+	}
+	if (_gizmoDrag &&
+		(playing || _gizmoDrag->selection != selection() ||
+			_gizmoScene.Root() != scenes.EditorCurrent().Root() ||
+			!ImGui::IsMouseDown(ImGuiMouseButton_Left) || !ImGui::IsMousePosValid() ||
+			(_previewSceneCamera && scenes.Current().ActiveCamera().IsAlive()) ||
+			ImGui::IsKeyPressed(ImGuiKey_Escape))) {
+		finishTransformGizmo(playing || ImGui::IsKeyPressed(ImGuiKey_Escape));
+	}
+
 	if (_raycastDrag &&
-		(playing || _selected != _raycastDrag->entity ||
+		(playing || Selected() != _raycastDrag->entity ||
 			_raycastDrag->scene.Root() != scenes.EditorCurrent().Root() ||
 			!ImGui::IsMouseDown(ImGuiMouseButton_Left) || !ImGui::IsMousePosValid() ||
 			!editor::CanEdit(_raycastDrag->entity, playing) ||
@@ -152,20 +168,12 @@ void Editor::Draw(u64 gameTextureId, Vector2 gameSize, bool playing, World &worl
 		finishRaycastGizmo(ImGui::IsKeyPressed(ImGuiKey_Escape));
 	}
 	if (_tileStrokeBefore &&
-		(playing || !ImGui::IsMouseDown(ImGuiMouseButton_Left) || _selected != _tileStrokeEntity)) {
+		(playing || !ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
+			Selected() != _tileStrokeEntity)) {
 		finishTileStroke();
 	}
-	if (_gizmoDrag) {
-		if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
-			finishTransformGizmo(true);
-		} else if (playing || (_previewSceneCamera && scenes.Current().ActiveCamera().IsAlive()) ||
-				   !ImGui::IsMouseDown(ImGuiMouseButton_Left) || !ImGui::IsMousePosValid() ||
-				   _selected != _gizmoEntity || !editor::CanEdit(_gizmoEntity, playing)) {
-			finishTransformGizmo();
-		}
-	}
 	if (_ninePatchBefore &&
-		(playing || _selected != _ninePatchEntity ||
+		(playing || Selected() != _ninePatchEntity ||
 			_ninePatchScene.Root() != scenes.EditorCurrent().Root() ||
 			!ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
 			!editor::CanEdit(_ninePatchEntity, playing) ||
@@ -173,21 +181,15 @@ void Editor::Draw(u64 gameTextureId, Vector2 gameSize, bool playing, World &worl
 			ImGui::IsKeyPressed(ImGuiKey_Escape))) {
 		finishNinePatchResize(ImGui::IsKeyPressed(ImGuiKey_Escape));
 	}
-	if (_paddingDrag && (playing || !_showNinePatchEditor || _selected != _paddingDrag->entity ||
-							!ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
-							!editor::CanEdit(_paddingDrag->entity, playing) ||
-							ImGui::IsKeyPressed(ImGuiKey_Escape))) {
+	if (_paddingDrag &&
+		(playing || !_showNinePatchEditor || Selected() != _paddingDrag->entity ||
+			!ImGui::IsMouseDown(ImGuiMouseButton_Left) ||
+			!editor::CanEdit(_paddingDrag->entity, playing) ||
+			ImGui::IsKeyPressed(ImGuiKey_Escape))) {
 		finishNinePatchPadding(ImGui::IsKeyPressed(ImGuiKey_Escape));
 	}
-	_selected = _playSelection.Update(playing, _selected, world);
-	if (!_selected.IsAlive()) {
-		_selected = {};
-	}
-	if (!playing) {
-		editor::UpdateSceneDocumentStates(_sceneSaveStates, scenes.EditorScenes());
-	}
-	// No active editor document while playing: live inspector edits bypass undo history
-	// and are discarded when Stop restores the snapshot.
+	bindSelection(scenes);
+	// No active editor document while playing; live edits remain transient.
 	_editingScene = playing ? Scene() : scenes.EditorCurrent();
 	_saveSceneRequested = false;
 	_undoSceneRequested = false;
@@ -226,7 +228,7 @@ void Editor::Draw(u64 gameTextureId, Vector2 gameSize, bool playing, World &worl
 	_editingScene = playing ? Scene() : scenes.EditorCurrent();
 	drawHierarchy(world, scenes, resources, playing);
 	if (!playing) {
-		_animationPreview.Select(_selected);
+		_animationPreview.Select(Selected());
 	}
 	drawInspector(world, scenes, scripts, project, resources, playing);
 	if (!ImGui::IsAnyItemActive()) {
@@ -245,7 +247,7 @@ void Editor::Draw(u64 gameTextureId, Vector2 gameSize, bool playing, World &worl
 		const std::string path = std::exchange(_openInstanceSceneRequested, {});
 		commitPendingSceneEdits(resources);
 		if (editor::TryOpenAsset(scenes, path, editor::AssetKind::Scene)) {
-			_selected = {};
+			bindSelection(scenes);
 		} else {
 			Log::Warn("Could not open source scene '{}'", path);
 		}
@@ -259,9 +261,16 @@ void Editor::Draw(u64 gameTextureId, Vector2 gameSize, bool playing, World &worl
 		ImGui::ShowStyleEditor();
 		ImGui::End();
 	}
+	for (auto &state : _sceneSaveStates) {
+		state.context->selection.Prune(state.context->root);
+		state.context->selectionBookmark =
+			editor::SelectionBookmark::Capture(state.context->root, state.context->selection);
+	}
 }
 
 void Editor::commitPendingSceneEdits(ResourceRegistry &resources) {
+	finishBulkInspector();
+	finishUIGizmo();
 	_resourceInspector.Commit(resources, _sceneSaveStates);
 	finishRaycastGizmo();
 	finishTileStroke();
@@ -448,4 +457,52 @@ void Editor::drawConsole() {
 	ImGui::End();
 }
 
+void Editor::bindSelection(SceneManager &scenes) {
+	const bool playing = scenes.IsPlaying();
+	if (playing != _selectionPlaying) {
+		_runtimeSelection.Clear();
+		_selectionPlaying = playing;
+	}
+	if (playing) {
+		_selectionContext.reset();
+		_runtimeSelection.Prune();
+		return;
+	}
+	editor::UpdateSceneDocumentStates(_sceneSaveStates, scenes.EditorScenes());
+	auto *state = editor::FindSceneDocumentState(_sceneSaveStates, scenes.EditorCurrent());
+	_selectionContext = state ? state->context : nullptr;
+	if (!state) {
+		_runtimeSelection.Clear();
+	}
+}
+
+bool Editor::canMutateSelection(bool structural) const {
+	return !_selectionPlaying && editor::CanEditSelection(selection(), _editingScene, structural);
+}
+
+void Editor::deleteSelection(ResourceRegistry &resources) {
+	commitPendingSceneEdits(resources);
+	editor::ExecuteDeleteSelection(_sceneSaveStates, _editingScene);
+}
+
+void Editor::handleSelectionShortcuts(ResourceRegistry &resources, Entity parent) {
+	if (_selectionPlaying || !ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows) ||
+		ImGui::GetIO().WantTextInput) {
+		return;
+	}
+	if (ImGui::IsKeyPressed(ImGuiKey_Delete, false)) {
+		deleteSelection(resources);
+	}
+	if (ImGui::GetIO().KeyCtrl || ImGui::GetIO().KeySuper) {
+		if (ImGui::IsKeyPressed(ImGuiKey_D, false)) {
+			duplicateEntity(resources);
+		}
+		if (ImGui::IsKeyPressed(ImGuiKey_C, false)) {
+			copyEntity(resources);
+		}
+		if (ImGui::IsKeyPressed(ImGuiKey_V, false)) {
+			pasteEntity(parent, resources);
+		}
+	}
+}
 } // namespace sowa

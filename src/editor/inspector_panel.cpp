@@ -25,8 +25,8 @@ namespace sowa {
 bool Editor::drawComponentHeader(const char *typeName, const char *label, const char *icon,
 	bool playing) {
 	ImGui::PushID(typeName);
-	const auto type = ComponentType(_selected.Raw().world().lookup(typeName));
-	const bool removable = editor::CanRemoveComponent(_selected, type, playing);
+	const auto type = ComponentType(Selected().Raw().world().lookup(typeName));
+	const bool removable = editor::CanRemoveComponent(Selected(), type, playing);
 	ImGuiWindow *window = ImGui::GetCurrentWindow();
 	const float right = window->WorkRect.Max.x;
 	if (removable) {
@@ -58,7 +58,7 @@ void Editor::drawInspector(World &world, SceneManager &scenes, ScriptServer &scr
 	ImGui::Begin(ICON_FA_SLIDERS "  Inspector");
 	ImGui::PopStyleVar();
 
-	if (!_selected.IsAlive()) {
+	if (!Selected().IsAlive()) {
 		ImGui::Spacing();
 		ImGui::TextColored(editor::theme::Accent, ICON_FA_SLIDERS "  Inspector");
 		ImGui::Spacing();
@@ -68,7 +68,14 @@ void Editor::drawInspector(World &world, SceneManager &scenes, ScriptServer &scr
 		return;
 	}
 
-	const Entity entity = _selected;
+	if (multiSelected()) {
+		drawBulkInspector(resources, playing);
+		ImGui::PopStyleVar(3);
+		ImGui::End();
+		return;
+	}
+
+	const Entity entity = Selected();
 	// Structure (components, scripts) is editable only while stopped; field
 	// values are also editable on live entities while playing.
 	const bool editable = editor::CanEdit(entity, playing);
@@ -90,7 +97,7 @@ void Editor::drawInspector(World &world, SceneManager &scenes, ScriptServer &scr
 		std::string name = entity.GetName();
 		const std::string nameBefore = entity.GetName();
 		if (ImGui::InputText("##", &name)) {
-			_selected.SetName(name);
+			Selected().SetName(name);
 		}
 		if (ImGui::IsItemActivated()) {
 			_pendingRenameEntity = entity;
@@ -222,7 +229,7 @@ void Editor::drawInspector(World &world, SceneManager &scenes, ScriptServer &scr
 				}
 			}
 			if (typeName == "UIRect") {
-				if (auto *rect = _selected.Get<UIRect>()) {
+				if (auto *rect = Selected().Get<UIRect>()) {
 					ImGui::TextDisabled("Resolved: %.0f x %.0f at %.0f, %.0f", rect->resolved.w,
 						rect->resolved.h, rect->resolved.x, rect->resolved.y);
 					if (ImGui::BeginCombo("Anchor preset", "Choose...")) {
@@ -502,7 +509,7 @@ void Editor::finishInspectorFieldEdit(Entity entity, ComponentType type, const F
 
 void Editor::drawParticlesInspector(World &world, ResourceRegistry &resources, bool playing,
 	bool editable) {
-	auto *emitter = _selected.Get<Particles2D>();
+	auto *emitter = Selected().Get<Particles2D>();
 	if (!emitter ||
 		!drawComponentHeader("Particles2D", "Particles 2D", ICON_FA_WAND_MAGIC_SPARKLES, playing)) {
 		return;
@@ -517,7 +524,7 @@ void Editor::drawParticlesInspector(World &world, ResourceRegistry &resources, b
 	if (ImGui::Checkbox("Emitting", &emitting)) {
 		emitter->SetEmitting(emitting);
 		const auto *field = type.FindField("is_emitting");
-		editor::RecordFieldEdit(_sceneSaveStates, _editingScene, _selected, type, *field, previous,
+		editor::RecordFieldEdit(_sceneSaveStates, _editingScene, Selected(), type, *field, previous,
 			emitting);
 	}
 
@@ -528,7 +535,7 @@ void Editor::drawParticlesInspector(World &world, ResourceRegistry &resources, b
 			if (ImGui::Selectable(names[index])) {
 				const auto before = *emitter;
 				*emitter = MakeParticlePreset(static_cast<ParticlePreset>(index));
-				editor::RecordParticlesEdit(_sceneSaveStates, _editingScene, _selected, before,
+				editor::RecordParticlesEdit(_sceneSaveStates, _editingScene, Selected(), before,
 					*emitter);
 			}
 		}
@@ -544,7 +551,7 @@ void Editor::drawParticlesInspector(World &world, ResourceRegistry &resources, b
 		for (const char *name : names) {
 			const auto *field = type.FindField(name);
 			if (field) {
-				drawInspectorField(_selected, type, *field, editable, world, resources);
+				drawInspectorField(Selected(), type, *field, editable, world, resources);
 			}
 		}
 		ImGui::EndDisabled();

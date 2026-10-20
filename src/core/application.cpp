@@ -1,8 +1,8 @@
 #include "core/application.hpp"
 #include "animation/animation.hpp"
 #include "script/lua_ui.hpp"
-
 #include <string>
+#include <unordered_set>
 
 #include "core/filesystem/folder_file_server.hpp"
 #include "core/game_time.hpp"
@@ -514,6 +514,29 @@ void Application::Update() {
 			_hoveredEntity = _entityPicks.Resolve(token);
 		}
 	}
+
+#if SOWA_EDITOR
+	if (auto request = _editor.TakeBoxSelectionRequest()) {
+		if (request->targetRevision ==
+				((static_cast<u64>(_gameTarget.version) << 32) | _gameTarget.id) &&
+			request->size == gameSize && request->root == _scenes.EditorCurrent().Root() &&
+			!_scenes.IsPlaying()) {
+			if (const auto rectangle = editor::BoxPickRectangle(request->a, request->b, gameSize)) {
+				const auto tokens = _graphicsDevice->ReadRenderTargetUIntRect(_gameTarget, 1,
+					rectangle->x, rectangle->y, rectangle->width, rectangle->height);
+				std::vector<Entity> hits;
+				std::unordered_set<Entity> seen;
+				for (u32 token : tokens) {
+					Entity e = _entityPicks.Resolve(token);
+					if (e.IsAlive() && seen.insert(e).second) {
+						hits.push_back(e);
+					}
+				}
+				_editor.CompleteBoxSelection(*request, hits);
+			}
+		}
+	}
+#endif
 	_entityPicks.BeginFrame();
 
 #if SOWA_EDITOR
@@ -554,6 +577,9 @@ void Application::Update() {
 	// Apply queued scene transitions before Progress.
 	// Transitions requested during Progress wait until the next frame.
 	if (_editorEnabled) {
+		if (_scenes.IsPlayPending()) {
+			_editor.CommitPendingEdits(_resources);
+		}
 		_editor.RestoreAnimationPreview(_world);
 		_fileSystem.DispatchChanges();
 		_scripts.FlushFileChanges();
@@ -693,6 +719,8 @@ void Application::presentFrame(Rect presentRect, Vector2 gameSize) {
 	if (_editor.IsInitialized()) {
 		SOWA_PROFILE_SCOPE("Editor draw");
 		_graphicsDevice->Clear(Color(0.13f, 0.14f, 0.15f, 1.f));
+		_editor.SetPickTargetRevision(
+			(static_cast<u64>(_gameTarget.version) << 32) | _gameTarget.id);
 		_editor.Draw(_graphicsDevice->GetNativeTextureId(gameColor), gameSize, _scenes.IsPlaying(),
 			_world, _scenes, _projectSettings, _scripts, _resources, _hoveredEntity);
 		_editor.EndFrame(*_graphicsDevice, _window);

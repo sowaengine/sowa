@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <optional>
 
 #include <glm/glm.hpp>
 
@@ -31,4 +32,10 @@ std::array<Vector2, 4> ViewportWorldCorners(const glm::mat4 &viewProjection);
 Vector2 WorldToViewportImage(const glm::mat4 &viewProjection, Vector2 worldPoint,
 	const Rect &image);
 
+// Normalized top-left image rectangle to a clipped bottom-left pixel region.
+struct PickRectangle {
+	i32 x, y, width, height;
+};
+
+std::optional<PickRectangle> BoxPickRectangle(Vector2 a, Vector2 b, Vector2 targetSize);
 } // namespace sowa::editor

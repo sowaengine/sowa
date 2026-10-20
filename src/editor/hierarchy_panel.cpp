@@ -38,18 +38,16 @@ void Editor::drawSceneTabs(SceneManager &scenes, ResourceRegistry &resources, bo
 		if (!playing) {
 			editor::ActivateSceneDocument(scenes, editorCurrent);
 		}
-		if (!editor::IsInSceneTree(_selected, editorCurrent.Root())) {
-			_selected = {};
-		}
+		bindSelection(scenes);
+		_editingScene = playing ? Scene() : scenes.EditorCurrent();
 	}
 	const auto actions = editor::DrawSceneDocumentTabs(documents, editorCurrent, _visibleSceneTab,
 		_sceneSaveStates, playing);
 	if (actions.activate.IsValid()) {
 		commitPendingSceneEdits(resources);
 		editor::ActivateSceneDocument(scenes, actions.activate);
-		if (!editor::IsInSceneTree(_selected, actions.activate.Root())) {
-			_selected = {};
-		}
+		bindSelection(scenes);
+		_editingScene = playing ? Scene() : scenes.EditorCurrent();
 	}
 	const Scene closeRequest = actions.close;
 
@@ -59,11 +57,11 @@ void Editor::drawSceneTabs(SceneManager &scenes, ResourceRegistry &resources, bo
 			_sceneCloseRequest = closeRequest;
 			_openSceneCloseDialog = true;
 		} else {
-			if (editor::IsInSceneTree(_selected, closeRequest.Root())) {
-				_selected = {};
-			}
+
 			if (editor::CloseSceneDocument(scenes, closeRequest, documents)) {
 				_visibleSceneTab = {};
+				bindSelection(scenes);
+				_editingScene = playing ? Scene() : scenes.EditorCurrent();
 			}
 		}
 	}
@@ -100,11 +98,11 @@ void Editor::drawSceneTabs(SceneManager &scenes, ResourceRegistry &resources, bo
 			ImGui::CloseCurrentPopup();
 		}
 		if (closeNow) {
-			if (editor::IsInSceneTree(_selected, _sceneCloseRequest.Root())) {
-				_selected = {};
-			}
+
 			if (editor::CloseSceneDocument(scenes, _sceneCloseRequest, documents)) {
 				_visibleSceneTab = {};
+				bindSelection(scenes);
+				_editingScene = playing ? Scene() : scenes.EditorCurrent();
 			}
 			_sceneCloseRequest = {};
 			ImGui::CloseCurrentPopup();
@@ -137,7 +135,7 @@ void Editor::drawCreateMenu(Entity parent, bool enabled, bool submenu) {
 			Entity spawned =
 				editor::ExecuteCreateEntity(_sceneSaveStates, _editingScene, parent, type);
 			if (spawned.IsAlive()) {
-				_selected = spawned;
+				SetSelected(spawned);
 				_expandHierarchyEntity = parent;
 			}
 		}
@@ -161,7 +159,7 @@ void Editor::drawCreateMenu(Entity parent, bool enabled, bool submenu) {
 				Entity spawned =
 					editor::ExecuteCreateEntity(_sceneSaveStates, _editingScene, parent, type);
 				if (spawned.IsAlive()) {
-					_selected = spawned;
+					SetSelected(spawned);
 					_expandHierarchyEntity = parent;
 				}
 			}
@@ -183,7 +181,7 @@ void Editor::drawHierarchyNode(Entity entity, ResourceRegistry &resources, bool 
 	const std::vector<Entity> children = entity.GetChildren();
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth |
 							   ImGuiTreeNodeFlags_DrawLinesToNodes;
-	if (_selected == entity) {
+	if (selection().Contains(entity)) {
 		flags |= ImGuiTreeNodeFlags_Selected;
 	}
 	if (children.empty()) {
@@ -216,29 +214,60 @@ void Editor::drawHierarchyNode(Entity entity, ResourceRegistry &resources, bool 
 		ImGui::PopStyleColor();
 	}
 
-	if (ImGui::IsItemClicked()) {
-		_selected = entity;
+	_hierarchyVisible.push_back(entity);
+	if (Selected() == entity) {
+		ImGui::GetWindowDrawList()->AddLine(ImVec2(rowMin.x, rowMin.y), ImVec2(rowMin.x, rowMax.y),
+			ImGui::GetColorU32(ImGuiCol_CheckMark), 3.f);
+	}
+	if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+		commitPendingSceneEdits(resources);
+		const auto &io = ImGui::GetIO();
+		_hierarchyClick = (!io.KeyShift && !io.KeyCtrl && !io.KeySuper) ? entity : Entity{};
+		if (io.KeyShift) {
+			_rangeRequest = std::make_pair(entity, io.KeyCtrl || io.KeySuper);
+		} else if ((io.KeyCtrl || io.KeySuper) || !selection().Contains(entity)) {
+			selection().Click(entity,
+				(io.KeyCtrl || io.KeySuper) ? editor::SelectionMode::Toggle
+											: editor::SelectionMode::Replace);
+		} else {
+			selection().Activate(entity);
+		}
+	}
+	// Delay collapse until release so dragging a selected row keeps its group.
+	if (_hierarchyClick == entity && ImGui::IsItemHovered() &&
+		ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
+		(ImGui::GetMouseDragDelta(ImGuiMouseButton_Left).x == 0.f &&
+			ImGui::GetMouseDragDelta(ImGuiMouseButton_Left).y == 0.f) &&
+		!ImGui::GetIO().KeyShift && !ImGui::GetIO().KeyCtrl && !ImGui::GetIO().KeySuper &&
+		!ImGui::IsItemToggledOpen()) {
+		SetSelected(entity);
 	}
 
 	if (!playing && editor::CanDrag(entity)) {
 		if (ImGui::BeginDragDropSource()) {
-			ImGui::SetDragDropPayload("SOWA_ENTITY", &entity, sizeof(Entity));
+			if (!selection().Contains(entity)) {
+				SetSelected(entity);
+			}
+			const auto &members = selection().Members();
+			ImGui::SetDragDropPayload("SOWA_ENTITIES", members.data(),
+				members.size() * sizeof(Entity));
 			ImGui::TextUnformatted(name.c_str());
 			ImGui::EndDragDropSource();
 		}
 	}
 
 	if (!playing && ImGui::BeginDragDropTarget()) {
-		if (const ImGuiPayload *pending = ImGui::GetDragDropPayload()) {
-			if (pending->IsDataType("SOWA_ENTITY")) {
-				const Entity dragged = *static_cast<const Entity *>(pending->Data);
-				if (editor::CanReparent(dragged, entity)) {
-					if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("SOWA_ENTITY")) {
-						const Entity dropped = *static_cast<const Entity *>(payload->Data);
-						editor::ExecuteReparentEntity(_sceneSaveStates, _editingScene, dropped,
-							entity);
-					}
-				}
+		if (const auto *payload = ImGui::AcceptDragDropPayload("SOWA_ENTITIES",
+				ImGuiDragDropFlags_AcceptBeforeDelivery)) {
+			editor::EntitySelection dragged;
+			const auto *entities = static_cast<const Entity *>(payload->Data);
+			dragged.Assign(
+				std::vector<Entity>(entities, entities + payload->DataSize / sizeof(Entity)));
+			if (payload->IsDelivery() &&
+				editor::CanReparentSelection(dragged, _editingScene, entity)) {
+				commitPendingSceneEdits(resources);
+				selection() = dragged;
+				editor::ExecuteReparentSelection(_sceneSaveStates, _editingScene, entity);
 			}
 		}
 		ImGui::EndDragDropTarget();
@@ -246,7 +275,12 @@ void Editor::drawHierarchyNode(Entity entity, ResourceRegistry &resources, bool 
 
 	if (const editor::MenuStyle menuStyle; ImGui::BeginPopupContextItem()) {
 		if (ImGui::IsWindowAppearing()) {
-			_selected = entity;
+			commitPendingSceneEdits(resources);
+			if (!selection().Contains(entity)) {
+				SetSelected(entity);
+			} else {
+				selection().Activate(entity);
+			}
 		}
 		drawCreateMenu(entity, !playing);
 		if (ImGui::MenuItem("Instantiate Scene", nullptr, false,
@@ -257,12 +291,8 @@ void Editor::drawHierarchyNode(Entity entity, ResourceRegistry &resources, bool 
 		}
 		ImGui::Separator();
 		drawEntityActions(entity, entity, playing, resources);
-		if (ImGui::MenuItem("Delete", nullptr, false, !playing && editor::CanDelete(entity))) {
-			if (editor::ExecuteDeleteEntity(_sceneSaveStates, _editingScene, entity)) {
-				if (_selected == entity) {
-					_selected = {};
-				}
-			}
+		if (ImGui::MenuItem("Delete", nullptr, false, !playing && canMutateSelection(true))) {
+			deleteSelection(resources);
 		}
 		ImGui::EndPopup();
 	}
@@ -294,7 +324,7 @@ void Editor::drawHierarchy(World &world, SceneManager &scenes, ResourceRegistry 
 	ImGui::Begin(ICON_FA_SITEMAP "  Hierarchy");
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6.f, 2.f));
 	const Scene hierarchyScene = scenes.EditorCurrent();
-	Entity createParent = editor::CanCreateChild(_selected) ? _selected : hierarchyScene.Root();
+	Entity createParent = editor::CanCreateChild(Selected()) ? Selected() : hierarchyScene.Root();
 	ImGui::BeginDisabled(playing || !editor::CanCreateChild(createParent));
 	if (ImGui::Button(ICON_FA_PLUS "  Add node")) {
 		ImGui::OpenPopup("##hierarchy_add");
@@ -314,39 +344,30 @@ void Editor::drawHierarchy(World &world, SceneManager &scenes, ResourceRegistry 
 	ImGui::Separator();
 	ImGui::Spacing();
 
-	if (!playing && ImGui::IsWindowFocused() && !ImGui::GetIO().WantTextInput &&
-		(ImGui::GetIO().KeyCtrl || ImGui::GetIO().KeySuper)) {
-		if (ImGui::IsKeyPressed(ImGuiKey_C, false)) {
-			copyEntity(resources);
-		}
-		if (ImGui::IsKeyPressed(ImGuiKey_D, false)) {
-			duplicateEntity(resources);
-		}
-		if (ImGui::IsKeyPressed(ImGuiKey_V, false)) {
-			pasteEntity(createParent, resources);
-		}
-	}
-	if (!playing && ImGui::IsWindowFocused() && !ImGui::GetIO().WantTextInput &&
-		ImGui::IsKeyPressed(ImGuiKey_Delete)) {
-		if (editor::ExecuteDeleteEntity(_sceneSaveStates, _editingScene, _selected)) {
-			_selected = {};
-		}
-	}
+	handleSelectionShortcuts(resources, createParent);
 
 	if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
 		!ImGui::IsAnyItemHovered()) {
-		_selected = {};
+		SetSelected({});
 	}
 
 	// During play, show runtime scenes and autoloads.
 	const std::vector<Scene> shownScenes =
 		playing ? scenes.RuntimeScenes() : std::vector<Scene>{hierarchyScene};
+	_hierarchyVisible.clear();
 	bool anyScene = false;
 	for (const Scene scene : shownScenes) {
 		if (scene.IsValid()) {
 			drawHierarchyNode(scene.Root(), resources, playing, true);
 			anyScene = true;
 		}
+	}
+	if (_rangeRequest) {
+		selection().Range(_rangeRequest->first, _hierarchyVisible, _rangeRequest->second);
+		_rangeRequest.reset();
+	}
+	if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+		_hierarchyClick = {};
 	}
 	if (!anyScene) {
 		ImGui::TextDisabled("No scene open.");
@@ -355,12 +376,12 @@ void Editor::drawHierarchy(World &world, SceneManager &scenes, ResourceRegistry 
 	if (const editor::MenuStyle menuStyle;
 		!playing && ImGui::BeginPopupContextWindow("hierarchy_bg",
 						ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_MouseButtonRight)) {
-		Entity parent = _selected;
+		Entity parent = Selected();
 		if (!editor::CanCreateChild(parent) && hierarchyScene.IsValid()) {
 			parent = hierarchyScene.Root();
 		}
 		drawCreateMenu(parent, true);
-		drawEntityActions(_selected, parent, playing, resources);
+		drawEntityActions(Selected(), parent, playing, resources);
 		if (ImGui::MenuItem("Instantiate Scene", nullptr, false, editor::CanCreateChild(parent))) {
 			_sceneInstanceParent = parent;
 			_sceneInstanceError.clear();
@@ -393,7 +414,7 @@ void Editor::drawSceneInstancePicker(World &world, ResourceRegistry &resources, 
 		if (result) {
 			editor::RecordInstantiatedScene(_sceneSaveStates, _editingScene, result.instance,
 				resources, result.packed, result.ownershipAdded);
-			_selected = result.instance;
+			SetSelected(result.instance);
 			_expandHierarchyEntity = _sceneInstanceParent;
 			_sceneInstanceParent = {};
 			ImGui::CloseCurrentPopup();
@@ -408,15 +429,18 @@ void Editor::drawSceneInstancePicker(World &world, ResourceRegistry &resources, 
 }
 
 void Editor::copyEntity(ResourceRegistry &resources) {
+	if (multiSelected()) {
+		return;
+	}
 	commitPendingSceneEdits(resources);
-	const auto text = editor::CopyEntity(_selected, resources);
+	const auto text = editor::CopyEntity(Selected(), resources);
 	if (!text.empty() && _window) {
 		_window->SetClipboard(text);
 	}
 }
 
 void Editor::pasteEntity(Entity parent, ResourceRegistry &resources) {
-	if (!_window || !_editingWorld || !parent.IsAlive()) {
+	if (multiSelected() || !_window || !_editingWorld || !parent.IsAlive()) {
 		return;
 	}
 	commitPendingSceneEdits(resources);
@@ -424,7 +448,7 @@ void Editor::pasteEntity(Entity parent, ResourceRegistry &resources) {
 	if (auto copy = editor::ExecutePasteEntity(_sceneSaveStates, _editingScene, parent,
 			_window->GetClipboard(), *_editingWorld, resources);
 		copy.IsAlive()) {
-		_selected = copy;
+		SetSelected(copy);
 		_expandHierarchyEntity = parent;
 	} else {
 		Log::Warn("Could not paste entity. The clipboard may contain unavailable components or "
@@ -434,26 +458,22 @@ void Editor::pasteEntity(Entity parent, ResourceRegistry &resources) {
 
 void Editor::duplicateEntity(ResourceRegistry &resources) {
 	commitPendingSceneEdits(resources);
-	if (auto copy = editor::ExecuteDuplicateEntity(_sceneSaveStates, _editingScene, _selected);
-		copy.IsAlive()) {
-		_selected = copy;
-		_expandHierarchyEntity = copy.GetParent();
+	if (editor::ExecuteDuplicateSelection(_sceneSaveStates, _editingScene)) {
+		_expandHierarchyEntity = Selected().GetParent();
 	}
 }
 
 void Editor::drawEntityActions(Entity entity, Entity pasteParent, bool playing,
 	ResourceRegistry &resources) {
-	const bool canCopy = !playing && editor::CanDelete(entity);
+	const bool canCopy = !playing && canMutateSelection(true);
 	if (ImGui::MenuItem("Duplicate", "Ctrl/Cmd+D", false, canCopy)) {
-		_selected = entity;
 		duplicateEntity(resources);
 	}
-	if (ImGui::MenuItem("Copy", "Ctrl/Cmd+C", false, canCopy)) {
-		_selected = entity;
+	if (ImGui::MenuItem("Copy", "Ctrl/Cmd+C", false, canCopy && !multiSelected())) {
 		copyEntity(resources);
 	}
-	const bool canPaste = !playing && editor::CanCreateChild(pasteParent) && _window &&
-						  editor::IsEntityClipboard(_window->GetClipboard());
+	const bool canPaste = !playing && !multiSelected() && editor::CanCreateChild(pasteParent) &&
+		_window && editor::IsEntityClipboard(_window->GetClipboard());
 	if (ImGui::MenuItem("Paste as child", "Ctrl/Cmd+V", false, canPaste)) {
 		pasteEntity(pasteParent, resources);
 	}

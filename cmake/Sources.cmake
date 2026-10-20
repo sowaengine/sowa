@@ -131,6 +131,9 @@ set(SOWA_TOOL_SOURCES
   editor/profiler_panel.cpp
   editor/command_palette.cpp
   editor/command_history.cpp
+  editor/selection.cpp
+  editor/group_transform.cpp
+  editor/bulk_inspector.cpp
   editor/scene_commands.cpp
   editor/scene_documents.cpp
   editor/widgets.cpp
@@ -144,6 +147,7 @@ set(SOWA_EDITOR_SOURCES
   editor/viewport_panel.cpp
   editor/hierarchy_panel.cpp
   editor/inspector_panel.cpp
+  editor/bulk_inspector_panel.cpp
   editor/filesystem_panel.cpp
   editor/editor_commands.cpp
   editor/tilemap_editor.cpp

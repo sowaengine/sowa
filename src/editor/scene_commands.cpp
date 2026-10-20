@@ -10,7 +10,9 @@
 
 #include "ecs/components/editor_entity_id.hpp"
 #include "ecs/components/transform2d.hpp"
+#include "editor/bulk_inspector.hpp"
 #include "editor/gizmos.hpp"
+#include "editor/group_transform.hpp"
 #include "editor/inspector.hpp"
 #include "resource/resource_registry.hpp"
 #include "scene/scene_serializer.hpp"
@@ -66,6 +68,10 @@ struct Locator {
 				cached = found->second;
 				return cached;
 			}
+		}
+		// An assigned identity must never fall back to a new entity at an old path.
+		if (id != 0) {
+			return {};
 		}
 		cached = resolve(context, path);
 		return cached;
@@ -140,9 +146,9 @@ bool writeField(Entity entity, std::string_view component, std::string_view fiel
 class FieldCommand final : public EditCommand {
   public:
 	FieldCommand(Locator entity, std::string component, std::string field, FieldValue before,
-		FieldValue after)
+		FieldValue after, std::optional<FieldInfo> schema = {})
 		: _entity(std::move(entity)), _component(std::move(component)), _field(std::move(field)),
-		  _before(std::move(before)), _after(std::move(after)) {
+		  _before(std::move(before)), _after(std::move(after)), _schema(std::move(schema)) {
 		if (const Entity *target = std::get_if<Entity>(&_before);
 			target != nullptr && _entity.context && isInDocument(_entity.context->root, *target)) {
 			_beforeEntity = locate(_entity.context, *target);
@@ -158,14 +164,25 @@ class FieldCommand final : public EditCommand {
 	}
 
 	bool Undo() override {
-		return writeField(_entity.Get(), _component, _field, resolvedValue(_before, _beforeEntity));
+		return apply(resolvedValue(_before, _beforeEntity));
 	}
 
 	bool Redo() override {
-		return writeField(_entity.Get(), _component, _field, resolvedValue(_after, _afterEntity));
+		return apply(resolvedValue(_after, _afterEntity));
 	}
 
   private:
+	bool apply(const FieldValue &value) const {
+		Entity entity = _entity.Get();
+		if (_schema) {
+			const auto type = componentNamed(entity, _component);
+			const auto *field = type.FindField(_field);
+			if (!field || !CompatibleInspectorField(*_schema, *field)) {
+				return false;
+			}
+		}
+		return writeField(entity, _component, _field, value);
+	}
 	FieldValue resolvedValue(const FieldValue &value, const std::optional<Locator> &entity) const {
 		if (!std::holds_alternative<Entity>(value)) {
 			return value;
@@ -178,6 +195,7 @@ class FieldCommand final : public EditCommand {
 	std::string _field;
 	FieldValue _before;
 	FieldValue _after;
+	std::optional<FieldInfo> _schema;
 	std::optional<Locator> _beforeEntity;
 	std::optional<Locator> _afterEntity;
 };
@@ -475,10 +493,11 @@ class DeleteCommand final : public EditCommand {
 
 class ReparentCommand final : public EditCommand {
   public:
-	ReparentCommand(std::shared_ptr<SceneDocumentContext> context, Entity entity, Entity newParent)
+	ReparentCommand(std::shared_ptr<SceneDocumentContext> context, Entity entity, Entity newParent,
+		std::optional<Transform2D> exactLocal = {})
 		: _context(std::move(context)), _entity(locate(_context, entity)),
 		  _oldParent(locate(_context, entity.GetParent())), _newParent(locate(_context, newParent)),
-		  _beforePath(relativePath(_context->root, entity)) {
+		  _beforePath(relativePath(_context->root, entity)), _afterTransform(exactLocal) {
 		if (const Transform2D *transform = entity.Get<Transform2D>()) {
 			_beforeTransform = *transform;
 		}
@@ -1219,6 +1238,406 @@ Entity ExecuteDuplicateEntity(std::vector<SceneDocumentSaveState> &states, Scene
 	return copy;
 }
 
+namespace {
+class SelectionCommand final : public EditCommand {
+  public:
+	SelectionCommand(std::shared_ptr<SceneDocumentContext> context,
+		std::unique_ptr<EditCommand> edit, EntitySelection before, EntitySelection after)
+		: _context(std::move(context)), _edit(std::move(edit)),
+		  _before(SelectionBookmark::Capture(_context->root, before)),
+		  _after(SelectionBookmark::Capture(_context->root, after)) {
+	}
+
+	std::string_view Name() const override {
+		return _edit->Name();
+	}
+
+	bool Undo() override {
+		if (!_edit->Undo()) {
+			return false;
+		}
+		_context->selection = _before.Restore(_context->root, _context->entityById);
+		return true;
+	}
+
+	bool Redo() override {
+		if (!_edit->Redo()) {
+			return false;
+		}
+		_context->selection = _after.Restore(_context->root, _context->entityById);
+		return true;
+	}
+
+	void Discard() override {
+		_edit->Discard();
+	}
+
+  private:
+	std::shared_ptr<SceneDocumentContext> _context;
+	std::unique_ptr<EditCommand> _edit;
+	SelectionBookmark _before, _after;
+};
+
+class ParentOrderCommand final : public EditCommand {
+  public:
+	ParentOrderCommand(std::unique_ptr<EditCommand> edit,
+		std::shared_ptr<SceneDocumentContext> context, std::vector<Entity> parents)
+		: _edit(std::move(edit)), _context(std::move(context)) {
+		for (Entity parent : parents) {
+			if (std::any_of(_orders.begin(), _orders.end(),
+					[&](const auto &order) { return order.parent.Get() == parent; })) {
+				continue;
+			}
+			Order order;
+			order.parent = locate(_context, parent);
+			for (Entity child : parent.GetChildren()) {
+				order.before.push_back(locate(_context, child));
+			}
+			_orders.push_back(std::move(order));
+		}
+	}
+
+	std::string_view Name() const override {
+		return _edit->Name();
+	}
+
+	bool Undo() override {
+		if (!_edit->Undo()) {
+			return false;
+		}
+		restore(false);
+		return true;
+	}
+
+	bool Redo() override {
+		if (!_edit->Redo()) {
+			return false;
+		}
+		if (!_captured) {
+			for (auto &order : _orders) {
+				for (Entity child : order.parent.Get().GetChildren()) {
+					order.after.push_back(locate(_context, child));
+				}
+			}
+			_captured = true;
+		} else {
+			restore(true);
+		}
+		return true;
+	}
+
+	void Discard() override {
+		_edit->Discard();
+	}
+
+  private:
+	struct Order {
+		Locator parent;
+		std::vector<Locator> before, after;
+	};
+
+	void restore(bool after) {
+		for (auto &order : _orders) {
+			Entity parent = order.parent.Get();
+			std::vector<Entity> children;
+			for (const auto &locator : after ? order.after : order.before) {
+				Entity child = locator.Get();
+				if (child.IsAlive() && child.GetParent() == parent) {
+					children.push_back(child);
+				}
+			}
+			for (Entity child : parent.GetChildren()) {
+				if (std::find(children.begin(), children.end(), child) == children.end()) {
+					children.push_back(child);
+				}
+			}
+			parent.SetChildOrder(children);
+		}
+	}
+
+	std::unique_ptr<EditCommand> _edit;
+	std::shared_ptr<SceneDocumentContext> _context;
+	std::vector<Order> _orders;
+	bool _captured = false;
+};
+
+void ensureIds(SceneDocumentSaveState &state, Entity root) {
+	if (IsInstanceLocked(root)) {
+		return;
+	}
+	EnsureEditorEntityId(state, root);
+	for (Entity child : root.GetChildren()) {
+		ensureIds(state, child);
+	}
+}
+
+std::unique_ptr<EditCommand> withSelection(SceneDocumentSaveState &state,
+	std::unique_ptr<EditCommand> command, const EntitySelection &before,
+	const EntitySelection &after) {
+	for (const EntitySelection *selection : {&before, &after}) {
+		for (Entity entity : selection->Members()) {
+			while (IsInstanceLocked(entity)) {
+				entity = entity.GetParent();
+			}
+			EnsureEditorEntityId(state, entity);
+		}
+	}
+	return std::make_unique<SelectionCommand>(state.context, std::move(command), before, after);
+}
+} // namespace
+
+bool CanEditSelection(const EntitySelection &selection, Scene scene, bool structural) {
+	const auto &members = selection.Members();
+	if (!scene.IsValid() || members.empty() ||
+		!std::all_of(members.begin(), members.end(),
+			[&](Entity entity) { return isInDocument(scene.Root(), entity); })) {
+		return false;
+	}
+	const auto targets = structural ? SelectionRoots(members) : members;
+	return std::all_of(targets.begin(), targets.end(), [&](Entity entity) {
+		return CanEdit(entity, false) && (!structural || CanDelete(entity));
+	});
+}
+
+bool ExecuteDeleteSelection(std::vector<SceneDocumentSaveState> &states, Scene scene) {
+	auto *state = document(states, scene);
+	if (!state || !CanEditSelection(state->context->selection, scene, true)) {
+		return false;
+	}
+	const auto before = state->context->selection;
+	auto roots = SelectionRoots(before.Members());
+	auto batch = std::make_unique<CommandBatch>("Delete Entities");
+	for (Entity entity : roots) {
+		batch->Add(std::make_unique<DeleteCommand>(state->context, entity));
+	}
+	EntitySelection after;
+	after.Set(roots.front().GetParent());
+	return state->history.Execute(withSelection(*state, std::move(batch), before, after));
+}
+
+bool CanReparentSelection(const EntitySelection &selection, Scene scene, Entity parent) {
+	if (!CanEditSelection(selection, scene, true) || !isInDocument(scene.Root(), parent) ||
+		!CanCreateChild(parent)) {
+		return false;
+	}
+	bool changed = false;
+	for (Entity entity : SelectionRoots(selection.Members())) {
+		if (parent == entity || parent.IsDescendantOf(entity)) {
+			return false;
+		}
+		if (entity.GetParent() == parent) {
+			continue;
+		}
+		if (!CanReparent(entity, parent)) {
+			return false;
+		}
+		if (entity.Has<Transform2D>()) {
+			const auto world = ComputeWorldMatrix(parent);
+			if (std::abs(glm::determinant(world)) < 1e-8f ||
+				!ExactTransform2D(glm::inverse(world) * ComputeWorldMatrix(entity))) {
+				return false;
+			}
+		}
+		changed = true;
+	}
+	return changed;
+}
+
+bool ExecuteReparentSelection(std::vector<SceneDocumentSaveState> &states, Scene scene,
+	Entity parent) {
+	auto *state = document(states, scene);
+	if (!state || !CanReparentSelection(state->context->selection, scene, parent)) {
+		return false;
+	}
+	const auto selection = state->context->selection;
+	auto batch = std::make_unique<CommandBatch>("Reparent Entities");
+	std::vector<Entity> parents{parent};
+	for (Entity entity : SelectionRoots(selection.Members())) {
+		parents.push_back(entity.GetParent());
+		if (entity.GetParent() == parent) {
+			continue;
+		}
+		std::optional<Transform2D> local;
+		if (entity.Has<Transform2D>()) {
+			local = ExactTransform2D(
+				glm::inverse(ComputeWorldMatrix(parent)) * ComputeWorldMatrix(entity));
+		}
+		batch->Add(std::make_unique<ReparentCommand>(state->context, entity, parent, local));
+	}
+	auto ordered =
+		std::make_unique<ParentOrderCommand>(std::move(batch), state->context, std::move(parents));
+	return state->history.Execute(withSelection(*state, std::move(ordered), selection, selection));
+}
+
+bool ExecuteDuplicateSelection(std::vector<SceneDocumentSaveState> &states, Scene scene) {
+	auto *state = document(states, scene);
+	if (!state || !CanEditSelection(state->context->selection, scene, true)) {
+		return false;
+	}
+	const auto before = state->context->selection;
+	auto roots = SelectionRoots(before.Members());
+	for (Entity e : roots) {
+		if (!CanCreateChild(e.GetParent())) {
+			return false;
+		}
+	}
+	const auto mapping = Entity::DuplicateRoots(roots);
+	if (mapping.empty()) {
+		return false;
+	}
+	auto batch = std::make_unique<CommandBatch>("Duplicate Entities");
+	for (Entity e : roots) {
+		Entity copy = mapping.at(e);
+		freshTreeIdentity(copy);
+		ensureIds(*state, copy);
+		batch->Add(std::make_unique<CreateCommand>(state->context, copy));
+	}
+	std::vector<Entity> copies;
+	for (Entity e : before.Members()) {
+		copies.push_back(mapping.at(e));
+	}
+	EntitySelection after;
+	after.Assign(copies, mapping.at(before.Active()));
+	auto command = withSelection(*state, std::move(batch), before, after);
+	state->context->selection = after;
+	return state->history.PushApplied(std::move(command));
+}
+
+namespace {
+std::unique_ptr<EditCommand> fieldBatch(SceneDocumentSaveState &state,
+	const std::vector<BulkFieldEdit> &edits) {
+	auto batch = std::make_unique<CommandBatch>("Edit Selected Properties");
+	for (const auto &edit : edits) {
+		if (!isInDocument(state.context->root, edit.entity) || !CanEdit(edit.entity, false)) {
+			return {};
+		}
+		ComponentType type = componentNamed(edit.entity, edit.component);
+		const auto *field = type.FindField(edit.field);
+		FieldValue current;
+		if (!field || (edit.schema && !CompatibleInspectorField(*edit.schema, *field)) ||
+			!CaptureFieldValue(edit.entity, type, *field, current) ||
+			current.index() != edit.before.index() || current.index() != edit.after.index()) {
+			return {};
+		}
+		if (edit.before != edit.after) {
+			batch->Add(std::make_unique<FieldCommand>(locate(state.context, edit.entity),
+				edit.component, edit.field, edit.before, edit.after, edit.schema));
+		}
+	}
+	if (batch->Empty()) {
+		return {};
+	}
+	return withSelection(state, std::move(batch), state.context->selection,
+		state.context->selection);
+}
+} // namespace
+
+bool RecordBulkFieldEdit(std::vector<SceneDocumentSaveState> &states, Scene scene,
+	const std::vector<BulkFieldEdit> &edits) {
+	auto *state = document(states, scene);
+	if (!state) {
+		return false;
+	}
+	auto batch = fieldBatch(*state, edits);
+	return batch && state->history.PushApplied(std::move(batch));
+}
+
+namespace {
+class BulkResourceCommand final : public EditCommand {
+  public:
+	BulkResourceCommand(std::unique_ptr<EditCommand> edit,
+		std::shared_ptr<SceneDocumentContext> context, ResourceRegistry &resources,
+		ResourceID created)
+		: _edit(std::move(edit)), _context(std::move(context)), _resources(resources),
+		  _created(created) {
+		if (_created.IsValid()) {
+			_resources.Retain(_created);
+		}
+	}
+
+	~BulkResourceCommand() override {
+		Discard();
+	}
+
+	std::string_view Name() const override {
+		return "Assign Selected Resources";
+	}
+
+	bool Undo() override {
+		if (!_edit->Undo()) {
+			return false;
+		}
+		if (_created.IsValid()) {
+			Scene(_context->root).Disown(_resources, _created);
+		}
+		return true;
+	}
+
+	bool Redo() override {
+		const bool added = _created.IsValid() && !Scene(_context->root).Owns(_created);
+		if (added && !Scene(_context->root).Own(_resources, _created)) {
+			return false;
+		}
+		if (_edit->Redo()) {
+			return true;
+		}
+		if (added) {
+			Scene(_context->root).Disown(_resources, _created);
+		}
+		return false;
+	}
+
+	void Discard() override {
+		_edit->Discard();
+		if (_created.IsValid()) {
+			_resources.Release(std::exchange(_created, {}));
+		}
+	}
+
+  private:
+	std::unique_ptr<EditCommand> _edit;
+	std::shared_ptr<SceneDocumentContext> _context;
+	ResourceRegistry &_resources;
+	ResourceID _created;
+};
+} // namespace
+
+bool ExecuteBulkFieldEdit(std::vector<SceneDocumentSaveState> &states, Scene scene,
+	const std::vector<BulkFieldEdit> &edits, ResourceRegistry *resources, ResourceID created) {
+	auto *state = document(states, scene);
+	if (!state) {
+		return false;
+	}
+	auto batch = fieldBatch(*state, edits);
+	if (!batch) {
+		return false;
+	}
+	for (const auto &edit : edits) {
+		if (const auto *id = std::get_if<ResourceID>(&edit.after); id && id->IsValid()) {
+			const auto type = componentNamed(edit.entity, edit.component);
+			const auto *field = type.FindField(edit.field);
+			if (!resources || !resources->Get(*id) || !scene.Owns(*id) ||
+				(!field->resourceType.empty() &&
+					resources->TypeNameOf(*id) != field->resourceType)) {
+				return false;
+			}
+		}
+		if (const auto *target = std::get_if<Entity>(&edit.after); target &&
+			target->Raw().id() != 0 &&
+			(!target->IsAlive() ||
+				target->Raw().world().c_ptr() != scene.Root().Raw().world().c_ptr())) {
+			return false;
+		}
+	}
+	if (created.IsValid()) {
+		if (!resources || !scene.Owns(created)) {
+			return false;
+		}
+		batch = std::make_unique<BulkResourceCommand>(std::move(batch), state->context, *resources,
+			created);
+	}
+	return state->history.Execute(std::move(batch));
+}
 bool IsEntityClipboard(std::string_view text) {
 	return text.starts_with(clipboardPrefix);
 }
@@ -1338,9 +1757,6 @@ bool ExecuteScriptRemove(std::vector<SceneDocumentSaveState> &states, Scene scen
 						locate(state->context, entity), scripts, std::move(path), false));
 }
 
-} // namespace sowa::editor
-
-namespace sowa::editor {
 namespace {
 // A new resource is kept by history while undone, and by the scene while assigned.
 class ResourceAssignmentCommand final : public EditCommand {

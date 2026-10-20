@@ -23,14 +23,17 @@ void Editor::finishTileStroke() {
 }
 
 bool Editor::drawTilemapBrush(const glm::mat4 &vp, const Rect &image) {
-	if (!_showTilemapEditor || !_tilePainting || !editor::CanEdit(_selected, false)) {
+	if (multiSelected()) {
 		return false;
 	}
-	auto *map = _selected.Get<Tilemap>();
-	if (!map || !_selected.Has<Transform2D>() || !map->ValidCellSize()) {
+	if (!_showTilemapEditor || !_tilePainting || !editor::CanEdit(Selected(), false)) {
 		return false;
 	}
-	const auto world = ComputeWorldMatrix(_selected);
+	auto *map = Selected().Get<Tilemap>();
+	if (!map || !Selected().Has<Transform2D>() || !map->ValidCellSize()) {
+		return false;
+	}
+	const auto world = ComputeWorldMatrix(Selected());
 	const bool hovered = ImGui::IsItemHovered();
 	const ImVec2 mouse = ImGui::GetIO().MousePos;
 	const auto cell = editor::TilemapViewportCell(*map, world, vp, image, {mouse.x, mouse.y});
@@ -82,7 +85,7 @@ bool Editor::drawTilemapBrush(const glm::mat4 &vp, const Rect &image) {
 					return true;
 				}
 				_tileStrokeBefore = *map;
-				_tileStrokeEntity = _selected;
+				_tileStrokeEntity = Selected();
 				_tileStrokeScene = _editingScene;
 			}
 			_tileStrokeChanged =

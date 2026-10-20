@@ -36,25 +36,7 @@ void ensureTreeIds(SceneDocumentSaveState &state, Entity entity) {
 	if (!entity.IsAlive() || IsInstanceLocked(entity)) {
 		return;
 	}
-	EditorEntityId *identity = entity.Get<EditorEntityId>();
-	if (identity == nullptr) {
-		entity.Add(EditorEntityId{});
-		identity = entity.Get<EditorEntityId>();
-	}
-	const auto existing = identity == nullptr ? state.context->entityById.end()
-											  : state.context->entityById.find(identity->Value());
-	if (identity != nullptr &&
-		(identity->Value() == 0 ||
-			(existing != state.context->entityById.end() && existing->second != entity))) {
-		u64 value = 0;
-		do {
-			value = state.context->ids.NextU64();
-		} while (value == 0 || state.context->entityById.contains(value));
-		identity->Set(value);
-	}
-	if (identity != nullptr) {
-		state.context->entityById[identity->Value()] = entity;
-	}
+	EnsureEditorEntityId(state, entity);
 	for (Entity child : entity.GetChildren()) {
 		ensureTreeIds(state, child);
 	}
@@ -127,11 +109,16 @@ void UpdateSceneDocumentStates(std::vector<SceneDocumentSaveState> &states,
 			state.context->indexedRoot = Entity();
 		}
 		if (state.context->indexedRoot == state.context->root) {
+			state.context->selection.Prune(state.context->root);
+			state.context->selectionBookmark =
+				SelectionBookmark::Capture(state.context->root, state.context->selection);
 			continue;
 		}
 		state.context->entityById.clear();
 		ensureTreeIds(state, state.context->root);
 		state.context->indexedRoot = state.context->root;
+		state.context->selection = state.context->selectionBookmark.Restore(state.context->root,
+			state.context->entityById);
 		if (const EditorEntityId *id = state.context->root.Get<EditorEntityId>(); id != nullptr) {
 			state.context->documentId = id->Value();
 		}

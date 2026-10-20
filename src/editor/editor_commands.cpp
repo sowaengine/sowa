@@ -97,12 +97,12 @@ void Editor::drawCommandPalette(SceneManager &scenes, ProjectSettings &project,
 	add("editor.view.settings", "Project: Project Settings", [this] { _projectSettings.Open(); });
 	add("editor.entity.duplicate", "Entity: Duplicate", [&] {
 		duplicateEntity(resources);
-	}).enabled = editing && editor::CanDelete(_selected);
+	}).enabled = editing && canMutateSelection(true);
 	add("editor.entity.copy", "Entity: Copy", [&] { copyEntity(resources); }).enabled =
-		editing && editor::CanDelete(_selected);
+		editing && !multiSelected() && editor::CanDelete(Selected());
 	add("editor.entity.paste", "Entity: Paste as Child", [&] {
-		pasteEntity(_selected.IsAlive() ? _selected : scene.Root(), resources);
-	}).enabled = editing && scene.IsValid();
+		pasteEntity(Selected().IsAlive() ? Selected() : scene.Root(), resources);
+	}).enabled = editing && !multiSelected() && scene.IsValid();
 	focus("editor.view.hierarchy", "View: Focus Hierarchy", ICON_FA_SITEMAP "  Hierarchy");
 	focus("editor.view.filesystem", "View: Focus Filesystem", ICON_FA_FOLDER "  Filesystem");
 

@@ -89,6 +89,9 @@ enum class GizmoHandle {
 inline constexpr f32 kGizmoLength = 72.f;
 inline constexpr f32 kGizmoRadius = 56.f;
 
+// Multiplicative dragging keeps mirrored scales mirrored and cannot cross zero.
+f32 GizmoScaleFactor(f32 pixels);
+
 // Screen-space handles stay the same size at every camera zoom. Position
 // uses world axes; scale uses the entity's rotated axes, including parents.
 struct GizmoGeometry {

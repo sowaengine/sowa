@@ -1,4 +1,6 @@
 #include "editor/viewport.hpp"
+#include <algorithm>
+#include <cmath>
 
 #include <algorithm>
 
@@ -54,4 +56,21 @@ Vector2 WorldToViewportImage(const glm::mat4 &viewProjection, Vector2 worldPoint
 		image.y + (0.5f - ndcY * 0.5f) * image.h);
 }
 
+std::optional<PickRectangle> BoxPickRectangle(Vector2 a, Vector2 b, Vector2 size) {
+	if (!std::isfinite(a.x) || !std::isfinite(a.y) || !std::isfinite(b.x) || !std::isfinite(b.y) ||
+		!std::isfinite(size.x) || !std::isfinite(size.y) || size.x < 1 || size.y < 1 ||
+		size.x > 32768 || size.y > 32768) {
+		return {};
+	}
+	const auto x0 = static_cast<i32>(std::floor(std::clamp(std::min(a.x, b.x), 0.f, 1.f) * size.x));
+	const auto x1 = static_cast<i32>(std::ceil(std::clamp(std::max(a.x, b.x), 0.f, 1.f) * size.x));
+	const auto y0 =
+		static_cast<i32>(std::floor((1.f - std::clamp(std::max(a.y, b.y), 0.f, 1.f)) * size.y));
+	const auto y1 =
+		static_cast<i32>(std::ceil((1.f - std::clamp(std::min(a.y, b.y), 0.f, 1.f)) * size.y));
+	if (x1 <= x0 || y1 <= y0) {
+		return {};
+	}
+	return PickRectangle{x0, y0, x1 - x0, y1 - y0};
+}
 } // namespace sowa::editor

@@ -1,6 +1,7 @@
 #include "editor/command_history.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 #include <utility>
 
 namespace sowa::editor {
@@ -126,4 +127,41 @@ std::string_view CommandHistory::RedoName() const {
 	return CanRedo() ? _entries[_cursor].command->Name() : std::string_view();
 }
 
+bool CommandBatch::Redo() {
+	for (std::size_t i = 0; i < _commands.size(); ++i) {
+		if (_commands[i]->Redo()) {
+			continue;
+		}
+		while (i > 0) {
+			--i;
+			if (!_commands[i]->Undo()) {
+				throw std::runtime_error("Editor batch rollback failed");
+			}
+		}
+		return false;
+	}
+	return true;
+}
+
+bool CommandBatch::Undo() {
+	for (std::size_t i = _commands.size(); i > 0; --i) {
+		if (_commands[i - 1]->Undo()) {
+			continue;
+		}
+		for (std::size_t j = i; j < _commands.size(); ++j) {
+			if (!_commands[j]->Redo()) {
+				throw std::runtime_error("Editor batch rollback failed");
+			}
+		}
+		return false;
+	}
+	return true;
+}
+
+void CommandBatch::Discard() {
+	for (auto &command : _commands) {
+		command->Discard();
+	}
+	_commands.clear();
+}
 } // namespace sowa::editor

@@ -235,6 +235,9 @@ class GraphicsDevice {
 	virtual void ClearRenderTargetUInt(RenderTargetHandle handle, u32 attachment, u32 value) = 0;
 	virtual u32 ReadRenderTargetUInt(RenderTargetHandle handle, u32 attachment, i32 x, i32 y) = 0;
 
+	virtual std::vector<u32> ReadRenderTargetUIntRect(RenderTargetHandle, u32, i32, i32, i32,
+		i32) = 0;
+
 	virtual void SetViewport(i32 x, i32 y, i32 width, i32 height) = 0;
 
 	// Draws with the currently bound pipeline. Index type is u32.

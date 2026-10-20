@@ -24,19 +24,22 @@ void Editor::finishUIGizmo(bool cancel) {
 }
 
 bool Editor::drawUIGizmo(const Rect &image, Vector2 gameSize, Entity hoveredEntity) {
-	if (_uiDragBefore && _uiDragEntity != _selected) {
-		finishUIGizmo();
-	}
-	if (!_selected.IsAlive() || !_selected.Has<UIRect>()) {
+	if (multiSelected()) {
 		return false;
 	}
-	const Entity canvasEntity = FindUICanvas(_selected);
+	if (_uiDragBefore && _uiDragEntity != Selected()) {
+		finishUIGizmo();
+	}
+	if (!Selected().IsAlive() || !Selected().Has<UIRect>()) {
+		return false;
+	}
+	const Entity canvasEntity = FindUICanvas(Selected());
 	if (!canvasEntity.IsAlive()) {
 		return false;
 	}
 
 	const auto &canvas = *canvasEntity.Get<UICanvas>();
-	auto &rect = *_selected.Get<UIRect>();
+	auto &rect = *Selected().Get<UIRect>();
 	const auto mouse = ImGui::GetIO().MousePos;
 	const Vector2 viewportMouse{(mouse.x - image.x) * gameSize.x / image.w,
 		(mouse.y - image.y) * gameSize.y / image.h};
@@ -51,7 +54,7 @@ bool Editor::drawUIGizmo(const Rect &image, Vector2 gameSize, Entity hoveredEnti
 	for (size_t i = 0; i < corners.size(); ++i) {
 		draw->AddLine(corners[i], corners[(i + 1) % 4], IM_COL32(80, 190, 255, 255), 2);
 	}
-	if (!editor::CanEdit(_selected, false)) {
+	if (!editor::CanEdit(Selected(), false)) {
 		return false;
 	}
 
@@ -73,9 +76,9 @@ bool Editor::drawUIGizmo(const Rect &image, Vector2 gameSize, Entity hoveredEnti
 	if (!_uiDragBefore && ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
 		ImGui::IsWindowHovered() &&
 		(hoveredCorner >= 0 ||
-			(inside && (hoveredEntity == _selected || !hoveredEntity.IsAlive())))) {
+			(inside && (hoveredEntity == Selected() || !hoveredEntity.IsAlive())))) {
 		_uiDragBefore = rect;
-		_uiDragEntity = _selected;
+		_uiDragEntity = Selected();
 		_uiDragScene = _editingScene;
 		_uiDragStart = localMouse;
 		_uiDragMapping = canvas.viewportToLayout;

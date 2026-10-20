@@ -111,6 +111,7 @@ add_executable(sowa_tests
   editor/test_nine_patch.cpp
   editor/test_entity_actions.cpp
   editor/test_project_manager.cpp
+  editor/test_multi_selection.cpp
   editor/test_hierarchy.cpp
   editor/test_inspector.cpp
   editor/test_resource_inspector.cpp
@@ -178,4 +179,16 @@ add_test(NAME sowa_tests COMMAND sowa_tests)
 
 if(NOT EMSCRIPTEN)
   target_link_libraries(sowa_tests PRIVATE uv_a)
+endif()
+
+# Run explicitly in a desktop login session; headless CTest remains GPU independent.
+if(NOT EMSCRIPTEN)
+  add_executable(sowa_gl_pick_test EXCLUDE_FROM_ALL
+    render/test_gl_pick_rectangle.cpp
+    ${PROJECT_SOURCE_DIR}/src/render/gl/gl_render_target.cpp
+    ${PROJECT_SOURCE_DIR}/src/render/gl/gl_texture.cpp
+    ${PROJECT_SOURCE_DIR}/src/core/log.cpp)
+  target_compile_features(sowa_gl_pick_test PRIVATE cxx_std_20)
+  target_include_directories(sowa_gl_pick_test PRIVATE ${PROJECT_SOURCE_DIR}/src)
+  target_link_libraries(sowa_gl_pick_test PRIVATE glad glfw fmt::fmt glm::glm doctest::doctest_with_main)
 endif()

@@ -19,6 +19,8 @@ class GLRenderTargetStore {
 	TextureHandle ColorTexture(RenderTargetHandle handle) const;
 	void ClearUInt(RenderTargetHandle handle, u32 attachment, u32 value) const;
 	u32 ReadUInt(RenderTargetHandle handle, u32 attachment, i32 x, i32 y) const;
+	std::vector<u32> ReadUIntRect(RenderTargetHandle handle, u32 attachment, i32 x, i32 y,
+		i32 width, i32 height) const;
 	i32 Width(RenderTargetHandle handle) const;
 	i32 Height(RenderTargetHandle handle) const;
 

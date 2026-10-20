@@ -50,6 +50,9 @@ class GLGraphicsDevice : public GraphicsDevice {
 	void ClearRenderTargetUInt(RenderTargetHandle handle, u32 attachment, u32 value) override;
 	u32 ReadRenderTargetUInt(RenderTargetHandle handle, u32 attachment, i32 x, i32 y) override;
 
+	std::vector<u32> ReadRenderTargetUIntRect(RenderTargetHandle handle, u32 attachment, i32 x,
+		i32 y, i32 width, i32 height) override;
+
 	void SetViewport(i32 x, i32 y, i32 width, i32 height) override;
 
 	void DrawIndexed(BufferHandle vertexBuffer, BufferHandle indexBuffer, u32 indexCount) override;

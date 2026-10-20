@@ -12,11 +12,13 @@
 #include "ecs/entity.hpp"
 #include "editor/animation_preview.hpp"
 #include "editor/animation_timeline.hpp"
+#include "editor/bulk_inspector.hpp"
 #include "editor/camera.hpp"
 #include "editor/command_palette.hpp"
 #include "editor/console.hpp"
 #include "editor/filesystem_browser.hpp"
 #include "editor/gizmos.hpp"
+#include "editor/group_transform.hpp"
 #include "editor/hierarchy.hpp"
 #include "editor/profiler_panel.hpp"
 #include "editor/project_export_panel.hpp"
@@ -106,15 +108,23 @@ class Editor {
 	void ReportProjectSettingsSaveResult(bool success, std::string message);
 
 	bool CanReloadScene(Scene scene) const {
-		return !editor::IsSceneDocumentUnsaved(_sceneSaveStates, scene);
+		return !editor::IsSceneDocumentUnsaved(_sceneSaveStates, scene) &&
+			!(_bulkPending && _bulkPending->scene.Root() == scene.Root()) &&
+			!(_gizmoDrag && _gizmoScene.Root() == scene.Root());
+	}
+
+	void CommitPendingEdits(ResourceRegistry &resources) {
+		if (_initialized) {
+			commitPendingSceneEdits(resources);
+		}
 	}
 
 	Entity Selected() const {
-		return _selected;
+		return selection().Active();
 	}
 
 	void SetSelected(Entity entity) {
-		_selected = entity;
+		selection().Set(entity);
 	}
 
 	// Debug menu toggle. Application applies it to PhysicsWorld each frame.
@@ -146,6 +156,24 @@ class Editor {
 
 	void SetCameraView(Vector2 position, f32 zoom);
 	void DrawViewportGrid(Renderer2D &renderer, Vector2 viewportSize);
+
+	struct BoxSelectionRequest {
+		Entity root;
+		Vector2 a, b, size;
+		u64 targetRevision;
+		editor::SelectionMode mode;
+		editor::EntitySelection before;
+	};
+
+	std::optional<BoxSelectionRequest> TakeBoxSelectionRequest() {
+		return std::exchange(_boxRequest, {});
+	}
+
+	void SetPickTargetRevision(u64 revision) {
+		_pickTargetRevision = revision;
+	}
+
+	void CompleteBoxSelection(const BoxSelectionRequest &request, const std::vector<Entity> &hits);
 
   private:
 	void drawCommandPalette(SceneManager &scenes, ProjectSettings &project, ScriptServer &scripts,
@@ -199,6 +227,16 @@ class Editor {
 	void duplicateEntity(ResourceRegistry &resources);
 	void drawInspector(World &world, SceneManager &scenes, ScriptServer &scripts,
 		ProjectSettings &project, ResourceRegistry &resources, bool playing);
+	void drawBulkInspector(ResourceRegistry &resources, bool playing);
+
+	struct BulkPending {
+		Scene scene;
+		editor::EntitySelection selection;
+		std::vector<editor::BulkFieldEdit> edits;
+	};
+
+	std::optional<BulkPending> _bulkPending;
+	void finishBulkInspector(bool cancel = false);
 	void drawInspectorField(Entity entity, ComponentType type, const FieldInfo &field,
 		bool editable, World &world, ResourceRegistry &resources, float labelWidth = 140.f);
 	void finishInspectorFieldEdit(Entity entity, ComponentType type, const FieldInfo &field,
@@ -255,7 +293,23 @@ class Editor {
 	bool _openFilesystemDialog = false;
 	editor::LogFilter _consoleFilter;
 	bool _consoleAutoScroll = true;
+	u64 _pickTargetRevision = 0;
 	Rect _gameImageRect;
+
+	struct Marquee {
+		Vector2 start;
+		Rect image;
+		editor::EntitySelection before;
+		Entity root;
+		editor::SelectionMode mode;
+		bool dragging = false;
+	};
+
+	std::optional<Marquee> _marquee;
+	std::optional<BoxSelectionRequest> _boxRequest;
+	bool drawBoxSelection(const Rect &image, Vector2 gameSize, Entity hovered, Scene scene,
+		ResourceRegistry &resources);
+
 	editor::EditorCamera _camera;
 	bool _cameraDragging = false;
 	bool _previewSceneCamera = false;
@@ -277,7 +331,21 @@ class Editor {
 	glm::mat4 _uiDragMapping{1.f};
 	f32 _uiDragScale = 1;
 	editor::GizmoMode _gizmoMode = editor::GizmoMode::Position;
-	std::optional<editor::GizmoDrag> _gizmoDrag;
+
+	struct TransformDrag {
+		std::optional<editor::GizmoDrag> single;
+		editor::GroupTransform group;
+		editor::GizmoGeometry geometry;
+		editor::GizmoHandle handle;
+		editor::GizmoMode mode;
+		glm::mat4 screenToWorld{1.f};
+		Vector2 start;
+		f32 lastAngle = 0, rotation = 0;
+		editor::EntitySelection selection;
+	};
+
+	std::optional<TransformDrag> _gizmoDrag;
+	bool _groupActivePivot = false, _groupLocalAxes = false;
 
 	struct RaycastDrag {
 		Scene scene;
@@ -288,10 +356,31 @@ class Editor {
 	};
 
 	std::optional<RaycastDrag> _raycastDrag;
-	Entity _gizmoEntity;
 	Scene _gizmoScene;
-	Entity _selected;
-	editor::PlaySelection _playSelection;
+	editor::EntitySelection _runtimeSelection;
+	std::shared_ptr<editor::SceneDocumentContext> _selectionContext;
+	bool _selectionPlaying = false;
+
+	editor::EntitySelection &selection() {
+		return _selectionContext ? _selectionContext->selection : _runtimeSelection;
+	}
+
+	const editor::EntitySelection &selection() const {
+		return _selectionContext ? _selectionContext->selection : _runtimeSelection;
+	}
+
+	void bindSelection(SceneManager &scenes);
+	std::vector<Entity> _hierarchyVisible;
+	Entity _hierarchyClick;
+	std::optional<std::pair<Entity, bool>> _rangeRequest;
+	void handleSelectionShortcuts(ResourceRegistry &resources, Entity parent);
+	void deleteSelection(ResourceRegistry &resources);
+	bool canMutateSelection(bool structural = false) const;
+
+	bool multiSelected() const {
+		return selection().Members().size() > 1;
+	}
+
 	editor::AnimationPreview _animationPreview;
 	editor::AnimationTimeline _animationTimeline;
 	bool _showAnimationEditor = false;

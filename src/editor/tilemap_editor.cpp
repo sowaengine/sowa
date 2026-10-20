@@ -21,7 +21,7 @@
 namespace sowa {
 
 void Editor::drawTilemapInspector(ResourceRegistry &, bool playing) {
-	if (!_selected.Has<Tilemap>()) {
+	if (!Selected().Has<Tilemap>()) {
 		return;
 	}
 	if (drawComponentHeader("Tilemap", "Tilemap", ICON_FA_LAYER_GROUP, playing)) {
@@ -33,6 +33,9 @@ void Editor::drawTilemapInspector(ResourceRegistry &, bool playing) {
 }
 
 void Editor::drawTilemapEditor(ResourceRegistry &resources, bool playing) {
+	if (multiSelected()) {
+		return;
+	}
 	if (!_showTilemapEditor) {
 		return;
 	}
@@ -41,19 +44,19 @@ void Editor::drawTilemapEditor(ResourceRegistry &resources, bool playing) {
 		ImGui::End();
 		return;
 	}
-	auto *map = _selected.Get<Tilemap>();
+	auto *map = Selected().Get<Tilemap>();
 	if (!map) {
 		ImGui::TextDisabled("Select an entity with a Tilemap component.");
 		ImGui::End();
 		return;
 	}
 
-	ImGui::BeginDisabled(!editor::CanEdit(_selected, playing));
+	ImGui::BeginDisabled(!editor::CanEdit(Selected(), playing));
 	std::optional<Tilemap> before;
 	const auto capture = [&] {
 		finishTileStroke();
 		if (!before) {
-			before = *_selected.Get<Tilemap>();
+			before = *Selected().Get<Tilemap>();
 		}
 	};
 	bool changed = false;
@@ -98,8 +101,8 @@ void Editor::drawTilemapEditor(ResourceRegistry &resources, bool playing) {
 		ImGui::EndTable();
 	}
 	if (changed) {
-		editor::RecordTilemapEdit(_sceneSaveStates, _editingScene, _selected, std::move(*before),
-			*_selected.Get<Tilemap>());
+		editor::RecordTilemapEdit(_sceneSaveStates, _editingScene, Selected(), std::move(*before),
+			*Selected().Get<Tilemap>());
 	}
 	ImGui::EndDisabled();
 	ImGui::End();
@@ -235,7 +238,7 @@ bool Editor::applyTileSource(ResourceRegistry &resources, TileSourceForm &source
 		return false;
 	}
 	capture();
-	auto *map = _selected.Get<Tilemap>();
+	auto *map = Selected().Get<Tilemap>();
 	const auto texture = resources.Get<ImageTexture>(asset.id);
 	const std::string name = editor::AssetName(source.path);
 	bool changed = false;
@@ -282,11 +285,11 @@ bool Editor::drawTilemapSources(ResourceRegistry &resources, const std::function
 	bool changed = false;
 	if (ImGui::BeginTabBar("Tile sources")) {
 		if (ImGui::BeginTabItem("Selected tile")) {
-			auto *map = _selected.Get<Tilemap>();
+			auto *map = Selected().Get<Tilemap>();
 			const auto *tile = map->FindTile(_tileBrush);
 			if (tile) {
 				const auto *sheet = map->SheetForTile(tile->id);
-				if (_tileSourceEntity != _selected || _tileSourceBrush != _tileBrush) {
+				if (_tileSourceEntity != Selected() || _tileSourceBrush != _tileBrush) {
 					_tileSourceNeedsRefresh = true;
 					_tileEditWholeSheet = sheet != nullptr;
 					_tileImportError.clear();
@@ -311,7 +314,7 @@ bool Editor::drawTilemapSources(ResourceRegistry &resources, const std::function
 						resource = sheet->resource;
 					}
 					_tileEditSource.path = editor::TileAssetPath(resources, resource);
-					_tileSourceEntity = _selected;
+					_tileSourceEntity = Selected();
 					_tileSourceBrush = _tileBrush;
 					_tileSourceNeedsRefresh = false;
 				}
@@ -328,7 +331,7 @@ bool Editor::drawTilemapSources(ResourceRegistry &resources, const std::function
 				ImGui::SameLine();
 				if (_tileEditSource.kind != 2 && ImGui::Button("Reload from disk")) {
 					capture();
-					map = _selected.Get<Tilemap>();
+					map = Selected().Get<Tilemap>();
 					tile = map->FindTile(_tileBrush);
 					sheet = map->SheetForTile(_tileBrush);
 					const ResourceID resource =
@@ -350,7 +353,7 @@ bool Editor::drawTilemapSources(ResourceRegistry &resources, const std::function
 									   : "Source changes update every painted use of this tile.");
 				if (ImGui::Button("Remove tile and painted uses")) {
 					capture();
-					_selected.Get<Tilemap>()->RemoveTile(_tileBrush);
+					Selected().Get<Tilemap>()->RemoveTile(_tileBrush);
 					_tileBrush = 0;
 					changed = true;
 				}

@@ -49,13 +49,13 @@ void Editor::ApplyAnimationPreview(World &world, ResourceRegistry &resources, f6
 		_animationPreview.Stop();
 		return;
 	}
-	_animationPreview.Select(_selected);
+	_animationPreview.Select(Selected());
 	_animationPreview.Apply(world, resources, delta, viewportSize);
 }
 
 void Editor::createAnimationLibrary(ResourceRegistry &resources) {
 	std::optional<AnimationPlayer> before;
-	if (auto *player = _selected.Get<AnimationPlayer>()) {
+	if (auto *player = Selected().Get<AnimationPlayer>()) {
 		before = *player;
 	}
 	auto library = resources.Create<AnimationLibrary>();
@@ -72,8 +72,8 @@ void Editor::createAnimationLibrary(ResourceRegistry &resources) {
 	player.playback = {};
 	player.library = library->Id();
 	player.currentAnimation = clip.name;
-	_selected.Add(player);
-	editor::RecordAnimationEdit(_sceneSaveStates, _editingScene, _selected, resources,
+	Selected().Add(player);
+	editor::RecordAnimationEdit(_sceneSaveStates, _editingScene, Selected(), resources,
 		library->Id(), before, player, empty, saveAnimation(*library), true);
 	_animationTimeline.Reset();
 	_showAnimationEditor = true;
@@ -82,7 +82,7 @@ void Editor::createAnimationLibrary(ResourceRegistry &resources) {
 
 void Editor::drawAddComponent(World &world, ScriptServer &scripts, ResourceRegistry &resources,
 	bool playing) {
-	ImGui::BeginDisabled(!editor::CanEdit(_selected, playing));
+	ImGui::BeginDisabled(!editor::CanEdit(Selected(), playing));
 	if (ImGui::Button(ICON_FA_PLUS "  Add component", {-1, 28})) {
 		_componentSearch[0] = '\0';
 		ImGui::OpenPopup("add_component");
@@ -95,7 +95,7 @@ void Editor::drawAddComponent(World &world, ScriptServer &scripts, ResourceRegis
 		ImGui::InputTextWithHint("##search", "Search components", _componentSearch,
 			sizeof(_componentSearch));
 		ImGui::Separator();
-		auto types = editor::AddableComponents(world, _selected);
+		auto types = editor::AddableComponents(world, Selected());
 		std::sort(types.begin(), types.end(), [](auto a, auto b) { return a.Name() < b.Name(); });
 		const std::string search = _componentSearch;
 		bool found = false;
@@ -123,7 +123,7 @@ void Editor::drawAddComponent(World &world, ScriptServer &scripts, ResourceRegis
 						if (type.Name() == "AnimationPlayer") {
 							createAnimationLibrary(resources);
 						} else {
-							editor::ExecuteAddComponent(_sceneSaveStates, _editingScene, _selected,
+							editor::ExecuteAddComponent(_sceneSaveStates, _editingScene, Selected(),
 								type, scripts);
 							if (type.Name() == "AnimatedSprite") {
 								_showSpriteSheetEditor = true;
@@ -151,7 +151,7 @@ void Editor::drawAddComponent(World &world, ScriptServer &scripts, ResourceRegis
 }
 
 void Editor::drawAnimationInspector(ResourceRegistry &resources, bool playing) {
-	auto *player = _selected.Get<AnimationPlayer>();
+	auto *player = Selected().Get<AnimationPlayer>();
 	if (!player ||
 		!drawComponentHeader("AnimationPlayer", "Animation Player", ICON_FA_FILM, playing)) {
 		return;
@@ -159,21 +159,21 @@ void Editor::drawAnimationInspector(ResourceRegistry &resources, bool playing) {
 	ImGui::PushID("animation_player");
 	const auto librarySelection =
 		_resourceInspector.Draw("library", player->library, "AnimationLibrary", _editingScene,
-			resources, _fileSystem, _sceneSaveStates, editor::CanEdit(_selected, playing));
-	player = _selected.Get<AnimationPlayer>();
+			resources, _fileSystem, _sceneSaveStates, editor::CanEdit(Selected(), playing));
+	player = Selected().Get<AnimationPlayer>();
 	if (librarySelection.changed) {
 		const auto previous = player->library;
 		player->library = librarySelection.value;
-		const auto type = _selected.Raw().world().lookup("AnimationPlayer");
+		const auto type = Selected().Raw().world().lookup("AnimationPlayer");
 		const auto component = ComponentType(type);
 		const auto *field = component.FindField("library");
-		editor::RecordResourceAssignment(_sceneSaveStates, _editingScene, _selected, component,
+		editor::RecordResourceAssignment(_sceneSaveStates, _editingScene, Selected(), component,
 			*field, resources, previous, player->library, librarySelection.created);
-		player = _selected.Get<AnimationPlayer>();
+		player = Selected().Get<AnimationPlayer>();
 	}
 	auto library = resources.Get<AnimationLibrary>(player->library);
 	if (!library) {
-		ImGui::BeginDisabled(!editor::CanEdit(_selected, playing));
+		ImGui::BeginDisabled(!editor::CanEdit(Selected(), playing));
 		if (ImGui::Button("Create animation")) {
 			createAnimationLibrary(resources);
 		}
@@ -183,7 +183,7 @@ void Editor::drawAnimationInspector(ResourceRegistry &resources, bool playing) {
 	}
 	auto before = *player;
 	before.isPlaying = false;
-	ImGui::BeginDisabled(!editor::CanEdit(_selected, playing));
+	ImGui::BeginDisabled(!editor::CanEdit(Selected(), playing));
 	const bool selected = animationPicker(*player, *library);
 	bool changed = selected;
 	changed |= ImGui::Checkbox("Autoplay", &player->autoplay);
@@ -198,7 +198,7 @@ void Editor::drawAnimationInspector(ResourceRegistry &resources, bool playing) {
 		_animationTimeline.Reset();
 	}
 	ImGui::EndDisabled();
-	ImGui::BeginDisabled(!editor::CanEdit(_selected, playing));
+	ImGui::BeginDisabled(!editor::CanEdit(Selected(), playing));
 	const auto *current = library->FindClip(player->currentAnimation);
 	if (ImGui::Checkbox("Playing", &player->isPlaying) && player->isPlaying && current &&
 		_animationPreview.Time() >= current->duration) {
@@ -214,13 +214,16 @@ void Editor::drawAnimationInspector(ResourceRegistry &resources, bool playing) {
 		const auto data = saveAnimation(*library);
 		auto after = *player;
 		after.isPlaying = false;
-		editor::RecordAnimationEdit(_sceneSaveStates, _editingScene, _selected, resources,
+		editor::RecordAnimationEdit(_sceneSaveStates, _editingScene, Selected(), resources,
 			library->Id(), before, after, data, data);
 	}
 	ImGui::PopID();
 }
 
 void Editor::drawAnimationEditor(World &world, ResourceRegistry &resources, bool playing) {
+	if (multiSelected()) {
+		return;
+	}
 	if (!_showAnimationEditor) {
 		return;
 	}
@@ -229,19 +232,19 @@ void Editor::drawAnimationEditor(World &world, ResourceRegistry &resources, bool
 		ImGui::End();
 		return;
 	}
-	auto *player = _selected.Get<AnimationPlayer>();
+	auto *player = Selected().Get<AnimationPlayer>();
 	auto library = player ? resources.Get<AnimationLibrary>(player->library) : nullptr;
 	if (!player || !library) {
 		ImGui::TextDisabled("Select an entity with an AnimationPlayer.");
 		ImGui::End();
 		return;
 	}
-	ImGui::BeginDisabled(!editor::CanEdit(_selected, playing));
+	ImGui::BeginDisabled(!editor::CanEdit(Selected(), playing));
 	const auto beforePlayer = *player;
 	auto beforeLibrary = *library;
 	bool changed = false;
 	ResourceID createdKeyResource;
-	ImGui::TextUnformatted(_selected.GetName().c_str());
+	ImGui::TextUnformatted(Selected().GetName().c_str());
 	ImGui::SameLine();
 	ImGui::SetNextItemWidth(200);
 	if (animationPicker(*player, *library, "##animation")) {
@@ -339,7 +342,7 @@ void Editor::drawAnimationEditor(World &world, ResourceRegistry &resources, bool
 				component.IsValid() ? component.FindField(binding.property) : nullptr;
 			const auto selection = _resourceInspector.Draw("key_resource", value,
 				field ? field->resourceType : "", _editingScene, resources, _fileSystem,
-				_sceneSaveStates, editor::CanEdit(_selected, playing));
+				_sceneSaveStates, editor::CanEdit(Selected(), playing));
 			if (selection.changed) {
 				value = selection.value;
 				if (selection.created) {
@@ -348,8 +351,8 @@ void Editor::drawAnimationEditor(World &world, ResourceRegistry &resources, bool
 			}
 			return selection.changed;
 		};
-		changed |= _animationTimeline.Draw(world, _selected, *clip, cursor, editResource);
-		player = _selected.Get<AnimationPlayer>();
+		changed |= _animationTimeline.Draw(world, Selected(), *clip, cursor, editResource);
+		player = Selected().Get<AnimationPlayer>();
 		if (_animationTimeline.DidScrub() || cursor != oldCursor) {
 			_animationPreview.Seek(cursor);
 		}
@@ -359,7 +362,7 @@ void Editor::drawAnimationEditor(World &world, ResourceRegistry &resources, bool
 		auto before = beforePlayer;
 		auto after = *player;
 		before.isPlaying = after.isPlaying = false;
-		editor::RecordAnimationEdit(_sceneSaveStates, _editingScene, _selected, resources,
+		editor::RecordAnimationEdit(_sceneSaveStates, _editingScene, Selected(), resources,
 			library->Id(), before, after, saveAnimation(beforeLibrary), saveAnimation(*library),
 			false, createdKeyResource);
 	}

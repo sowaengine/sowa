@@ -7,6 +7,7 @@
 
 #include "core/id_generator.hpp"
 #include "editor/command_history.hpp"
+#include "editor/selection.hpp"
 #include "scene/scene.hpp"
 
 namespace sowa {
@@ -23,6 +24,8 @@ bool ActivateSceneDocument(SceneManager &scenes, Scene scene);
 struct SceneDocumentContext {
 	Entity root;
 	Entity indexedRoot;
+	EntitySelection selection;
+	SelectionBookmark selectionBookmark;
 	u64 reloadRevision = 0;
 	std::string sourcePath;
 	Entity graveyard;

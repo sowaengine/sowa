@@ -98,5 +98,23 @@ bool RecordScriptAttach(std::vector<SceneDocumentSaveState> &states, Scene scene
 bool ExecuteScriptRemove(std::vector<SceneDocumentSaveState> &states, Scene scene, Entity entity,
 	ScriptServer &scripts, std::string path);
 
+struct BulkFieldEdit {
+	Entity entity;
+	std::string component, field;
+	FieldValue before, after;
+	std::optional<FieldInfo> schema;
+};
+
+bool CanEditSelection(const EntitySelection &selection, Scene scene, bool structural = false);
+bool ExecuteDeleteSelection(std::vector<SceneDocumentSaveState> &states, Scene scene);
+bool ExecuteDuplicateSelection(std::vector<SceneDocumentSaveState> &states, Scene scene);
+bool CanReparentSelection(const EntitySelection &selection, Scene scene, Entity parent);
+bool ExecuteReparentSelection(std::vector<SceneDocumentSaveState> &states, Scene scene,
+	Entity parent);
+bool ExecuteBulkFieldEdit(std::vector<SceneDocumentSaveState> &states, Scene scene,
+	const std::vector<BulkFieldEdit> &edits, ResourceRegistry *resources = nullptr,
+	ResourceID created = {});
+bool RecordBulkFieldEdit(std::vector<SceneDocumentSaveState> &states, Scene scene,
+	const std::vector<BulkFieldEdit> &edits);
 } // namespace editor
 } // namespace sowa

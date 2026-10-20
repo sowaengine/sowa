@@ -215,9 +215,9 @@ void Editor::drawDockHost(SceneManager &scenes, const ProjectSettings &project,
 				_redoSceneRequested = true;
 			}
 			ImGui::Separator();
-			drawEntityActions(_selected,
-				_selected.IsAlive() ? _selected : scenes.EditorCurrent().Root(), scenes.IsPlaying(),
-				resources);
+			drawEntityActions(Selected(),
+				Selected().IsAlive() ? Selected() : scenes.EditorCurrent().Root(),
+				scenes.IsPlaying(), resources);
 			ImGui::EndPopup();
 		}
 		if (openProject) {

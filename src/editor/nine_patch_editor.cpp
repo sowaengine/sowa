@@ -44,6 +44,9 @@ void Editor::finishNinePatchPadding(bool cancel) {
 }
 
 void Editor::drawNinePatchEditor(World &world, ResourceRegistry &resources, bool playing) {
+	if (multiSelected()) {
+		return;
+	}
 	if (!_showNinePatchEditor) {
 		return;
 	}
@@ -53,7 +56,7 @@ void Editor::drawNinePatchEditor(World &world, ResourceRegistry &resources, bool
 		return;
 	}
 	ComponentType type;
-	for (const auto candidate : _selected.GetComponents()) {
+	for (const auto candidate : Selected().GetComponents()) {
 		if (candidate.Name() == _ninePatchType) {
 			type = candidate;
 			break;
@@ -64,14 +67,14 @@ void Editor::drawNinePatchEditor(World &world, ResourceRegistry &resources, bool
 		ImGui::End();
 		return;
 	}
-	const bool editable = editor::CanEdit(_selected, playing);
+	const bool editable = editor::CanEdit(Selected(), playing);
 	ImGui::BeginDisabled(!editable);
 	for (const auto *name : paddingFields) {
 		const auto *field = type.FindField(name);
-		drawInspectorField(_selected, type, *field, editable, world, resources);
+		drawInspectorField(Selected(), type, *field, editable, world, resources);
 	}
 	ImGui::EndDisabled();
-	const auto id = *_selected.GetField(type, "texture").As<ResourceID>();
+	const auto id = *Selected().GetField(type, "texture").As<ResourceID>();
 	const auto texture = resources.Get<ImageTexture>(id);
 	if (!texture || !texture->IsLoaded()) {
 		ImGui::TextWrapped(
@@ -98,7 +101,7 @@ void Editor::drawNinePatchEditor(World &world, ResourceRegistry &resources, bool
 	int hoveredGuide = -1;
 	float distance = 9;
 	for (int i = 0; i < 4; ++i) {
-		const float padding = *_selected.GetField(type, paddingFields[i]).As<f32>();
+		const float padding = *Selected().GetField(type, paddingFields[i]).As<f32>();
 		const bool horizontal = i < 2;
 		const float extent = horizontal ? size.x : size.y;
 		const float position = std::clamp(i % 2 ? extent - padding : padding, 0.f, extent);
@@ -120,15 +123,15 @@ void Editor::drawNinePatchEditor(World &world, ResourceRegistry &resources, bool
 		ImGui::SetTooltip("%s", paddingFields[hoveredGuide]);
 		if (!_paddingDrag && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 			const auto *name = paddingFields[hoveredGuide];
-			_paddingDrag = PendingFieldEdit{_editingScene, _selected, type, name,
-				*_selected.GetField(type, name).As<f32>()};
+			_paddingDrag = PendingFieldEdit{_editingScene, Selected(), type, name,
+				*Selected().GetField(type, name).As<f32>()};
 		}
 	}
-	if (_paddingDrag && _paddingDrag->entity == _selected && _paddingDrag->type == type) {
+	if (_paddingDrag && _paddingDrag->entity == Selected() && _paddingDrag->type == type) {
 		for (int i = 0; i < 4; ++i) {
 			if (_paddingDrag->field == paddingFields[i]) {
-				const float opposite = *_selected.GetField(type, paddingFields[i ^ 1]).As<f32>();
-				*_selected.GetField(type, paddingFields[i]).As<f32>() =
+				const float opposite = *Selected().GetField(type, paddingFields[i ^ 1]).As<f32>();
+				*Selected().GetField(type, paddingFields[i]).As<f32>() =
 					editor::NinePatchPaddingAt(paddingFields[i], point, size, opposite);
 			}
 		}
@@ -138,13 +141,13 @@ void Editor::drawNinePatchEditor(World &world, ResourceRegistry &resources, bool
 	const Rect preview{previewOrigin.x, previewOrigin.y, available.x, 120};
 	ImagePatchOptions options;
 	options.ninePatch = true;
-	options.paddingLeft = *_selected.GetField(type, "paddingLeft").As<f32>();
-	options.paddingRight = *_selected.GetField(type, "paddingRight").As<f32>();
-	options.paddingTop = *_selected.GetField(type, "paddingTop").As<f32>();
-	options.paddingBottom = *_selected.GetField(type, "paddingBottom").As<f32>();
-	options.tileCenter = *_selected.GetField(type, "tileCenter").As<bool>();
-	options.tileEdges = *_selected.GetField(type, "tileEdges").As<bool>();
-	options.drawCenter = *_selected.GetField(type, "drawCenter").As<bool>();
+	options.paddingLeft = *Selected().GetField(type, "paddingLeft").As<f32>();
+	options.paddingRight = *Selected().GetField(type, "paddingRight").As<f32>();
+	options.paddingTop = *Selected().GetField(type, "paddingTop").As<f32>();
+	options.paddingBottom = *Selected().GetField(type, "paddingBottom").As<f32>();
+	options.tileCenter = *Selected().GetField(type, "tileCenter").As<bool>();
+	options.tileEdges = *Selected().GetField(type, "tileEdges").As<bool>();
+	options.drawCenter = *Selected().GetField(type, "drawCenter").As<bool>();
 	for (const auto &patch : BuildImagePatches(preview, size, texture->flipVertically, options)) {
 		drawTexture(draw, native, patch.rect, patch.uv);
 	}

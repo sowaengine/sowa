@@ -25,11 +25,14 @@ void Editor::finishNinePatchResize(bool cancel) {
 }
 
 bool Editor::drawNinePatchGizmo(const glm::mat4 &viewProjection, const Rect &image) {
-	auto *rect = _selected.Get<NinePatchRect>();
-	if (!rect || !_selected.Has<Transform2D>() || !editor::CanEdit(_selected, false)) {
+	if (multiSelected()) {
 		return false;
 	}
-	const glm::mat4 projection = viewProjection * ComputeWorldMatrix(_selected);
+	auto *rect = Selected().Get<NinePatchRect>();
+	if (!rect || !Selected().Has<Transform2D>() || !editor::CanEdit(Selected(), false)) {
+		return false;
+	}
+	const glm::mat4 projection = viewProjection * ComputeWorldMatrix(Selected());
 	if (std::abs(glm::determinant(projection)) < 1e-20f) {
 		return false;
 	}
@@ -59,7 +62,7 @@ bool Editor::drawNinePatchGizmo(const glm::mat4 &viewProjection, const Rect &ima
 		if (!_ninePatchBefore && ImGui::IsWindowHovered() &&
 			ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 			_ninePatchBefore = *rect;
-			_ninePatchEntity = _selected;
+			_ninePatchEntity = Selected();
 			_ninePatchScene = _editingScene;
 			_ninePatchMapping = glm::inverse(projection);
 			_ninePatchStart = UITransformPoint(_ninePatchMapping, ndc);

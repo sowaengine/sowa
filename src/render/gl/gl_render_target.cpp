@@ -178,6 +178,47 @@ u32 GLRenderTargetStore::ReadUInt(RenderTargetHandle handle, u32 attachment, i32
 	return rgba[0];
 }
 
+std::vector<u32> GLRenderTargetStore::ReadUIntRect(RenderTargetHandle handle, u32 attachment, i32 x,
+	i32 y, i32 width, i32 height) const {
+	const Slot *slot = resolve(handle);
+	if (!slot || attachment != 1 || !slot->glUIntTexture || x < 0 || y < 0 || width <= 0 ||
+		height <= 0 || width > slot->width || height > slot->height || x > slot->width - width ||
+		y > slot->height - height) {
+		return {};
+	}
+	const std::size_t count = static_cast<std::size_t>(width) * height;
+	std::vector<u32> rgba(count * 4);
+	GLint previous = 0, pack = 0, rowLength = 0, skipRows = 0, skipPixels = 0, buffer = 0;
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &previous);
+	glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &buffer);
+	glGetIntegerv(GL_PACK_ALIGNMENT, &pack);
+	glGetIntegerv(GL_PACK_ROW_LENGTH, &rowLength);
+	glGetIntegerv(GL_PACK_SKIP_ROWS, &skipRows);
+	glGetIntegerv(GL_PACK_SKIP_PIXELS, &skipPixels);
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+	glPixelStorei(GL_PACK_ALIGNMENT, 4);
+	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+	glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, slot->glFbo);
+	GLint readBuffer = 0;
+	glGetIntegerv(GL_READ_BUFFER, &readBuffer);
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + attachment);
+	glReadPixels(x, y, width, height, GL_RGBA_INTEGER, GL_UNSIGNED_INT, rgba.data());
+	glReadBuffer(static_cast<GLenum>(readBuffer));
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, static_cast<GLuint>(previous));
+	glBindBuffer(GL_PIXEL_PACK_BUFFER, static_cast<GLuint>(buffer));
+	glPixelStorei(GL_PACK_ALIGNMENT, pack);
+	glPixelStorei(GL_PACK_ROW_LENGTH, rowLength);
+	glPixelStorei(GL_PACK_SKIP_ROWS, skipRows);
+	glPixelStorei(GL_PACK_SKIP_PIXELS, skipPixels);
+	std::vector<u32> result(count);
+	for (std::size_t i = 0; i < count; ++i) {
+		result[i] = rgba[i * 4];
+	}
+	return result;
+}
+
 i32 GLRenderTargetStore::Width(RenderTargetHandle handle) const {
 	const Slot *slot = resolve(handle);
 	return slot ? slot->width : 0;

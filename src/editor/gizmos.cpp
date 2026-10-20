@@ -291,6 +291,10 @@ std::optional<GizmoDrag> BeginGizmoDrag(Entity entity, GizmoMode mode, GizmoHand
 	return drag;
 }
 
+f32 GizmoScaleFactor(f32 pixels) {
+	return std::exp(std::clamp(pixels / kGizmoLength, -10.f, 10.f));
+}
+
 Transform2D UpdateGizmoDrag(GizmoDrag &drag, Vector2 mouse) {
 	Transform2D result = drag.before;
 	if (drag.mode == GizmoMode::None || !finitePoint(mouse)) {
@@ -314,13 +318,14 @@ Transform2D UpdateGizmoDrag(GizmoDrag &drag, Vector2 mouse) {
 		}
 		result.rotation += glm::degrees(drag.rotationDelta);
 	} else if (drag.handle == GizmoHandle::Center) {
-		const f32 factor = std::exp(std::clamp((delta.x - delta.y) / kGizmoLength, -10.f, 10.f));
+		const f32 factor = GizmoScaleFactor(delta.x - delta.y);
 		result.scale *= factor;
 	} else {
 		f32 &scale = drag.handle == GizmoHandle::X ? result.scale.x : result.scale.y;
 		const Vector2 direction =
 			drag.handle == GizmoHandle::X ? drag.geometry.xDirection : drag.geometry.yDirection;
-		scale += dot(delta, direction) / kGizmoLength * std::max(std::abs(scale), 1.f);
+		const f32 distance = dot(delta, direction);
+		scale = scale == 0.f ? distance / kGizmoLength : scale * GizmoScaleFactor(distance);
 	}
 	if (!finitePoint(result.position) || !finitePoint(result.scale) ||
 		!std::isfinite(result.rotation)) {

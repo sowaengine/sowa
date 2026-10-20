@@ -82,6 +82,11 @@ class StubGraphicsDevice : public GraphicsDevice {
 		return readUIntResult;
 	}
 
+	std::vector<u32> ReadRenderTargetUIntRect(RenderTargetHandle, u32, i32, i32, i32,
+		i32) override {
+		return {};
+	}
+
 	void SetViewport(i32, i32, i32, i32) override {}
 
 	void DrawIndexed(BufferHandle, BufferHandle, u32) override {}

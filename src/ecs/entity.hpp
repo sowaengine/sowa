@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 
 #include <algorithm>
 #include <cstddef>
@@ -388,6 +389,10 @@ class Entity {
 			}
 		}
 
+		// Flecs releases the ordered-children record when the last child leaves.
+		if (children.empty()) {
+			return true;
+		}
 		std::vector<flecs::entity_t> ids;
 		ids.reserve(children.size());
 		for (const Entity &child : children) {
@@ -404,6 +409,7 @@ class Entity {
 	// entity references map to copies; external references and ResourceIDs stay unchanged.
 	// Null parent creates a root. Rejects dead handles, cycles, and deferred execution.
 	Entity Duplicate(Entity parent = Entity()) const;
+	static std::unordered_map<Entity, Entity> DuplicateRoots(const std::vector<Entity> &roots);
 
 	bool operator==(const Entity &other) const {
 		return _entity == other._entity;
