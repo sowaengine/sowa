@@ -19,6 +19,8 @@ namespace sowa {
 
 class FileSystem;
 
+using ResourceIdMapper = u64 (*)(u64 id, void *context);
+
 // Serialize uses the same archive interface for saving and loading.
 enum class ArchiveMode {
 	Save,
@@ -66,6 +68,17 @@ class Archive {
 	bool Field(std::string_view key, i32 &value);
 	bool Field(std::string_view key, u32 &value);
 	bool Field(std::string_view key, u64 &value);
+
+	// Only resource fields participate in ID remapping.
+	bool ResourceField(std::string_view key, u64 &value);
+
+	Archive WithResourceMapper(ResourceIdMapper mapper, void *context) const {
+		Archive result = *this;
+		result._resourceMapper = mapper;
+		result._resourceContext = context;
+		return result;
+	}
+
 	bool Field(std::string_view key, f32 &value);
 	bool Field(std::string_view key, f64 &value);
 	bool Field(std::string_view key, std::string &value);
@@ -120,7 +133,8 @@ class Archive {
 			for (std::size_t i = 0; i < items.size(); ++i) {
 				// Shared node storage lets scalar writes update the sequence element.
 				YAML::Node element(YAML::NodeType::Null);
-				Archive child(element, _mode, _errors, elementPath(name, i), _version);
+				Archive child(element, _mode, _errors, elementPath(name, i), _version,
+					_resourceMapper, _resourceContext);
 				elementFn(child, items[i]);
 				sequence.push_back(element);
 			}
@@ -140,7 +154,8 @@ class Archive {
 		items.clear();
 		items.resize(sequence.size());
 		for (std::size_t i = 0; i < sequence.size(); ++i) {
-			Archive child(sequence[i], _mode, _errors, elementPath(name, i), _version);
+			Archive child(sequence[i], _mode, _errors, elementPath(name, i), _version,
+				_resourceMapper, _resourceContext);
 			elementFn(child, items[i]);
 		}
 		return true;
@@ -177,9 +192,10 @@ class Archive {
 
   private:
 	Archive(YAML::Node node, ArchiveMode mode, std::shared_ptr<std::vector<std::string>> errors,
-		std::string path, u32 version)
+		std::string path, u32 version, ResourceIdMapper mapper = nullptr,
+		void *resourceContext = nullptr)
 		: _node(node), _mode(mode), _errors(std::move(errors)), _path(std::move(path)),
-		  _version(version) {
+		  _version(version), _resourceMapper(mapper), _resourceContext(resourceContext) {
 	}
 
 	// Reads key through a const view of the node. Going through the
@@ -203,6 +219,8 @@ class Archive {
 		std::make_shared<std::vector<std::string>>();
 	std::string _path;
 	u32 _version = kArchiveVersion;
+	ResourceIdMapper _resourceMapper = nullptr;
+	void *_resourceContext = nullptr;
 	bool _valid = true;
 };
 

@@ -198,7 +198,7 @@ void AnimationTrack::Serialize(Archive &a) {
 			[&](auto &value) {
 				using T = std::decay_t<decltype(value)>;
 				if constexpr (std::is_same_v<T, ResourceID>) {
-					k.Field("value", value.value);
+					k.ResourceField("value", value.value);
 				} else {
 					k.Field("value", value);
 				}

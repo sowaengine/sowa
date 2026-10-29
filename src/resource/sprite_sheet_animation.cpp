@@ -117,7 +117,7 @@ void SpriteSheetAnimation::Serialize(Archive &archive) {
 
 	archive.List("animations", entries, [](Archive &element, Entry &entry) {
 		element.Field("name", entry.name);
-		element.Field("texture", entry.animation.texture.value);
+		element.ResourceField("texture", entry.animation.texture.value);
 		element.Field("columns", entry.animation.columns);
 		element.Field("rows", entry.animation.rows);
 		// Older scenes used the same padding and spacing on both axes.

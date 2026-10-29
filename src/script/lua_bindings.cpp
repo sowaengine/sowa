@@ -2,6 +2,7 @@
 #include "animation/animated_sprite.hpp"
 #include "animation/animation.hpp"
 #include "particles/particles2d.hpp"
+#include "script/lua_function.hpp"
 #include "script/lua_physics.hpp"
 #include "script/lua_tilemap.hpp"
 
@@ -407,33 +408,33 @@ sol::object AudioSourceMethod(ComponentView &view, const std::string &name, sol:
 
 	AudioMixer *mixer = MixerOf(s);
 	if (name == "play") {
-		return sol::make_object(s, [mixer](ComponentView self) {
+		return MakeLuaFunction(s, [mixer](ComponentView self) {
 			if (mixer != nullptr) {
 				mixer->Play(self.entity);
 			}
 		});
 	}
 	if (name == "pause") {
-		return sol::make_object(s, [mixer](ComponentView self) {
+		return MakeLuaFunction(s, [mixer](ComponentView self) {
 			if (mixer != nullptr) {
 				mixer->Pause(self.entity);
 			}
 		});
 	}
 	if (name == "stop") {
-		return sol::make_object(s, [mixer](ComponentView self) {
+		return MakeLuaFunction(s, [mixer](ComponentView self) {
 			if (mixer != nullptr) {
 				mixer->Stop(self.entity);
 			}
 		});
 	}
 	if (name == "is_playing") {
-		return sol::make_object(s, [mixer](ComponentView self) {
+		return MakeLuaFunction(s, [mixer](ComponentView self) {
 			return mixer != nullptr && mixer->IsPlaying(self.entity);
 		});
 	}
 	if (name == "is_paused") {
-		return sol::make_object(s, [mixer](ComponentView self) {
+		return MakeLuaFunction(s, [mixer](ComponentView self) {
 			return mixer != nullptr && mixer->IsPaused(self.entity);
 		});
 	}
@@ -447,54 +448,54 @@ sol::object RigidBody2DMethod(ComponentView &view, const std::string &name, sol:
 
 	PhysicsWorld *physics = PhysicsOf(s);
 	if (name == "apply_force") {
-		return sol::make_object(s, [physics](ComponentView self, Vector2 force) {
+		return MakeLuaFunction(s, [physics](ComponentView self, Vector2 force) {
 			if (physics != nullptr) {
 				physics->ApplyForce(self.entity, force);
 			}
 		});
 	}
 	if (name == "apply_torque") {
-		return sol::make_object(s, [physics](ComponentView self, f32 torque) {
+		return MakeLuaFunction(s, [physics](ComponentView self, f32 torque) {
 			if (physics != nullptr) {
 				physics->ApplyTorque(self.entity, torque);
 			}
 		});
 	}
 	if (name == "apply_impulse") {
-		return sol::make_object(s, [physics](ComponentView self, Vector2 impulse) {
+		return MakeLuaFunction(s, [physics](ComponentView self, Vector2 impulse) {
 			if (physics != nullptr) {
 				physics->ApplyImpulse(self.entity, impulse);
 			}
 		});
 	}
 	if (name == "apply_angular_impulse") {
-		return sol::make_object(s, [physics](ComponentView self, f32 impulse) {
+		return MakeLuaFunction(s, [physics](ComponentView self, f32 impulse) {
 			if (physics != nullptr) {
 				physics->ApplyAngularImpulse(self.entity, impulse);
 			}
 		});
 	}
 	if (name == "set_linear_velocity") {
-		return sol::make_object(s, [physics](ComponentView self, Vector2 velocity) {
+		return MakeLuaFunction(s, [physics](ComponentView self, Vector2 velocity) {
 			if (physics != nullptr) {
 				physics->SetLinearVelocity(self.entity, velocity);
 			}
 		});
 	}
 	if (name == "linear_velocity") {
-		return sol::make_object(s, [physics](ComponentView self) {
+		return MakeLuaFunction(s, [physics](ComponentView self) {
 			return physics != nullptr ? physics->GetLinearVelocity(self.entity) : Vector2();
 		});
 	}
 	if (name == "set_angular_velocity") {
-		return sol::make_object(s, [physics](ComponentView self, f32 degreesPerSecond) {
+		return MakeLuaFunction(s, [physics](ComponentView self, f32 degreesPerSecond) {
 			if (physics != nullptr) {
 				physics->SetAngularVelocity(self.entity, degreesPerSecond);
 			}
 		});
 	}
 	if (name == "angular_velocity") {
-		return sol::make_object(s, [physics](ComponentView self) {
+		return MakeLuaFunction(s, [physics](ComponentView self) {
 			return physics != nullptr ? physics->GetAngularVelocity(self.entity) : 0.f;
 		});
 	}
@@ -907,14 +908,15 @@ Random &LuaRng() {
 	return rng;
 }
 
-f32 MathRandom(sol::optional<f32> min, sol::optional<f32> max) {
+// Match Lua's float [0, 1) and inclusive integer range semantics.
+sol::object MathRandom(sol::optional<f32> min, sol::optional<f32> max, sol::this_state s) {
 	if (!min) {
-		return LuaRng().Float();
+		return sol::make_object(s, LuaRng().Float());
 	}
 	if (!max) {
-		return LuaRng().RangeFloat(0.f, *min);
+		return sol::make_object(s, LuaRng().Range(1, static_cast<i32>(*min)));
 	}
-	return LuaRng().RangeFloat(*min, *max);
+	return sol::make_object(s, LuaRng().Range(static_cast<i32>(*min), static_cast<i32>(*max)));
 }
 
 void BindMath(sol::state &lua) {
@@ -1497,6 +1499,32 @@ void BindScenes(sol::state &lua, SceneManager &scenes) {
 	lua["scenes"] = &scenes;
 }
 
+// Use strings for 64-bit IDs; accept numeric IDs for compatibility.
+std::string ResourceIdToLua(u64 id) {
+	return std::to_string(id);
+}
+
+bool ResourceIdFromLua(const sol::object &value, u64 &out) {
+	if (value.is<std::string>()) {
+		const std::string text = value.as<std::string>();
+		try {
+			out = std::stoull(text);
+			return true;
+		} catch (const std::exception &) {
+			return false;
+		}
+	}
+	if (IsLuaNumber(value)) {
+		const double number = value.as<double>();
+		if (number < 0.0 || number >= 18446744073709551616.0) {
+			return false;
+		}
+		out = static_cast<u64>(number);
+		return true;
+	}
+	return false;
+}
+
 sol::object FindPackedScene(ResourceRegistry &resources, const std::string &path,
 	sol::this_state s) {
 	u64 foundId = 0;
@@ -1514,12 +1542,16 @@ sol::object FindPackedScene(ResourceRegistry &resources, const std::string &path
 	if (foundId == 0) {
 		return Nil(s);
 	}
-	return sol::make_object(s, foundId);
+	return sol::make_object(s, ResourceIdToLua(foundId));
 }
 
-sol::object InstantiatePacked(ResourceRegistry &resources, World &world, u64 id,
+sol::object InstantiatePacked(ResourceRegistry &resources, World &world, sol::object id,
 	sol::optional<Entity> parent, sol::this_state s) {
-	Ref<PackedScene> packed = resources.Get<PackedScene>(ResourceID{id});
+	u64 value = 0;
+	if (!ResourceIdFromLua(id, value)) {
+		return Nil(s);
+	}
+	Ref<PackedScene> packed = resources.Get<PackedScene>(ResourceID{value});
 	if (packed == nullptr) {
 		return Nil(s);
 	}
@@ -1528,10 +1560,11 @@ sol::object InstantiatePacked(ResourceRegistry &resources, World &world, u64 id,
 }
 
 sol::object ResourcesGet(ResourceRegistry &registry, sol::object id, sol::this_state s) {
-	if (!IsLuaNumber(id)) {
+	u64 value = 0;
+	if (!ResourceIdFromLua(id, value)) {
 		return Nil(s);
 	}
-	const ResourceID resourceId{id.as<u64>()};
+	const ResourceID resourceId{value};
 	if (!registry.Has(resourceId)) {
 		return Nil(s);
 	}
@@ -1541,7 +1574,7 @@ sol::object ResourcesGet(ResourceRegistry &registry, sol::object id, sol::this_s
 void BindResources(sol::state &lua, World &world, ResourceRegistry &resources) {
 	lua.new_usertype<ResourceRegistry>("ResourceRegistry", sol::no_constructor, "get",
 		&ResourcesGet, "find_packed_scene", &FindPackedScene, "instantiate",
-		[&world](ResourceRegistry &registry, u64 id, sol::optional<Entity> parent,
+		[&world](ResourceRegistry &registry, sol::object id, sol::optional<Entity> parent,
 			sol::this_state s) { return InstantiatePacked(registry, world, id, parent, s); });
 	lua["resources"] = &resources;
 }

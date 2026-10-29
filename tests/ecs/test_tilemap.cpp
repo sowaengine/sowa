@@ -294,6 +294,7 @@ TEST_CASE("Tilemap Lua methods survive storage migration and removed components"
 	REQUIRE(scripts.DoString(R"(
 		e=world:create_entity('Map')
 		m=e:add('Tilemap')
+		assert(type(m.get_used_cells)=='function')
 		local grass=m:add_texture(1,'Grass')
 		local ids=m:add_sheet(2,Vector2(32,32),Vector2(16,16))
 		assert(#ids==4)

@@ -1,4 +1,5 @@
 #include "script/lua_physics.hpp"
+#include "script/lua_function.hpp"
 
 #include <cmath>
 #include <stdexcept>
@@ -272,25 +273,25 @@ sol::object RaycastMethod(ComponentView &view, const std::string &name, sol::thi
 	}
 	PhysicsWorld *physics = Physics(state);
 	if (name == "hit") {
-		return sol::make_object(lua, [physics](ComponentView self, sol::this_state state) {
+		return MakeLuaFunction(lua, [physics](ComponentView self, sol::this_state state) {
 			return Hit(sol::state_view(state),
 				physics ? physics->RaycastHit(self.entity) : std::optional<PhysicsHit2D>{});
 		});
 	}
 	if (name == "is_colliding") {
-		return sol::make_object(lua, [physics](ComponentView self) {
+		return MakeLuaFunction(lua, [physics](ComponentView self) {
 			return physics && physics->RaycastHit(self.entity).has_value();
 		});
 	}
 	if (name == "force_update") {
-		return sol::make_object(lua, [physics](ComponentView self, sol::this_state state) {
+		return MakeLuaFunction(lua, [physics](ComponentView self, sol::this_state state) {
 			return Hit(sol::state_view(state),
 				physics ? physics->ForceRaycastUpdate(self.entity) : PhysicsClosestResult2D{});
 		});
 	}
 	if (name == "add_body_exception" || name == "add_collider_exception") {
 		const bool body = name == "add_body_exception";
-		return sol::make_object(lua, [physics, body](ComponentView self, Entity excluded) {
+		return MakeLuaFunction(lua, [physics, body](ComponentView self, Entity excluded) {
 			if (physics && !physics->AddRaycastException(self.entity, excluded, body)) {
 				Error("exception requires a live ray and Entity in the same world");
 			}
@@ -298,14 +299,14 @@ sol::object RaycastMethod(ComponentView &view, const std::string &name, sol::thi
 	}
 	if (name == "remove_body_exception" || name == "remove_collider_exception") {
 		const bool body = name == "remove_body_exception";
-		return sol::make_object(lua, [physics, body](ComponentView self, Entity excluded) {
+		return MakeLuaFunction(lua, [physics, body](ComponentView self, Entity excluded) {
 			if (physics) {
 				physics->RemoveRaycastException(self.entity, excluded, body);
 			}
 		});
 	}
 	if (name == "clear_exceptions") {
-		return sol::make_object(lua, [physics](ComponentView self) {
+		return MakeLuaFunction(lua, [physics](ComponentView self) {
 			if (physics) {
 				physics->ClearRaycastExceptions(self.entity);
 			}

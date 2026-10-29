@@ -238,6 +238,26 @@ TEST_CASE("building targets stages files, applies overrides and lays out each pl
 	CHECK(fs::exists(fixture.project / ".sowa" / "exports" / "web.manifest"));
 }
 
+TEST_CASE("build contexts collect callbacks safely between targets") {
+	BuildFixture fixture;
+	fixture.script(R"(
+build.platforms { Platform.Linux }
+build.on("configure", function(ctx)
+    collectgarbage("collect")
+    ctx:mount("res"):include("scenes/**")
+end)
+)");
+	fixture.targets(R"(Targets:
+  - { Name: first, Platform: linux }
+  - { Name: second, Platform: linux }
+  - { Name: third, Platform: linux }
+  - { Name: fourth, Platform: linux }
+)");
+	const BuildReport report = fixture.build({"first", "second", "third", "fourth"});
+	REQUIRE_MESSAGE(report.ok, report.error);
+	CHECK(report.built.size() == 4);
+}
+
 TEST_CASE("web exports use the project icon as the favicon") {
 	BuildFixture fixture;
 	write(fixture.project / "project.sowa",

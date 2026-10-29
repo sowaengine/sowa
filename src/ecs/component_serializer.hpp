@@ -11,6 +11,7 @@ namespace sowa {
 // components and preserves absent fields. Saving fails for absent components.
 // EntityRef loads require a fallback to collect paths for later resolution.
 bool SerializeComponent(Archive &archive, Entity entity, ComponentType type,
-	FieldFallback fallback = nullptr, void *context = nullptr);
+	FieldFallback fallback = nullptr, void *context = nullptr,
+	ResourceIdMapper resourceMapper = nullptr, void *resourceContext = nullptr);
 
 } // namespace sowa

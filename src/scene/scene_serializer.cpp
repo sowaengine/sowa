@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <string>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "core/filesystem/file_system.hpp"
@@ -22,6 +24,15 @@
 namespace sowa {
 
 namespace {
+
+u64 mapResourceId(u64 id, void *context) {
+	const auto *remap = static_cast<const ResourceRemap *>(context);
+	if (remap == nullptr) {
+		return id;
+	}
+	const auto found = remap->find(id);
+	return found != remap->end() ? found->second : id;
+}
 
 // An entity reference met while loading, held until every entity exists.
 struct PendingRef {
@@ -97,7 +108,7 @@ void saveEntity(Archive &archive, Entity entity) {
 }
 
 void loadEntityFields(Archive &archive, Entity entity, World &world,
-	std::vector<PendingRef> &pending) {
+	std::vector<PendingRef> &pending, const ResourceRemap *remap = nullptr) {
 	std::string name;
 	if (archive.Field("name", name) && !name.empty()) {
 		entity.SetName(name);
@@ -122,7 +133,8 @@ void loadEntityFields(Archive &archive, Entity entity, World &world,
 		Archive component = components.Child(typeName);
 
 		const std::size_t before = pending.size();
-		SerializeComponent(component, entity, type, &collectEntityRef, &pending);
+		SerializeComponent(component, entity, type, &collectEntityRef, &pending,
+			remap != nullptr ? &mapResourceId : nullptr, const_cast<ResourceRemap *>(remap));
 		// Anything the fallback recorded belongs to this entity and component.
 		for (std::size_t i = before; i < pending.size(); ++i) {
 			pending[i].holder = entity;
@@ -132,15 +144,18 @@ void loadEntityFields(Archive &archive, Entity entity, World &world,
 }
 
 void loadEntity(Archive &archive, Entity entity, World &world, ResourceRegistry &resources,
-	std::vector<PendingRef> &pending);
+	std::vector<PendingRef> &pending, const ResourceRemap *remap = nullptr);
 
 void loadChildren(Archive &archive, Entity entity, World &world, ResourceRegistry &resources,
-	std::vector<PendingRef> &pending) {
+	std::vector<PendingRef> &pending, const ResourceRemap *remap = nullptr) {
 	// Create children in document order to preserve insertion order. Elements lets each
 	// child exist before its data is read.
 	for (Archive element : archive.Elements("children")) {
 		u64 packedId = 0;
 		if (element.Field("instance", packedId) && packedId != 0) {
+			if (remap != nullptr) {
+				packedId = mapResourceId(packedId, const_cast<ResourceRemap *>(remap));
+			}
 			Ref<PackedScene> packed = resources.Get<PackedScene>(ResourceID{packedId});
 			if (packed == nullptr) {
 				element.AddError("instance", "no PackedScene with this id is in the registry");
@@ -153,60 +168,129 @@ void loadChildren(Archive &archive, Entity entity, World &world, ResourceRegistr
 			}
 			// Host overrides (name, transform, …) on the instance root only.
 			// Children come from the template.
-			loadEntityFields(element, instance, world, pending);
+			loadEntityFields(element, instance, world, pending, remap);
 			continue;
 		}
 
 		Entity child = entity.CreateChild();
-		loadEntity(element, child, world, resources, pending);
+		loadEntity(element, child, world, resources, pending, remap);
 	}
 }
 
 void loadEntity(Archive &archive, Entity entity, World &world, ResourceRegistry &resources,
-	std::vector<PendingRef> &pending) {
-	loadEntityFields(archive, entity, world, pending);
-	loadChildren(archive, entity, world, resources, pending);
+	std::vector<PendingRef> &pending, const ResourceRemap *remap) {
+	loadEntityFields(archive, entity, world, pending, remap);
+	loadChildren(archive, entity, world, resources, pending, remap);
 }
 
-std::vector<ResourceID> loadResourceRecords(Archive &archive, ResourceRegistry &resources) {
-	std::vector<ResourceID> ids;
+std::string resourceData(Resource &resource) {
+	auto archive = Archive::Save();
+	resource.Serialize(archive);
+	return archive.ToString();
+}
+
+} // namespace
+
+std::vector<ResourceID> LoadResourceRecords(Archive &archive, ResourceRegistry &resources,
+	ResourceRemap &remap, bool retain, const std::vector<ResourceID> &owned) {
+	struct Record {
+		u64 original;
+		ResourceID existing;
+		Ref<Resource> candidate;
+		Archive data;
+		bool mine;
+		bool shared;
+	};
+
+	std::vector<Record> records;
+	const auto previous = std::exchange(remap, {});
+	std::unordered_set<u64> seen;
+	// Candidates need registry metadata; discard those that are not adopted.
+	std::unordered_set<u64> adopted;
+	auto cleanup = MakeScopeExit([&] {
+		for (auto &record : records) {
+			if (!adopted.contains(record.candidate->Id().value)) {
+				resources.Remove(record.candidate->Id());
+			}
+		}
+	});
+
 	for (Archive element : archive.Elements("resources")) {
 		u64 rawId = 0;
 		std::string typeName;
-		if (!element.Field("id", rawId) || !element.Field("type", typeName)) {
-			element.AddError("id", "a resource record needs both an id and a type");
+		if (!element.Field("id", rawId) || rawId == 0 || !element.Field("type", typeName)) {
+			element.AddError("id", "a resource record needs a positive id and a type");
 			continue;
 		}
-
-		const ResourceID id{rawId};
-
-		// Reuse the resource with this ID and share ownership with other scenes. A new ID
-		// would leave serialized component references pointing at the wrong record.
-		if (resources.Has(id)) {
-			const std::string_view existing = resources.TypeNameOf(id);
-			if (existing != typeName) {
-				element.AddError("type",
-					"resource id is already in use by a '" + std::string(existing) + "'");
-				continue;
-			}
-			ids.push_back(id);
+		if (!seen.insert(rawId).second) {
+			element.AddError("id", "duplicate resource id");
 			continue;
 		}
-
-		Ref<Resource> resource = resources.Create(typeName, id);
-		if (resource == nullptr) {
+		ResourceID id{rawId};
+		if (auto prior = previous.find(rawId); prior != previous.end() &&
+			std::find(owned.begin(), owned.end(), ResourceID{prior->second}) != owned.end() &&
+			resources.Has(ResourceID{prior->second})) {
+			id = ResourceID{prior->second};
+			remap[rawId] = id.value;
+		}
+		const bool existing = resources.Has(id);
+		if (existing && resources.TypeNameOf(id) != typeName) {
+			element.AddError("type",
+				"resource id is already in use by a '" + std::string(resources.TypeNameOf(id)) +
+					"'");
+			continue;
+		}
+		auto candidate = resources.Create(typeName, existing ? ResourceID{} : id);
+		if (!candidate) {
 			element.AddError("type", "could not create a resource of type '" + typeName + "'");
 			continue;
 		}
+		const bool mine = std::find(owned.begin(), owned.end(), id) != owned.end();
+		records.push_back({rawId, id, candidate, element.Child("data"), mine, existing && !mine});
+	}
 
-		Archive data = element.Child("data");
-		resource->Serialize(data);
-		// Deserialization sets fields; Reload is what acts on them.
+	// Propagate remaps through dependencies until sharing decisions stop changing.
+	// Each pass can only make shared records private, including cycles.
+	bool changed;
+	do {
+		changed = false;
+		for (auto &record : records) {
+			auto data = record.data.WithResourceMapper(&mapResourceId, &remap);
+			record.candidate->Serialize(data);
+			if (record.shared &&
+				resourceData(*record.candidate) != resourceData(*resources.Get(record.existing))) {
+				record.shared = false;
+				remap[record.original] = record.candidate->Id().value;
+				changed = true;
+			}
+		}
+	} while (changed);
+
+	std::vector<ResourceID> ids;
+	std::vector<ResourceID> reload;
+	for (auto &record : records) {
+		const ResourceID target =
+			record.mine || record.shared ? record.existing : record.candidate->Id();
+		if (!record.shared) {
+			auto data = record.data.WithResourceMapper(&mapResourceId, &remap);
+			resources.Get(target)->Serialize(data);
+			reload.push_back(target);
+		}
+		if (target == record.candidate->Id()) {
+			adopted.insert(target.value);
+		}
+		if (!retain || resources.Retain(target)) {
+			ids.push_back(target);
+		}
+	}
+	// All reference fields and IDs must exist before Reload follows a dependency.
+	for (auto id : reload) {
 		resources.Reload(id);
-		ids.push_back(id);
 	}
 	return ids;
 }
+
+namespace {
 
 Entity resolveInstanceRef(World &world, Entity root, const std::string &rootName,
 	const std::string &path) {
@@ -339,7 +423,8 @@ bool SaveScene(Archive &archive, Scene scene, ResourceRegistry &resources) {
 	return true;
 }
 
-Scene LoadScene(Archive &archive, World &world, ResourceRegistry &resources) {
+Scene LoadScene(Archive &archive, World &world, ResourceRegistry &resources,
+	const std::vector<ResourceID> &owned) {
 	if (!archive.IsValid()) {
 		return Scene();
 	}
@@ -352,7 +437,9 @@ Scene LoadScene(Archive &archive, World &world, ResourceRegistry &resources) {
 	// Resources first: an instance: child needs its PackedScene already
 	// Reloaded before we can build the subtree. Own waits until the root
 	// carries SceneRoot, which arrives with the entity walk.
-	const std::vector<ResourceID> loadedIds = loadResourceRecords(archive, resources);
+	ResourceRemap remap;
+	const std::vector<ResourceID> loadedIds =
+		LoadResourceRecords(archive, resources, remap, false, owned);
 
 	// Created bare and then filled in: the root's SceneRoot component comes
 	// from the document like any other, so a file that omits it produces an
@@ -365,10 +452,13 @@ Scene LoadScene(Archive &archive, World &world, ResourceRegistry &resources) {
 	root.Field("name", savedName);
 
 	std::vector<PendingRef> pending;
-	loadEntity(root, rootEntity, world, resources, pending);
+	loadEntity(root, rootEntity, world, resources, pending, &remap);
 
 	for (const ResourceID id : loadedIds) {
 		scene.Own(resources, id);
+	}
+	if (scene.IsValid()) {
+		scene.Root().Get<SceneRoot>()->resourceRemap = remap;
 	}
 
 	// Resolve paths after all entities exist. Remap the saved root name to the live name,
@@ -405,6 +495,7 @@ FsError SaveSceneToFile(FileSystem &fs, std::string_view path, Scene scene,
 	if (result == FsError::Ok &&
 		(scene.SourcePath().empty() || fs.Normalize(scene.SourcePath()) == fs.Normalize(path))) {
 		scene.Root().Get<SceneRoot>()->diskContent = text;
+		scene.Root().Get<SceneRoot>()->resourceRemap.clear();
 	}
 	return result;
 }
@@ -470,7 +561,7 @@ Entity PackedScene::Instantiate(World &world, ResourceRegistry &resources, Entit
 
 	Entity rootEntity = world.CreateEntity();
 	std::vector<PendingRef> pending;
-	loadEntity(root, rootEntity, world, resources, pending);
+	loadEntity(root, rootEntity, world, resources, pending, &_remap);
 	rootEntity.Add(SceneInstance{Id()});
 
 	for (PendingRef &ref : pending) {
@@ -588,21 +679,9 @@ bool ReloadSceneFromFile(FileSystem &fs, Scene scene, World &world, ResourceRegi
 		Log::Warn("Cannot reload '{}': invalid scene data", path);
 		return false;
 	}
-	// Update shared resource definitions too; merely reusing their IDs leaves
-	// inspector changes in a scene file invisible to every existing owner.
-	for (Archive record : archive.Elements("resources")) {
-		u64 raw = 0;
-		if (!record.Field("id", raw)) {
-			continue;
-		}
-		if (auto resource = resources.Get(ResourceID{raw})) {
-			Archive data = record.Child("data");
-			resource->Serialize(data);
-			resources.Reload(ResourceID{raw});
-		}
-	}
 	const auto owned = scene.OwnedResources();
-	const auto incoming = staged.OwnedResources();
+	auto remap = scene.Root().Get<SceneRoot>()->resourceRemap;
+	const auto incoming = LoadResourceRecords(archive, resources, remap, false, owned);
 	for (ResourceID id : incoming) {
 		scene.Own(resources, id);
 	}
@@ -619,11 +698,12 @@ bool ReloadSceneFromFile(FileSystem &fs, Scene scene, World &world, ResourceRegi
 	std::string savedName;
 	root.Field("name", savedName);
 	std::vector<PendingRef> pending;
-	loadEntity(root, scene.Root(), world, resources, pending);
+	loadEntity(root, scene.Root(), world, resources, pending, &remap);
 	resolvePending(world, scene.Root(), savedName, pending);
 	scene.SetSourcePath(path);
 	scene.Root().Get<SceneRoot>()->diskContent = text;
 	scene.Root().Get<SceneRoot>()->reloadRevision = revision;
+	scene.Root().Get<SceneRoot>()->resourceRemap = std::move(remap);
 	scene.SetEnabled(enabled);
 	return true;
 }

@@ -382,6 +382,14 @@ bool Archive::enumTransfer(const std::string *key, i32 &value,
 	return false;
 }
 
+bool Archive::ResourceField(std::string_view key, u64 &value) {
+	const bool transferred = Field(key, value);
+	if (transferred && IsLoading() && _resourceMapper != nullptr) {
+		value = _resourceMapper(value, _resourceContext);
+	}
+	return transferred;
+}
+
 Archive Archive::Child(std::string_view key) {
 	const std::string name(key);
 	const std::string path = childPath(name);
@@ -396,7 +404,8 @@ Archive Archive::Child(std::string_view key) {
 		if (!existing.IsMap()) {
 			_node[name] = YAML::Node(YAML::NodeType::Map);
 		}
-		return Archive(_node[name], _mode, _errors, path, _version);
+		return Archive(_node[name], _mode, _errors, path, _version, _resourceMapper,
+			_resourceContext);
 	}
 
 	const YAML::Node node = lookup(name);
@@ -404,14 +413,16 @@ Archive Archive::Child(std::string_view key) {
 		// Inert rather than invalid: nested reads all return false and leave
 		// their targets at whatever defaults the object already had, which is
 		// the same "absence isn't an error" rule one level down.
-		return Archive(YAML::Node(), _mode, _errors, path, _version);
+		return Archive(YAML::Node(), _mode, _errors, path, _version, _resourceMapper,
+			_resourceContext);
 	}
 	if (!node.IsMap()) {
 		pushError(*_errors, path, "expected a mapping");
-		return Archive(YAML::Node(), _mode, _errors, path, _version);
+		return Archive(YAML::Node(), _mode, _errors, path, _version, _resourceMapper,
+			_resourceContext);
 	}
 
-	return Archive(node, _mode, _errors, path, _version);
+	return Archive(node, _mode, _errors, path, _version, _resourceMapper, _resourceContext);
 }
 
 std::vector<std::string> Archive::Keys() const {
@@ -446,7 +457,8 @@ std::vector<Archive> Archive::Elements(std::string_view key) {
 	for (std::size_t i = 0; i < sequence.size(); ++i) {
 		// push_back, not emplace_back: the constructor is private, so the
 		// allocator can't reach it but this member function can.
-		elements.push_back(Archive(sequence[i], _mode, _errors, elementPath(name, i), _version));
+		elements.push_back(Archive(sequence[i], _mode, _errors, elementPath(name, i), _version,
+			_resourceMapper, _resourceContext));
 	}
 	return elements;
 }

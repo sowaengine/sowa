@@ -87,50 +87,13 @@ void PackedScene::Reload(const ResourceContext &context) {
 		return;
 	}
 	ResourceRegistry &resources = *context.registry;
-	std::vector<ResourceID> retained;
 
-	for (Archive element : archive.Elements("resources")) {
-		u64 rawId = 0;
-		std::string typeName;
-		if (!element.Field("id", rawId) || !element.Field("type", typeName)) {
-			element.AddError("id", "a resource record needs both an id and a type");
-			continue;
-		}
-
-		const ResourceID id{rawId};
-		if (resources.Has(id)) {
-			const std::string_view existing = resources.TypeNameOf(id);
-			if (existing != typeName) {
-				element.AddError("type",
-					"resource id is already in use by a '" + std::string(existing) + "'");
-				continue;
-			}
-			if (!resources.Retain(id)) {
-				continue;
-			}
-			retained.push_back(id);
-			Archive data = element.Child("data");
-			resources.Get(id)->Serialize(data);
-			resources.Reload(id);
-			continue;
-		}
-
-		Ref<Resource> resource = resources.Create(typeName, id);
-		if (resource == nullptr) {
-			element.AddError("type", "could not create a resource of type '" + typeName + "'");
-			continue;
-		}
-
-		Archive data = element.Child("data");
-		resource->Serialize(data);
-		resources.Reload(id);
-		if (!resources.Retain(id)) {
-			continue;
-		}
-		retained.push_back(id);
-	}
+	ResourceRemap remap = _remap;
+	const std::vector<ResourceID> ids =
+		LoadResourceRecords(archive, resources, remap, true, _retained);
+	_remap = remap;
 	const auto previous = std::move(_retained);
-	_retained = std::move(retained);
+	_retained = ids;
 	_document = document;
 	++_revision;
 	for (ResourceID id : previous) {

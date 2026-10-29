@@ -4,24 +4,34 @@
 
 #include <doctest/doctest.h>
 
+#include "animation/animation.hpp"
 #include "core/filesystem/file_system.hpp"
 #include "core/serialize/archive.hpp"
+#include "ecs/component_type.hpp"
 #include "ecs/components/camera2d.hpp"
 #include "ecs/components/render_order.hpp"
 #include "ecs/components/scene_root.hpp"
+#include "ecs/components/tilemap.hpp"
 #include "ecs/components/transform2d.hpp"
 #include "ecs/entity.hpp"
 #include "ecs/visibility.hpp"
 #include "ecs/world.hpp"
-#include "ecs/component_type.hpp"
+#include "resource/font.hpp"
 #include "resource/resource.hpp"
 #include "resource/resource_registry.hpp"
+#include "resource/sprite_sheet_animation.hpp"
 #include "scene/scene.hpp"
 #include "scene/scene_serializer.hpp"
+#include "ui/theme.hpp"
 
 using namespace sowa;
 
 namespace {
+
+struct ResourceLink : Resource {
+	std::string label;
+	ResourceID next;
+};
 
 // Saves scene and loads it back into a *different* world, so nothing can
 // pass by accidentally still pointing at the original entities.
@@ -855,4 +865,153 @@ TEST_CASE("A shared resource lives until its last owner releases it") {
 	Scene again = spawn();
 	CHECK(fixture.registry.Get<Note>(tex) != object);
 	UnloadScene(again, fixture.registry);
+}
+
+TEST_CASE("resource ID collisions remap references inside other resources") {
+	World world;
+	ResourceRegistry resources;
+	resources.RegisterType<Font>("Font").Field("pixelSize", &Font::pixelSize);
+	RegisterUITheme(resources);
+	auto load = [&](const char *name, int pixelSize) {
+		const auto data = std::string("resources:\n") +
+			"  - id: 200\n    type: UITheme\n    data:\n      font: 100\n"
+			"      rules: [{role: Button, font: 100, texture: 100}]\n"
+			"  - id: 100\n    type: Font\n    data: {pixelSize: " +
+			std::to_string(pixelSize) + "}\nroot:\n  name: " + name +
+			"\n  components:\n    SceneRoot: {}\n"
+			"    Tilemap:\n      sheets: [{id: 1, resource: 100}]\n"
+			"      tiles: [{id: 1, resource: 100}]\n  children: []\n";
+		auto archive = Archive::Load(data);
+		auto scene = LoadScene(archive, world, resources);
+		REQUIRE(scene.IsValid());
+		return scene;
+	};
+	Scene first = load("First", 32);
+	Scene second = load("Second", 64);
+	Ref<UITheme> theme;
+	for (auto id : second.OwnedResources()) {
+		if (auto candidate = resources.Get<UITheme>(id)) {
+			theme = candidate;
+		}
+	}
+	REQUIRE(theme);
+	auto font = resources.Get<Font>(theme->font);
+	REQUIRE(font);
+	CHECK(font->pixelSize == 64);
+	REQUIRE(theme->rules.size() == 1);
+	CHECK(theme->rules[0].appearance.font == font->Id());
+	CHECK(theme->rules[0].appearance.texture == font->Id());
+	const auto *tiles = second.Root().Get<Tilemap>();
+	REQUIRE(tiles);
+	REQUIRE(tiles->Sheets().size() == 1);
+	REQUIRE(tiles->Tiles().size() == 1);
+	CHECK(tiles->Sheets()[0].resource == font->Id());
+	CHECK(tiles->Tiles()[0].resource == font->Id());
+	CHECK(resources.Get<Font>(ResourceID{100})->pixelSize == 32);
+	UnloadScene(second, resources);
+	UnloadScene(first, resources);
+	CHECK(resources.Count() == 0);
+}
+
+TEST_CASE("Resource remapping propagates through forward references and cycles") {
+	World world;
+	ResourceRegistry resources;
+	resources.RegisterType<ResourceLink>("Link")
+		.Field("label", &ResourceLink::label)
+		.ResourceField("next", &ResourceLink::next, "Link");
+	auto load = [&](const char *lastLabel) {
+		auto archive = Archive::Load(std::string(R"(
+resources:
+  - {id: 100, type: Link, data: {label: A, next: 200}}
+  - {id: 200, type: Link, data: {label: B, next: 300}}
+  - {id: 300, type: Link, data: {label: )") +
+			lastLabel + R"(, next: 100}}
+root: {name: Graph, components: {SceneRoot: {}}}
+)");
+		auto scene = LoadScene(archive, world, resources);
+		REQUIRE(scene.IsValid());
+		REQUIRE_FALSE(archive.HasErrors());
+		return scene;
+	};
+	auto first = load("C");
+	auto identical = load("C");
+	CHECK(resources.Count() == 3);
+	CHECK(identical.OwnedResources() == first.OwnedResources());
+	auto changed = load("Changed");
+	REQUIRE(changed.OwnedResources().size() == 3);
+	CHECK(resources.Count() == 6);
+	const auto &ids = changed.OwnedResources();
+	CHECK(ids[0] != ResourceID{100});
+	CHECK(resources.Get<ResourceLink>(ids[0])->next == ids[1]);
+	CHECK(resources.Get<ResourceLink>(ids[1])->next == ids[2]);
+	CHECK(resources.Get<ResourceLink>(ids[2])->next == ids[0]);
+	CHECK(resources.Get<ResourceLink>(ids[2])->label == "Changed");
+	CHECK(resources.Get<ResourceLink>(ResourceID{300})->label == "C");
+	UnloadScene(changed, resources);
+	CHECK(resources.Count() == 3);
+	UnloadScene(identical, resources);
+	CHECK(resources.Count() == 3);
+	UnloadScene(first, resources);
+	CHECK(resources.Count() == 0);
+}
+
+TEST_CASE("Reloading owned resource records updates objects in place") {
+	ResourceRegistry resources;
+	resources.RegisterType<ResourceLink>("Link")
+		.Field("label", &ResourceLink::label)
+		.ResourceField("next", &ResourceLink::next, "Link");
+	auto first = Archive::Load(R"(resources:
+  - {id: 100, type: Link, data: {label: Before, next: 200}}
+  - {id: 200, type: Link, data: {label: Other, next: 100}}
+)");
+	ResourceRemap remap;
+	const auto owned = LoadResourceRecords(first, resources, remap, false);
+	auto original = resources.Get<ResourceLink>(ResourceID{100});
+	REQUIRE(original);
+	auto updated = Archive::Load(R"(resources:
+  - {id: 100, type: Link, data: {label: After, next: 200}}
+  - {id: 200, type: Link, data: {label: Other, next: 100}}
+)");
+	CHECK(LoadResourceRecords(updated, resources, remap, false, owned) == owned);
+	CHECK(resources.Count() == 2);
+	CHECK(resources.Get<ResourceLink>(ResourceID{100}) == original);
+	CHECK(original->label == "After");
+	CHECK(original->next == ResourceID{200});
+	CHECK(remap.empty());
+}
+
+TEST_CASE("Custom animation serializers remap resource references without changing numeric data") {
+	auto mapper = +[](u64 id, void *) -> u64 { return id == 100 ? 200 : id; };
+	auto spriteData = Archive::Load(R"(animations:
+  - {name: walk, texture: 100, columns: 100, frames: [100]}
+)")
+						  .WithResourceMapper(mapper, nullptr);
+	SpriteSheetAnimation sprites;
+	sprites.Serialize(spriteData);
+	REQUIRE(sprites.Find("walk"));
+	CHECK(sprites.Find("walk")->texture == ResourceID{200});
+	CHECK(sprites.Find("walk")->columns == 100);
+	CHECK(sprites.Find("walk")->frames == std::vector<i32>{100});
+	auto animationData = Archive::Load(R"(clips:
+  - name: change
+    duration: 100
+    tracks:
+      - type: ResourceRef
+        keys: [{time: 100, value: 100}]
+      - type: U32
+        keys: [{time: 100, value: 100}]
+)")
+							 .WithResourceMapper(mapper, nullptr);
+	AnimationLibrary animations;
+	animations.Serialize(animationData);
+	REQUIRE_FALSE(animationData.HasErrors());
+	REQUIRE(animations.clips.size() == 1);
+	const auto &clip = animations.clips[0];
+	REQUIRE(clip.tracks.size() == 2);
+	CHECK(clip.duration == 100);
+	REQUIRE(clip.tracks[0].Keys().size() == 1);
+	REQUIRE(clip.tracks[1].Keys().size() == 1);
+	CHECK(std::get<ResourceID>(clip.tracks[0].Keys()[0].value) == ResourceID{200});
+	CHECK(std::get<u32>(clip.tracks[1].Keys()[0].value) == 100);
+	CHECK(clip.tracks[0].Keys()[0].time == 100);
 }

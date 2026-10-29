@@ -1,6 +1,7 @@
 #include "editor/project_manager.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <filesystem>
 #include <vector>
 

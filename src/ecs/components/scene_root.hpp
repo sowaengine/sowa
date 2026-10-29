@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 #include "ecs/entity.hpp"
 
@@ -15,6 +16,7 @@ struct SceneRoot {
 	std::string sourcePath;
 	// Last loaded/saved disk bytes; editor-only metadata, not reflected.
 	std::string diskContent;
+	std::unordered_map<u64, u64> resourceRemap;
 	u64 reloadRevision = 0;
 
 	// This scene's active camera. Serialized as an entity path and resolved by the scene loader.

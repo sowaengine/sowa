@@ -314,7 +314,7 @@ void Tilemap::Serialize(Archive &archive) {
 	archive.Field("nextSheetId", _nextSheetId);
 	archive.List("sheets", _sheets, [](Archive &a, TileSheet &sheet) {
 		a.Field("id", sheet.id);
-		a.Field("resource", sheet.resource.value);
+		a.ResourceField("resource", sheet.resource.value);
 		a.Field("tileSize", sheet.tileSize);
 		a.Field("margin", sheet.margin);
 		a.Field("spacing", sheet.spacing);
@@ -326,7 +326,7 @@ void Tilemap::Serialize(Archive &archive) {
 	archive.List("tiles", _tiles, [](Archive &a, TileDefinition &tile) {
 		a.Field("id", tile.id);
 		a.Field("name", tile.name);
-		a.Field("resource", tile.resource.value);
+		a.ResourceField("resource", tile.resource.value);
 		a.Field("scene", tile.scene);
 		a.Field("x", tile.region.x);
 		a.Field("y", tile.region.y);

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string_view>
+#include <unordered_map>
+#include <vector>
 
 #include "core/filesystem/fs_types.hpp"
 #include "core/serialize/archive.hpp"
@@ -12,6 +14,14 @@ namespace sowa {
 class FileSystem;
 class World;
 
+// Maps serialized resource IDs to registry IDs after collisions.
+using ResourceRemap = std::unordered_map<u64, u64>;
+
+// Loads resources, remapping conflicting IDs. Retain increments their reference counts.
+// Owned resources are updated in place; pass the previous remap when reloading.
+std::vector<ResourceID> LoadResourceRecords(Archive &archive, ResourceRegistry &resources,
+	ResourceRemap &remap, bool retain = false, const std::vector<ResourceID> &owned = {});
+
 // Reload in place, preserving the document root and ownership.
 bool ReloadSceneFromFile(FileSystem &fs, Scene scene, World &world, ResourceRegistry &resources);
 
@@ -20,9 +30,10 @@ bool ReloadSceneFromFile(FileSystem &fs, Scene scene, World &world, ResourceRegi
 // without inherited children. Archive errors retain recoverable data.
 bool SaveScene(Archive &archive, Scene scene, ResourceRegistry &resources);
 
-// Builds the scene the archive describes and returns it. Invalid if the
-// document has no root or the world can't take it.
-Scene LoadScene(Archive &archive, World &world, ResourceRegistry &resources);
+// Loads a scene, updating resources already listed in owned. Returns an invalid
+// scene if the document has no root or the world cannot create it.
+Scene LoadScene(Archive &archive, World &world, ResourceRegistry &resources,
+	const std::vector<ResourceID> &owned = {});
 
 FsError SaveSceneToFile(FileSystem &fs, std::string_view path, Scene scene,
 	ResourceRegistry &resources);

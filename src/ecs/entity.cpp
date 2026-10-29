@@ -210,10 +210,9 @@ Entity CloneOne(Entity source, Entity parent) {
 	// flecs clones component values through copy hooks, including groups and visibility.
 	// Assign the new name after parenting.
 	Entity copy(source.Raw().clone(true));
+	// Reattach through SetParent so ordered parents register the cloned child.
+	copy.Raw().remove(flecs::ChildOf, flecs::Wildcard);
 
-	// The clone also carries (ChildOf, source's parent) across, so an
-	// unparented duplicate has to be actively detached rather than just left
-	// where it lands.
 	if (parent.IsAlive()) {
 		copy.SetParent(parent);
 	} else {

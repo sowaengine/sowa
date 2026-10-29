@@ -16,8 +16,8 @@ void appearance(Archive &a, UIAppearance &v) {
 	a.Field("text", v.text);
 	a.Field("accent", v.accent);
 	a.Field("border", v.border);
-	a.Field("font", v.font.value);
-	a.Field("texture", v.texture.value);
+	a.ResourceField("font", v.font.value);
+	a.ResourceField("texture", v.texture.value);
 	a.Field("fontSize", v.fontSize);
 	a.Field("borderWidth", v.borderWidth);
 	a.Field("padding", v.padding);

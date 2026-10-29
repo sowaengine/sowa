@@ -42,3 +42,16 @@ TEST_CASE("SeverityToString covers all severities") {
 	CHECK(std::string(Log::SeverityToString(Log::Severity::Warn)) == "WARN");
 	CHECK(std::string(Log::SeverityToString(Log::Severity::Error)) == "ERROR");
 }
+
+TEST_CASE("repeated runtime errors retain one diagnostic and count every failure") {
+	Log::Clear();
+	const std::size_t before = Log::ErrorCount();
+	for (int i = 0; i < 20; ++i) {
+		Log::Error("repeat failure");
+	}
+	REQUIRE(Log::GetLines().size() == 1);
+	CHECK(Log::GetLines().back().repetitions == 20);
+	CHECK(Log::ErrorCount() == before + 20);
+	Log::Clear();
+	CHECK(Log::ErrorCount() == before + 20);
+}

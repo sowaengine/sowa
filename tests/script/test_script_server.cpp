@@ -1,5 +1,7 @@
+#include <array>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -32,6 +34,25 @@
 #include "script/script_server.hpp"
 
 using namespace sowa;
+
+TEST_CASE("Lua collects distinct callbacks with the same signature") {
+	sol::state lua;
+	auto first = std::make_shared<int>(1);
+	auto second = std::make_shared<int>(2);
+	std::weak_ptr<int> firstLifetime = first;
+	std::weak_ptr<int> secondLifetime = second;
+	lua.set_function("first", [value = std::move(first)] { return *value; });
+	lua.set_function("second", [padding = std::array<u64, 2>{}, value = std::move(second)] {
+		return *value + padding[0];
+	});
+	CHECK(lua["first"]().get<int>() == 1);
+	CHECK(lua["second"]().get<int>() == 2);
+	lua["first"] = sol::lua_nil;
+	lua["second"] = sol::lua_nil;
+	lua.collect_garbage();
+	CHECK(firstLifetime.expired());
+	CHECK(secondLifetime.expired());
+}
 
 namespace {
 
@@ -813,7 +834,7 @@ TEST_CASE("math binds engine Math and not Lua's math library") {
 		local r = math.random()
 		assert(r >= 0 and r < 1)
 		local a = math.random(2, 3)
-		assert(a >= 2 and a < 3)
+		assert(a >= 2 and a <= 3 and a % 1 == 0)
 		assert(math.abs(-4) == 4)
 		assert(math.abs(math.sin(0)) < 0.0001)
 		assert(math.abs(math.cos(0) - 1) < 0.0001)
@@ -1051,9 +1072,10 @@ TEST_CASE("resources:find_packed_scene returns the matching id") {
 	Ref<PackedScene> packed = resources.Create<PackedScene>(ResourceID{42});
 	REQUIRE(packed != nullptr);
 	packed->path = "res://scenes/object.scene";
-	CHECK(
-		scripts.DoString("assert(resources:find_packed_scene('res://scenes/object.scene') == 42)"));
+	CHECK(scripts.DoString(
+		"assert(resources:find_packed_scene('res://scenes/object.scene') == '42')"));
 	CHECK(scripts.DoString("assert(resources:find_packed_scene('res://missing.scene') == nil)"));
+	CHECK(scripts.DoString("assert(resources:get('42').path == 'res://scenes/object.scene')"));
 	CHECK(scripts.DoString("assert(resources:get(42).path == 'res://scenes/object.scene')"));
 }
 
@@ -1497,6 +1519,7 @@ TEST_CASE("AudioSource play pause stop are Lua methods") {
 
 	REQUIRE(scripts.DoString(R"(
 		local src = e:get("AudioSource")
+		assert(type(src.play) == 'function' and type(src.pause) == 'function')
 		assert(src:is_playing() == false)
 		assert(src:is_paused() == false)
 		src:play()
@@ -1790,6 +1813,102 @@ TEST_CASE("Script hot reload keeps running code on syntax errors and recovers on
 	fs.Events()->changed("res://helper.lua");
 	REQUIRE(scripts.FlushFileChanges());
 	CHECK(scripts.DoString("assert(value() == 7)"));
+}
+
+TEST_CASE("Failed reload rolls back partial registrations across modules") {
+	const auto root = makeTempDir();
+	FileSystem fs;
+	fs.MountFolder("res", root);
+	World world;
+	ScriptServer scripts(world);
+	writeFile(root / "main.lua", R"(
+		state = {nested = {value = 3}}
+		local original = state.nested
+		local M = world:component('Recovery', {value = 3})
+		function M:_start() starts = (starts or 0) + 1 end
+		function M:_update() self.value = self.value + original.value end
+		world:system('RecoverySystem'):each(function() ticks = (ticks or 0) + 1 end)
+		editor.commands.register {id = 'wait', title = 'Wait', run = function()
+			answer = editor.input.text {title = 'Answer'}
+		end}
+	)");
+	writeFile(root / "last.lua", "return true");
+	REQUIRE(scripts.LoadModules(fs, {"res://main.lua", "res://last.lua"}));
+	Entity entity = world.CreateEntity();
+	REQUIRE(scripts.AttachScript(entity, "res://main.lua"));
+	scripts.SetEntity("e", entity);
+	world.Progress(0.1f);
+	std::string error;
+	REQUIRE(scripts.Commands().Execute("wait", false, error));
+	REQUIRE(scripts.CommandInputs().Current());
+	REQUIRE(scripts.DoString(R"(
+		timer_hits = 0
+		timers:create(0.1, true):on_timeout(function() timer_hits = timer_hits + 1 end)
+	)"));
+	writeFile(root / "main.lua", R"(
+		state.nested.value = 99
+		state.extra = true
+		local M = world:component('Recovery', {value = 'changed', added = 7})
+		function M:_update() error('replacement must not run') end
+		world:component('Uncommitted', {value = 1})
+		world:system('RecoverySystem'):each(function() ticks = 1000 end)
+		editor.commands.register {id = 'replacement', title = 'Replacement', run = function() end}
+		timers:create(0.1, true):on_timeout(function() timer_hits = timer_hits + 100 end)
+	)");
+	writeFile(root / "last.lua", "error('later module failed')");
+	CHECK_FALSE(scripts.ReloadModules(fs));
+	CHECK_FALSE(world.FindComponent("Uncommitted").IsValid());
+	CHECK(scripts.Commands().Search("").at(0).id == "wait");
+	REQUIRE(scripts.CommandInputs().Current());
+	CHECK(scripts.CommandInputs().Submit("kept"));
+	world.Progress(0.1f);
+	scripts.UpdateTimers(0.2f);
+	CHECK(scripts.DoString(R"(
+		assert(e:get('Recovery').value == 9)
+		assert(starts == 1 and ticks == 2)
+		assert(state.nested.value == 3 and state.extra == nil)
+		assert(answer == 'kept' and timer_hits == 1)
+	)"));
+	writeFile(root / "main.lua", R"(
+		local M = world:component('Recovery', {value = 3, added = 7})
+		function M:_start() starts = starts + 1 end
+		function M:_update() self.value = self.value + self.added end
+		world:system('RecoverySystem'):each(function() ticks = ticks + 10 end)
+	)");
+	writeFile(root / "last.lua", "return true");
+	REQUIRE(scripts.ReloadModules(fs));
+	world.Progress(0.1f);
+	CHECK(
+		scripts.DoString("assert(e:get('Recovery').value == 16 and starts == 1 and ticks == 12)"));
+}
+
+TEST_CASE("Rejected reload restores configured paths and validates staged system queries") {
+	const auto root = makeTempDir();
+	FileSystem fs;
+	fs.MountFolder("res", root);
+	World world;
+	ScriptServer scripts(world);
+	writeFile(root / "main.lua",
+		"world:system('Counter'):each(function() ticks = (ticks or 0) + 1 end)");
+	REQUIRE(scripts.LoadModules(fs, {"res://main.lua"}));
+	writeFile(root / "bad.lua",
+		"world:system('Counter'):with('MissingType'):each(function() ticks = 100 end)");
+	CHECK_FALSE(scripts.ReloadModules(fs, {"res://bad.lua"}));
+	world.Progress(0.1f);
+	CHECK(scripts.DoString("assert(ticks == 1)"));
+	REQUIRE(scripts.ReloadModules(fs));
+	world.Progress(0.1f);
+	CHECK(scripts.DoString("assert(ticks == 2)"));
+	writeFile(root / "main.lua", R"(
+		world:system('Counter'):with('DeclaredLater'):each(function() ticks = ticks + 10 end)
+		world:component('DeclaredLater', {})
+	)");
+	REQUIRE(scripts.ReloadModules(fs));
+	auto entity = world.CreateEntity();
+	REQUIRE(scripts.DoString("assert(ticks == 2)"));
+	entity.Add(world.FindComponent("DeclaredLater"));
+	world.Progress(0.1f);
+	CHECK(scripts.DoString("assert(ticks == 12)"));
 }
 
 TEST_CASE(

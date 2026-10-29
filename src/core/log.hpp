@@ -20,6 +20,7 @@ enum class Severity {
 struct Message {
 	std::string text;
 	Severity severity;
+	std::size_t repetitions = 1;
 };
 
 const char *SeverityToString(Severity severity);
@@ -27,6 +28,8 @@ const char *SeverityToString(Severity severity);
 const std::deque<Message> &GetLines();
 void Clear();
 std::size_t MaxLines();
+// Counts errors across buffer eviction and Clear.
+std::size_t ErrorCount();
 void SetMaxLines(std::size_t maxLines);
 
 namespace Internal {

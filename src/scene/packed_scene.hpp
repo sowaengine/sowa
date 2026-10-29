@@ -6,6 +6,7 @@
 #include "ecs/entity.hpp"
 #include "resource/resource.hpp"
 #include "resource/resource_id.hpp"
+#include "scene/scene_serializer.hpp"
 
 namespace sowa {
 
@@ -37,6 +38,7 @@ class PackedScene : public Resource {
 	u64 _revision = 0;
 	std::string _document;
 	std::vector<ResourceID> _retained;
+	ResourceRemap _remap;
 };
 
 } // namespace sowa

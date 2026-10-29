@@ -31,6 +31,8 @@ class ResourceRegistry;
 class SceneManager;
 class World;
 struct Collision2D;
+struct FieldDefault;
+struct FieldDesc;
 
 // Owns Lua bindings and component lifecycle hooks. Must be destroyed before World.
 class ScriptServer {
@@ -142,6 +144,8 @@ class ScriptServer {
 	void destroyLuaSystem(const std::string &name);
 	void rememberLuaSystem(const std::string &name, System system);
 	void bindStartSystem(const std::string &typeName, ComponentType type);
+	void destroyComponentSystems(const std::string &typeName);
+	void ensureStartSystem(const std::string &typeName, ComponentType type);
 	bool startInstance(const std::string &typeName, ComponentType type, Entity entity);
 	void bindUpdateSystem(const std::string &typeName, ComponentType type);
 	void bindFixedUpdateSystem(const std::string &typeName, ComponentType type);
@@ -154,6 +158,8 @@ class ScriptServer {
 	void callCollisionHook(const std::string &typeName, const char *hook, Entity entity,
 		ComponentType type, Entity other);
 	void recordScriptComponent(const std::string &typeName);
+	ComponentType applyComponentDefinition(const std::string &name,
+		const std::vector<FieldDesc> &fields, const std::vector<FieldDefault> &defaults);
 
 	World &_world;
 	Scope<Impl> _impl;

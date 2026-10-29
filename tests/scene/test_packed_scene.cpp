@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,10 @@ struct Gun {
 	i32 unused = 0;
 };
 
+struct Holder {
+	ResourceID resource;
+};
+
 struct Fixture {
 	World world;
 	ResourceRegistry registry;
@@ -48,6 +53,8 @@ struct Fixture {
 		registry.RegisterType<PackedScene>("PackedScene").Field("path", &PackedScene::path);
 		world.RegisterComponent<Aim>("Aim").Field("target", &Aim::target);
 		world.RegisterComponent<Gun>("Gun").Field("unused", &Gun::unused);
+		world.RegisterComponent<Holder>("Holder").ResourceField("resource", &Holder::resource,
+			"Note");
 	}
 
 	~Fixture() { std::filesystem::remove_all(dir); }
@@ -266,4 +273,81 @@ TEST_CASE("Instantiate without a loaded document is refused") {
 	CHECK_FALSE(packed->Instantiate(f.world, f.registry).IsAlive());
 	CHECK_FALSE(Log::GetLines().empty());
 	Log::Clear();
+}
+
+TEST_CASE("A template that reuses a resource id gets its own resource") {
+	Fixture f;
+	const auto sceneText = [](const char *noteText) {
+		return std::string("version: 1\n"
+						   "resources:\n"
+						   "  - id: 1\n"
+						   "    type: Note\n"
+						   "    data:\n"
+						   "      text: ") +
+			noteText +
+			"\n"
+			"root:\n"
+			"  name: Scene\n"
+			"  components:\n"
+			"    SceneRoot:\n"
+			"      sourcePath: \"\"\n"
+			"      activeCamera: \"\"\n"
+			"  children:\n"
+			"    - name: Holder\n"
+			"      components:\n"
+			"        Holder:\n"
+			"          resource: 1\n";
+	};
+	std::ofstream(f.dir / "template.scene") << sceneText("template");
+	std::ofstream(f.dir / "host.scene") << sceneText("host");
+
+	Scene host = LoadSceneFromFile(f.fs, "tmp://host.scene", f.world, f.registry);
+	REQUIRE(host.IsValid());
+	REQUIRE(f.registry.Get<Note>(ResourceID{1}) != nullptr);
+	CHECK(f.registry.Get<Note>(ResourceID{1})->text == "host");
+
+	Ref<PackedScene> packed = f.loadPacked("tmp://template.scene");
+	REQUIRE(packed != nullptr);
+	CHECK(f.registry.Get<Note>(ResourceID{1})->text == "host");
+
+	Entity instance = packed->Instantiate(f.world, f.registry, host.Root());
+	REQUIRE(instance.IsAlive());
+	Entity holder = instance.Find("Holder");
+	REQUIRE(holder.IsAlive());
+	const Holder *reference = holder.Get<Holder>();
+	REQUIRE(reference != nullptr);
+	CHECK(reference->resource != ResourceID{1});
+	const Ref<Note> templateNote = f.registry.Get<Note>(reference->resource);
+	REQUIRE(templateNote != nullptr);
+	CHECK(templateNote->text == "template");
+	std::ofstream(f.dir / "template.scene") << sceneText("updated");
+	f.registry.Reload(packed->Id());
+	CHECK(f.registry.Get<Note>(templateNote->Id()) == templateNote);
+	CHECK(templateNote->text == "updated");
+	CHECK(f.registry.Get<Note>(ResourceID{1})->text == "host");
+}
+
+TEST_CASE("Nested instances follow colliding PackedScene resource IDs") {
+	Fixture f;
+	std::ofstream(f.dir / "first.scene")
+		<< "root: {name: First, components: {SceneRoot: {}}, children: [{name: FirstChild}]}";
+	std::ofstream(f.dir / "second.scene")
+		<< "root: {name: Second, components: {SceneRoot: {}}, children: [{name: SecondChild}]}";
+	auto load = [&](const char *path) {
+		auto archive =
+			Archive::Load(std::string("resources:\n  - id: 100\n"
+									  "    type: PackedScene\n    data: {path: 'tmp://") +
+				path +
+				"'}\n"
+				"root:\n  name: Host\n  components: {SceneRoot: {}}\n"
+				"  children: [{name: Nested, instance: 100}]\n");
+		auto scene = LoadScene(archive, f.world, f.registry);
+		REQUIRE_FALSE(archive.HasErrors());
+		return scene;
+	};
+	auto first = load("first.scene");
+	auto second = load("second.scene");
+	CHECK(first.Root().Find("Nested/FirstChild").IsAlive());
+	CHECK(second.Root().Find("Nested/SecondChild").IsAlive());
+	CHECK_FALSE(second.Root().Find("Nested/FirstChild").IsAlive());
 }

@@ -110,6 +110,22 @@ TEST_CASE("world:system with two components matches the intersection") {
 	REQUIRE(scripts.DoString("assert(well:get('Health').hp == 10)"));
 }
 
+TEST_CASE("_start runs before the systems of the same script") {
+	World world;
+	ScriptServer scripts(world);
+	REQUIRE(scripts.DoString(R"(
+		local Order = world:component("Order", {})
+		function Order:_start() events = "start" end
+		world:system("OrderSystem")
+			:with("Order")
+			:each(function(e, o) events = events .. ",system" end)
+		hero = world:create_entity()
+		hero:add("Order")
+	)"));
+	world.Progress(0.016f);
+	REQUIRE(scripts.DoString("assert(events == 'start,system', tostring(events))"));
+}
+
 TEST_CASE("Redefining a Lua component migrates fields by name") {
 	World world;
 	ScriptServer scripts(world);

@@ -37,9 +37,9 @@ std::filesystem::path ExecutablePath() {
 	}
 	path = buffer.c_str();
 #elif defined(__linux__)
-	std::error_code ec;
-	path = std::filesystem::read_symlink("/proc/self/exe", ec);
-	if (ec) {
+	std::error_code linkError;
+	path = std::filesystem::read_symlink("/proc/self/exe", linkError);
+	if (linkError) {
 		return {};
 	}
 #else

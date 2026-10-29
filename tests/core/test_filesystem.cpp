@@ -160,3 +160,25 @@ TEST_CASE("FileSystem refuses moves between mounted servers") {
 
 	std::filesystem::remove_all(root);
 }
+
+TEST_CASE("folder mounts reject symlinks that leave their root") {
+	const auto root = makeTempDir();
+	const auto outside = root.parent_path() / "sowa_fs_outside_review";
+	std::filesystem::create_directories(outside);
+	writeFile(outside / "keep.txt", "keep");
+	std::error_code ec;
+	std::filesystem::create_directory_symlink(outside, root / "escape", ec);
+	REQUIRE_FALSE(ec);
+	FileSystem fs;
+	fs.MountFolder("res", root);
+	CHECK(fs.Load("res://escape/keep.txt").error == FsError::InvalidPath);
+	CHECK(fs.ReadDirectory("res://escape").error == FsError::InvalidPath);
+	CHECK(fs.Save("res://escape/keep.txt", {}) == FsError::InvalidPath);
+	CHECK(fs.CreateFile("res://escape/new.txt") == FsError::InvalidPath);
+	CHECK(fs.CreateDirectory("res://escape/new") == FsError::InvalidPath);
+	CHECK(fs.Move("res://escape/keep.txt", "res://lost.txt") == FsError::InvalidPath);
+	CHECK(fs.RemoveAll("res://escape/keep.txt") == FsError::InvalidPath);
+	CHECK(std::filesystem::file_size(outside / "keep.txt") == 4);
+	std::filesystem::remove_all(root);
+	std::filesystem::remove_all(outside);
+}

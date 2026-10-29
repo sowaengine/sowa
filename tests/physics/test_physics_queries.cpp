@@ -472,6 +472,7 @@ TEST_CASE("Lua direct and component queries share options hit copies and validat
 		assert(#overlaps == 1 and overlaps[1].collider == target)
 		assert(overlaps[1].point == nil and overlaps[1].distance == nil)
 		local ray = probe:get('Raycast2D')
+		assert(type(ray.force_update) == 'function')
 		assert(ray:is_colliding() and ray:hit().collider == target)
 		local copy = ray:hit()
 		copy.point.x = 999

@@ -1,4 +1,5 @@
 #include "script/script_server.hpp"
+#include "script/lua_function.hpp"
 
 #include <algorithm>
 #include <list>
@@ -9,6 +10,9 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include <lauxlib.h>
+#include <lua.h>
 
 #include "core/filesystem/file_system.hpp"
 #include "core/log.hpp"
@@ -62,6 +66,19 @@ struct ScriptServer::Impl {
 	std::unordered_map<std::string, sol::table> prototypes;
 	std::unordered_map<std::string, std::vector<FieldDefault>> defaults;
 	std::unordered_map<std::string, sol::table> extras;
+
+	struct ReloadStage {
+		std::vector<std::function<void()>> componentDefinitions;
+		std::vector<std::function<void()>> registrations;
+		std::list<Timer> timers;
+		std::list<Tween> tweens;
+		bool clearTimers = false;
+		bool clearTweens = false;
+		std::unordered_set<std::string> components;
+		std::vector<std::string> queriedComponents;
+	};
+
+	std::unique_ptr<ReloadStage> reloadStage;
 	std::vector<std::pair<std::string, System>> luaSystems;
 	std::vector<std::string> modulePaths;
 	std::vector<std::string> directPaths;
@@ -85,6 +102,61 @@ struct ScriptServer::Impl {
 };
 
 namespace {
+
+// Restore tables in place so existing closures and instances keep their references.
+class LuaTableSnapshot {
+	struct Entry {
+		sol::table table;
+		sol::object metatable;
+		std::vector<std::pair<sol::object, sol::object>> values;
+	};
+
+	std::unordered_set<const void *> _seen;
+	std::vector<Entry> _entries;
+
+  public:
+	void Capture(sol::table table) {
+		auto *L = table.lua_state();
+		sol::stack::push(L, table);
+		const void *identity = lua_topointer(L, -1);
+		lua_pop(L, 1);
+		if (!_seen.insert(identity).second) {
+			return;
+		}
+		Entry entry{table, table[sol::metatable_key], {}};
+		for (const auto &value : table) {
+			entry.values.emplace_back(value.first, value.second);
+		}
+		for (const auto &[key, value] : entry.values) {
+			if (key.get_type() == sol::type::table) {
+				Capture(key.as<sol::table>());
+			}
+			if (value.get_type() == sol::type::table) {
+				Capture(value.as<sol::table>());
+			}
+		}
+		if (entry.metatable.get_type() == sol::type::table) {
+			Capture(entry.metatable.as<sol::table>());
+		}
+		_entries.push_back(std::move(entry));
+	}
+
+	void Restore() {
+		for (auto &entry : _entries) {
+			std::vector<sol::object> keys;
+			for (const auto &value : entry.table) {
+				keys.push_back(value.first);
+			}
+			for (const auto &key : keys) {
+				entry.table.raw_set(key, sol::lua_nil);
+			}
+			for (const auto &[key, value] : entry.values) {
+				entry.table.raw_set(key, value);
+			}
+			entry.table[sol::metatable_key] = entry.metatable;
+		}
+	}
+};
 
 #if SOWA_PROFILER
 // Event hooks (_exit, collisions) are not flecs systems, so they get their own
@@ -269,7 +341,7 @@ void ScriptServer::attachDebugger() {
 	lua_setglobal(L, sol::detail::default_handler_name());
 
 	const sol::object expander =
-		sol::make_object(_impl->lua, [this](sol::object value, sol::this_state s) -> sol::object {
+		MakeLuaFunction(_impl->lua, [this](sol::object value, sol::this_state s) -> sol::object {
 			sol::state_view lua(s);
 			if (value.is<ComponentView>()) {
 				const ComponentView view = value.as<ComponentView>();
@@ -335,7 +407,8 @@ sowa::CommandInputs &ScriptServer::CommandInputs() {
 }
 
 Timer *ScriptServer::NewTimer(f32 timeout, bool autoStart, bool repeating) {
-	return &_impl->timers.emplace_back(timeout, autoStart, repeating);
+	auto &timers = _impl->reloadStage ? _impl->reloadStage->timers : _impl->timers;
+	return &timers.emplace_back(timeout, autoStart, repeating);
 }
 
 void ScriptServer::UpdateTimers(f32 delta) {
@@ -345,6 +418,11 @@ void ScriptServer::UpdateTimers(f32 delta) {
 }
 
 void ScriptServer::ClearTimers() {
+	if (_impl->reloadStage) {
+		_impl->reloadStage->clearTimers = true;
+		_impl->reloadStage->timers.clear();
+		return;
+	}
 	_impl->timers.clear();
 }
 
@@ -353,7 +431,8 @@ std::list<Timer> &ScriptServer::Timers() {
 }
 
 Tween *ScriptServer::NewTween(f32 duration, bool autoStart) {
-	return &_impl->tweens.emplace_back(duration, autoStart);
+	auto &tweens = _impl->reloadStage ? _impl->reloadStage->tweens : _impl->tweens;
+	return &tweens.emplace_back(duration, autoStart);
 }
 
 void ScriptServer::UpdateTweens(f32 delta) {
@@ -363,6 +442,11 @@ void ScriptServer::UpdateTweens(f32 delta) {
 }
 
 void ScriptServer::ClearTweens() {
+	if (_impl->reloadStage) {
+		_impl->reloadStage->clearTweens = true;
+		_impl->reloadStage->tweens.clear();
+		return;
+	}
 	_impl->tweens.clear();
 }
 
@@ -520,8 +604,13 @@ bool ScriptServer::ReloadModules(FileSystem &fs) {
 }
 
 bool ScriptServer::ReloadModules(FileSystem &fs, const std::vector<std::string> &paths) {
-	_impl->modulePaths.assign(paths.begin(), paths.end());
-	return reloadConfiguredModules(fs);
+	const auto previous = _impl->modulePaths;
+	_impl->modulePaths = paths;
+	if (reloadConfiguredModules(fs)) {
+		return true;
+	}
+	_impl->modulePaths = previous;
+	return false;
 }
 
 bool ScriptServer::reloadConfiguredModules(FileSystem &fs) {
@@ -532,19 +621,48 @@ bool ScriptServer::reloadConfiguredModules(FileSystem &fs) {
 	SOWA_PROFILE_SCOPE("Script load");
 	bindFileEvents(fs);
 	_impl->fileSystem = &fs;
+	if (_impl->reloadStage) {
+		Log::Error("Recursive script reload is not supported");
+		return false;
+	}
+	LuaTableSnapshot tables;
+	tables.Capture(_impl->lua.globals());
+	for (const auto &[name, table] : _impl->prototypes) {
+		tables.Capture(table);
+	}
+	for (const auto &[name, table] : _impl->extras) {
+		tables.Capture(table);
+	}
+	const auto prototypes = _impl->prototypes;
+	const auto sourceComponents = _impl->sourceComponents;
+	const auto componentSources = _impl->componentSources;
+	const auto projectSources = _impl->projectSources;
+	const auto sourceContents = _impl->sourceContents;
+	const auto commands = _impl->commands;
+	const auto inputs = _impl->commandInputs;
 	const auto previousFiles = std::exchange(_impl->scriptFiles, {});
+	const auto errorsBefore = Log::ErrorCount();
+	_impl->reloadStage = std::make_unique<Impl::ReloadStage>();
 	bool completed = false;
-	const auto keepFailedSources = MakeScopeExit([&] {
-		// Failed loads still need subscriptions so correcting a required file
-		// can recover without restarting the engine.
-		if (!completed) {
-			_impl->scriptFiles.insert(previousFiles.begin(), previousFiles.end());
+	const auto rollback = MakeScopeExit([&] {
+		_impl->reloadStage.reset();
+		if (completed) {
+			return;
 		}
+		tables.Restore();
+		_impl->prototypes = prototypes;
+		_impl->sourceComponents = sourceComponents;
+		_impl->componentSources = componentSources;
+		_impl->projectSources = projectSources;
+		_impl->sourceContents = sourceContents;
+		_impl->commands = commands;
+		_impl->commandInputs = inputs;
+		// New failed dependencies must remain watched so a corrected save retries.
+		_impl->scriptFiles.insert(previousFiles.begin(), previousFiles.end());
 	});
 	clearLoaded();
 	_impl->commandInputs.Cancel();
 	_impl->commands.Clear();
-	dropLuaSystems();
 	// Patch the existing prototype table identity, removing obsolete hooks
 	// and methods as well as replacing functions that were edited.
 	for (const auto &[type, source] : _impl->componentSources) {
@@ -584,6 +702,32 @@ bool ScriptServer::reloadConfiguredModules(FileSystem &fs) {
 			return false;
 		}
 	}
+	for (const auto &name : _impl->reloadStage->queriedComponents) {
+		if (!_impl->reloadStage->components.contains(name) &&
+			!_world.FindComponent(name).IsValid()) {
+			Log::Error("Script reload: unknown component '{}'", name);
+			return false;
+		}
+	}
+	if (Log::ErrorCount() != errorsBefore) {
+		return false;
+	}
+	auto stage = std::move(_impl->reloadStage);
+	dropLuaSystems();
+	for (auto &definition : stage->componentDefinitions) {
+		definition();
+	}
+	for (auto &registration : stage->registrations) {
+		registration();
+	}
+	if (stage->clearTimers) {
+		_impl->timers.clear();
+	}
+	if (stage->clearTweens) {
+		_impl->tweens.clear();
+	}
+	_impl->timers.splice(_impl->timers.end(), stage->timers);
+	_impl->tweens.splice(_impl->tweens.end(), stage->tweens);
 	completed = true;
 	return true;
 }
@@ -786,6 +930,30 @@ sol::object ScriptServer::DefineComponent(const std::string &name, sol::optional
 		}
 	}
 
+	if (_impl->reloadStage) {
+		const auto existing = _world.FindComponent(name);
+		if (existing.IsValid() && !_world.IsDataDescribed(existing)) {
+			throw std::runtime_error(
+				"world:component '" + name + "': a native component already uses this name");
+		}
+		_impl->reloadStage->components.insert(name);
+		_impl->reloadStage->componentDefinitions.push_back(
+			[this, name, descs, defaults] { applyComponentDefinition(name, descs, defaults); });
+	} else if (!applyComponentDefinition(name, descs, defaults).IsValid()) {
+		return sol::make_object(s, sol::lua_nil);
+	}
+	recordScriptComponent(name);
+
+	auto it = _impl->prototypes.find(name);
+	if (it == _impl->prototypes.end()) {
+		it = _impl->prototypes.emplace(name, _impl->lua.create_table()).first;
+	}
+
+	return it->second;
+}
+
+ComponentType ScriptServer::applyComponentDefinition(const std::string &name,
+	const std::vector<FieldDesc> &descs, const std::vector<FieldDefault> &defaults) {
 	ComponentType type = _world.FindComponent(name);
 	std::unordered_set<std::string> previousNames;
 	if (type.IsValid()) {
@@ -798,15 +966,17 @@ sol::object ScriptServer::DefineComponent(const std::string &name, sol::optional
 	if (type.IsValid()) {
 		if (!_world.IsDataDescribed(type)) {
 			Log::Error("world:component '{}': a native component already uses this name", name);
-			return sol::make_object(s, sol::lua_nil);
+			return {};
 		}
 		if (!_world.ComponentFieldsMatch(type, descs)) {
+			// Flecs cannot replace a component while lifecycle systems still query it.
+			destroyComponentSystems(name);
 			_impl->migrating = true;
 			EcsResult<ComponentType> replaced = _world.ReplaceDataDescribedFields(type, descs);
 			_impl->migrating = false;
 			if (!replaced) {
 				Log::Error("world:component '{}': failed to migrate fields", name);
-				return sol::make_object(s, sol::lua_nil);
+				return {};
 			}
 			type = replaced.value;
 			migrated = true;
@@ -815,13 +985,12 @@ sol::object ScriptServer::DefineComponent(const std::string &name, sol::optional
 		EcsResult<ComponentType> created = _world.RegisterComponent(name, descs);
 		if (!created) {
 			Log::Error("world:component '{}': registration failed", name);
-			return sol::make_object(s, sol::lua_nil);
+			return {};
 		}
 		type = created.value;
 	}
 
-	_impl->defaults[name] = std::move(defaults);
-	recordScriptComponent(name);
+	_impl->defaults[name] = defaults;
 	if (migrated) {
 		const std::vector<FieldDefault> &defs = _impl->defaults[name];
 		_world.EachWithType(type, true, [&](Entity entity) {
@@ -834,11 +1003,8 @@ sol::object ScriptServer::DefineComponent(const std::string &name, sol::optional
 		});
 	}
 
-	auto it = _impl->prototypes.find(name);
-	if (it == _impl->prototypes.end()) {
-		it = _impl->prototypes.emplace(name, _impl->lua.create_table()).first;
-	}
-	return it->second;
+	ensureStartSystem(name, type);
+	return type;
 }
 
 void ScriptServer::recordScriptComponent(const std::string &typeName) {
@@ -936,6 +1102,23 @@ bool ScriptServer::IsProjectScriptSource(std::string_view path) const {
 
 void ScriptServer::FinishSystem(const std::string &name, const std::vector<std::string> &withNames,
 	const std::vector<std::string> &withoutNames, bool always, sol::protected_function fn) {
+	if (_impl->reloadStage) {
+		if (name.empty()) {
+			throw std::runtime_error("world:system: empty name");
+		}
+		for (const auto &component : withNames) {
+			_impl->reloadStage->queriedComponents.push_back(component);
+		}
+		for (const auto &component : withoutNames) {
+			_impl->reloadStage->queriedComponents.push_back(component);
+		}
+		_impl->reloadStage->registrations.push_back(
+			[this, name, withNames, withoutNames, always, fn] {
+				FinishSystem(name, withNames, withoutNames, always, fn);
+			});
+		return;
+	}
+
 	if (name.empty()) {
 		Log::Error("world:system: empty name");
 		return;
@@ -1018,6 +1201,11 @@ void ScriptServer::rememberLuaSystem(const std::string &name, System system) {
 }
 
 void ScriptServer::SyncLifecycles() {
+	if (_impl->reloadStage) {
+		_impl->reloadStage->registrations.push_back([this] { SyncLifecycles(); });
+		return;
+	}
+
 	for (auto &[typeName, proto] : _impl->prototypes) {
 		ComponentType type = _world.FindComponent(typeName);
 		if (!type.IsValid()) {
@@ -1028,7 +1216,8 @@ void ScriptServer::SyncLifecycles() {
 		const bool hasExit = proto["_exit"].get_type() == sol::type::function;
 		const bool hasFixed = proto["_physics_update"].get_type() == sol::type::function;
 		if (hasStart || hasExit || hasFixed) {
-			bindStartSystem(typeName, type);
+			// Preserve _start's pipeline position before script-defined systems.
+			ensureStartSystem(typeName, type);
 		}
 		if (hasUpdate) {
 			bindUpdateSystem(typeName, type);
@@ -1047,11 +1236,39 @@ void ScriptServer::bindStartSystem(const std::string &typeName, ComponentType ty
 	auto builder = _world.Flecs().system(name.c_str())
 		.with(type.Raw()).without<ScriptLive>(type.Raw());
 	flecs::system sys = builder.each([this, typeName, type](flecs::entity e) {
+		// Hooks are assigned after component definition; check them at runtime.
+		auto it = _impl->prototypes.find(typeName);
+		if (it == _impl->prototypes.end()) {
+			return;
+		}
+		const sol::table &proto = it->second;
+		const bool hasHook = proto["_start"].get_type() == sol::type::function ||
+			proto["_exit"].get_type() == sol::type::function ||
+			proto["_physics_update"].get_type() == sol::type::function;
+		if (!hasHook) {
+			return;
+		}
 		startInstance(typeName, type, Entity(e));
 	});
 	System handle(sys);
 	_world.TrackPlayOnly(handle);
 	rememberLuaSystem(name, handle);
+}
+
+void ScriptServer::destroyComponentSystems(const std::string &typeName) {
+	destroyLuaSystem("Lua." + typeName + "._start");
+	destroyLuaSystem("Lua." + typeName + "._update");
+	destroyLuaSystem("Lua." + typeName + "._physics_update");
+}
+
+void ScriptServer::ensureStartSystem(const std::string &typeName, ComponentType type) {
+	const std::string name = "Lua." + typeName + "._start";
+	const bool bound = std::any_of(_impl->luaSystems.begin(), _impl->luaSystems.end(),
+		[&name](const auto &entry) { return entry.first == name; });
+	if (bound) {
+		return;
+	}
+	bindStartSystem(typeName, type);
 }
 
 void ScriptServer::bindUpdateSystem(const std::string &typeName, ComponentType type) {

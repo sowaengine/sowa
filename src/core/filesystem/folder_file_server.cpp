@@ -9,11 +9,30 @@ FolderFileServer::FolderFileServer(std::filesystem::path root) : _root(std::move
 }
 
 std::filesystem::path FolderFileServer::resolve(const std::filesystem::path &path) const {
-	return _root / path;
+	if (path.is_absolute() || path.string().find('\0') != std::string::npos) {
+		return {};
+	}
+	std::error_code ec;
+	const auto root = std::filesystem::weakly_canonical(std::filesystem::absolute(_root, ec), ec);
+	if (ec) {
+		return {};
+	}
+	const auto full = std::filesystem::weakly_canonical(root / path, ec);
+	if (ec) {
+		return {};
+	}
+	const auto relative = full.lexically_relative(root);
+	if (relative.empty() || *relative.begin() == "..") {
+		return {};
+	}
+	return (root / path).lexically_normal();
 }
 
 FsResult<Ref<FileData>> FolderFileServer::Load(const std::filesystem::path &path) {
 	const std::filesystem::path full = resolve(path);
+	if (full.empty()) {
+		return {nullptr, FsError::InvalidPath};
+	}
 
 	std::error_code ec;
 	if (!std::filesystem::exists(full, ec)) {
@@ -50,6 +69,9 @@ FsResult<Ref<FileData>> FolderFileServer::Load(const std::filesystem::path &path
 FsResult<std::vector<FileEntry>> FolderFileServer::ReadDirectory(
 	const std::filesystem::path &path) {
 	const std::filesystem::path full = resolve(path);
+	if (full.empty()) {
+		return {{}, FsError::InvalidPath};
+	}
 
 	std::error_code ec;
 	if (!std::filesystem::exists(full, ec)) {
@@ -80,6 +102,9 @@ FsResult<std::vector<FileEntry>> FolderFileServer::ReadDirectory(
 
 FsError FolderFileServer::Save(const std::filesystem::path &path, const FileData &data) {
 	const std::filesystem::path full = resolve(path);
+	if (full.empty()) {
+		return FsError::InvalidPath;
+	}
 
 	std::error_code ec;
 	if (std::filesystem::is_directory(full, ec)) {
@@ -107,6 +132,9 @@ FsError FolderFileServer::CreateFile(const std::filesystem::path &path) {
 		return FsError::InvalidPath;
 	}
 	const std::filesystem::path full = resolve(path);
+	if (full.empty()) {
+		return FsError::InvalidPath;
+	}
 	std::error_code ec;
 	if (std::filesystem::exists(full, ec)) {
 		return FsError::AlreadyExists;
@@ -127,6 +155,9 @@ FsError FolderFileServer::CreateDirectory(const std::filesystem::path &path) {
 		return FsError::InvalidPath;
 	}
 	const std::filesystem::path full = resolve(path);
+	if (full.empty()) {
+		return FsError::InvalidPath;
+	}
 	std::error_code ec;
 	if (std::filesystem::exists(full, ec)) {
 		return FsError::AlreadyExists;
@@ -146,6 +177,9 @@ FsError FolderFileServer::Move(const std::filesystem::path &from, const std::fil
 	}
 	const std::filesystem::path fullFrom = resolve(from);
 	const std::filesystem::path fullTo = resolve(to);
+	if (fullFrom.empty() || fullTo.empty() || fullFrom == resolve({}) || fullTo == resolve({})) {
+		return FsError::InvalidPath;
+	}
 	std::error_code ec;
 	if (!std::filesystem::exists(fullFrom, ec)) {
 		return ec ? FsError::IoError : FsError::NotFound;
@@ -165,6 +199,9 @@ FsError FolderFileServer::RemoveAll(const std::filesystem::path &path) {
 		return FsError::InvalidPath;
 	}
 	const std::filesystem::path full = resolve(path);
+	if (full.empty() || full == resolve({})) {
+		return FsError::InvalidPath;
+	}
 	std::error_code ec;
 	if (!std::filesystem::exists(full, ec)) {
 		return ec ? FsError::IoError : FsError::NotFound;

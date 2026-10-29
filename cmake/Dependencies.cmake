@@ -256,6 +256,23 @@ if(NOT sol2_POPULATED)
 endif()
 add_library(sol2 INTERFACE)
 add_library(sol2::sol2 ALIAS sol2)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # GCC's pretty names can collide for lambdas, causing sol2 to use the wrong
+  # destructor. Use unique RTTI names for metatable identity.
+  file(READ "${sol2_SOURCE_DIR}/include/sol/usertype_traits.hpp" sol2_traits)
+  string(REPLACE "#include <sol/demangle.hpp>"
+    "#include <sol/demangle.hpp>\n#include <typeinfo>" sol2_traits "${sol2_traits}")
+  string(REPLACE ".append(detail::demangle<T>())" ".append(typeid(T).name())"
+    sol2_unique_traits "${sol2_traits}")
+  if(sol2_traits STREQUAL sol2_unique_traits)
+    message(FATAL_ERROR "The sol2 GCC metatable compatibility patch needs updating")
+  endif()
+  set(sol2_compat_include "${CMAKE_BINARY_DIR}/generated/sol2-compat")
+  file(MAKE_DIRECTORY "${sol2_compat_include}/sol")
+  file(CONFIGURE OUTPUT "${sol2_compat_include}/sol/usertype_traits.hpp"
+    CONTENT "${sol2_unique_traits}" @ONLY)
+  target_include_directories(sol2 INTERFACE "${sol2_compat_include}")
+endif()
 target_include_directories(sol2 INTERFACE ${sol2_SOURCE_DIR}/include)
 target_link_libraries(sol2 INTERFACE lua_static)
 target_compile_definitions(sol2 INTERFACE SOL_ALL_SAFETIES_ON=1)

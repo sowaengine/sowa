@@ -4,8 +4,11 @@
 
 namespace sowa {
 
-void SerializeFields(Archive &archive, void *base, const std::vector<FieldInfo> &fields,
-	FieldFallback fallback, void *context) {
+void SerializeFields(Archive &source, void *base, const std::vector<FieldInfo> &fields,
+	FieldFallback fallback, void *context, ResourceIdMapper resourceMapper, void *resourceContext) {
+	auto archive = resourceMapper != nullptr
+		? source.WithResourceMapper(resourceMapper, resourceContext)
+		: source;
 	if (!archive.IsValid() || base == nullptr) {
 		return;
 	}
@@ -72,11 +75,16 @@ void SerializeFields(Archive &archive, void *base, const std::vector<FieldInfo> 
 			// own constant list, which is what the archive needs anyway.
 			archive.EnumField(field.name, *static_cast<i32 *>(ref.Data()), field.enumConstants);
 			break;
-		case FieldType::ResourceRef:
+		case FieldType::ResourceRef: {
 			// Serialize the underlying u64 through Data(): core cannot depend on ResourceID.
 			// Restored resource records and component references must retain the same ID.
-			archive.Field(field.name, *static_cast<u64 *>(ref.Data()));
+			u64 *value = static_cast<u64 *>(ref.Data());
+			if (value == nullptr) {
+				break;
+			}
+			archive.ResourceField(field.name, *value);
 			break;
+		}
 		case FieldType::EntityRef:
 			// Only components can mean anything by this. A resource outlives
 			// the scene whose entities it would be naming, so reaching here

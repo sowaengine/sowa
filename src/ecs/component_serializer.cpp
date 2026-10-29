@@ -37,7 +37,7 @@ void transferEntityRef(void *, Archive &archive, const FieldInfo &field, FieldRe
 } // namespace
 
 bool SerializeComponent(Archive &archive, Entity entity, ComponentType type, FieldFallback fallback,
-	void *context) {
+	void *context, ResourceIdMapper resourceMapper, void *resourceContext) {
 	if (!archive.IsValid() || !entity.IsAlive() || !type.IsValid()) {
 		return false;
 	}
@@ -49,7 +49,10 @@ bool SerializeComponent(Archive &archive, Entity entity, ComponentType type, Fie
 	}
 
 	if (type.Name() == "Tilemap") {
-		entity.Get<Tilemap>()->Serialize(archive);
+		auto data = resourceMapper != nullptr
+			? archive.WithResourceMapper(resourceMapper, resourceContext)
+			: archive;
+		entity.Get<Tilemap>()->Serialize(data);
 		return true;
 	}
 
@@ -65,7 +68,8 @@ bool SerializeComponent(Archive &archive, Entity entity, ComponentType type, Fie
 	}
 
 	SerializeFields(archive, base, type.Fields(),
-		fallback != nullptr ? fallback : &transferEntityRef, context);
+		fallback != nullptr ? fallback : &transferEntityRef, context, resourceMapper,
+		resourceContext);
 	return true;
 }
 

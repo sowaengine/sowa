@@ -16,6 +16,7 @@ using FieldFallback = void (*)(void *context, Archive &, const FieldInfo &, Fiel
 // Works for ECS components and resources. Skips fields without FieldFlags::Serialize;
 // the caller supplies nesting.
 void SerializeFields(Archive &archive, void *base, const std::vector<FieldInfo> &fields,
-	FieldFallback fallback = nullptr, void *context = nullptr);
+	FieldFallback fallback = nullptr, void *context = nullptr,
+	ResourceIdMapper resourceMapper = nullptr, void *resourceContext = nullptr);
 
 } // namespace sowa

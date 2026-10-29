@@ -33,7 +33,8 @@ struct NativeBackend {
 	}
 
 	void Emit(const std::string &directory, const char *file, int status = 0) {
-		const auto &watch = watches.at(directory);
+		const auto path = std::filesystem::absolute(directory).lexically_normal().string();
+		const auto &watch = watches.at(path);
 		watch.callback(watch.handle, file, UV_CHANGE, status);
 	}
 };

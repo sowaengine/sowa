@@ -57,3 +57,21 @@ TEST_CASE("Entity is usable as a hash-set/hash-map key") {
 	CHECK(set.size() == 2);
 	CHECK(set.count(a) == 1);
 }
+
+TEST_CASE("duplicate appears in the ordered parent's child traversal") {
+	World world;
+	Entity parent = world.CreateEntity();
+	parent.SetName("Parent");
+	Entity original = parent.CreateChild("Parcel");
+	Entity detail = original.CreateChild("Label");
+	Entity copy = original.Duplicate(parent);
+	REQUIRE(copy.IsAlive());
+	CHECK(copy.GetParent() == parent);
+	const auto children = parent.GetChildren();
+	REQUIRE(children.size() == 2);
+	CHECK(children[0] == original);
+	CHECK(children[1] == copy);
+	REQUIRE(copy.GetChildren().size() == 1);
+	CHECK(copy.GetChildren()[0] != detail);
+	CHECK(copy.GetChildren()[0].GetParent() == copy);
+}

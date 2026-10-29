@@ -1,5 +1,6 @@
 #include "core/log.hpp"
 
+#include <atomic>
 #include <ctime>
 #include <iostream>
 #include <mutex>
@@ -8,6 +9,8 @@ namespace sowa::Log {
 namespace {
 
 constexpr std::size_t kDefaultMaxLines = 1000;
+std::atomic<std::size_t> errorCount{0};
+std::string lastErrorText;
 
 std::mutex &mutex() {
 	static std::mutex m;
@@ -71,11 +74,25 @@ const char *SeverityToString(Severity severity) {
 }
 
 void Internal::Push(std::string_view text, Severity severity) {
+	if (severity == Severity::Error) {
+		++errorCount;
+	}
 	std::string line =
 		fmt::format("[{}] [{}] {}", currentTimestamp(), SeverityToString(severity), text);
 
 	{
 		std::lock_guard<std::mutex> lock(mutex());
+		if (severity == Severity::Error && !lines().empty() &&
+			lines().back().severity == severity && lastErrorText == text) {
+			const std::size_t repeats = ++lines().back().repetitions;
+			// Report repeats at powers of two to limit per-frame error spam.
+			if ((repeats & (repeats - 1)) == 0) {
+				std::cout << ansiColor(severity) << line << " (repeated " << repeats
+							<< " times)\033[0m\n";
+			}
+			return;
+		}
+		lastErrorText = severity == Severity::Error ? std::string(text) : std::string();
 		std::cout << ansiColor(severity) << line << "\033[0m\n";
 
 		lines().push_back(Message{std::move(line), severity});
@@ -83,6 +100,10 @@ void Internal::Push(std::string_view text, Severity severity) {
 			lines().pop_front();
 		}
 	}
+}
+
+std::size_t ErrorCount() {
+	return errorCount.load();
 }
 
 const std::deque<Message> &GetLines() {
